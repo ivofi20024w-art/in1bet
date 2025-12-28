@@ -1,0 +1,145 @@
+Contexto do Projeto (LEIA COM ATENÇÃO):
+Estamos construindo uma plataforma de casino online e apostas esportivas para o Brasil, com dinheiro real, pagamentos via PIX, CPF obrigatório e requisitos de LGPD e segurança financeira.
+
+Este backend será usado em produção. Nada aqui é protótipo.
+
+🎯 OBJETIVO
+
+Criar a base completa do backend, sólida, escalável e segura, sem implementar ainda pagamentos ou jogos.
+
+🧱 STACK OBRIGATÓRIA (NÃO NEGOCIÁVEL)
+
+Node.js
+
+Express.js
+
+TypeScript
+
+PostgreSQL (NÃO usar SQLite)
+
+Prisma ORM
+
+JWT (Access + Refresh Token)
+
+bcrypt
+
+dotenv
+
+🚨 REGRAS ABSOLUTAS
+
+NÃO alterar o frontend
+
+NÃO criar mocks ou dados falsos
+
+NÃO implementar pagamentos agora
+
+NÃO usar banco em memória
+
+NÃO misturar responsabilidades entre módulos
+
+Código limpo, tipado, organizado e comentado
+
+🗂️ ARQUITETURA OBRIGATÓRIA
+
+Estrutura modular clara:
+
+auth
+
+users
+
+wallet
+
+payments (apenas estrutura, sem lógica ainda)
+
+admin (apenas estrutura)
+
+Cada módulo deve ter:
+
+controller
+
+service
+
+routes
+
+schema/validation
+
+👤 USUÁRIOS (BRASIL)
+
+Implementar modelo User com:
+
+Nome
+
+Email (único)
+
+CPF (único, obrigatório, validado corretamente)
+
+Senha (hash bcrypt)
+
+Data de criação
+
+Criar helper específico para validação real de CPF.
+
+🔐 AUTENTICAÇÃO
+
+Implementar:
+
+Registro (com validação de CPF)
+
+Login (email ou CPF + senha)
+
+JWT Access Token
+
+Middleware de proteção de rotas
+
+💰 CARTEIRA (WALLET)
+
+Criar automaticamente uma wallet ao registrar usuário
+
+Wallet separada da lógica de pagamentos
+
+Campos: balance, locked_balance
+
+🛡️ SEGURANÇA BÁSICA
+
+Middleware de autenticação
+
+Validação de inputs
+
+Tratamento global de erros
+
+Nenhuma rota crítica sem autenticação
+
+📌 ORDEM DE EXECUÇÃO (OBRIGATÓRIA)
+
+Configuração do projeto e TypeScript
+
+Prisma + PostgreSQL
+
+Modelos User e Wallet
+
+Registro com CPF validado
+
+Login com JWT
+
+Middleware de autenticação
+
+NÃO avançar para pagamentos ou jogos.
+
+✅ CRITÉRIOS DE ACEITAÇÃO
+
+Considere esta tarefa concluída apenas se:
+
+O servidor inicia sem erros
+
+Registro cria usuário + wallet
+
+CPF inválido é rejeitado
+
+Login gera JWT válido
+
+Rotas protegidas exigem autenticação
+
+Estrutura está pronta para integrar PIX no próximo passo
+
+Resultado esperado:
+Backend profissional, seguro e pronto para produção, servindo como base sólida para pagamentos PIX, apostas e integrações futuras.

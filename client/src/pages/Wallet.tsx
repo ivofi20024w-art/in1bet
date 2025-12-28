@@ -26,23 +26,23 @@ export default function WalletPage() {
                     <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-wider">Saldo Total</CardTitle>
                 </CardHeader>
                 <CardContent>
+                    <div className="text-3xl font-bold text-white">{USER.currency} {(USER.balance + (USER.locked_balance || 0)).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                </CardContent>
+            </Card>
+            <Card className="bg-card border-white/5">
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-wider">Saldo Disponível</CardTitle>
+                </CardHeader>
+                <CardContent>
                     <div className="text-3xl font-bold text-white">{USER.currency} {USER.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                 </CardContent>
             </Card>
             <Card className="bg-card border-white/5">
                 <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-wider">Saldo Real</CardTitle>
+                    <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-wider">Saldo Bloqueado</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="text-3xl font-bold text-white">{USER.currency} {(USER.balance * 0.8).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-                </CardContent>
-            </Card>
-            <Card className="bg-card border-white/5">
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-sm font-medium text-gray-400 uppercase tracking-wider">Bônus</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-3xl font-bold text-white">{USER.currency} {(USER.balance * 0.2).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
+                    <div className="text-3xl font-bold text-white">{USER.currency} {(USER.locked_balance || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
                 </CardContent>
             </Card>
         </div>

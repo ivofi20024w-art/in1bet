@@ -6,6 +6,7 @@ export const USER = {
   email: "joao.silva@email.com",
   phone: "+55 11 99999-9999",
   balance: 2450.50,
+  locked_balance: 500.00, // Bonus/Locked funds
   currency: "R$",
   avatar: "https://github.com/shadcn.png",
   vipLevel: "Gold",
