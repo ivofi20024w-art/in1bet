@@ -3,17 +3,19 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertTriangle, ArrowRight, CheckCircle2, ShieldCheck, ChevronLeft } from "lucide-react";
 import { IMaskInput } from "react-imask";
 import { cpf } from "cpf-cnpj-validator";
 import { useToast } from "@/hooks/use-toast";
+import { register } from "@/lib/auth";
 
 export default function Register() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
   
   const [formData, setFormData] = useState({
     email: "",
@@ -35,18 +37,19 @@ export default function Register() {
     if (step === 1) {
         if (!formData.email) newErrors.email = "Email é obrigatório";
         if (!formData.password) newErrors.password = "Senha é obrigatória";
+        if (formData.password.length < 6) newErrors.password = "Senha deve ter pelo menos 6 caracteres";
         if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Senhas não conferem";
         if (!formData.terms) newErrors.terms = "Você deve aceitar os termos";
     }
 
     if (step === 2) {
         if (!formData.name) newErrors.name = "Nome completo é obrigatório";
+        if (formData.name.length < 3) newErrors.name = "Nome deve ter pelo menos 3 caracteres";
         if (!formData.cpf) newErrors.cpf = "CPF é obrigatório";
         else if (!cpf.isValid(formData.cpf)) newErrors.cpf = "CPF inválido";
         
         if (!formData.birthDate) newErrors.birthDate = "Data de nascimento é obrigatória";
         else {
-             // Mock age validation
              const year = parseInt(formData.birthDate.split('-')[0]);
              if (new Date().getFullYear() - year < 18) newErrors.birthDate = "Você deve ter mais de 18 anos";
         }
@@ -62,23 +65,39 @@ export default function Register() {
     else handleRegister();
   };
 
-  const handleRegister = () => {
-      setLoading(true);
-      // Simulate API call
-      setTimeout(() => {
-          setLoading(false);
-          localStorage.setItem("in1bet_auth", "true");
-          toast({
-              title: "Conta criada com sucesso!",
-              description: "Bem-vindo ao IN1Bet.",
-          });
-          setLocation("/");
-      }, 1500);
+  const handleRegister = async () => {
+    setLoading(true);
+    setApiError("");
+
+    try {
+      await register({
+        name: formData.name,
+        email: formData.email,
+        cpf: formData.cpf,
+        password: formData.password,
+        phone: formData.phone || undefined,
+        birthDate: formData.birthDate || undefined,
+      });
+
+      toast({
+        title: "Conta criada com sucesso!",
+        description: "Bem-vindo ao IN1Bet.",
+      });
+      setLocation("/");
+    } catch (err: any) {
+      setApiError(err.message || "Erro ao criar conta");
+      toast({
+        title: "Erro no cadastro",
+        description: err.message || "Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
-        {/* Background Elements */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
         
         <div className="w-full max-w-md relative z-10 space-y-8">
@@ -112,6 +131,12 @@ export default function Register() {
                 </CardHeader>
                 
                 <CardContent className="space-y-4">
+                    {apiError && (
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg">
+                            {apiError}
+                        </div>
+                    )}
+
                     {step === 1 && (
                         <div className="space-y-4 animate-in slide-in-from-right duration-300">
                             <div className="space-y-2">
@@ -122,6 +147,7 @@ export default function Register() {
                                     value={formData.email}
                                     onChange={e => setFormData({...formData, email: e.target.value})}
                                     className={errors.email ? "border-red-500" : ""}
+                                    data-testid="input-email"
                                 />
                                 {errors.email && <span className="text-xs text-red-500">{errors.email}</span>}
                             </div>
@@ -133,6 +159,7 @@ export default function Register() {
                                     value={formData.password}
                                     onChange={e => setFormData({...formData, password: e.target.value})}
                                     className={errors.password ? "border-red-500" : ""}
+                                    data-testid="input-password"
                                 />
                                 {errors.password && <span className="text-xs text-red-500">{errors.password}</span>}
                             </div>
@@ -144,6 +171,7 @@ export default function Register() {
                                     value={formData.confirmPassword}
                                     onChange={e => setFormData({...formData, confirmPassword: e.target.value})}
                                     className={errors.confirmPassword ? "border-red-500" : ""}
+                                    data-testid="input-confirm-password"
                                 />
                                 {errors.confirmPassword && <span className="text-xs text-red-500">{errors.confirmPassword}</span>}
                             </div>
@@ -153,6 +181,7 @@ export default function Register() {
                                     className="mt-1 rounded border-white/20 bg-transparent text-primary focus:ring-primary"
                                     checked={formData.terms}
                                     onChange={e => setFormData({...formData, terms: e.target.checked})}
+                                    data-testid="checkbox-terms"
                                 />
                                 <div className="text-xs text-muted-foreground leading-relaxed">
                                     Li e concordo com os <span className="text-primary underline">Termos e Condições</span>. Confirmo que tenho mais de 18 anos.
@@ -176,6 +205,7 @@ export default function Register() {
                                     value={formData.name}
                                     onChange={e => setFormData({...formData, name: e.target.value})}
                                     className={errors.name ? "border-red-500" : ""}
+                                    data-testid="input-name"
                                 />
                                 {errors.name && <span className="text-xs text-red-500">{errors.name}</span>}
                             </div>
@@ -188,6 +218,7 @@ export default function Register() {
                                     onAccept={(value) => setFormData({...formData, cpf: value})}
                                     className={`flex h-10 w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 md:text-sm transition-all duration-300 hover:border-white/20 ${errors.cpf ? "border-red-500" : ""}`}
                                     placeholder="000.000.000-00"
+                                    data-testid="input-cpf"
                                 />
                                 {errors.cpf && <span className="text-xs text-red-500">{errors.cpf}</span>}
                             </div>
@@ -199,6 +230,7 @@ export default function Register() {
                                     value={formData.birthDate}
                                     onChange={e => setFormData({...formData, birthDate: e.target.value})}
                                     className={errors.birthDate ? "border-red-500" : ""}
+                                    data-testid="input-birthdate"
                                 />
                                 {errors.birthDate && <span className="text-xs text-red-500">{errors.birthDate}</span>}
                             </div>
@@ -215,6 +247,7 @@ export default function Register() {
                                     onAccept={(value) => setFormData({...formData, phone: value})}
                                     className="flex h-10 w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 md:text-sm transition-all duration-300 hover:border-white/20"
                                     placeholder="(11) 99999-9999"
+                                    data-testid="input-phone"
                                 />
                             </div>
 
@@ -224,6 +257,7 @@ export default function Register() {
                                     placeholder="Ex: BONUS100" 
                                     value={formData.promoCode}
                                     onChange={e => setFormData({...formData, promoCode: e.target.value.toUpperCase()})}
+                                    data-testid="input-promo"
                                 />
                             </div>
 
@@ -243,6 +277,7 @@ export default function Register() {
                         onClick={handleNext} 
                         disabled={loading}
                         className="w-full h-12 text-lg font-bold shadow-[0_0_20px_-5px_rgba(242,102,49,0.5)]"
+                        data-testid="button-next"
                     >
                         {loading ? "Criando conta..." : step === 3 ? "Finalizar Cadastro" : "Continuar"}
                         {!loading && step < 3 && <ArrowRight className="w-5 h-5 ml-2" />}

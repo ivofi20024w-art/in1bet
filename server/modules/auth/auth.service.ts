@@ -1,0 +1,190 @@
+import bcrypt from "bcrypt";
+import { storage, sanitizeUser } from "../../storage";
+import { 
+  registerUserSchema, 
+  loginUserSchema, 
+  isValidCPF,
+  type RegisterUser, 
+  type LoginUser,
+  type SafeUser 
+} from "@shared/schema";
+import { 
+  generateAccessToken, 
+  generateRefreshToken, 
+  verifyRefreshToken 
+} from "./auth.middleware";
+
+const SALT_ROUNDS = 10;
+
+export interface AuthResponse {
+  success: boolean;
+  user?: SafeUser;
+  accessToken?: string;
+  refreshToken?: string;
+  error?: string;
+}
+
+// Register new user with CPF validation
+export async function registerUser(data: RegisterUser): Promise<AuthResponse> {
+  try {
+    // Validate input
+    const validationResult = registerUserSchema.safeParse(data);
+    if (!validationResult.success) {
+      return { 
+        success: false, 
+        error: validationResult.error.errors[0]?.message || "Dados inválidos" 
+      };
+    }
+
+    const { name, email, cpf, password, phone, birthDate } = validationResult.data;
+
+    // Validate CPF
+    if (!isValidCPF(cpf)) {
+      return { success: false, error: "CPF inválido" };
+    }
+
+    // Check if email already exists
+    const existingEmail = await storage.getUserByEmail(email);
+    if (existingEmail) {
+      return { success: false, error: "Este email já está cadastrado" };
+    }
+
+    // Check if CPF already exists
+    const existingCPF = await storage.getUserByCPF(cpf);
+    if (existingCPF) {
+      return { success: false, error: "Este CPF já está cadastrado" };
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
+    // Create user
+    const user = await storage.createUser({
+      name,
+      email,
+      cpf,
+      password: hashedPassword,
+      phone: phone || null,
+      birthDate: birthDate ? new Date(birthDate) : null,
+    });
+
+    // Create wallet automatically
+    await storage.createWallet({ userId: user.id });
+
+    // Generate tokens
+    const accessToken = generateAccessToken(user.id, user.email);
+    const refreshToken = generateRefreshToken(user.id, user.email);
+
+    // Store refresh token
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+    await storage.createRefreshToken(user.id, refreshToken, expiresAt);
+
+    return {
+      success: true,
+      user: sanitizeUser(user),
+      accessToken,
+      refreshToken,
+    };
+  } catch (error) {
+    console.error("Register error:", error);
+    return { success: false, error: "Erro ao criar conta" };
+  }
+}
+
+// Login with email or CPF
+export async function loginUser(data: LoginUser): Promise<AuthResponse> {
+  try {
+    // Validate input
+    const validationResult = loginUserSchema.safeParse(data);
+    if (!validationResult.success) {
+      return { 
+        success: false, 
+        error: validationResult.error.errors[0]?.message || "Dados inválidos" 
+      };
+    }
+
+    const { identifier, password } = validationResult.data;
+
+    // Find user by email or CPF
+    const user = await storage.getUserByEmailOrCPF(identifier);
+    if (!user) {
+      return { success: false, error: "Email/CPF ou senha incorretos" };
+    }
+
+    // Verify password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return { success: false, error: "Email/CPF ou senha incorretos" };
+    }
+
+    // Generate tokens
+    const accessToken = generateAccessToken(user.id, user.email);
+    const refreshToken = generateRefreshToken(user.id, user.email);
+
+    // Store refresh token
+    const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    await storage.createRefreshToken(user.id, refreshToken, expiresAt);
+
+    return {
+      success: true,
+      user: sanitizeUser(user),
+      accessToken,
+      refreshToken,
+    };
+  } catch (error) {
+    console.error("Login error:", error);
+    return { success: false, error: "Erro ao fazer login" };
+  }
+}
+
+// Refresh access token
+export async function refreshAccessToken(token: string): Promise<AuthResponse> {
+  try {
+    // Verify token
+    const decoded = verifyRefreshToken(token);
+    if (!decoded) {
+      return { success: false, error: "Token inválido" };
+    }
+
+    // Check if token exists in database
+    const storedToken = await storage.getRefreshToken(token);
+    if (!storedToken) {
+      return { success: false, error: "Token não encontrado" };
+    }
+
+    // Check if expired
+    if (new Date(storedToken.expiresAt) < new Date()) {
+      await storage.deleteRefreshToken(token);
+      return { success: false, error: "Token expirado" };
+    }
+
+    // Get user
+    const user = await storage.getUser(decoded.userId);
+    if (!user) {
+      return { success: false, error: "Usuário não encontrado" };
+    }
+
+    // Generate new access token
+    const accessToken = generateAccessToken(user.id, user.email);
+
+    return {
+      success: true,
+      user: sanitizeUser(user),
+      accessToken,
+    };
+  } catch (error) {
+    console.error("Refresh token error:", error);
+    return { success: false, error: "Erro ao renovar token" };
+  }
+}
+
+// Logout - invalidate refresh token
+export async function logoutUser(refreshToken: string): Promise<boolean> {
+  try {
+    await storage.deleteRefreshToken(refreshToken);
+    return true;
+  } catch (error) {
+    console.error("Logout error:", error);
+    return false;
+  }
+}

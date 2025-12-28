@@ -49,3 +49,9 @@ waitForPort = 5000
 
 [agent]
 mockupState = "FULLSTACK"
+integrations = ["javascript_database:1.0.0"]
+
+[userenv]
+
+[userenv.shared]
+JWT_SECRET = "11c0909ada462b9de7f3911ad3c0d8d8b7044e791a506f1cc53a27a187ab5b24cf1b48426cdb440a8e481ad4cabb860e3991cce985447c67bd10e82acb902ec8"

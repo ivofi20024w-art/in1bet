@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldCheck, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { login } from "@/lib/auth";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -13,34 +14,34 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
-    // Mock login simulation
-    setTimeout(() => {
-        setLoading(false);
-        if (identifier && password) {
-            localStorage.setItem("in1bet_auth", "true");
-            toast({
-                title: "Login realizado com sucesso",
-                description: "Redirecionando para o lobby...",
-            });
-            setLocation("/");
-        } else {
-            toast({
-                title: "Erro no login",
-                description: "Verifique suas credenciais.",
-                variant: "destructive"
-            });
-        }
-    }, 1500);
+    try {
+      await login(identifier, password);
+      toast({
+        title: "Login realizado com sucesso",
+        description: "Redirecionando para o lobby...",
+      });
+      setLocation("/");
+    } catch (err: any) {
+      setError(err.message || "Erro ao fazer login");
+      toast({
+        title: "Erro no login",
+        description: err.message || "Verifique suas credenciais.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
-        {/* Background Elements */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background pointer-events-none" />
         
         <div className="w-full max-w-md relative z-10 space-y-8">
@@ -60,6 +61,12 @@ export default function Login() {
                 
                 <form onSubmit={handleLogin}>
                     <CardContent className="space-y-4">
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg">
+                                {error}
+                            </div>
+                        )}
+                        
                         <div className="space-y-2">
                             <Label>CPF ou Email</Label>
                             <Input 
@@ -67,6 +74,7 @@ export default function Login() {
                                 value={identifier}
                                 onChange={(e) => setIdentifier(e.target.value)}
                                 className="h-11 bg-background/50 border-white/10"
+                                data-testid="input-identifier"
                             />
                         </div>
                         
@@ -83,6 +91,7 @@ export default function Login() {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="h-11 bg-background/50 border-white/10"
+                                data-testid="input-password"
                             />
                         </div>
                     </CardContent>
@@ -92,6 +101,7 @@ export default function Login() {
                             type="submit" 
                             disabled={loading}
                             className="w-full h-12 text-lg font-bold shadow-[0_0_20px_-5px_rgba(242,102,49,0.5)]"
+                            data-testid="button-login"
                         >
                             {loading ? "Entrando..." : "Entrar"}
                             {!loading && <LogIn className="w-5 h-5 ml-2" />}
