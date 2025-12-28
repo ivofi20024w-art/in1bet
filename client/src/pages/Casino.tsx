@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import Autoplay from "embla-carousel-autoplay";
 
 const GAME_CATEGORIES = [
@@ -205,18 +204,17 @@ export default function Casino() {
                 </div>
 
                 {/* Categories Collapsible */}
-                <Collapsible 
-                    open={isCategoriesOpen} 
-                    onOpenChange={setIsCategoriesOpen}
-                    className="bg-card border border-white/5 rounded-xl overflow-hidden"
-                >
-                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-white/5 transition-colors group">
+                <div className="bg-card border border-white/5 rounded-xl overflow-hidden">
+                    <button 
+                        onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+                        className="flex items-center justify-between w-full p-4 hover:bg-white/5 transition-colors group"
+                    >
                         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-hover:text-primary transition-colors">Categorias</h3>
                         <ChevronDown className={cn("w-4 h-4 text-gray-500 transition-transform duration-300", isCategoriesOpen ? "rotate-180" : "")} />
-                    </CollapsibleTrigger>
+                    </button>
                     
-                    <CollapsibleContent>
-                        <div className="p-2 pt-0 space-y-1">
+                    {isCategoriesOpen && (
+                        <div className="p-2 pt-0 space-y-1 animate-in slide-in-from-top-2 duration-200">
                             {GAME_CATEGORIES.map(cat => (
                                 <button
                                     key={cat.id}
@@ -234,17 +232,16 @@ export default function Casino() {
                                 </button>
                             ))}
                         </div>
-                    </CollapsibleContent>
-                </Collapsible>
+                    )}
+                </div>
 
                 {/* Providers Collapsible */}
-                <Collapsible
-                    open={isProvidersOpen}
-                    onOpenChange={setIsProvidersOpen}
-                    className="bg-card border border-white/5 rounded-xl overflow-hidden"
-                >
-                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-white/5 transition-colors group">
-                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-hover:text-primary transition-colors">
+                <div className="bg-card border border-white/5 rounded-xl overflow-hidden">
+                     <button 
+                        onClick={() => setIsProvidersOpen(!isProvidersOpen)}
+                        className="flex items-center justify-between w-full p-4 hover:bg-white/5 transition-colors group"
+                     >
+                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-hover:text-primary transition-colors flex items-center">
                             Provedores
                             {selectedProvider && <span className="ml-2 text-[9px] text-primary bg-primary/10 px-2 py-0.5 rounded-full">1 Selecionado</span>}
                         </h3>
@@ -259,10 +256,10 @@ export default function Casino() {
                              )}
                             <ChevronDown className={cn("w-4 h-4 text-gray-500 transition-transform duration-300", isProvidersOpen ? "rotate-180" : "")} />
                         </div>
-                     </CollapsibleTrigger>
+                     </button>
                      
-                     <CollapsibleContent>
-                        <div className="p-2 pt-0">
+                     {isProvidersOpen && (
+                        <div className="p-2 pt-0 animate-in slide-in-from-top-2 duration-200">
                             <ScrollArea className="h-[250px] pr-2">
                                 <div className="space-y-1">
                                     {PROVIDERS.map(provider => (
@@ -281,8 +278,8 @@ export default function Casino() {
                                 </div>
                             </ScrollArea>
                         </div>
-                     </CollapsibleContent>
-                </Collapsible>
+                     )}
+                </div>
             </div>
         </aside>
 
