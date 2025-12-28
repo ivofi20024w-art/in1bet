@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export default function Support() {
   return (
     <MainLayout>
-      <div className="relative h-64 w-full bg-secondary/20 -mt-8 mb-8 flex flex-col items-center justify-center border-b border-white/5 overflow-hidden">
+      <div className="relative h-64 w-full bg-secondary/20 -mt-8 mb-12 flex flex-col items-center justify-center border-b border-white/5 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
         
         <div className="relative z-10 text-center max-w-2xl px-6 animate-in slide-in-from-bottom-4 duration-700">
@@ -29,27 +29,27 @@ export default function Support() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 -mt-16 relative z-20">
-            <Card className="bg-card border-white/5 hover:border-primary/50 transition-all cursor-pointer group shadow-xl hover:-translate-y-1 duration-300">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16 relative z-20">
+            <Card className="bg-card border-white/5 hover:border-primary/50 transition-all cursor-pointer group shadow-xl hover:-translate-y-1 duration-300 h-full">
                 <CardContent className="p-8 flex flex-col items-center text-center">
                     <div className="w-14 h-14 bg-green-500/10 rounded-full flex items-center justify-center mb-6 text-green-500 group-hover:scale-110 transition-transform">
                         <MessageCircle className="w-7 h-7" />
                     </div>
                     <h3 className="text-xl font-bold text-white mb-2">Chat Ao Vivo</h3>
-                    <p className="text-sm text-gray-400 mb-6 leading-relaxed">Converse com nossos especialistas em tempo real. Disponível 24/7.</p>
+                    <p className="text-sm text-gray-400 mb-6 leading-relaxed flex-1">Converse com nossos especialistas em tempo real. Disponível 24/7.</p>
                     <Button className="w-full bg-green-600 hover:bg-green-500 text-white font-bold" onClick={() => alert("Simulando abertura do JivoChat...")}>
                         Iniciar Conversa
                     </Button>
                 </CardContent>
             </Card>
 
-             <Card className="bg-card border-white/5 hover:border-primary/50 transition-all cursor-pointer group shadow-xl hover:-translate-y-1 duration-300">
+             <Card className="bg-card border-white/5 hover:border-primary/50 transition-all cursor-pointer group shadow-xl hover:-translate-y-1 duration-300 h-full">
                 <CardContent className="p-8 flex flex-col items-center text-center">
                     <div className="w-14 h-14 bg-blue-500/10 rounded-full flex items-center justify-center mb-6 text-blue-500 group-hover:scale-110 transition-transform">
                         <Ticket className="w-7 h-7" />
                     </div>
                     <h3 className="text-xl font-bold text-white mb-2">Abrir Ticket</h3>
-                    <p className="text-sm text-gray-400 mb-6 leading-relaxed">Para questões mais complexas que exigem análise detalhada.</p>
+                    <p className="text-sm text-gray-400 mb-6 leading-relaxed flex-1">Para questões mais complexas que exigem análise detalhada.</p>
                     <Link href="/support/tickets" className="w-full">
                         <Button variant="outline" className="w-full border-white/10 hover:bg-white/5 hover:border-primary/50 hover:text-primary">
                             Meus Tickets
@@ -58,13 +58,13 @@ export default function Support() {
                 </CardContent>
             </Card>
 
-             <Card className="bg-card border-white/5 hover:border-primary/50 transition-all cursor-pointer group shadow-xl hover:-translate-y-1 duration-300">
+             <Card className="bg-card border-white/5 hover:border-primary/50 transition-all cursor-pointer group shadow-xl hover:-translate-y-1 duration-300 h-full">
                 <CardContent className="p-8 flex flex-col items-center text-center">
                     <div className="w-14 h-14 bg-purple-500/10 rounded-full flex items-center justify-center mb-6 text-purple-500 group-hover:scale-110 transition-transform">
                         <Mail className="w-7 h-7" />
                     </div>
                     <h3 className="text-xl font-bold text-white mb-2">Email</h3>
-                    <p className="text-sm text-gray-400 mb-6 leading-relaxed">Envie documentos ou dúvidas gerais para nossa equipe.</p>
+                    <p className="text-sm text-gray-400 mb-6 leading-relaxed flex-1">Envie documentos ou dúvidas gerais para nossa equipe.</p>
                     <Button variant="outline" className="w-full border-white/10 hover:bg-white/5 hover:border-primary/50 hover:text-primary">
                         suporte@primebet.com
                     </Button>

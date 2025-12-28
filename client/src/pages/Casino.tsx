@@ -1,14 +1,15 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { GameCard } from "@/components/shared/GameCard";
-import { CASINO_GAMES, PROVIDERS } from "@/lib/mockData";
+import { CASINO_GAMES, PROVIDERS, ORIGINALS_GAMES } from "@/lib/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import casinoHero from "@assets/generated_images/casino_lobby_luxurious_background.png";
-import { Flame, Star, History, Sparkles, Search, Filter, Play } from "lucide-react";
+import { Flame, Star, History, Sparkles, Search, Filter, Play, Rocket, Zap, Crown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 
 export default function Casino() {
   const [loading, setLoading] = useState(true);
@@ -53,6 +54,46 @@ export default function Casino() {
           </div>
         </div>
       </div>
+
+      {/* IN1Bet Originals Section */}
+      <section className="mb-12">
+        <div className="flex items-center gap-2 mb-6">
+            <div className="p-2 bg-primary/20 rounded-lg">
+                <Rocket className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+                <h3 className="font-heading font-bold text-2xl text-white">IN1Bet Originals</h3>
+                <p className="text-sm text-gray-400">Jogos exclusivos com RTP de 99%</p>
+            </div>
+        </div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+            {ORIGINALS_GAMES.map(game => (
+                <Link key={game.id} href={`/games/${game.id}`}>
+                    <div className="group relative aspect-[3/4] rounded-xl overflow-hidden cursor-pointer border border-white/5 hover:border-primary/50 transition-all shadow-lg hover:shadow-primary/20">
+                         {/* Placeholder colorful gradients for original games */}
+                         <div className={`absolute inset-0 bg-gradient-to-br ${
+                             game.id === 'mines' ? 'from-blue-600 to-blue-900' : 
+                             game.id === 'crash' ? 'from-red-600 to-red-900' : 
+                             game.id === 'double' ? 'from-purple-600 to-purple-900' :
+                             game.id === 'plinko' ? 'from-green-600 to-green-900' :
+                             'from-gray-700 to-gray-900'
+                         } transition-transform group-hover:scale-110 duration-500`} />
+                         
+                         <div className="absolute inset-0 flex flex-col items-center justify-center p-4">
+                             {game.id === 'mines' && <div className="w-16 h-16 mb-2 text-white opacity-80"><Zap className="w-full h-full" /></div>}
+                             {game.id === 'crash' && <div className="w-16 h-16 mb-2 text-white opacity-80"><Rocket className="w-full h-full" /></div>}
+                             {game.id === 'double' && <div className="w-16 h-16 mb-2 text-white opacity-80"><div className="text-4xl font-black">2x</div></div>}
+                             {game.id === 'plinko' && <div className="w-16 h-16 mb-2 text-white opacity-80"><div className="text-4xl font-black">●</div></div>}
+                             
+                             <h4 className="font-heading font-bold text-xl text-white uppercase tracking-wider">{game.name}</h4>
+                             <Badge variant="secondary" className="mt-2 bg-black/30 backdrop-blur-md text-white border-white/10">ORIGINAL</Badge>
+                         </div>
+                    </div>
+                </Link>
+            ))}
+        </div>
+      </section>
 
       {/* Search & Filters */}
       <div className="flex flex-col md:flex-row gap-4 mb-8 sticky top-20 z-30 bg-background/80 backdrop-blur-xl p-4 rounded-xl border border-white/5 shadow-lg">
