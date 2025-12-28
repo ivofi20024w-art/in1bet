@@ -30,6 +30,7 @@ import Crash from "@/pages/games/Crash";
 import Double from "@/pages/games/Double";
 import Mines from "@/pages/games/Mines";
 import Plinko from "@/pages/games/Plinko";
+import MatchDetail from "@/pages/sports/MatchDetail";
 import { useEffect, useState } from "react";
 import { Loader } from "@/components/ui/Loader";
 
@@ -92,6 +93,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/casino" component={Casino} />
         <Route path="/sports" component={Sports} />
+        <Route path="/sports/match/:id" component={MatchDetail} />
         <Route path="/live-betting" component={LiveBetting} />
         <Route path="/live-casino" component={LiveCasino} />
         <Route path="/virtual-sports" component={VirtualSports} />

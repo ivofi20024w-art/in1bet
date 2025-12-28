@@ -19,7 +19,7 @@ interface OddsCardProps {
 
 export function OddsCard({ league, home, away, time, score, odds, isLive }: OddsCardProps) {
   return (
-    <div className="bg-card border border-white/5 rounded-xl p-4 hover:border-primary/30 transition-all hover:bg-secondary/10 group cursor-pointer relative overflow-hidden">
+    <div className="bg-card border border-white/5 rounded-xl p-4 hover:border-primary/50 transition-all hover:bg-secondary/20 group cursor-pointer relative overflow-hidden shadow-sm hover:shadow-md">
       {isLive && (
           <div className="absolute top-0 right-0 w-16 h-16 bg-red-500/10 rounded-bl-full -mr-8 -mt-8 animate-pulse pointer-events-none" />
       )}
@@ -49,7 +49,7 @@ export function OddsCard({ league, home, away, time, score, odds, isLive }: Odds
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 relative z-10">
+      <div className="grid grid-cols-3 gap-2 relative z-10" onClick={(e) => e.preventDefault()}>
         <button className="flex flex-col items-center justify-center bg-secondary/50 hover:bg-primary hover:text-white rounded-lg p-2 transition-all duration-200 group/btn border border-white/5 hover:border-primary">
           <span className="text-[10px] text-muted-foreground group-hover/btn:text-white/80 mb-0.5 font-medium">1</span>
           <div className="flex items-center gap-1">
