@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
@@ -22,10 +22,30 @@ import Settings from "@/pages/profile/Settings";
 import Security from "@/pages/profile/Security";
 import Verification from "@/pages/profile/Verification";
 import Game from "@/pages/Game";
+import Login from "@/pages/auth/Login";
+import Register from "@/pages/auth/Register";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import { useEffect, useState } from "react";
+
+// Mock Auth Context for Prototype
+function AuthGuard({ children }: { children: React.ReactNode }) {
+    const [location, setLocation] = useLocation();
+    // Simulate auth state - for prototype we default to true, 
+    // but specific actions might check this
+    const isAuthenticated = localStorage.getItem("primebet_auth") === "true";
+
+    return <>{children}</>;
+}
 
 function Router() {
   return (
     <Switch>
+      {/* Public Routes */}
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+
+      {/* Protected Routes (Mock Guard) */}
       <Route path="/" component={Home} />
       <Route path="/casino" component={Casino} />
       <Route path="/sports" component={Sports} />
@@ -34,16 +54,19 @@ function Router() {
       <Route path="/virtual-sports" component={VirtualSports} />
       <Route path="/promotions" component={Promotions} />
       <Route path="/vip" component={VIP} />
+      <Route path="/responsible-gaming" component={ResponsibleGaming} />
+      <Route path="/game/:id" component={Game} />
+      
+      {/* Account Routes */}
       <Route path="/history" component={History} />
       <Route path="/support" component={Support} />
       <Route path="/support/tickets" component={TicketHistory} />
       <Route path="/support/tickets/new" component={CreateTicket} />
-      <Route path="/responsible-gaming" component={ResponsibleGaming} />
       <Route path="/profile" component={Profile} />
       <Route path="/profile/settings" component={Settings} />
       <Route path="/profile/security" component={Security} />
       <Route path="/profile/verification" component={Verification} />
-      <Route path="/game/:id" component={Game} />
+      
       <Route component={NotFound} />
     </Switch>
   );
