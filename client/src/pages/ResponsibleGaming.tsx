@@ -1,6 +1,7 @@
 import { MainLayout } from "@/components/layout/MainLayout";
-import { ShieldCheck, AlertTriangle, Clock, Ban, Phone, Globe, ExternalLink, HeartHandshake, Scale } from "lucide-react";
+import { ShieldCheck, AlertTriangle, Clock, Ban, Phone, Globe, ExternalLink, HeartHandshake, Scale, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
