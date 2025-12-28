@@ -65,6 +65,22 @@ export const refreshTokens = pgTable("refresh_tokens", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// PIX Deposits table - tracks PIX payment requests
+export const pixDeposits = pgTable("pix_deposits", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  externalId: varchar("external_id", { length: 64 }).notNull().unique(),
+  ondapayTransactionId: varchar("ondapay_transaction_id", { length: 64 }),
+  amount: numeric("amount", { precision: 15, scale: 2 }).notNull(),
+  netAmount: numeric("net_amount", { precision: 15, scale: 2 }),
+  status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+  qrCode: text("qr_code"),
+  qrCodeBase64: text("qr_code_base64"),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Transaction types for the ledger
 export const TransactionType = {
   DEPOSIT: "DEPOSIT",
@@ -166,7 +182,19 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({
   updatedAt: true,
 });
 
+// PIX deposit schema
+export const insertPixDepositSchema = createInsertSchema(pixDeposits).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  status: true,
+  netAmount: true,
+  paidAt: true,
+});
+
 // Types
+export type PixDeposit = typeof pixDeposits.$inferSelect;
+export type InsertPixDeposit = z.infer<typeof insertPixDepositSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type RegisterUser = z.infer<typeof registerUserSchema>;
 export type LoginUser = z.infer<typeof loginUserSchema>;

@@ -7,6 +7,7 @@ import usersRoutes from "./modules/users/users.routes";
 import walletRoutes from "./modules/wallet/wallet.routes";
 import paymentsRoutes from "./modules/payments/payments.routes";
 import adminRoutes from "./modules/admin/admin.routes";
+import ondapayRoutes from "./modules/payments/ondapay/ondapay.routes";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -19,6 +20,9 @@ export async function registerRoutes(
     }
     next(err);
   });
+
+  // Webhook endpoint (no auth required - comes from OndaPay)
+  app.use("/api", ondapayRoutes);
 
   // Register all API routes with /api prefix
   app.use("/api/auth", authRoutes);

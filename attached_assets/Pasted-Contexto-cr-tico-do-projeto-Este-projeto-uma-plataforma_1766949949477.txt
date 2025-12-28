@@ -1,0 +1,145 @@
+Contexto crítico do projeto:
+Este projeto é uma plataforma de casino e apostas online para o Brasil, com dinheiro real, CPF obrigatório, Wallet + Transaction Ledger já implementados e seguros.
+
+A autenticação, wallet e ledger JÁ ESTÃO FUNCIONAIS.
+Agora vamos integrar pagamentos PIX reais via ONDAPAY.
+
+🎯 OBJETIVO
+
+Integrar corretamente a API PIX da OndaPay, seguindo exatamente a documentação oficial disponível em:
+👉 https://api.ondapay.app/docs/api
+
+A integração deve ser real, segura, idempotente e pronta para produção.
+
+🔍 LEITURA DA DOCUMENTAÇÃO (OBRIGATÓRIA)
+
+Acessar e interpretar a documentação interativa (Swagger/Redoc) da OndaPay
+
+Identificar:
+
+URL base da API
+
+Endpoints reais disponíveis
+
+Headers obrigatórios (Authorization, Content-Type etc.)
+
+Estrutura exata de request e response
+
+Campos retornados (QR Code, BR Code / Copia e Cola, IDs, status)
+
+⚠️ NÃO assumir endpoints. Usar somente o que está documentado.
+
+🚨 REGRAS ABSOLUTAS (NÃO NEGOCIÁVEL)
+
+NÃO alterar o frontend
+
+NÃO alterar o sistema de autenticação
+
+NÃO alterar Wallet ou Transaction Ledger existentes
+
+NÃO usar mocks ou dados fictícios
+
+NÃO creditar saldo no momento da criação do PIX
+
+Saldo só pode ser creditado via webhook confirmado
+
+💳 FLUXO PIX OBRIGATÓRIO
+
+Usuário solicita depósito PIX
+
+Backend cria cobrança PIX na OndaPay
+
+OndaPay retorna:
+
+QR Code (imagem ou base64)
+
+BR Code (PIX Copia e Cola)
+
+Backend retorna AMBOS para o frontend
+
+Usuário paga o PIX
+
+OndaPay envia webhook de confirmação
+
+Backend valida o webhook
+
+Backend cria Transaction (DEPOSIT)
+
+Backend credita a Wallet de forma atômica
+
+🔐 SEGURANÇA & IDMPOTÊNCIA
+
+Implementar idempotência obrigatória usando referenceId / paymentId
+
+Webhook pode ser enviado mais de uma vez → não pode gerar crédito duplicado
+
+Validar assinatura do webhook usando ONDAPAY_WEBHOOK_SECRET, se especificado na documentação
+
+🗂️ ESTRUTURA DO CÓDIGO
+
+Criar módulo:
+
+modules/payments/ondapay/
+├── ondapay.service.ts
+├── ondapay.controller.ts
+├── ondapay.routes.ts
+└── ondapay.webhook.ts
+
+
+Código modular, limpo e tipado.
+
+🌐 ENDPOINTS DO BACKEND
+
+Implementar:
+
+POST /payments/pix/create
+→ cria cobrança PIX e retorna QR Code + Copia e Cola
+
+GET /payments/pix/status/:referenceId
+→ consulta status da cobrança
+
+POST /webhook/ondapay
+→ recebe confirmação de pagamento
+
+📒 REGRAS DE TRANSAÇÃO
+
+Cada PIX confirmado cria uma Transaction:
+
+type: DEPOSIT
+
+status: COMPLETED
+
+Atualização de saldo deve usar transaction do banco
+
+Nenhuma alteração direta de saldo sem passar pelo ledger
+
+🧪 TESTES OBRIGATÓRIOS
+
+Criar cobrança PIX com sucesso
+
+Receber QR Code e Copia e Cola
+
+Simular webhook de pagamento confirmado
+
+Simular webhook duplicado
+
+Confirmar que o saldo NÃO duplica
+
+✅ CRITÉRIOS DE ACEITAÇÃO
+
+Considere concluído apenas se:
+
+A integração usa exatamente a API documentada da OndaPay
+
+QR Code e Copia e Cola são retornados
+
+Saldo só é creditado via webhook
+
+Idempotência funciona corretamente
+
+Wallet e Ledger permanecem íntegros
+
+Sistema está pronto para produção
+
+Resultado esperado:
+Integração PIX real via OndaPay, segura, auditável, idempotente e totalmente conectada ao sistema financeiro existente.
