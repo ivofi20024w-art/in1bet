@@ -1,0 +1,233 @@
+Projeto: IN1Bet
+
+CONTEXTO GERAL
+
+A plataforma já possui:
+
+Autenticação funcional
+
+Wallet com transaction ledger
+
+Depósitos PIX via OndaPay 100% funcionais e testados
+
+Saldo só é atualizado via webhook
+
+UI de carteira já existente e aprovada (NÃO alterar design)
+
+Agora vamos avançar para SAQUE PIX + KYC LEVE, seguindo padrões reais de casinos brasileiros.
+
+🎯 OBJETIVO DESTA FASE
+
+Implementar SAQUE PIX de forma segura e auditável
+
+Implementar KYC LEVE obrigatório (CPF + Nome) antes do primeiro saque
+
+Garantir compliance, antifraude básico e confiança do usuário
+
+🚨 REGRAS ABSOLUTAS (NÃO QUEBRAR)
+
+NÃO alterar lógica de depósito PIX
+
+NÃO alterar UI existente da carteira (somente integrar)
+
+TODO saque deve passar pelo ledger
+
+Nenhum saque automático sem validações
+
+KYC deve ser obrigatório antes do saque
+
+Backend é a única fonte da verdade
+
+🧩 PARTE 1 — KYC LEVE (OBRIGATÓRIO)
+📌 Requisitos de KYC
+
+Implementar KYC básico com os seguintes campos:
+
+Nome completo
+
+CPF
+
+Data de nascimento (opcional, mas recomendado)
+
+📌 Regras de validação
+
+CPF:
+
+Validar formato
+
+Validar dígitos verificadores (algoritmo oficial)
+
+CPF deve ser único por conta
+
+Nome:
+
+Obrigatório
+
+Salvo exatamente como informado pelo usuário
+
+Status KYC:
+
+PENDING
+
+VERIFIED
+
+REJECTED
+
+📌 Comportamento
+
+Usuário PODE depositar sem KYC
+
+Usuário NÃO pode sacar sem KYC aprovado
+
+Se tentar sacar sem KYC:
+
+Mostrar modal:
+“Para realizar um saque, é necessário validar seus dados (CPF).”
+
+🧩 PARTE 2 — SAQUE PIX (CORE)
+📌 Backend — Saque
+
+Criar estrutura de saque PIX com:
+
+Valor
+
+Chave PIX (CPF / Email / Telefone)
+
+Tipo de chave
+
+user_id
+
+Status do saque:
+
+PENDING
+
+APPROVED
+
+REJECTED
+
+PAID
+
+Timestamp completo
+
+📌 Regras de negócio
+
+Valor mínimo de saque (ex: R$20)
+
+Usuário só pode sacar até o saldo disponível
+
+Saldo deve ser reservado no momento do pedido
+
+Ledger deve registrar:
+
+pedido de saque
+
+aprovação
+
+pagamento
+
+Nenhuma alteração direta no balance
+
+🧩 PARTE 3 — FLUXO DE SAQUE (UX + BACKEND)
+🖥️ Frontend (usando UI existente)
+
+Botão “Sacar” já existente passa a funcionar
+
+Ao clicar:
+
+Se KYC não feito → abrir modal KYC
+
+Se KYC ok → abrir modal Saque PIX
+
+Modal Saque PIX:
+
+Campo valor
+
+Campo chave PIX
+
+Seletor tipo de chave
+
+Mostrar saldo disponível
+
+Botão “Solicitar Saque”
+
+Feedbacks obrigatórios:
+
+“Saque solicitado com sucesso”
+
+“Saque em análise”
+
+Status visível no histórico
+
+🧩 PARTE 4 — ADMIN (MÍNIMO FUNCIONAL)
+
+Criar painel admin simples, sem foco em design:
+
+Admin pode:
+
+Ver lista de saques
+
+Ver dados do usuário (nome, CPF, saldo)
+
+Aprovar saque
+
+Rejeitar saque (com motivo)
+
+Marcar saque como pago
+
+⚠️ IMPORTANTE
+O pagamento PIX pode ser:
+
+Manual (fora do sistema)
+
+Ou futuro automático
+Por agora, admin controla status
+
+🧠 SEGURANÇA & COMPLIANCE
+
+Todos os eventos devem ser logados
+
+Nenhum saque pode pular o ledger
+
+Nenhuma ação sensível sem autenticação
+
+CPF mascarado no frontend
+
+CPF completo só visível no admin
+
+✅ CHECKLIST FINAL (ANTES DE CONCLUIR)
+
+ Usuário sem KYC não saca
+
+ CPF inválido é bloqueado
+
+ Saldo nunca fica negativo
+
+ Saque não credita nem debita direto
+
+ Ledger registra tudo
+
+ Admin controla fluxo
+
+ UX clara e confiável
+
+🏁 RESULTADO ESPERADO
+
+Ao final desta fase:
+
+A plataforma aceita PIX
+
+A plataforma paga PIX
+
+O usuário confia
+
+O sistema está pronto para escala
+
+O casino está nível produção Brasil
+
+👉 Avança com esta implementação mantendo o mesmo padrão de qualidade e arquitetura já existente.
+
+🔚 NOTA FINAL (IMPORTANTE)
+
+Não criar nada além do que foi pedido.
+Não reinventar regras.
+Não simplificar lógica financeira.

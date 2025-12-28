@@ -85,6 +85,8 @@ export const pixDeposits = pgTable("pix_deposits", {
 export const TransactionType = {
   DEPOSIT: "DEPOSIT",
   WITHDRAW: "WITHDRAW",
+  WITHDRAW_RESERVE: "WITHDRAW_RESERVE",
+  WITHDRAW_RELEASE: "WITHDRAW_RELEASE",
   BET: "BET",
   WIN: "WIN",
   ROLLBACK: "ROLLBACK",
@@ -96,6 +98,46 @@ export const TransactionStatus = {
   COMPLETED: "COMPLETED",
   FAILED: "FAILED",
 } as const;
+
+// Withdrawal status
+export const WithdrawalStatus = {
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+  PAID: "PAID",
+} as const;
+
+// KYC Status
+export const KycStatus = {
+  PENDING: "pending",
+  VERIFIED: "verified",
+  REJECTED: "rejected",
+} as const;
+
+// PIX Key Types
+export const PixKeyType = {
+  CPF: "CPF",
+  EMAIL: "EMAIL",
+  PHONE: "PHONE",
+  RANDOM: "RANDOM",
+} as const;
+
+// PIX Withdrawals table
+export const pixWithdrawals = pgTable("pix_withdrawals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  amount: numeric("amount", { precision: 15, scale: 2 }).notNull(),
+  pixKey: text("pix_key").notNull(),
+  pixKeyType: varchar("pix_key_type", { length: 20 }).notNull(),
+  status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+  rejectionReason: text("rejection_reason"),
+  transactionId: varchar("transaction_id").references(() => transactions.id),
+  approvedBy: varchar("approved_by"),
+  approvedAt: timestamp("approved_at"),
+  paidAt: timestamp("paid_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
 // Transaction Ledger - Every balance change must create a transaction
 export const transactions = pgTable("transactions", {
@@ -192,9 +234,40 @@ export const insertPixDepositSchema = createInsertSchema(pixDeposits).omit({
   paidAt: true,
 });
 
+// PIX withdrawal schema
+export const insertPixWithdrawalSchema = createInsertSchema(pixWithdrawals).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  status: true,
+  rejectionReason: true,
+  transactionId: true,
+  approvedBy: true,
+  approvedAt: true,
+  paidAt: true,
+});
+
+// Withdrawal request schema (frontend)
+export const requestWithdrawalSchema = z.object({
+  amount: z.number().min(20, "Valor mínimo de saque é R$ 20,00"),
+  pixKey: z.string().min(1, "Chave PIX obrigatória"),
+  pixKeyType: z.enum(["CPF", "EMAIL", "PHONE", "RANDOM"]),
+});
+
+// KYC submission schema
+export const submitKycSchema = z.object({
+  fullName: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
+  cpf: z.string().refine(isValidCPF, "CPF inválido"),
+  birthDate: z.string().optional(),
+});
+
 // Types
 export type PixDeposit = typeof pixDeposits.$inferSelect;
 export type InsertPixDeposit = z.infer<typeof insertPixDepositSchema>;
+export type PixWithdrawal = typeof pixWithdrawals.$inferSelect;
+export type InsertPixWithdrawal = z.infer<typeof insertPixWithdrawalSchema>;
+export type RequestWithdrawal = z.infer<typeof requestWithdrawalSchema>;
+export type SubmitKyc = z.infer<typeof submitKycSchema>;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type RegisterUser = z.infer<typeof registerUserSchema>;
 export type LoginUser = z.infer<typeof loginUserSchema>;
@@ -206,6 +279,9 @@ export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type TransactionTypeValue = typeof TransactionType[keyof typeof TransactionType];
 export type TransactionStatusValue = typeof TransactionStatus[keyof typeof TransactionStatus];
+export type WithdrawalStatusValue = typeof WithdrawalStatus[keyof typeof WithdrawalStatus];
+export type KycStatusValue = typeof KycStatus[keyof typeof KycStatus];
+export type PixKeyTypeValue = typeof PixKeyType[keyof typeof PixKeyType];
 
 // Safe user type (without password)
 export type SafeUser = Omit<User, 'password'>;
