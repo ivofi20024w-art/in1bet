@@ -120,34 +120,45 @@ export async function logout(): Promise<void> {
 // Get current user
 export async function getCurrentUser(): Promise<User | null> {
   const auth = getStoredAuth();
+  console.log("[AUTH] getCurrentUser called, hasAccessToken:", !!auth.accessToken);
   
   if (!auth.accessToken) {
+    console.log("[AUTH] No access token found");
     return null;
   }
   
   try {
+    console.log("[AUTH] Fetching /api/auth/me");
     const response = await fetch("/api/auth/me", {
       headers: {
         "Authorization": `Bearer ${auth.accessToken}`,
       },
     });
     
+    console.log("[AUTH] /api/auth/me response status:", response.status);
+    
     if (!response.ok) {
+      const errorText = await response.text();
+      console.log("[AUTH] /api/auth/me error:", errorText);
+      
       // Try to refresh token
       if (response.status === 401 && auth.refreshToken) {
+        console.log("[AUTH] Attempting token refresh");
         const refreshed = await refreshToken();
         if (refreshed) {
           return getCurrentUser();
         }
       }
+      console.log("[AUTH] Clearing auth due to failed /me request");
       clearAuth();
       return null;
     }
     
     const data = await response.json();
+    console.log("[AUTH] Got user from /me:", data.user?.email);
     return data.user;
   } catch (e) {
-    console.error("Error getting current user:", e);
+    console.error("[AUTH] Error getting current user:", e);
     return null;
   }
 }

@@ -13,19 +13,38 @@ import { Input } from "@/components/ui/input";
 import { WalletModal } from "@/components/wallet/WalletModal";
 import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
+import { getStoredAuth, logout as authLogout, type User } from "@/lib/auth";
 
 export function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    // Check auth status (mock)
-    setIsAuthenticated(localStorage.getItem("in1bet_auth") === "true");
+    const checkAuth = () => {
+      const auth = getStoredAuth();
+      console.log("[HEADER] Auth check:", auth.isAuthenticated, auth.user?.email);
+      setIsAuthenticated(auth.isAuthenticated);
+      setUser(auth.user);
+    };
+    
+    checkAuth();
+    
+    const handleStorageChange = () => checkAuth();
+    window.addEventListener('storage', handleStorageChange);
+    
+    const interval = setInterval(checkAuth, 1000);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
   }, []);
 
-  const handleLogout = () => {
-      localStorage.removeItem("in1bet_auth");
+  const handleLogout = async () => {
+      await authLogout();
       setIsAuthenticated(false);
+      setUser(null);
       setLocation("/login");
   };
 
