@@ -65,18 +65,64 @@ export const refreshTokens = pgTable("refresh_tokens", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Transaction types for the ledger
+export const TransactionType = {
+  DEPOSIT: "DEPOSIT",
+  WITHDRAW: "WITHDRAW",
+  BET: "BET",
+  WIN: "WIN",
+  ROLLBACK: "ROLLBACK",
+  BONUS: "BONUS",
+} as const;
+
+export const TransactionStatus = {
+  PENDING: "PENDING",
+  COMPLETED: "COMPLETED",
+  FAILED: "FAILED",
+} as const;
+
+// Transaction Ledger - Every balance change must create a transaction
+export const transactions = pgTable("transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  walletId: varchar("wallet_id").notNull().references(() => wallets.id),
+  type: varchar("type", { length: 20 }).notNull(),
+  amount: numeric("amount", { precision: 15, scale: 2 }).notNull(),
+  balanceBefore: numeric("balance_before", { precision: 15, scale: 2 }).notNull(),
+  balanceAfter: numeric("balance_after", { precision: 15, scale: 2 }).notNull(),
+  status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+  referenceId: varchar("reference_id", { length: 64 }).unique(),
+  description: text("description"),
+  metadata: text("metadata"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Relations
-export const usersRelations = relations(users, ({ one }) => ({
+export const usersRelations = relations(users, ({ one, many }) => ({
   wallet: one(wallets, {
     fields: [users.id],
     references: [wallets.userId],
   }),
+  transactions: many(transactions),
 }));
 
-export const walletsRelations = relations(wallets, ({ one }) => ({
+export const walletsRelations = relations(wallets, ({ one, many }) => ({
   user: one(users, {
     fields: [wallets.userId],
     references: [users.id],
+  }),
+  transactions: many(transactions),
+}));
+
+export const transactionsRelations = relations(transactions, ({ one }) => ({
+  user: one(users, {
+    fields: [transactions.userId],
+    references: [users.id],
+  }),
+  wallet: one(wallets, {
+    fields: [transactions.walletId],
+    references: [wallets.id],
   }),
 }));
 
@@ -113,6 +159,13 @@ export const insertWalletSchema = createInsertSchema(wallets).omit({
   currency: true,
 });
 
+// Transaction schema for creating new transactions
+export const insertTransactionSchema = createInsertSchema(transactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type RegisterUser = z.infer<typeof registerUserSchema>;
@@ -121,6 +174,10 @@ export type User = typeof users.$inferSelect;
 export type InsertWallet = z.infer<typeof insertWalletSchema>;
 export type Wallet = typeof wallets.$inferSelect;
 export type RefreshToken = typeof refreshTokens.$inferSelect;
+export type Transaction = typeof transactions.$inferSelect;
+export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
+export type TransactionTypeValue = typeof TransactionType[keyof typeof TransactionType];
+export type TransactionStatusValue = typeof TransactionStatus[keyof typeof TransactionStatus];
 
 // Safe user type (without password)
 export type SafeUser = Omit<User, 'password'>;

@@ -25,7 +25,9 @@ export interface IStorage {
   // Wallet operations
   getWalletByUserId(userId: string): Promise<Wallet | undefined>;
   createWallet(wallet: InsertWallet): Promise<Wallet>;
-  updateWalletBalance(userId: string, balance: string, lockedBalance?: string): Promise<Wallet | undefined>;
+  // Note: updateWalletBalance is intentionally NOT exposed here
+  // All balance changes MUST go through the wallet.service.ts processBalanceChange function
+  // to ensure transaction ledger consistency
   
   // Refresh token operations
   createRefreshToken(userId: string, token: string, expiresAt: Date): Promise<RefreshToken>;
@@ -104,22 +106,9 @@ export class DatabaseStorage implements IStorage {
     return newWallet;
   }
 
-  async updateWalletBalance(userId: string, balance: string, lockedBalance?: string): Promise<Wallet | undefined> {
-    const updateData: Partial<Wallet> = { 
-      balance, 
-      updatedAt: new Date() 
-    };
-    if (lockedBalance !== undefined) {
-      updateData.lockedBalance = lockedBalance;
-    }
-    
-    const [wallet] = await db
-      .update(wallets)
-      .set(updateData)
-      .where(eq(wallets.userId, userId))
-      .returning();
-    return wallet || undefined;
-  }
+  // updateWalletBalance has been intentionally removed from the storage layer
+  // All balance changes MUST go through wallet.service.ts processBalanceChange
+  // This ensures transaction ledger consistency and auditability
 
   // Refresh token operations
   async createRefreshToken(userId: string, token: string, expiresAt: Date): Promise<RefreshToken> {

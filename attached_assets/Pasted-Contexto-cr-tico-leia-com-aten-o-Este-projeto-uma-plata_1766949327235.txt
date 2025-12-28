@@ -1,0 +1,134 @@
+Contexto crítico (leia com atenção):
+Este projeto é uma plataforma de casino e apostas para o Brasil, com dinheiro real, CPF obrigatório e pagamentos via PIX (a integrar depois).
+
+O sistema de autenticação já está funcional.
+Este passo constrói o núcleo financeiro da plataforma. Nada aqui é protótipo.
+
+🎯 OBJETIVO
+
+Implementar um sistema de Wallet + Transaction Ledger, seguro, auditável e pronto para produção.
+
+🚨 REGRAS ABSOLUTAS (NÃO NEGOCIÁVEL)
+
+NÃO alterar o frontend
+
+NÃO alterar o sistema de autenticação existente
+
+NÃO implementar pagamentos PIX ainda
+
+NÃO usar mocks ou dados fictícios
+
+NÃO permitir saldo negativo
+
+Código limpo, tipado, modular e seguro
+
+🗂️ ARQUITETURA OBRIGATÓRIA
+
+Criar/usar módulo wallet e transactions separados:
+
+wallet.controller.ts
+
+wallet.service.ts
+
+wallet.routes.ts
+
+transactions.service.ts
+
+Toda alteração de saldo DEVE passar pelo ledger de transações.
+
+💰 WALLET
+
+A Wallet deve conter:
+
+balance (saldo disponível)
+
+lockedBalance (saldo bloqueado)
+
+Relacionamento 1:1 com User
+
+Regras:
+
+Wallet é criada automaticamente no registro do usuário
+
+Nunca permitir saldo negativo
+
+Atualizações devem ser atômicas (transaction do banco)
+
+📒 TRANSACTION LEDGER
+
+Criar modelo Transaction com:
+
+id
+
+userId
+
+type (DEPOSIT, WITHDRAW, BET, WIN, ROLLBACK)
+
+amount
+
+status (PENDING, COMPLETED, FAILED)
+
+referenceId (único, para idempotência futura)
+
+createdAt
+
+Cada alteração de saldo:
+
+Cria obrigatoriamente uma Transaction
+
+Nunca altera saldo diretamente sem ledger
+
+🔐 SEGURANÇA & CONSISTÊNCIA
+
+Usar database transactions (BEGIN / COMMIT / ROLLBACK)
+
+Garantir idempotência por referenceId
+
+Bloquear race conditions em atualizações simultâneas
+
+🌐 ENDPOINTS (BACKEND)
+
+Implementar endpoints protegidos:
+
+GET /wallet → retorna saldo do usuário autenticado
+
+GET /transactions → histórico do usuário autenticado
+
+Não expor endpoints de crédito manual.
+
+🧪 VALIDAÇÕES
+
+Rejeitar valores inválidos
+
+Rejeitar operações que excedam saldo
+
+Validar tipo de transação
+
+📌 ORDEM DE IMPLEMENTAÇÃO (OBRIGATÓRIA)
+
+Modelos Prisma
+
+Services (lógica de negócio)
+
+Controllers
+
+Rotas protegidas
+
+✅ CRITÉRIOS DE ACEITAÇÃO
+
+Considere concluído apenas se:
+
+Wallet existe para todo usuário
+
+Saldo nunca fica negativo
+
+Toda mudança gera Transaction
+
+Concorrência não quebra saldo
+
+API inicia sem erros
+
+Pronto para integrar PIX no próximo passo
+
+Resultado esperado:
+Sistema financeiro sólido, auditável e pronto para produção, seguindo padrões de grandes casas de apostas.
