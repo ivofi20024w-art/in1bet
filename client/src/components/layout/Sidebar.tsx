@@ -9,20 +9,18 @@ export function Sidebar({ className }: { className?: string }) {
   const renderMenuItem = (item: any) => {
       const isActive = location === item.path;
       return (
-        <Link key={item.path} href={item.path}>
-          <a className={cn(
-            "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
-            isActive 
-              ? "bg-primary text-white shadow-[0_0_20px_-5px_rgba(249,115,22,0.5)]" 
-              : "text-muted-foreground hover:text-white hover:bg-white/5"
-          )}>
-            <item.icon className={cn("w-4 h-4", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
-            {item.label}
-            {isActive && (
-              <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent pointer-events-none" />
-            )}
-          </a>
-        </Link>
+        <Link key={item.path} href={item.path} className={cn(
+        "flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 group relative overflow-hidden",
+        isActive 
+          ? "bg-primary text-white shadow-[0_0_20px_-5px_rgba(249,115,22,0.5)]" 
+          : "text-muted-foreground hover:text-white hover:bg-white/5"
+      )}>
+        <item.icon className={cn("w-4 h-4", isActive ? "text-white" : "text-muted-foreground group-hover:text-white")} />
+        {item.label}
+        {isActive && (
+          <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent pointer-events-none" />
+        )}
+      </Link>
       );
   };
 
@@ -42,14 +40,14 @@ export function Sidebar({ className }: { className?: string }) {
               
               {/* Originals Sub-menu Simulation */}
               <div className="pl-11 pr-4 space-y-1">
-                 <Link href="/games/crash">
-                    <a className="block text-xs text-muted-foreground hover:text-white py-1 font-bold text-primary">🚀 Crashmania</a>
+                 <Link href="/games/crash" className="block text-xs text-muted-foreground hover:text-white py-1 font-bold text-primary">
+                    🚀 Crashmania
                  </Link>
-                 <Link href="/games/double">
-                    <a className="block text-xs text-muted-foreground hover:text-white py-1 font-bold text-red-500">🔴 Double</a>
+                 <Link href="/games/double" className="block text-xs text-muted-foreground hover:text-white py-1 font-bold text-red-500">
+                    🔴 Double
                  </Link>
-                 <Link href="/games/mines">
-                    <a className="block text-xs text-muted-foreground hover:text-white py-1 font-bold text-blue-400">💎 Mines</a>
+                 <Link href="/games/mines" className="block text-xs text-muted-foreground hover:text-white py-1 font-bold text-blue-400">
+                    💎 Mines
                  </Link>
               </div>
           </div>
@@ -62,17 +60,13 @@ export function Sidebar({ className }: { className?: string }) {
       </div>
 
       <div className="mt-auto space-y-1 pt-6 border-t border-white/5">
-        <Link href="/support">
-          <a className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-white hover:bg-white/5 transition-colors">
+        <Link href="/support" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-white hover:bg-white/5 transition-colors">
             <HelpCircle className="w-5 h-5" />
             Suporte
-          </a>
         </Link>
-        <Link href="/responsible-gaming">
-          <a className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-white hover:bg-white/5 transition-colors">
+        <Link href="/responsible-gaming" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-white hover:bg-white/5 transition-colors">
             <ShieldCheck className="w-5 h-5" />
             Jogo Responsável
-          </a>
         </Link>
       </div>
     </aside>

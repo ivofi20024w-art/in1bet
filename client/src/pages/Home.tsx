@@ -56,11 +56,11 @@ export default function Home() {
                     <p className="text-gray-200 mb-6 max-w-md text-sm md:text-lg font-medium drop-shadow-md">
                       {banner.subtitle}
                     </p>
-                    <Link href={banner.link}>
-                      <Button className="bg-white text-black hover:bg-gray-200 rounded-full px-8 h-12 font-bold shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                    <Button asChild className="bg-white text-black hover:bg-gray-200 rounded-full px-8 h-12 font-bold shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+                      <Link href={banner.link}>
                         {banner.cta}
-                      </Button>
-                    </Link>
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               </CarouselItem>
@@ -97,8 +97,7 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {ORIGINALS.map((game) => (
-            <Link key={game.id} href={game.link}>
-              <div className={`relative h-48 rounded-2xl overflow-hidden cursor-pointer group bg-gradient-to-br ${game.color} p-1`}>
+            <Link key={game.id} href={game.link} className={`relative h-48 rounded-2xl overflow-hidden cursor-pointer group bg-gradient-to-br ${game.color} p-1 block`}>
                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors z-10" />
                  
                  {/* Content */}
@@ -106,14 +105,13 @@ export default function Home() {
                     <h3 className="text-4xl font-heading font-black text-white drop-shadow-[0_4px_0_rgba(0,0,0,0.5)] italic transform -rotate-3 group-hover:scale-110 transition-transform duration-300">
                         {game.name}
                     </h3>
-                    <Button size="sm" className="mt-4 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 bg-white text-black font-bold rounded-full">
+                    <Button size="sm" className="mt-4 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 bg-white text-black font-bold rounded-full pointer-events-none">
                         JOGAR AGORA
                     </Button>
                  </div>
 
                  {/* Background Effect */}
                  <div className="absolute inset-0 opacity-30 mix-blend-overlay" style={{ backgroundImage: `url(${game.image})`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-              </div>
             </Link>
           ))}
         </div>

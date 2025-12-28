@@ -27,11 +27,11 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-white mb-4">Plataforma</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link href="/casino"><a className="hover:text-primary transition-colors">Casino</a></Link></li>
-              <li><Link href="/live-casino"><a className="hover:text-primary transition-colors">Casino Ao Vivo</a></Link></li>
-              <li><Link href="/sports"><a className="hover:text-primary transition-colors">Esportes</a></Link></li>
-              <li><Link href="/promotions"><a className="hover:text-primary transition-colors">Promoções</a></Link></li>
-              <li><Link href="/vip"><a className="hover:text-primary transition-colors">Clube VIP</a></Link></li>
+              <li><Link href="/casino" className="hover:text-primary transition-colors">Casino</Link></li>
+              <li><Link href="/live-casino" className="hover:text-primary transition-colors">Casino Ao Vivo</Link></li>
+              <li><Link href="/sports" className="hover:text-primary transition-colors">Esportes</Link></li>
+              <li><Link href="/promotions" className="hover:text-primary transition-colors">Promoções</Link></li>
+              <li><Link href="/vip" className="hover:text-primary transition-colors">Clube VIP</Link></li>
             </ul>
           </div>
 
@@ -39,11 +39,11 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-white mb-4">Ajuda e Legal</h4>
             <ul className="space-y-2 text-sm text-gray-400">
-              <li><Link href="/support"><a className="hover:text-primary transition-colors">Central de Ajuda</a></Link></li>
-              <li><Link href="/support/tickets"><a className="hover:text-primary transition-colors">Meus Tickets</a></Link></li>
-              <li><Link href="/terms"><a className="hover:text-primary transition-colors">Termos e Condições</a></Link></li>
-              <li><Link href="/privacy"><a className="hover:text-primary transition-colors">Política de Privacidade</a></Link></li>
-              <li><Link href="/responsible-gaming"><a className="hover:text-primary transition-colors">Jogo Responsável</a></Link></li>
+              <li><Link href="/support" className="hover:text-primary transition-colors">Central de Ajuda</Link></li>
+              <li><Link href="/support/tickets" className="hover:text-primary transition-colors">Meus Tickets</Link></li>
+              <li><Link href="/terms" className="hover:text-primary transition-colors">Termos e Condições</Link></li>
+              <li><Link href="/privacy" className="hover:text-primary transition-colors">Política de Privacidade</Link></li>
+              <li><Link href="/responsible-gaming" className="hover:text-primary transition-colors">Jogo Responsável</Link></li>
             </ul>
           </div>
 

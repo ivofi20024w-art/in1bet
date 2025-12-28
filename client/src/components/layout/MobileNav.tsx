@@ -37,14 +37,12 @@ export function MobileNav() {
             }
 
             return (
-              <Link key={item.path} href={item.path}>
-                <a className={cn(
-                  "flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-xl transition-all",
-                  isActive ? "text-primary" : "text-muted-foreground hover:text-white"
-                )}>
+              <Link key={item.path} href={item.path} className={cn(
+                "flex flex-col items-center justify-center gap-1 w-12 h-12 rounded-xl transition-all",
+                isActive ? "text-primary" : "text-muted-foreground hover:text-white"
+              )}>
                   <item.icon className={cn("w-5 h-5", isActive && "fill-current")} />
                   <span className="text-[10px] font-medium">{item.label}</span>
-                </a>
               </Link>
             );
           })}
