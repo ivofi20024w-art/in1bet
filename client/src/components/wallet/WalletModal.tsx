@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Wallet, ArrowUpRight, ArrowDownLeft, Copy, Clock, CheckCircle2, XCircle, Loader2, Check, AlertCircle, ChevronRight, RefreshCw } from "lucide-react";
+import { Wallet, ArrowUpRight, ArrowDownLeft, Copy, Clock, CheckCircle2, XCircle, Loader2, Check, AlertCircle, RefreshCw, User } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { getStoredAuth, getWallet } from "@/lib/auth";
@@ -33,11 +33,32 @@ interface PixHistoryItem {
   paidAt: string | null;
 }
 
+interface WithdrawalHistoryItem {
+  id: string;
+  amount: number;
+  pixKey: string;
+  pixKeyType: string;
+  status: string;
+  rejectionReason: string | null;
+  createdAt: string;
+  paidAt: string | null;
+}
+
 interface WalletBalance {
   balance: number;
   lockedBalance: number;
   currency: string;
 }
+
+interface KycStatus {
+  kycStatus: string;
+  name: string;
+  cpf: string | null;
+  isVerified: boolean;
+}
+
+type WithdrawStep = 'input' | 'kyc' | 'loading' | 'success' | 'error';
+type PixKeyType = 'CPF' | 'EMAIL' | 'PHONE';
 
 export function WalletModal({ children, onBalanceUpdate }: { children: React.ReactNode; onBalanceUpdate?: () => void }) {
   const [amount, setAmount] = useState("50");
@@ -48,8 +69,20 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
   const [error, setError] = useState<string | null>(null);
   const [isPolling, setIsPolling] = useState(false);
   const [history, setHistory] = useState<PixHistoryItem[]>([]);
+  const [withdrawalHistory, setWithdrawalHistory] = useState<WithdrawalHistoryItem[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [walletBalance, setWalletBalance] = useState<WalletBalance | null>(null);
+  
+  const [withdrawStep, setWithdrawStep] = useState<WithdrawStep>('input');
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [pixKey, setPixKey] = useState("");
+  const [pixKeyType, setPixKeyType] = useState<PixKeyType>('CPF');
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
+  const [kycStatus, setKycStatus] = useState<KycStatus | null>(null);
+  
+  const [kycName, setKycName] = useState("");
+  const [kycCpf, setKycCpf] = useState("");
+  const [kycLoading, setKycLoading] = useState(false);
 
   useEffect(() => {
     if (depositStep === 'payment' && timer > 0) {
@@ -90,12 +123,22 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
 
     setLoadingHistory(true);
     try {
-      const response = await fetch("/api/payments/pix/history", {
-        headers: { "Authorization": `Bearer ${auth.accessToken}` },
-      });
-      if (response.ok) {
-        const data = await response.json();
+      const [depositRes, withdrawRes] = await Promise.all([
+        fetch("/api/payments/pix/history", {
+          headers: { "Authorization": `Bearer ${auth.accessToken}` },
+        }),
+        fetch("/api/withdrawals/history", {
+          headers: { "Authorization": `Bearer ${auth.accessToken}` },
+        }),
+      ]);
+      
+      if (depositRes.ok) {
+        const data = await depositRes.json();
         setHistory(data.deposits || []);
+      }
+      if (withdrawRes.ok) {
+        const data = await withdrawRes.json();
+        setWithdrawalHistory(data.withdrawals || []);
       }
     } catch (e) {
       console.error("Error fetching history:", e);
@@ -108,6 +151,24 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
     const data = await getWallet();
     if (data) {
       setWalletBalance(data);
+    }
+  }, []);
+
+  const fetchKycStatus = useCallback(async () => {
+    const auth = getStoredAuth();
+    if (!auth.accessToken) return;
+
+    try {
+      const response = await fetch("/api/kyc/status", {
+        headers: { "Authorization": `Bearer ${auth.accessToken}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setKycStatus(data);
+        if (data.name) setKycName(data.name);
+      }
+    } catch (e) {
+      console.error("Error fetching KYC status:", e);
     }
   }, []);
 
@@ -181,6 +242,114 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
     }
   };
 
+  const handleWithdrawRequest = async () => {
+    const amountNum = parseFloat(withdrawAmount);
+    if (!withdrawAmount || amountNum < 20) {
+      toast.error("O valor mínimo de saque é R$ 20,00");
+      return;
+    }
+
+    if (!pixKey.trim()) {
+      toast.error("Informe a chave PIX");
+      return;
+    }
+
+    if (walletBalance && amountNum > walletBalance.balance) {
+      toast.error("Saldo insuficiente");
+      return;
+    }
+
+    const auth = getStoredAuth();
+    if (!auth.accessToken) {
+      toast.error("Você precisa estar logado");
+      return;
+    }
+
+    if (kycStatus?.kycStatus !== 'verified') {
+      setWithdrawStep('kyc');
+      return;
+    }
+
+    setWithdrawStep('loading');
+    setWithdrawError(null);
+
+    try {
+      const response = await fetch("/api/withdrawals/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${auth.accessToken}`,
+        },
+        body: JSON.stringify({ 
+          amount: amountNum, 
+          pixKey: pixKey.trim(), 
+          pixKeyType 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao solicitar saque");
+      }
+
+      setWithdrawStep('success');
+      toast.success("Saque solicitado com sucesso!");
+      onBalanceUpdate?.();
+      fetchWalletBalance();
+    } catch (e: any) {
+      console.error("Error requesting withdrawal:", e);
+      setWithdrawError(e.message || "Erro ao solicitar saque");
+      setWithdrawStep('error');
+      toast.error(e.message || "Erro ao solicitar saque");
+    }
+  };
+
+  const handleKycSubmit = async () => {
+    if (!kycName.trim() || kycName.trim().length < 3) {
+      toast.error("Nome deve ter pelo menos 3 caracteres");
+      return;
+    }
+
+    if (!kycCpf.trim()) {
+      toast.error("Informe o CPF");
+      return;
+    }
+
+    const auth = getStoredAuth();
+    if (!auth.accessToken) return;
+
+    setKycLoading(true);
+
+    try {
+      const response = await fetch("/api/kyc/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${auth.accessToken}`,
+        },
+        body: JSON.stringify({ 
+          fullName: kycName.trim(), 
+          cpf: kycCpf.trim() 
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao validar dados");
+      }
+
+      toast.success("Dados verificados com sucesso!");
+      await fetchKycStatus();
+      setWithdrawStep('input');
+    } catch (e: any) {
+      toast.error(e.message || "Erro ao validar dados");
+    } finally {
+      setKycLoading(false);
+    }
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -201,6 +370,14 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
     return date.toLocaleDateString('pt-BR');
   };
 
+  const formatCpf = (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 11);
+    if (digits.length <= 3) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+    if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+    return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+  };
+
   const resetDeposit = () => {
     setDepositStep('input');
     setAmount("50");
@@ -209,19 +386,50 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
     setIsPolling(false);
   };
 
+  const resetWithdraw = () => {
+    setWithdrawStep('input');
+    setWithdrawAmount("");
+    setPixKey("");
+    setWithdrawError(null);
+  };
+
   const handleTabChange = (tab: string) => {
     if (tab === 'history') {
       fetchHistory();
     }
     if (tab === 'withdraw') {
       fetchWalletBalance();
+      fetchKycStatus();
     }
   };
 
+  const getWithdrawalStatusLabel = (status: string) => {
+    switch (status) {
+      case 'PENDING': return { label: 'Pendente', color: 'text-yellow-500' };
+      case 'APPROVED': return { label: 'Aprovado', color: 'text-blue-500' };
+      case 'REJECTED': return { label: 'Rejeitado', color: 'text-red-500' };
+      case 'PAID': return { label: 'Pago', color: 'text-green-500' };
+      default: return { label: status, color: 'text-gray-500' };
+    }
+  };
+
+  const allHistory = [
+    ...history.map(h => ({ ...h, type: 'deposit' as const, id: h.externalId })),
+    ...withdrawalHistory.map(w => ({ ...w, type: 'withdrawal' as const, externalId: w.id })),
+  ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
   return (
     <Dialog onOpenChange={(open) => {
-      if (!open) setTimeout(() => resetDeposit(), 300);
-      if (open) fetchWalletBalance();
+      if (!open) {
+        setTimeout(() => {
+          resetDeposit();
+          resetWithdraw();
+        }, 300);
+      }
+      if (open) {
+        fetchWalletBalance();
+        fetchKycStatus();
+      }
     }}>
       <DialogTrigger asChild>
         {children}
@@ -421,61 +629,205 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
             </TabsContent>
 
             <TabsContent value="withdraw" className="space-y-4 mt-0 animate-in slide-in-from-right-4 duration-300">
-              <div className="bg-secondary/30 rounded-xl p-6 text-center border border-white/5 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
-                <p className="text-muted-foreground text-sm mb-1 uppercase tracking-wider">Saldo Disponível</p>
-                <h2 className="text-4xl font-bold font-heading text-white" data-testid="text-withdraw-balance">
-                  R$ {walletBalance ? walletBalance.balance.toFixed(2).replace('.', ',') : '0,00'}
-                </h2>
-                {walletBalance && walletBalance.balance > 0 && (
-                  <div className="text-xs text-emerald-400 flex items-center justify-center gap-1 mt-2">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    Disponível para saque
+              {withdrawStep === 'input' && (
+                <>
+                  <div className="bg-secondary/30 rounded-xl p-6 text-center border border-white/5 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
+                    <p className="text-muted-foreground text-sm mb-1 uppercase tracking-wider">Saldo Disponível</p>
+                    <h2 className="text-4xl font-bold font-heading text-white" data-testid="text-withdraw-balance">
+                      R$ {walletBalance ? walletBalance.balance.toFixed(2).replace('.', ',') : '0,00'}
+                    </h2>
+                    {walletBalance && walletBalance.balance >= 20 && (
+                      <div className="text-xs text-emerald-400 flex items-center justify-center gap-1 mt-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                        Disponível para saque
+                      </div>
+                    )}
+                    {walletBalance && walletBalance.balance < 20 && walletBalance.balance > 0 && (
+                      <div className="text-xs text-yellow-400 flex items-center justify-center gap-1 mt-2">
+                        Mínimo para saque: R$ 20,00
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Tipo de Chave PIX</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <Button variant="outline" size="sm" className="bg-primary/20 border-primary text-primary hover:bg-primary/30">CPF</Button>
-                    <Button variant="outline" size="sm" className="border-white/10 hover:bg-white/5">E-mail</Button>
-                    <Button variant="outline" size="sm" className="border-white/10 hover:bg-white/5">Telefone</Button>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Tipo de Chave PIX</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {(['CPF', 'EMAIL', 'PHONE'] as PixKeyType[]).map((type) => (
+                          <Button 
+                            key={type}
+                            variant="outline" 
+                            size="sm" 
+                            className={pixKeyType === type 
+                              ? "bg-primary/20 border-primary text-primary hover:bg-primary/30" 
+                              : "border-white/10 hover:bg-white/5"
+                            }
+                            onClick={() => setPixKeyType(type)}
+                          >
+                            {type === 'CPF' ? 'CPF' : type === 'EMAIL' ? 'E-mail' : 'Telefone'}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Chave PIX</Label>
+                      <Input 
+                        placeholder={
+                          pixKeyType === 'CPF' ? "000.000.000-00" : 
+                          pixKeyType === 'EMAIL' ? "email@exemplo.com" : 
+                          "(00) 00000-0000"
+                        }
+                        value={pixKey}
+                        onChange={(e) => setPixKey(e.target.value)}
+                        className="bg-secondary/50 border-white/10 focus-visible:ring-primary h-12" 
+                        data-testid="input-pix-key" 
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>Valor do Saque</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">R$</span>
+                        <Input 
+                          type="number" 
+                          placeholder="0,00" 
+                          value={withdrawAmount}
+                          onChange={(e) => setWithdrawAmount(e.target.value)}
+                          className="pl-10 bg-secondary/50 border-white/10 focus-visible:ring-primary h-12 font-bold" 
+                          data-testid="input-withdraw-amount"
+                          min="20"
+                        />
+                        <button 
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-primary font-bold hover:text-white transition-colors"
+                          onClick={() => setWithdrawAmount(walletBalance?.balance.toString() || "")}
+                        >
+                          MÁXIMO
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 flex gap-3">
+                      <AlertCircle className="w-5 h-5 text-yellow-500 shrink-0" />
+                      <p className="text-xs text-yellow-500/90 leading-relaxed">
+                        A conta de destino deve ser da mesma titularidade (mesmo CPF) da conta cadastrada no site.
+                      </p>
+                    </div>
+
+                    <Button 
+                      className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 shadow-[0_0_15px_-3px_rgba(242,102,49,0.4)] transition-all hover:scale-[1.02]"
+                      onClick={handleWithdrawRequest}
+                      disabled={!walletBalance || walletBalance.balance < 20}
+                      data-testid="button-request-withdraw"
+                    >
+                      SOLICITAR SAQUE
+                    </Button>
+                  </div>
+                </>
+              )}
+
+              {withdrawStep === 'kyc' && (
+                <div className="space-y-4 animate-in zoom-in-95 duration-300">
+                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center shrink-0">
+                      <User className="w-5 h-5 text-blue-500" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-blue-500 text-sm">Verificação de Dados</p>
+                      <p className="text-xs text-muted-foreground">Confirme seus dados para continuar</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label>Nome Completo</Label>
+                      <Input 
+                        placeholder="Seu nome completo"
+                        value={kycName}
+                        onChange={(e) => setKycName(e.target.value)}
+                        className="bg-secondary/50 border-white/10 focus-visible:ring-primary h-12" 
+                        data-testid="input-kyc-name"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label>CPF</Label>
+                      <Input 
+                        placeholder="000.000.000-00"
+                        value={kycCpf}
+                        onChange={(e) => setKycCpf(formatCpf(e.target.value))}
+                        className="bg-secondary/50 border-white/10 focus-visible:ring-primary h-12" 
+                        data-testid="input-kyc-cpf"
+                        maxLength={14}
+                      />
+                    </div>
+
+                    <Button 
+                      className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold h-12"
+                      onClick={handleKycSubmit}
+                      disabled={kycLoading}
+                      data-testid="button-kyc-submit"
+                    >
+                      {kycLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "VERIFICAR DADOS"}
+                    </Button>
+
+                    <Button 
+                      variant="ghost" 
+                      className="w-full text-xs text-muted-foreground hover:text-white"
+                      onClick={() => setWithdrawStep('input')}
+                    >
+                      Voltar
+                    </Button>
                   </div>
                 </div>
+              )}
 
-                <div className="space-y-2">
-                  <Label>Chave PIX</Label>
-                  <Input placeholder="000.000.000-00" className="bg-secondary/50 border-white/10 focus-visible:ring-primary h-12" data-testid="input-pix-key" />
+              {withdrawStep === 'loading' && (
+                <div className="flex flex-col items-center justify-center py-12 space-y-4">
+                  <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                  <p className="text-muted-foreground animate-pulse">Processando saque...</p>
                 </div>
+              )}
 
-                <div className="space-y-2">
-                  <Label>Valor do Saque</Label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">R$</span>
-                    <Input type="number" placeholder="0,00" className="pl-10 bg-secondary/50 border-white/10 focus-visible:ring-primary h-12 font-bold" data-testid="input-withdraw-amount" />
-                    <button className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-primary font-bold hover:text-white transition-colors">
-                      MÁXIMO
-                    </button>
+              {withdrawStep === 'success' && (
+                <div className="flex flex-col items-center justify-center py-8 space-y-6 animate-in zoom-in-95 duration-500">
+                  <div className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mb-2">
+                    <CheckCircle2 className="w-12 h-12 text-green-500" />
                   </div>
+                  <div className="text-center space-y-2">
+                    <h2 className="text-2xl font-bold text-white">Saque Solicitado!</h2>
+                    <p className="text-muted-foreground max-w-[250px] mx-auto">
+                      Seu saque está em análise e será processado em breve.
+                    </p>
+                  </div>
+                  <Button 
+                    className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 mt-4"
+                    onClick={resetWithdraw}
+                    data-testid="button-new-withdraw"
+                  >
+                    FAZER NOVO SAQUE
+                  </Button>
                 </div>
+              )}
 
-                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 flex gap-3">
-                  <AlertCircle className="w-5 h-5 text-yellow-500 shrink-0" />
-                  <p className="text-xs text-yellow-500/90 leading-relaxed">
-                    A conta de destino deve ser da mesma titularidade (mesmo CPF) da conta cadastrada no site.
-                  </p>
+              {withdrawStep === 'error' && (
+                <div className="flex flex-col items-center justify-center py-8 space-y-6">
+                  <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center">
+                    <XCircle className="w-10 h-10 text-red-500" />
+                  </div>
+                  <div className="text-center space-y-2">
+                    <h2 className="text-xl font-bold text-white">Erro ao solicitar saque</h2>
+                    <p className="text-muted-foreground text-sm">{withdrawError}</p>
+                  </div>
+                  <Button 
+                    className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12"
+                    onClick={resetWithdraw}
+                  >
+                    TENTAR NOVAMENTE
+                  </Button>
                 </div>
-
-                <Button 
-                  className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 shadow-[0_0_15px_-3px_rgba(242,102,49,0.4)] transition-all hover:scale-[1.02]"
-                  disabled
-                  data-testid="button-request-withdraw"
-                >
-                  EM BREVE
-                </Button>
-              </div>
+              )}
             </TabsContent>
             
             <TabsContent value="history" className="mt-0 animate-in fade-in duration-300">
@@ -483,36 +835,57 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-8 h-8 text-primary animate-spin" />
                 </div>
-              ) : history.length === 0 ? (
+              ) : allHistory.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <p className="text-sm">Nenhuma transação encontrada.</p>
                   <p className="text-xs mt-2">Faça seu primeiro depósito via PIX!</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {history.map((tx) => (
-                    <div key={tx.externalId} className="flex items-center justify-between p-4 rounded-xl bg-secondary/20 border border-white/5 hover:border-white/10 transition-colors group" data-testid={`transaction-${tx.externalId}`}>
+                  {allHistory.map((tx) => (
+                    <div 
+                      key={tx.id || tx.externalId} 
+                      className="flex items-center justify-between p-4 rounded-xl bg-secondary/20 border border-white/5 hover:border-white/10 transition-colors group" 
+                      data-testid={`transaction-${tx.id || tx.externalId}`}
+                    >
                       <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-full bg-green-500/10 text-green-500 group-hover:bg-green-500/20 transition-colors">
-                          <ArrowDownLeft className="w-5 h-5" />
+                        <div className={`p-3 rounded-full ${
+                          tx.type === 'deposit' 
+                            ? 'bg-green-500/10 text-green-500' 
+                            : 'bg-red-500/10 text-red-500'
+                        } group-hover:opacity-80 transition-colors`}>
+                          {tx.type === 'deposit' 
+                            ? <ArrowDownLeft className="w-5 h-5" /> 
+                            : <ArrowUpRight className="w-5 h-5" />
+                          }
                         </div>
                         <div>
-                          <p className="font-bold text-sm text-white">Depósito PIX</p>
+                          <p className="font-bold text-sm text-white">
+                            {tx.type === 'deposit' ? 'Depósito PIX' : 'Saque PIX'}
+                          </p>
                           <p className="text-xs text-muted-foreground">{formatDate(tx.createdAt)}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-green-500">
-                          + R$ {tx.amount.toFixed(2)}
+                        <p className={`font-bold ${tx.type === 'deposit' ? 'text-green-500' : 'text-white'}`}>
+                          {tx.type === 'deposit' ? '+' : '-'} R$ {tx.amount.toFixed(2)}
                         </p>
                         <div className="flex items-center justify-end gap-1.5 mt-1">
-                          {tx.status === 'COMPLETED' && <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />}
-                          {tx.status === 'PENDING' && <Clock className="w-3.5 h-3.5 text-yellow-500" />}
-                          <span className={`text-[11px] font-medium ${
-                            tx.status === 'COMPLETED' ? 'text-green-500' : 'text-yellow-500'
-                          }`}>
-                            {tx.status === 'COMPLETED' ? 'Confirmado' : 'Pendente'}
-                          </span>
+                          {tx.type === 'deposit' ? (
+                            <>
+                              {tx.status === 'COMPLETED' && <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />}
+                              {tx.status === 'PENDING' && <Clock className="w-3.5 h-3.5 text-yellow-500" />}
+                              <span className={`text-[11px] font-medium ${
+                                tx.status === 'COMPLETED' ? 'text-green-500' : 'text-yellow-500'
+                              }`}>
+                                {tx.status === 'COMPLETED' ? 'Confirmado' : 'Pendente'}
+                              </span>
+                            </>
+                          ) : (
+                            <span className={`text-[11px] font-medium ${getWithdrawalStatusLabel(tx.status).color}`}>
+                              {getWithdrawalStatusLabel(tx.status).label}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
