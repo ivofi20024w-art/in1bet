@@ -39,6 +39,7 @@ import MatchDetail from "@/pages/sports/MatchDetail";
 import MyBets from "@/pages/sports/MyBets";
 import SportsResults from "@/pages/sports/Results";
 import Prematch from "@/pages/sports/Prematch";
+import AdminPanel from "@/pages/admin/AdminPanel";
 import { useEffect, useState } from "react";
 import { Loader } from "@/components/ui/Loader";
 
@@ -134,6 +135,7 @@ function Router() {
         <Route path="/wallet" component={WalletPage} />
         <Route path="/casino/popular" component={Casino} />
         <Route path="/casino/recent" component={Casino} />
+        <Route path="/admin" component={AdminPanel} />
         
         <Route component={NotFound} />
       </Switch>

@@ -85,6 +85,25 @@ export async function requestWithdrawal(
     return { success: true, withdrawal };
   } catch (error: any) {
     console.error("Withdrawal request error:", error);
+    
+    const releaseReferenceId = `WITHDRAW_FAILED_${userId}_${Date.now()}`;
+    try {
+      const releaseResult = await processBalanceChange(
+        userId,
+        amount,
+        TransactionType.WITHDRAW_RELEASE,
+        `Falha ao criar saque - saldo liberado`,
+        releaseReferenceId,
+        { error: "insert_failed" }
+      );
+      
+      if (!releaseResult.success) {
+        console.error(`CRITICAL: Failed to release locked balance for user ${userId}, amount R$ ${amount}. Manual intervention required.`);
+      }
+    } catch (releaseError) {
+      console.error(`CRITICAL: Exception releasing locked balance for user ${userId}, amount R$ ${amount}:`, releaseError);
+    }
+    
     return { success: false, error: "Erro ao criar solicitação de saque" };
   }
 }

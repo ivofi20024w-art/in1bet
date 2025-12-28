@@ -39,6 +39,7 @@ export const users = pgTable("users", {
   phone: varchar("phone", { length: 20 }),
   birthDate: timestamp("birth_date"),
   isVerified: boolean("is_verified").default(false),
+  isAdmin: boolean("is_admin").default(false),
   kycStatus: varchar("kyc_status", { length: 20 }).default("pending"),
   vipLevel: varchar("vip_level", { length: 20 }).default("bronze"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -190,6 +191,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   updatedAt: true,
   isVerified: true,
+  isAdmin: true,
   kycStatus: true,
   vipLevel: true,
 });

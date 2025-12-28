@@ -1,4 +1,4 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { authMiddleware } from "../auth/auth.middleware";
 import { db } from "../../db";
 import { users, wallets, pixWithdrawals, transactions } from "@shared/schema";
@@ -16,13 +16,23 @@ const router = Router();
 
 router.use(authMiddleware);
 
-const ADMIN_EMAILS = ["eoleonardo9@icloud.com"];
-
-const adminCheck = (req: Request, res: Response, next: Function) => {
-  if (!req.user || !ADMIN_EMAILS.includes(req.user.email)) {
-    return res.status(403).json({ error: "Acesso negado" });
+const adminCheck = async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user) {
+    return res.status(401).json({ error: "Não autenticado" });
   }
-  next();
+
+  try {
+    const [user] = await db.select().from(users).where(eq(users.id, req.user.id));
+    
+    if (!user || !user.isAdmin) {
+      return res.status(403).json({ error: "Acesso negado" });
+    }
+
+    next();
+  } catch (error) {
+    console.error("Admin check error:", error);
+    return res.status(500).json({ error: "Erro ao verificar permissões" });
+  }
 };
 
 router.get("/stats", adminCheck, async (req: Request, res: Response) => {
