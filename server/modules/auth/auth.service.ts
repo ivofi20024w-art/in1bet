@@ -85,9 +85,35 @@ export async function registerUser(data: RegisterUser): Promise<AuthResponse> {
       accessToken,
       refreshToken,
     };
-  } catch (error) {
-    console.error("Register error:", error);
-    return { success: false, error: "Erro ao criar conta" };
+  } catch (error: any) {
+    console.error("Register error details:", {
+      message: error?.message,
+      code: error?.code,
+      detail: error?.detail,
+      stack: error?.stack
+    });
+    
+    // Check for specific database errors
+    if (error?.code === '23505') {
+      // Unique constraint violation
+      if (error?.detail?.includes('email')) {
+        return { success: false, error: "Este email já está cadastrado" };
+      }
+      if (error?.detail?.includes('cpf')) {
+        return { success: false, error: "Este CPF já está cadastrado" };
+      }
+      return { success: false, error: "Dados duplicados encontrados" };
+    }
+    
+    if (error?.code === '23503') {
+      return { success: false, error: "Erro de referência no banco de dados" };
+    }
+    
+    if (error?.message?.includes('connect')) {
+      return { success: false, error: "Erro de conexão com banco de dados" };
+    }
+    
+    return { success: false, error: `Erro ao criar conta: ${error?.message || 'erro desconhecido'}` };
   }
 }
 

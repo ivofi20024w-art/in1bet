@@ -7,6 +7,7 @@ const router = Router();
 // POST /api/auth/register - Register new user
 router.post("/register", async (req: Request, res: Response) => {
   try {
+    console.log("Register request body:", JSON.stringify(req.body, null, 2));
     const result = await registerUser(req.body);
     
     if (!result.success) {
