@@ -76,8 +76,13 @@ Key tables:
 - **Backend**: Express, jsonwebtoken, bcrypt, drizzle-orm
 - **Build**: Vite, esbuild, TSX
 
-### Third-Party Integrations (Planned)
-- PIX payment gateway (placeholder in payments module)
+### Third-Party Integrations
+- **OndaPay PIX** - Real PIX payment integration for deposits
+  - POST /api/payments/pix/create - Creates PIX charge, returns QR code + copia/cola
+  - GET /api/payments/pix/status/:externalId - Check payment status
+  - GET /api/payments/pix/history - User's PIX deposit history
+  - POST /api/webhook/ondapay - Webhook for payment confirmation
+  - Requires: ONDAPAY_CLIENT_ID, ONDAPAY_CLIENT_SECRET secrets
 - KYC verification service (placeholder)
 - JivoChat widget (placeholder in index.html)
 
