@@ -45,6 +45,7 @@ export const PROFILE_MENU_ITEMS = [
 ];
 
 export const ORIGINALS_GAMES = [
+    { id: "plinko", name: "Plinko" },
     { id: "crash", name: "Crash" },
     { id: "double", name: "Double" },
     { id: "mines", name: "Mines" },

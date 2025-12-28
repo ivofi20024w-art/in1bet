@@ -29,6 +29,7 @@ import ForgotPassword from "@/pages/auth/ForgotPassword";
 import Crash from "@/pages/games/Crash";
 import Double from "@/pages/games/Double";
 import Mines from "@/pages/games/Mines";
+import Plinko from "@/pages/games/Plinko";
 import { useEffect, useState } from "react";
 
 // Mock Auth Context for Prototype
@@ -63,6 +64,7 @@ function Router() {
       <Route path="/games/crash" component={Crash} />
       <Route path="/games/double" component={Double} />
       <Route path="/games/mines" component={Mines} />
+      <Route path="/games/plinko" component={Plinko} />
       
       {/* Account Routes */}
       <Route path="/history" component={History} />
