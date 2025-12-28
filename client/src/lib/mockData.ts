@@ -29,7 +29,6 @@ export const SPORTS_MENU = [
   { icon: Clock, label: "Pré-Jogo", path: "/sports/prematch" },
   { icon: Ticket, label: "Minhas Apostas", path: "/sports/my-bets" },
   { icon: Swords, label: "Resultados", path: "/sports/results" },
-  { icon: Gamepad2, label: "Virtuais", path: "/virtual-sports" },
 ];
 
 export const PROFILE_MENU_ITEMS = [

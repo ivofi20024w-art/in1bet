@@ -31,6 +31,9 @@ import Double from "@/pages/games/Double";
 import Mines from "@/pages/games/Mines";
 import Plinko from "@/pages/games/Plinko";
 import MatchDetail from "@/pages/sports/MatchDetail";
+import MyBets from "@/pages/sports/MyBets";
+import SportsResults from "@/pages/sports/Results";
+import Prematch from "@/pages/sports/Prematch";
 import { useEffect, useState } from "react";
 import { Loader } from "@/components/ui/Loader";
 
@@ -94,9 +97,11 @@ function Router() {
         <Route path="/casino" component={Casino} />
         <Route path="/sports" component={Sports} />
         <Route path="/sports/match/:id" component={MatchDetail} />
+        <Route path="/sports/my-bets" component={MyBets} />
+        <Route path="/sports/results" component={SportsResults} />
+        <Route path="/sports/prematch" component={Prematch} />
         <Route path="/live-betting" component={LiveBetting} />
         <Route path="/live-casino" component={LiveCasino} />
-        <Route path="/virtual-sports" component={VirtualSports} />
         <Route path="/promotions" component={Promotions} />
         <Route path="/vip" component={VIP} />
         <Route path="/responsible-gaming" component={ResponsibleGaming} />
