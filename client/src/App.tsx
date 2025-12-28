@@ -25,6 +25,8 @@ import Settings from "@/pages/profile/Settings";
 import Security from "@/pages/profile/Security";
 import Verification from "@/pages/profile/Verification";
 import Affiliates from "@/pages/profile/Affiliates";
+import Originals from "@/pages/Originals";
+import WalletPage from "@/pages/Wallet";
 import Game from "@/pages/Game";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
@@ -128,6 +130,10 @@ function Router() {
         <Route path="/profile/security" component={Security} />
         <Route path="/profile/verification" component={Verification} />
         <Route path="/affiliates" component={Affiliates} />
+        <Route path="/originals" component={Originals} />
+        <Route path="/wallet" component={WalletPage} />
+        <Route path="/casino/popular" component={Casino} />
+        <Route path="/casino/recent" component={Casino} />
         
         <Route component={NotFound} />
       </Switch>

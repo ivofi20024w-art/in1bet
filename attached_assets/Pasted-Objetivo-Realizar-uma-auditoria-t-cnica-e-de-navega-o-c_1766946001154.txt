@@ -1,0 +1,84 @@
+Objetivo:
+Realizar uma auditoria técnica e de navegação completa do projeto atual, analisando todo o código, ficheiro por ficheiro, rotas, links, componentes e estados, garantindo que a aplicação está coesa, funcional e sem erros de navegação.
+
+Regras obrigatórias (CRÍTICAS):
+	•	NÃO alterar design, layout, cores, tipografia ou UX
+	•	NÃO remover funcionalidades existentes
+	•	NÃO refatorar código sem necessidade
+	•	Corrigir apenas erros reais ou ausências claras
+
+⸻
+
+1️⃣ ANÁLISE GLOBAL DO PROJETO
+	•	Percorrer todo o projeto (todas as pastas e ficheiros)
+	•	Identificar:
+	•	componentes não utilizados
+	•	imports quebrados
+	•	warnings
+	•	erros de runtime potenciais
+
+⸻
+
+2️⃣ ROTAS & NAVEGAÇÃO
+	•	Verificar todas as rotas declaradas
+	•	Confirmar que:
+	•	cada rota possui uma página/componente correspondente
+	•	não existem rotas mortas
+	•	não existem links que levam a páginas inexistentes
+
+Resultado esperado:
+	•	Nenhum erro 404 ao navegar pelo site
+	•	Links do header, sidebar, footer e perfil todos funcionais
+
+⸻
+
+3️⃣ LINKS & CTAs
+	•	Verificar todos os links clicáveis:
+	•	Sidebar
+	•	Header
+	•	Footer
+	•	Menu do Perfil
+	•	Botões (CTA)
+	•	Corrigir:
+	•	links quebrados
+	•	botões sem ação
+	•	rotas não implementadas
+
+⸻
+
+4️⃣ ESTADOS DE AUTENTICAÇÃO
+	•	Verificar:
+	•	estados visitante vs logado
+	•	rotas protegidas
+	•	comportamentos inconsistentes
+
+⸻
+
+5️⃣ PÁGINAS INSTITUCIONAIS
+	•	Confirmar existência e ligação correta de:
+	•	Termos e Condições
+	•	Política de Privacidade
+	•	Responsible Gaming
+	•	18+
+
+Se alguma não existir:
+	•	Criar página simples de texto
+	•	Ligar corretamente ao footer
+
+⸻
+
+6️⃣ ERROS 404 & FALLBACK
+	•	Implementar página 404 amigável
+	•	Garantir fallback para rotas inválidas
+
+⸻
+
+7️⃣ RELATÓRIO FINAL
+
+Após a auditoria:
+	•	Corrigir os problemas encontrados
+	•	Garantir navegação fluida
+	•	Manter integridade visual
+
+Resultado final esperado:
+Uma aplicação 100% navegável, sem links quebrados, sem erros 404, com todas as rotas funcionais e experiência contínua, pronta para evoluir para produção.
