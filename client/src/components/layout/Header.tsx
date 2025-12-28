@@ -1,6 +1,6 @@
-import { Bell, Search, Wallet, ChevronDown, User as UserIcon } from "lucide-react";
+import { Bell, Search, Wallet, ChevronDown, User as UserIcon, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { USER } from "@/lib/mockData";
+import { USER, PROFILE_MENU_ITEMS } from "@/lib/mockData";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,27 +11,50 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { WalletModal } from "@/components/wallet/WalletModal";
+import { Link } from "wouter";
 
 export function Header() {
   return (
     <header className="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-background/80 backdrop-blur-md sticky top-0 z-50">
       <div className="flex items-center gap-4 flex-1 max-w-xl">
-        <div className="relative w-full max-w-sm hidden md:block">
+        <div className="relative w-full max-w-md hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
-            placeholder="Procurar jogos, desportos..." 
-            className="pl-9 bg-secondary/50 border-transparent focus-visible:ring-primary/50 h-9 rounded-full text-sm"
+            placeholder="Buscar jogos, provedores, eventos..." 
+            className="pl-9 bg-secondary/30 border-white/5 focus-visible:ring-primary/50 h-10 rounded-xl text-sm w-full transition-all focus:bg-secondary/50"
           />
         </div>
       </div>
 
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white hover:bg-white/5 relative">
-          <Bell className="w-5 h-5" />
-          {USER.notifications > 0 && (
-            <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse" />
-          )}
-        </Button>
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white hover:bg-white/5 relative">
+                  <Bell className="w-5 h-5" />
+                  {USER.notifications > 0 && (
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse" />
+                  )}
+                </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80 bg-card border-white/10 text-foreground p-0">
+                <div className="p-4 border-b border-white/5">
+                    <h4 className="font-bold text-sm">Notificações</h4>
+                </div>
+                <div className="max-h-64 overflow-y-auto">
+                    <div className="p-4 hover:bg-white/5 cursor-pointer transition-colors border-b border-white/5">
+                        <p className="text-sm font-bold text-white mb-1">Bônus Creditado!</p>
+                        <p className="text-xs text-muted-foreground">Seu bônus de depósito de R$ 50,00 foi creditado.</p>
+                    </div>
+                     <div className="p-4 hover:bg-white/5 cursor-pointer transition-colors border-b border-white/5">
+                        <p className="text-sm font-bold text-white mb-1">Flamengo marcou!</p>
+                        <p className="text-xs text-muted-foreground">Flamengo 1 - 0 Palmeiras (15')</p>
+                    </div>
+                </div>
+                <div className="p-2 text-center">
+                    <Button variant="ghost" size="sm" className="text-xs text-primary w-full">Marcar como lidas</Button>
+                </div>
+            </DropdownMenuContent>
+        </DropdownMenu>
 
         <div className="h-6 w-px bg-white/10 mx-1" />
 
@@ -57,23 +80,38 @@ export function Header() {
               <img src={USER.avatar} alt={USER.name} className="h-full w-full object-cover" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-card border-white/10 text-foreground">
-            <DropdownMenuLabel>Minha Conta</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-white/10" />
-            <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-primary">
-              <UserIcon className="mr-2 h-4 w-4" />
-              <span>Perfil</span>
-            </DropdownMenuItem>
+          <DropdownMenuContent align="end" className="w-56 bg-card border-white/10 text-foreground p-2">
+            <div className="px-2 py-1.5 mb-2">
+                <p className="font-bold text-sm text-white">{USER.name}</p>
+                <p className="text-xs text-muted-foreground">@{USER.username}</p>
+            </div>
             
-            <WalletModal>
-              <div className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-white/5 focus:text-primary hover:bg-white/5 hover:text-primary w-full">
-                <Wallet className="mr-2 h-4 w-4" />
-                <span>Carteira</span>
-              </div>
-            </WalletModal>
+            <DropdownMenuSeparator className="bg-white/10" />
+            
+            {PROFILE_MENU_ITEMS.map((item) => {
+                 if (item.label === 'Carteira') {
+                     return (
+                         <WalletModal key={item.path}>
+                            <div className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-white/5 focus:text-primary hover:bg-white/5 hover:text-primary w-full">
+                                <item.icon className="mr-2 h-4 w-4" />
+                                <span>{item.label}</span>
+                            </div>
+                        </WalletModal>
+                     )
+                 }
+                 return (
+                    <Link key={item.path} href={item.path}>
+                        <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-primary">
+                            <item.icon className="mr-2 h-4 w-4" />
+                            <span>{item.label}</span>
+                        </DropdownMenuItem>
+                    </Link>
+                 )
+            })}
             
             <DropdownMenuSeparator className="bg-white/10" />
             <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive">
+              <LogOut className="mr-2 h-4 w-4" />
               Sair
             </DropdownMenuItem>
           </DropdownMenuContent>

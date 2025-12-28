@@ -1,4 +1,4 @@
-import { Trophy, Flame, Play, LayoutGrid, CircleDollarSign, Gamepad2, Search, Menu, User, Bell, ChevronDown, Wallet, LogOut, Settings, History, MonitorPlay, Gift, Crown, HelpCircle, ShieldCheck } from "lucide-react";
+import { Trophy, Flame, Play, LayoutGrid, CircleDollarSign, Gamepad2, Search, Menu, User, Bell, ChevronDown, Wallet, LogOut, Settings, History, MonitorPlay, Gift, Crown, HelpCircle, ShieldCheck, Dice5, TowerControl, TrendingUp, Clock, Dna, Rocket, Swords, Ticket } from "lucide-react";
 
 export const USER = {
   name: "João Silva",
@@ -10,16 +10,40 @@ export const USER = {
   notifications: 3
 };
 
-export const MENU_ITEMS = [
-  { icon: LayoutGrid, label: "Lobby", path: "/" },
+export const CASINO_MENU = [
   { icon: Flame, label: "Casino", path: "/casino" },
   { icon: CircleDollarSign, label: "Casino Ao Vivo", path: "/live-casino" },
-  { icon: Trophy, label: "Desportos", path: "/sports" },
-  { icon: MonitorPlay, label: "Apostas Ao Vivo", path: "/live-betting" },
+  { icon: Rocket, label: "Originais", path: "/originals" }, // Crash, Double, etc under a category or page
+  { icon: TrendingUp, label: "Populares", path: "/casino/popular" },
+  { icon: History, label: "Recentes", path: "/casino/recent" },
+];
+
+export const SPORTS_MENU = [
+  { icon: Trophy, label: "Esportes", path: "/sports" },
+  { icon: MonitorPlay, label: "Ao Vivo", path: "/live-betting" },
+  { icon: Clock, label: "Pré-Jogo", path: "/sports/prematch" },
+  { icon: Ticket, label: "Minhas Apostas", path: "/sports/my-bets" },
+  { icon: Swords, label: "Resultados", path: "/sports/results" },
   { icon: Gamepad2, label: "Virtuais", path: "/virtual-sports" },
-  { icon: Gift, label: "Promoções", path: "/promotions" },
-  { icon: Crown, label: "Clube VIP", path: "/vip" },
+];
+
+export const PROFILE_MENU_ITEMS = [
+  { icon: User, label: "Minha Conta", path: "/profile" },
+  { icon: Wallet, label: "Carteira", path: "/wallet" }, // Triggers modal usually
   { icon: History, label: "Histórico", path: "/history" },
+  { icon: Settings, label: "Preferências", path: "/settings" },
+  { icon: Gift, label: "Recompensas", path: "/vip" },
+  { icon: HelpCircle, label: "Suporte", path: "/support" },
+];
+
+export const ORIGINALS_GAMES = [
+    { id: "crash", name: "Crash" },
+    { id: "double", name: "Double" },
+    { id: "mines", name: "Mines" },
+    { id: "limbo", name: "Limbo" },
+    { id: "dice", name: "Dice" },
+    { id: "tower", name: "Tower" },
+    { id: "slide", name: "Slide" },
 ];
 
 export const CASINO_GAMES = [
@@ -118,4 +142,10 @@ export const FAQS = [
   { question: "Como faço um depósito?", answer: "Clique no botão 'Depósito' no topo da página, escolha o método PIX e siga as instruções." },
   { question: "Quanto tempo demora o saque?", answer: "Saques via PIX são processados em até 1 hora para contas verificadas." },
   { question: "É seguro apostar aqui?", answer: "Sim, somos licenciados e utilizamos criptografia SSL para proteger seus dados." },
+];
+
+export const TICKETS = [
+    { id: "TCK-001", subject: "Depósito não caiu", status: "Aberto", date: "Hoje 10:30" },
+    { id: "TCK-002", subject: "Dúvida sobre bônus", status: "Respondido", date: "Ontem 15:45" },
+    { id: "TCK-003", subject: "Erro no jogo Aviator", status: "Fechado", date: "20/12/2025" },
 ];

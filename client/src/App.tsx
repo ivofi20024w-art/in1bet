@@ -14,6 +14,8 @@ import Promotions from "@/pages/Promotions";
 import VIP from "@/pages/VIP";
 import History from "@/pages/History";
 import Support from "@/pages/Support";
+import CreateTicket from "@/pages/support/CreateTicket";
+import TicketHistory from "@/pages/support/TicketHistory";
 import ResponsibleGaming from "@/pages/ResponsibleGaming";
 import Game from "@/pages/Game";
 
@@ -30,6 +32,8 @@ function Router() {
       <Route path="/vip" component={VIP} />
       <Route path="/history" component={History} />
       <Route path="/support" component={Support} />
+      <Route path="/support/tickets" component={TicketHistory} />
+      <Route path="/support/tickets/new" component={CreateTicket} />
       <Route path="/responsible-gaming" component={ResponsibleGaming} />
       <Route path="/game/:id" component={Game} />
       <Route component={NotFound} />
