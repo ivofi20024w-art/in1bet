@@ -32,9 +32,11 @@ The frontend follows a page-based structure under `client/src/pages/` with share
 The backend uses a modular architecture with separate modules for:
 - `auth` - Registration, login, token refresh, logout
 - `users` - Profile management
-- `wallet` - Balance operations
-- `payments` - PIX integration placeholder
-- `admin` - Administrative functions placeholder
+- `wallet` - Balance operations with ledger transactions
+- `payments` - OndaPay PIX integration for deposits
+- `withdrawals` - PIX withdrawal requests with balance locking
+- `kyc` - KYC Light verification (CPF/name confirmation)
+- `admin` - User and withdrawal management (isAdmin flag required)
 
 ### Data Storage
 - **Database**: PostgreSQL (required, no SQLite)
@@ -42,9 +44,12 @@ The backend uses a modular architecture with separate modules for:
 - **Schema Location**: `shared/schema.ts` (shared between frontend/backend)
 
 Key tables:
-- `users` - User accounts with CPF, KYC status, VIP level
+- `users` - User accounts with CPF, KYC status, VIP level, isAdmin flag
 - `wallets` - User balances (available and locked funds)
 - `refreshTokens` - JWT refresh token storage
+- `pixDeposits` - PIX deposit records with OndaPay integration
+- `pixWithdrawals` - PIX withdrawal requests with status tracking
+- `transactions` - Ledger for all balance changes (deposits, withdrawals, bets, wins)
 
 ### Authentication Flow
 1. User registers with name, email, CPF, password
@@ -83,7 +88,33 @@ Key tables:
   - GET /api/payments/pix/history - User's PIX deposit history
   - POST /api/webhook/ondapay - Webhook for payment confirmation
   - Requires: ONDAPAY_CLIENT_ID, ONDAPAY_CLIENT_SECRET secrets
-- KYC verification service (placeholder)
+
+### Withdrawal System
+- **Withdrawal Flow**: PENDING → APPROVED → PAID (or REJECTED with balance release)
+- **Balance Locking**: When withdrawal requested, amount moves from available to locked balance
+- **KYC Required**: Users must verify CPF/name before first withdrawal
+- **Minimum**: R$ 20.00
+- **Transaction Types**: WITHDRAW_RESERVE (lock balance), WITHDRAW_RELEASE (unlock if rejected)
+- Endpoints:
+  - POST /api/withdrawals/request - Request new withdrawal
+  - GET /api/withdrawals/history - User's withdrawal history
+  - GET /api/withdrawals/status/:id - Check withdrawal status
+
+### KYC Light Verification
+- POST /api/kyc/submit - Submit CPF and full name for verification
+- GET /api/kyc/status - Check KYC verification status
+- Validates CPF matches user's registration data
+
+### Admin Panel (/admin)
+- Only accessible by users with isAdmin flag set to true in database
+- Endpoints:
+  - GET /api/admin/stats - Platform statistics
+  - GET /api/admin/users - List all users
+  - GET /api/admin/withdrawals - List withdrawals (filterable by status)
+  - POST /api/admin/withdrawals/:id/approve - Approve pending withdrawal
+  - POST /api/admin/withdrawals/:id/reject - Reject withdrawal (releases locked balance)
+  - POST /api/admin/withdrawals/:id/pay - Mark approved withdrawal as paid
+
 - JivoChat widget (placeholder in index.html)
 
 ### Development Tools
