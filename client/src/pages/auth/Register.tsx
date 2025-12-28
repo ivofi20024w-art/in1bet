@@ -70,7 +70,7 @@ export default function Register() {
           localStorage.setItem("primebet_auth", "true");
           toast({
               title: "Conta criada com sucesso!",
-              description: "Bem-vindo ao PrimeBet.",
+              description: "Bem-vindo ao IN1Bet.",
           });
           setLocation("/");
       }, 1500);
@@ -84,7 +84,7 @@ export default function Register() {
         <div className="w-full max-w-md relative z-10 space-y-8">
             <div className="text-center">
                 <h1 className="text-4xl font-heading font-bold italic text-primary tracking-wide mb-2">
-                    PRIME<span className="text-white">BET</span>
+                    IN1<span className="text-white">BET</span>
                 </h1>
                 <p className="text-muted-foreground">Crie sua conta em segundos</p>
             </div>

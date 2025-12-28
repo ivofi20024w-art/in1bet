@@ -30,7 +30,7 @@ export function Sidebar({ className }: { className?: string }) {
     <aside className={cn("flex flex-col h-full w-[240px] bg-sidebar border-r border-white/5 py-6 px-3", className)}>
       <div className="mb-8 px-4">
         <h1 className="text-2xl font-bold font-heading italic text-primary tracking-wide">
-          PRIME<span className="text-white">BET</span>
+          IN1<span className="text-white">BET</span>
         </h1>
       </div>
 
@@ -42,8 +42,8 @@ export function Sidebar({ className }: { className?: string }) {
               
               {/* Originals Sub-menu Simulation */}
               <div className="pl-11 pr-4 space-y-1">
-                 <Link href="/originals/crash">
-                    <a className="block text-xs text-muted-foreground hover:text-white py-1">Crash</a>
+                 <Link href="/games/crash">
+                    <a className="block text-xs text-muted-foreground hover:text-white py-1 font-bold text-primary">🚀 Crashmania</a>
                  </Link>
                  <Link href="/originals/double">
                     <a className="block text-xs text-muted-foreground hover:text-white py-1">Double</a>

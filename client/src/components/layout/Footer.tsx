@@ -11,7 +11,7 @@ export function Footer() {
           {/* About Section */}
           <div className="space-y-4">
             <h3 className="font-heading font-bold text-2xl italic text-primary">
-              PRIME<span className="text-white">BET</span>
+              IN1<span className="text-white">BET</span>
             </h3>
             <p className="text-muted-foreground text-sm leading-relaxed">
               A melhor plataforma de entretenimento online. Oferecemos uma experiência premium em casino e apostas desportivas com segurança, transparência e pagamentos instantâneos via PIX.
@@ -68,7 +68,7 @@ export function Footer() {
                 <span className="text-xs">Proibido para menores de 18 anos. Jogue com responsabilidade.</span>
             </div>
             <p className="text-xs text-gray-600">
-                © {currentYear} PrimeBet. Todos os direitos reservados.
+                © {currentYear} IN1Bet. Todos os direitos reservados.
             </p>
         </div>
       </div>

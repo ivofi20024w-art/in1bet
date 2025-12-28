@@ -35,7 +35,7 @@ export function MainLayout({ children }: { children: ReactNode }) {
           </Sheet>
           
           <h1 className="text-xl font-bold font-heading italic text-primary tracking-wide">
-            PRIME<span className="text-white">BET</span>
+            IN1<span className="text-white">BET</span>
           </h1>
 
           <div className="w-10" /> {/* Spacer for balance */}

@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useState, useEffect, useRef } from "react";
+import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ShieldCheck, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -47,7 +47,7 @@ export default function Login() {
             <div className="text-center">
                 <Link href="/">
                     <h1 className="text-4xl font-heading font-bold italic text-primary tracking-wide mb-2 cursor-pointer hover:scale-105 transition-transform">
-                        PRIME<span className="text-white">BET</span>
+                        IN1<span className="text-white">BET</span>
                     </h1>
                 </Link>
                 <p className="text-muted-foreground">Acesse sua conta para jogar</p>
