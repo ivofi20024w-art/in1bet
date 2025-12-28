@@ -1,6 +1,6 @@
 import { Bell, Search, Wallet, ChevronDown, User as UserIcon, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { USER, PROFILE_MENU_ITEMS } from "@/lib/mockData";
+import { PROFILE_MENU_ITEMS } from "@/lib/mockData";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,19 +13,28 @@ import { Input } from "@/components/ui/input";
 import { WalletModal } from "@/components/wallet/WalletModal";
 import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
-import { getStoredAuth, logout as authLogout, type User } from "@/lib/auth";
+import { getStoredAuth, logout as authLogout, getWallet, type User } from "@/lib/auth";
 
 export function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const auth = getStoredAuth();
-      console.log("[HEADER] Auth check:", auth.isAuthenticated, auth.user?.email);
       setIsAuthenticated(auth.isAuthenticated);
       setUser(auth.user);
+      
+      if (auth.isAuthenticated && auth.accessToken) {
+        const wallet = await getWallet();
+        if (wallet) {
+          setWalletBalance(wallet.balance);
+        }
+      } else {
+        setWalletBalance(0);
+      }
     };
     
     checkAuth();
@@ -33,7 +42,7 @@ export function Header() {
     const handleStorageChange = () => checkAuth();
     window.addEventListener('storage', handleStorageChange);
     
-    const interval = setInterval(checkAuth, 1000);
+    const interval = setInterval(checkAuth, 5000);
     
     return () => {
       window.removeEventListener('storage', handleStorageChange);
@@ -41,10 +50,29 @@ export function Header() {
     };
   }, []);
 
+  const getDisplayName = () => {
+    if (!user?.name) return "Usuário";
+    const parts = user.name.trim().split(" ");
+    if (parts.length >= 2) {
+      return `${parts[0]} ${parts[parts.length - 1]}`;
+    }
+    return parts[0];
+  };
+
+  const getInitials = () => {
+    if (!user?.name) return "U";
+    const parts = user.name.trim().split(" ");
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    return parts[0][0].toUpperCase();
+  };
+
   const handleLogout = async () => {
       await authLogout();
       setIsAuthenticated(false);
       setUser(null);
+      setWalletBalance(0);
       setLocation("/login");
   };
 
@@ -80,9 +108,6 @@ export function Header() {
                     <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white hover:bg-white/5 relative">
                         <Bell className="w-5 h-5" />
-                        {USER.notifications > 0 && (
-                            <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full animate-pulse" />
-                        )}
                         </Button>
                     </DropdownMenuTrigger>
                     {/* Notification content same as before... */}
@@ -108,7 +133,7 @@ export function Header() {
                 <div className="flex flex-col items-end leading-none mr-2">
                     <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Saldo</span>
                     <span className="text-sm font-bold text-primary tabular-nums group-hover:text-white transition-colors">
-                    {USER.currency} {USER.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                    R$ {walletBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </span>
                 </div>
                 
@@ -122,14 +147,14 @@ export function Header() {
 
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-10 w-10 rounded-full p-0 overflow-hidden border-2 border-transparent hover:border-primary/50 transition-all ml-2">
-                    <img src={USER.avatar} alt={USER.name} className="h-full w-full object-cover" />
+                    <Button variant="ghost" className="h-10 w-10 rounded-full p-0 overflow-hidden border-2 border-transparent hover:border-primary/50 transition-all ml-2 bg-primary/20">
+                    <span className="text-primary font-bold text-sm">{getInitials()}</span>
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-card border-white/10 text-foreground p-2">
                     <div className="px-2 py-1.5 mb-2">
-                        <p className="font-bold text-sm text-white">{USER.name}</p>
-                        <p className="text-xs text-muted-foreground">@{USER.username}</p>
+                        <p className="font-bold text-sm text-white">{getDisplayName()}</p>
+                        <p className="text-xs text-muted-foreground">{user?.email}</p>
                     </div>
                     
                     <DropdownMenuSeparator className="bg-white/10" />
