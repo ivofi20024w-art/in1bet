@@ -1,0 +1,115 @@
+Objetivo geral:
+Evoluir a plataforma atual para um nível AAA profissional, mantendo rigorosamente o design, identidade visual, UX, componentes e estrutura já implementados.
+
+Regras obrigatórias (NÃO QUEBRAR):
+	•	NÃO redesenhar o layout existente
+	•	NÃO alterar cores, tipografia, branding ou ícones
+	•	NÃO remover funcionalidades já implementadas
+	•	REUTILIZAR componentes, estilos e padrões atuais
+	•	Mobile-first, performance e consistência
+
+⸻
+
+1️⃣ FOOTER PROFISSIONAL COMPLETO
+
+Criar um footer institucional de alto nível, semelhante aos grandes operadores.
+
+Estrutura do Footer:
+	•	Sobre a Plataforma (texto institucional curto)
+	•	Links Rápidos
+	•	Casino
+	•	Esportes
+	•	Promoções
+	•	VIP
+	•	Ajuda & Suporte
+	•	Central de Ajuda
+	•	Suporte ao Vivo
+	•	Tickets
+	•	Legal & Compliance
+	•	Termos e Condições
+	•	Política de Privacidade
+	•	Responsible Gaming
+	•	18+
+	•	Pagamentos
+	•	Ícones PIX
+	•	Bancos / Gateways
+	•	Segurança
+	•	SSL
+	•	Fair Play
+	•	Redes Sociais
+	•	Copyright dinâmico
+
+Footer responsivo, colapsável no mobile.
+
+⸻
+
+2️⃣ HEADER – AJUSTES FINAIS
+	•	Melhorar hierarquia visual
+	•	Saldo visível apenas quando logado
+	•	Botão “Depositar” sempre em destaque
+	•	Pesquisa global refinada (autocomplete + categorias)
+	•	Ícone de notificações com badge
+
+⸻
+
+3️⃣ SIDEBAR – POLIMENTO FINAL
+	•	Garantir separação clara CASINO / ESPORTES
+	•	Animações suaves de abertura/fecho
+	•	Destaque de item ativo
+	•	Sidebar colapsável no mobile
+
+⸻
+
+4️⃣ CASINO – MELHORIAS DE CONVERSÃO
+	•	Tags: Popular, Novo, Exclusivo
+	•	Jogos Recentes (logado)
+	•	Skeleton loading
+	•	Hover effects premium
+
+⸻
+
+5️⃣ ESPORTES – UX PROFISSIONAL
+	•	Melhorar lista de eventos
+	•	Destaque visual para ao vivo
+	•	Odds com feedback visual
+	•	Filtros rápidos
+
+⸻
+
+6️⃣ CARTEIRA / PAGAMENTOS
+	•	Modal de carteira refinado
+	•	Histórico de transações
+	•	Status visual (pendente, aprovado, recusado)
+	•	Preparar estrutura para Pix (OndaPay)
+
+⸻
+
+7️⃣ SUPORTE & TICKETS
+	•	Central de suporte refinada
+	•	Integração visual do JivoChat
+	•	Fluxo claro Online / Offline
+	•	Tickets com status e respostas
+	•	Painel admin de tickets (mock funcional)
+
+⸻
+
+8️⃣ NOTIFICAÇÕES
+	•	Marcar como lidas
+	•	Agrupamento
+	•	Tipos (promoção, aposta, sistema)
+
+⸻
+
+9️⃣ COMPLIANCE & CONFIANÇA
+	•	Responsible Gaming page
+	•	Autoexclusão (mock)
+	•	Limites de depósito (mock)
+	•	Selos visuais de segurança
+
+⸻
+
+🔟 PERFORMANCE & POLIMENTO
+	•	Loading states
+	•	Skeletons
+	•	Transições suaves
+	•	Garantir consistência geral

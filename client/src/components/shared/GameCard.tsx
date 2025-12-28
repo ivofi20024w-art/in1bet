@@ -1,6 +1,7 @@
 import { Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface GameCardProps {
   id: number;
@@ -9,9 +10,18 @@ interface GameCardProps {
   image: string;
   hot?: boolean;
   className?: string;
+  loading?: boolean;
 }
 
-export function GameCard({ id, title, provider, image, hot, className }: GameCardProps) {
+export function GameCard({ id, title, provider, image, hot, className, loading }: GameCardProps) {
+  if (loading) {
+      return (
+          <div className={cn("aspect-[3/4] rounded-xl overflow-hidden", className)}>
+              <Skeleton className="w-full h-full bg-secondary/30" />
+          </div>
+      )
+  }
+
   return (
     <Link href={`/game/${id}`}>
       <div className={cn("group relative rounded-xl overflow-hidden aspect-[3/4] bg-card border border-white/5 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_20px_-5px_rgba(249,115,22,0.3)] hover:-translate-y-1 cursor-pointer", className)}>
