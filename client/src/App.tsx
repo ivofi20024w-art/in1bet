@@ -17,6 +17,10 @@ import Support from "@/pages/Support";
 import CreateTicket from "@/pages/support/CreateTicket";
 import TicketHistory from "@/pages/support/TicketHistory";
 import ResponsibleGaming from "@/pages/ResponsibleGaming";
+import Profile from "@/pages/profile/Profile";
+import Settings from "@/pages/profile/Settings";
+import Security from "@/pages/profile/Security";
+import Verification from "@/pages/profile/Verification";
 import Game from "@/pages/Game";
 
 function Router() {
@@ -35,6 +39,10 @@ function Router() {
       <Route path="/support/tickets" component={TicketHistory} />
       <Route path="/support/tickets/new" component={CreateTicket} />
       <Route path="/responsible-gaming" component={ResponsibleGaming} />
+      <Route path="/profile" component={Profile} />
+      <Route path="/profile/settings" component={Settings} />
+      <Route path="/profile/security" component={Security} />
+      <Route path="/profile/verification" component={Verification} />
       <Route path="/game/:id" component={Game} />
       <Route component={NotFound} />
     </Switch>

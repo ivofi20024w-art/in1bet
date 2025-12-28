@@ -1,13 +1,17 @@
-import { Trophy, Flame, Play, LayoutGrid, CircleDollarSign, Gamepad2, Search, Menu, User, Bell, ChevronDown, Wallet, LogOut, Settings, History, MonitorPlay, Gift, Crown, HelpCircle, ShieldCheck, Dice5, TowerControl, TrendingUp, Clock, Dna, Rocket, Swords, Ticket } from "lucide-react";
+import { Trophy, Flame, Play, LayoutGrid, CircleDollarSign, Gamepad2, Search, Menu, User, Bell, ChevronDown, Wallet, LogOut, Settings, History, MonitorPlay, Gift, Crown, HelpCircle, ShieldCheck, Dice5, TowerControl, TrendingUp, Clock, Dna, Rocket, Swords, Ticket, Lock, FileCheck } from "lucide-react";
 
 export const USER = {
   name: "João Silva",
   username: "joaosilva88",
+  email: "joao.silva@email.com",
+  phone: "+55 11 99999-9999",
   balance: 2450.50,
   currency: "R$",
   avatar: "https://github.com/shadcn.png",
   vipLevel: "Gold",
-  notifications: 3
+  notifications: 3,
+  kycStatus: "Pendente", // Verificada, Pendente, Rejeitada
+  joinDate: "15/05/2024"
 };
 
 export const CASINO_MENU = [
@@ -31,8 +35,10 @@ export const PROFILE_MENU_ITEMS = [
   { icon: User, label: "Minha Conta", path: "/profile" },
   { icon: Wallet, label: "Carteira", path: "/wallet" }, // Triggers modal usually
   { icon: History, label: "Histórico", path: "/history" },
-  { icon: Settings, label: "Preferências", path: "/settings" },
+  { icon: Settings, label: "Preferências", path: "/profile/settings" },
   { icon: Gift, label: "Recompensas", path: "/vip" },
+  { icon: FileCheck, label: "Verificação", path: "/profile/verification" },
+  { icon: Lock, label: "Segurança", path: "/profile/security" },
   { icon: HelpCircle, label: "Suporte", path: "/support" },
 ];
 
@@ -136,6 +142,8 @@ export const BET_HISTORY = [
   { id: "BET-1022", date: "27/12/2025", type: "Casino", event: "Gates of Olympus", stake: 20.00, return: 450.00, status: "Ganho" },
   { id: "BET-1021", date: "27/12/2025", type: "Esportes", event: "Lakers vs Warriors", stake: 100.00, return: 0, status: "Perdido" },
   { id: "BET-1020", date: "26/12/2025", type: "Casino", event: "Roleta Brasileira", stake: 200.00, return: 400.00, status: "Ganho" },
+  { id: "BET-1019", date: "25/12/2025", type: "Esportes", event: "Man City vs Arsenal", stake: 75.00, return: 0, status: "Perdido" },
+  { id: "BET-1018", date: "24/12/2025", type: "Casino", event: "Aviator", stake: 10.00, return: 25.50, status: "Ganho" },
 ];
 
 export const FAQS = [
@@ -148,4 +156,10 @@ export const TICKETS = [
     { id: "TCK-001", subject: "Depósito não caiu", status: "Aberto", date: "Hoje 10:30" },
     { id: "TCK-002", subject: "Dúvida sobre bônus", status: "Respondido", date: "Ontem 15:45" },
     { id: "TCK-003", subject: "Erro no jogo Aviator", status: "Fechado", date: "20/12/2025" },
+];
+
+export const LOGIN_HISTORY = [
+    { date: "Hoje 10:00", device: "Chrome / Windows 10", ip: "189.12.34.56", location: "São Paulo, BR" },
+    { date: "Ontem 18:30", device: "Safari / iPhone 13", ip: "177.34.56.78", location: "São Paulo, BR" },
+    { date: "26/12/2025", device: "Chrome / Windows 10", ip: "189.12.34.56", location: "São Paulo, BR" },
 ];

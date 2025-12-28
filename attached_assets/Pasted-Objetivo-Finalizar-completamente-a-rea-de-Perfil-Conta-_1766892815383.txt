@@ -1,0 +1,114 @@
+Objetivo:
+Finalizar completamente a área de Perfil / Conta do Usuário, garantindo UX profissional, clareza, confiança e padrão de grandes casas de apostas, mantendo rigorosamente o design, identidade visual e componentes já existentes.
+
+Regras obrigatórias:
+	•	NÃO redesenhar layout global
+	•	NÃO alterar cores, tipografia ou branding
+	•	REUTILIZAR componentes atuais
+	•	Mobile-first
+
+⸻
+
+1️⃣ MENU DO PERFIL (HEADER)
+
+Refinar o dropdown do perfil para conter:
+	•	Minha Conta
+	•	Carteira (abre modal)
+	•	Histórico
+	•	Preferências
+	•	Recompensas
+	•	Verificação / KYC
+	•	Segurança
+	•	Suporte
+	•	Sair
+
+UX esperado:
+	•	Dropdown limpo
+	•	Ícones consistentes
+	•	Estados hover/active
+
+⸻
+
+2️⃣ PÁGINA “MINHA CONTA”
+
+Criar uma página central de conta com:
+	•	Dados pessoais (nome, email, telefone – mock)
+	•	Status da conta (verificada / pendente)
+	•	Botão “Editar Dados”
+	•	Avisos importantes (ex.: KYC pendente)
+
+⸻
+
+3️⃣ CARTEIRA (WALLET)
+
+Modal ou página dedicada contendo:
+	•	Saldo disponível
+	•	Saldo bloqueado
+	•	Histórico de transações
+	•	Botões: Depositar / Sacar
+	•	Status visual das operações
+
+Preparar estrutura para integração Pix (OndaPay).
+
+⸻
+
+4️⃣ HISTÓRICO COMPLETO
+
+Centralizar todo o histórico do usuário:
+	•	Histórico de apostas
+	•	Histórico de depósitos
+	•	Histórico de saques
+	•	Filtros por data / tipo
+	•	Tabelas claras e responsivas
+
+⸻
+
+5️⃣ PREFERÊNCIAS
+
+Criar página de preferências com:
+	•	Idioma
+	•	Odds (decimal / fracionada – mock)
+	•	Notificações
+	•	Tema (se aplicável)
+
+⸻
+
+6️⃣ SEGURANÇA
+
+Página de segurança contendo:
+	•	Alterar senha
+	•	Histórico de login (mock)
+	•	Dispositivos conectados (mock)
+	•	Ativar 2FA (mock)
+
+⸻
+
+7️⃣ VERIFICAÇÃO / KYC
+
+Página de verificação com:
+	•	Status do KYC
+	•	Upload de documentos (mock)
+	•	Mensagens claras sobre aprovação
+
+⸻
+
+8️⃣ RECOMPENSAS / VIP
+
+Área de recompensas com:
+	•	Nível atual
+	•	Benefícios
+	•	Progresso visual
+
+⸻
+
+9️⃣ RESPONSIBLE GAMING
+
+Dentro do perfil:
+	•	Limites de depósito (mock)
+	•	Autoexclusão (mock)
+	•	Pausas temporárias
+
+⸻
+
+Resultado final esperado:
+Uma área de perfil totalmente funcional, clara e profissional, equivalente às melhores plataformas do mercado, transmitindo confiança e controle total ao usuário.
