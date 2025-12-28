@@ -45,11 +45,11 @@ export function Sidebar({ className }: { className?: string }) {
                  <Link href="/games/crash">
                     <a className="block text-xs text-muted-foreground hover:text-white py-1 font-bold text-primary">🚀 Crashmania</a>
                  </Link>
-                 <Link href="/originals/double">
-                    <a className="block text-xs text-muted-foreground hover:text-white py-1">Double</a>
+                 <Link href="/games/double">
+                    <a className="block text-xs text-muted-foreground hover:text-white py-1 font-bold text-red-500">🔴 Double</a>
                  </Link>
-                 <Link href="/originals/mines">
-                    <a className="block text-xs text-muted-foreground hover:text-white py-1">Mines</a>
+                 <Link href="/games/mines">
+                    <a className="block text-xs text-muted-foreground hover:text-white py-1 font-bold text-blue-400">💎 Mines</a>
                  </Link>
               </div>
           </div>

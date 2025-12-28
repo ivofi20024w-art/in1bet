@@ -26,6 +26,8 @@ import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import Crash from "@/pages/games/Crash";
+import Double from "@/pages/games/Double";
+import Mines from "@/pages/games/Mines";
 import { useEffect, useState } from "react";
 
 // Mock Auth Context for Prototype
@@ -58,6 +60,8 @@ function Router() {
       <Route path="/responsible-gaming" component={ResponsibleGaming} />
       <Route path="/game/:id" component={Game} />
       <Route path="/games/crash" component={Crash} />
+      <Route path="/games/double" component={Double} />
+      <Route path="/games/mines" component={Mines} />
       
       {/* Account Routes */}
       <Route path="/history" component={History} />
