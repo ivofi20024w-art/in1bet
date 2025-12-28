@@ -3,7 +3,7 @@ import { GameCard } from "@/components/shared/GameCard";
 import { CASINO_GAMES, PROVIDERS, ORIGINALS_GAMES } from "@/lib/mockData";
 import casinoHero from "@assets/generated_images/casino_lobby_luxurious_background.png";
 import slotsTournamentBanner from "@assets/generated_images/promotional_banner_for_slots_tournament.png";
-import { Flame, Star, History, Rocket, Search, Filter, Play, Crown, Trophy, Users, Zap, Dice5, Timer } from "lucide-react";
+import { Flame, Star, History, Rocket, Search, Filter, Play, Crown, Trophy, Users, Zap, Dice5, Timer, ChevronDown } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import Autoplay from "embla-carousel-autoplay";
 
 const GAME_CATEGORIES = [
@@ -60,6 +61,10 @@ export default function Casino() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState("all");
+  
+  // Collapsible states
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(true);
+  const [isProvidersOpen, setIsProvidersOpen] = useState(true);
 
   // Simulate loading state
   useEffect(() => {
@@ -185,8 +190,8 @@ export default function Casino() {
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Left Sidebar Filters */}
-        <aside className="lg:w-64 flex-shrink-0 space-y-8">
-            <div className="sticky top-24 space-y-6">
+        <aside className="lg:w-64 flex-shrink-0 space-y-4">
+            <div className="sticky top-24 space-y-4">
                 
                 {/* Search */}
                 <div className="relative group">
@@ -199,51 +204,85 @@ export default function Casino() {
                     />
                 </div>
 
-                {/* Categories */}
-                <div className="space-y-1 bg-card border border-white/5 rounded-xl p-2">
-                    <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-2 mt-1">Categorias</h3>
-                    {GAME_CATEGORIES.map(cat => (
-                        <button
-                            key={cat.id}
-                            onClick={() => setActiveCategory(cat.id)}
-                            className={cn(
-                                "flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
-                                activeCategory === cat.id ? "bg-primary text-white shadow-md shadow-primary/20" : "text-gray-400 hover:bg-white/5 hover:text-white"
-                            )}
-                        >
-                            <div className="flex items-center gap-3">
-                                <cat.icon className={cn("w-4 h-4", activeCategory === cat.id ? "text-white" : "text-gray-500 group-hover:text-primary")} />
-                                {cat.label}
-                            </div>
-                            {activeCategory === cat.id && <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
-                        </button>
-                    ))}
-                </div>
-
-                {/* Providers */}
-                <div className="space-y-1 bg-card border border-white/5 rounded-xl p-2">
-                     <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2 px-2 mt-1 flex justify-between items-center">
-                        Provedores
-                        {selectedProvider && <span className="text-[10px] text-primary cursor-pointer hover:underline" onClick={() => setSelectedProvider(null)}>Limpar</span>}
-                     </h3>
-                     <ScrollArea className="h-[250px] pr-2">
-                        <div className="space-y-1">
-                            {PROVIDERS.map(provider => (
+                {/* Categories Collapsible */}
+                <Collapsible 
+                    open={isCategoriesOpen} 
+                    onOpenChange={setIsCategoriesOpen}
+                    className="bg-card border border-white/5 rounded-xl overflow-hidden"
+                >
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-white/5 transition-colors group">
+                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-hover:text-primary transition-colors">Categorias</h3>
+                        <ChevronDown className={cn("w-4 h-4 text-gray-500 transition-transform duration-300", isCategoriesOpen ? "rotate-180" : "")} />
+                    </CollapsibleTrigger>
+                    
+                    <CollapsibleContent>
+                        <div className="p-2 pt-0 space-y-1">
+                            {GAME_CATEGORIES.map(cat => (
                                 <button
-                                    key={provider.id}
-                                    onClick={() => setSelectedProvider(selectedProvider === provider.name ? null : provider.name)}
+                                    key={cat.id}
+                                    onClick={() => setActiveCategory(cat.id)}
                                     className={cn(
-                                        "flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm transition-all group border border-transparent",
-                                        selectedProvider === provider.name ? "bg-secondary text-white border-white/10" : "text-gray-400 hover:bg-white/5 hover:text-white"
+                                        "flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
+                                        activeCategory === cat.id ? "bg-primary text-white shadow-md shadow-primary/20" : "text-gray-400 hover:bg-white/5 hover:text-white"
                                     )}
                                 >
-                                    {provider.name}
-                                    {selectedProvider === provider.name && <CheckIcon className="w-3 h-3 text-primary" />}
+                                    <div className="flex items-center gap-3">
+                                        <cat.icon className={cn("w-4 h-4", activeCategory === cat.id ? "text-white" : "text-gray-500 group-hover:text-primary")} />
+                                        {cat.label}
+                                    </div>
+                                    {activeCategory === cat.id && <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
                                 </button>
                             ))}
                         </div>
-                     </ScrollArea>
-                </div>
+                    </CollapsibleContent>
+                </Collapsible>
+
+                {/* Providers Collapsible */}
+                <Collapsible
+                    open={isProvidersOpen}
+                    onOpenChange={setIsProvidersOpen}
+                    className="bg-card border border-white/5 rounded-xl overflow-hidden"
+                >
+                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-white/5 transition-colors group">
+                        <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-hover:text-primary transition-colors">
+                            Provedores
+                            {selectedProvider && <span className="ml-2 text-[9px] text-primary bg-primary/10 px-2 py-0.5 rounded-full">1 Selecionado</span>}
+                        </h3>
+                        <div className="flex items-center gap-2">
+                             {selectedProvider && (
+                                <span 
+                                    className="text-[10px] text-red-400 hover:text-red-300 hover:underline px-2 py-1 cursor-pointer" 
+                                    onClick={(e) => { e.stopPropagation(); setSelectedProvider(null); }}
+                                >
+                                    Limpar
+                                </span>
+                             )}
+                            <ChevronDown className={cn("w-4 h-4 text-gray-500 transition-transform duration-300", isProvidersOpen ? "rotate-180" : "")} />
+                        </div>
+                     </CollapsibleTrigger>
+                     
+                     <CollapsibleContent>
+                        <div className="p-2 pt-0">
+                            <ScrollArea className="h-[250px] pr-2">
+                                <div className="space-y-1">
+                                    {PROVIDERS.map(provider => (
+                                        <button
+                                            key={provider.id}
+                                            onClick={() => setSelectedProvider(selectedProvider === provider.name ? null : provider.name)}
+                                            className={cn(
+                                                "flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm transition-all group border border-transparent",
+                                                selectedProvider === provider.name ? "bg-secondary text-white border-white/10" : "text-gray-400 hover:bg-white/5 hover:text-white"
+                                            )}
+                                        >
+                                            {provider.name}
+                                            {selectedProvider === provider.name && <CheckIcon className="w-3 h-3 text-primary" />}
+                                        </button>
+                                    ))}
+                                </div>
+                            </ScrollArea>
+                        </div>
+                     </CollapsibleContent>
+                </Collapsible>
             </div>
         </aside>
 
