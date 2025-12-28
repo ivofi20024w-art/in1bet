@@ -4,21 +4,18 @@ import * as schema from "@shared/schema";
 
 const { Pool } = pg;
 
-// Use NEON_DATABASE_URL for production, DATABASE_URL for development
-const isProduction = process.env.NODE_ENV === 'production';
-const connectionString = isProduction 
-  ? process.env.NEON_DATABASE_URL 
-  : process.env.DATABASE_URL;
+// Use NEON_DATABASE_URL if available (production), otherwise DATABASE_URL (development)
+// Priority: NEON_DATABASE_URL > DATABASE_URL
+const connectionString = process.env.NEON_DATABASE_URL || process.env.DATABASE_URL;
+const usingNeon = !!process.env.NEON_DATABASE_URL;
 
 if (!connectionString) {
   throw new Error(
-    isProduction 
-      ? "NEON_DATABASE_URL must be set for production. Create a database at neon.tech"
-      : "DATABASE_URL must be set. Did you forget to provision a database?",
+    "DATABASE_URL or NEON_DATABASE_URL must be set. Did you forget to provision a database?",
   );
 }
 
-console.log(`[DB] Connecting to ${isProduction ? 'Neon (production)' : 'local (development)'} database...`);
+console.log(`[DB] Connecting to ${usingNeon ? 'Neon (external)' : 'local (internal)'} database...`);
 
 // Create pool with retry-friendly settings
 export const pool = new Pool({ 
