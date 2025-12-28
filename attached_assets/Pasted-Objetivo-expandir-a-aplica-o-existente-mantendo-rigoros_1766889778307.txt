@@ -1,0 +1,63 @@
+Objetivo: expandir a aplicação existente mantendo rigorosamente o mesmo padrão visual, UX e estrutura já implementados.
+
+Instruções obrigatórias (não alterar):
+	•	NÃO redesenhar o layout atual
+	•	NÃO alterar cores, tipografia, espaçamentos, sidebar ou header
+	•	REUTILIZAR exatamente os mesmos componentes, estilos, cards, grids e hierarquia visual já existentes
+	•	O resultado final deve parecer uma continuação natural do site atual, no mesmo nível de qualidade
+
+Contexto do projeto:
+Plataforma profissional de casino e apostas desportivas, com UI/UX premium inspirada em grandes operadores (ex.: Betano / Blaze), sem copiar marcas, textos ou código, mas com experiência equivalente.
+
+Tarefa principal:
+Criar e integrar novas páginas reais e funcionais, mantendo 100% o padrão visual atual.
+
+Criar as seguintes páginas e rotas:
+	1.	Apostas Ao Vivo (Live Betting)
+	•	Lista de eventos ao vivo
+	•	Odds em tempo real (mock)
+	•	Layout idêntico à página Sports existente
+	2.	Casino Ao Vivo
+	•	Cards de jogos ao vivo
+	•	Filtros por tipo
+	•	Mesmo layout e grid da página Casino
+	3.	Desportos Virtuais
+	•	Futebol virtual, corridas, etc. (mock)
+	•	Cards iguais aos usados em Sports
+	4.	Promoções & Bónus
+	•	Cards promocionais
+	•	CTA visuais
+	•	Layout institucional premium
+	5.	VIP / Programa de Fidelidade
+	•	Níveis VIP
+	•	Benefícios por nível
+	•	Visual premium (ouro, platina, etc.)
+	6.	Histórico de Apostas
+	•	Tabela de apostas
+	•	Filtros por data e tipo
+	•	Mesmo padrão dark / clean
+	7.	Página de Jogo Individual
+	•	Área preparada para iframe/launcher
+	•	Header fixo
+	•	Ações rápidas
+	8.	Suporte & FAQ
+	•	Categorias
+	•	Layout simples e claro
+	9.	Responsible Gaming / 18+ / Legais
+	•	Página institucional
+	•	Autoexclusão (mock)
+	•	Limites de jogo (mock)
+
+Navegação:
+	•	Adicionar os novos itens corretamente à sidebar
+	•	Garantir que todas as rotas funcionam
+	•	Não quebrar nenhuma rota existente
+
+Qualidade esperada:
+	•	Não criar placeholders vazios
+	•	Não usar estilos diferentes
+	•	Não mudar identidade visual
+	•	O utilizador não deve perceber onde acaba o site antigo e começam as novas páginas
+
+Resultado final esperado:
+Um site maior, mais completo, com aparência e experiência de uma plataforma real de apostas de alto nível, mantendo exatamente o mesmo padrão atual.
