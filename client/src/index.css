@@ -39,22 +39,22 @@
   --background: 222 15% 10%;    /* #16191d - Deep dark blue-grey */
   --foreground: 210 20% 98%;    /* #f8fafc */
   
-  --card: 222 15% 14%;          /* Slightly lighter than bg */
+  --card: 222 15% 13%;          /* Slightly lighter than bg */
   --card-foreground: 210 20% 98%;
   
-  --popover: 222 15% 14%;
+  --popover: 222 15% 13%;
   --popover-foreground: 210 20% 98%;
   
-  --primary: 16 90% 55%;        /* #f26631 - Vibrant Orange (Betano-ish but fresh) */
+  --primary: 16 90% 55%;        /* #f26631 - Vibrant Orange */
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 217 10% 20%;     /* #2e3238 */
+  --secondary: 217 10% 18%;     /* #2e3238 */
   --secondary-foreground: 210 20% 98%;
   
   --muted: 217 10% 20%;
   --muted-foreground: 215 15% 65%;
   
-  --accent: 16 90% 55%;         /* Matches primary for active states */
+  --accent: 16 90% 55%;         
   --accent-foreground: 0 0% 100%;
   
   --destructive: 0 84% 60%;
@@ -64,7 +64,7 @@
   --input: 217 10% 20%;
   --ring: 16 90% 55%;
   
-  --sidebar: 222 15% 12%;       /* Sidebar slightly distinct */
+  --sidebar: 222 15% 11%;       
   --sidebar-foreground: 210 20% 98%;
   
   --radius: 0.75rem;
@@ -81,11 +81,15 @@
 
 @layer utilities {
   .text-shadow {
-    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
   }
   
-  .glass-panel {
-    @apply bg-card/60 backdrop-blur-md border border-white/5;
+  .glass {
+    @apply bg-white/5 backdrop-blur-md border border-white/10;
+  }
+
+  .glass-card {
+    @apply bg-card/60 backdrop-blur-md border border-white/5 shadow-xl;
   }
   
   .hide-scrollbar::-webkit-scrollbar {
@@ -98,7 +102,7 @@
   }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - More polished */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -109,8 +113,9 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted));
-  border-radius: 4px;
+  background: hsl(var(--secondary));
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--background));
 }
 
 ::-webkit-scrollbar-thumb:hover {
