@@ -194,7 +194,9 @@ export async function processPixWebhook(
     return { success: true, message: "Already processed" };
   }
 
-  const creditAmount = net_amount || amount;
+  // Always credit the full amount the user deposited, not the net amount after fees
+  // Fees are absorbed by the platform, not the user
+  const creditAmount = amount;
 
   const referenceId = `PIX_${external_id}`;
 
