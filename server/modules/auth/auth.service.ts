@@ -121,9 +121,12 @@ export async function registerUser(data: RegisterUser): Promise<AuthResponse> {
 // Login with email or CPF
 export async function loginUser(data: LoginUser): Promise<AuthResponse> {
   try {
+    console.log("[LOGIN] Attempt started for identifier:", data?.identifier);
+    
     // Validate input
     const validationResult = loginUserSchema.safeParse(data);
     if (!validationResult.success) {
+      console.log("[LOGIN] Validation failed:", validationResult.error.errors);
       return { 
         success: false, 
         error: validationResult.error.errors[0]?.message || "Dados inválidos" 
@@ -131,15 +134,22 @@ export async function loginUser(data: LoginUser): Promise<AuthResponse> {
     }
 
     const { identifier, password } = validationResult.data;
+    console.log("[LOGIN] Looking up user by identifier:", identifier);
 
     // Find user by email or CPF (with retry for DNS issues)
     const user = await withRetry(() => storage.getUserByEmailOrCPF(identifier));
+    console.log("[LOGIN] User lookup result:", user ? `Found user ${user.id} (${user.email})` : "NOT FOUND");
+    
     if (!user) {
       return { success: false, error: "Email/CPF ou senha incorretos" };
     }
 
     // Verify password
+    console.log("[LOGIN] Comparing password for user:", user.email);
+    console.log("[LOGIN] Stored hash starts with:", user.password?.substring(0, 20));
     const isValidPassword = await bcrypt.compare(password, user.password);
+    console.log("[LOGIN] Password valid:", isValidPassword);
+    
     if (!isValidPassword) {
       return { success: false, error: "Email/CPF ou senha incorretos" };
     }
