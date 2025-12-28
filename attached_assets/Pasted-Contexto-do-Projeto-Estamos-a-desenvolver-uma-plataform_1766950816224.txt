@@ -1,0 +1,155 @@
+Contexto do Projeto
+Estamos a desenvolver uma plataforma de casino e apostas desportivas focada no Brasil (PIX + CPF), com backend já implementado e testado para autenticação, wallet com transaction ledger e integração PIX via OndaPay (incluindo webhook seguro e idempotência).
+
+O backend crítico está completo e validado.
+Agora o foco é produto, UX e conversão, mantendo padrão visual e técnico nível Betano / Blaze.
+
+🎯 OBJETIVO DESTA PRÓXIMA FASE
+
+Implementar o FRONTEND COMPLETO DO DEPÓSITO PIX e consolidar a experiência de Wallet/Perfil, usando o backend já existente, sem alterar regras de negócio.
+
+📌 REGRAS OBRIGATÓRIAS
+
+NÃO alterar endpoints backend já existentes
+
+NÃO creditar saldo fora do webhook
+
+NÃO criar lógica duplicada de wallet
+
+Reutilizar o design system atual (cores, tipografia, espaçamentos)
+
+UX mobile-first (Brasil = majoritariamente mobile)
+
+Linguagem PT-BR
+
+Tudo deve parecer produto real, não protótipo
+
+🧩 FUNCIONALIDADES A IMPLEMENTAR
+1️⃣ FRONTEND — DEPÓSITO PIX (PRIORIDADE MÁXIMA)
+
+Criar Modal / Página de Depósito PIX integrada ao endpoint:
+
+POST /api/payments/pix/create
+
+UX obrigatória:
+
+Campo de valor com:
+
+Presets rápidos: R$20, R$50, R$100, R$200
+
+Input manual
+
+Botão “Gerar PIX”
+
+Exibir após criação:
+
+QR Code grande (base64)
+
+Código PIX Copia e Cola
+
+Botão “Copiar código”
+
+Texto: “Pagamento via PIX é instantâneo”
+
+Estado visual:
+
+“Aguardando pagamento…”
+
+Loader ou animação leve
+
+Feedback:
+
+Detectar pagamento via polling (/status/:externalId)
+
+Atualizar UI quando status = pago
+
+Mostrar “Depósito confirmado com sucesso”
+
+⚠️ IMPORTANTE:
+O frontend NÃO pode atualizar saldo manualmente.
+O saldo deve refletir automaticamente após o webhook processar.
+
+2️⃣ WALLET & HISTÓRICO (CONSOLIDAÇÃO)
+
+Criar / finalizar páginas:
+
+Minha Carteira
+
+Saldo disponível
+
+Botão “Depositar”
+
+Botão “Sacar” (UI apenas, sem lógica ainda)
+
+Histórico de Transações
+
+Lista de depósitos PIX
+
+Status (Pendente / Confirmado)
+
+Valor bruto
+
+Data e hora
+
+ID da transação
+
+Usar:
+GET /api/payments/pix/history
+
+3️⃣ PERFIL DO USUÁRIO (REFINAMENTO AAA)
+
+Na área de perfil:
+
+Dados pessoais (nome, email, CPF mascarado)
+
+Preferências
+
+Segurança (placeholder)
+
+Acesso rápido à Wallet e Histórico
+
+UX clara, limpa e profissional.
+
+4️⃣ MOBILE EXPERIENCE (OBRIGATÓRIO)
+
+Garantir:
+
+Modal PIX 100% funcional no mobile
+
+QR Code bem dimensionado
+
+Botão “Copiar PIX” acessível
+
+Bottom spacing correto (não colar no teclado)
+
+🧠 EXPECTATIVA FINAL
+
+Após este update, o projeto deve permitir que:
+
+Um usuário logado
+
+Acesse a Wallet
+
+Gere um PIX
+
+Pague via QR ou Copia e Cola
+
+Veja o saldo atualizado automaticamente
+
+Consulte o histórico
+
+👉 Sem bugs, sem gambiarras, sem lógica duplicada.
+
+✅ CHECKLIST DE QUALIDADE (ANTES DE CONCLUIR)
+
+ PIX funciona end-to-end pelo frontend
+
+ Saldo só muda após webhook
+
+ UI clara, profissional e confiável
+
+ Mobile testado
+
+ Nenhuma regra de negócio quebrada
+
+👉 Avança com esta implementação mantendo o mesmo padrão de código e qualidade do backend atual.

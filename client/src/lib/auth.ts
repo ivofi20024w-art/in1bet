@@ -204,7 +204,7 @@ export async function getWallet(): Promise<{ balance: number; lockedBalance: num
   }
   
   try {
-    const response = await fetch("/api/wallet/balance", {
+    const response = await fetch("/api/wallet", {
       headers: {
         "Authorization": `Bearer ${auth.accessToken}`,
       },
@@ -214,7 +214,12 @@ export async function getWallet(): Promise<{ balance: number; lockedBalance: num
       return null;
     }
     
-    return await response.json();
+    const data = await response.json();
+    return {
+      balance: data.wallet?.balance || 0,
+      lockedBalance: data.wallet?.lockedBalance || 0,
+      currency: data.wallet?.currency || "BRL",
+    };
   } catch (e) {
     console.error("Error getting wallet:", e);
     return null;
