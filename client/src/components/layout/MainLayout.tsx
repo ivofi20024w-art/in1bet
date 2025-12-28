@@ -8,6 +8,8 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+import { MobileNav } from "./MobileNav";
+
 export function MainLayout({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
 
@@ -47,6 +49,8 @@ export function MainLayout({ children }: { children: ReactNode }) {
           </div>
           <Footer />
         </main>
+        
+        <MobileNav />
       </div>
     </div>
   );
