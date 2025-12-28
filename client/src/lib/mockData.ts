@@ -1,4 +1,4 @@
-import { Trophy, Flame, Play, LayoutGrid, CircleDollarSign, Gamepad2, Search, Menu, User, Bell, ChevronDown, Wallet, LogOut, Settings, History, MonitorPlay, Gift, Crown, HelpCircle, ShieldCheck, Dice5, TowerControl, TrendingUp, Clock, Dna, Rocket, Swords, Ticket, Lock, FileCheck } from "lucide-react";
+import { Trophy, Flame, Play, LayoutGrid, CircleDollarSign, Gamepad2, Search, Menu, User, Bell, ChevronDown, Wallet, LogOut, Settings, History, MonitorPlay, Gift, Crown, HelpCircle, ShieldCheck, Dice5, TowerControl, TrendingUp, Clock, Dna, Rocket, Swords, Ticket, Lock, FileCheck, Users, Share2, BarChart3, Banknote, Target, MousePointerClick } from "lucide-react";
 
 export const USER = {
   name: "João Silva",
@@ -11,7 +11,8 @@ export const USER = {
   vipLevel: "Gold",
   notifications: 3,
   kycStatus: "Pendente", // Verificada, Pendente, Rejeitada
-  joinDate: "15/05/2024"
+  joinDate: "15/05/2024",
+  referralCode: "PRIME88"
 };
 
 export const CASINO_MENU = [
@@ -34,6 +35,7 @@ export const SPORTS_MENU = [
 export const PROFILE_MENU_ITEMS = [
   { icon: User, label: "Minha Conta", path: "/profile" },
   { icon: Wallet, label: "Carteira", path: "/wallet" }, // Triggers modal usually
+  { icon: Users, label: "Afiliados", path: "/affiliates" },
   { icon: History, label: "Histórico", path: "/history" },
   { icon: Settings, label: "Preferências", path: "/profile/settings" },
   { icon: Gift, label: "Recompensas", path: "/vip" },
@@ -174,3 +176,26 @@ export const LOGIN_HISTORY = [
     { date: "Ontem 18:30", device: "Safari / iPhone 13", ip: "177.34.56.78", location: "São Paulo, BR" },
     { date: "26/12/2025", device: "Chrome / Windows 10", ip: "189.12.34.56", location: "São Paulo, BR" },
 ];
+
+export const AFFILIATE_DATA = {
+    totalEarnings: 1250.80,
+    availableBalance: 450.50,
+    totalReferrals: 128,
+    activeReferrals: 45,
+    todayClicks: 342,
+    todaySignups: 12,
+    todayEarnings: 85.20,
+    commissionRate: 30, // Percentage
+    referralLink: "https://primebet.com/r/joaosilva88",
+    campaigns: [
+        { id: 1, name: "Instagram Bio", clicks: 1240, signups: 85, earnings: 850.50 },
+        { id: 2, name: "Youtube Video", clicks: 540, signups: 32, earnings: 320.00 },
+        { id: 3, name: "Telegram Group", clicks: 120, signups: 11, earnings: 80.30 },
+    ],
+    recentReferrals: [
+        { id: 1, user: "marcos_12", date: "Hoje, 10:23", status: "Active", commission: 12.50 },
+        { id: 2, user: "ana_clara", date: "Hoje, 09:15", status: "Active", commission: 8.20 },
+        { id: 3, user: "pedro_games", date: "Ontem, 22:40", status: "Inactive", commission: 0.00 },
+        { id: 4, user: "lucas_bet", date: "Ontem, 18:20", status: "Active", commission: 25.00 },
+    ]
+};

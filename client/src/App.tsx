@@ -21,6 +21,7 @@ import Profile from "@/pages/profile/Profile";
 import Settings from "@/pages/profile/Settings";
 import Security from "@/pages/profile/Security";
 import Verification from "@/pages/profile/Verification";
+import Affiliates from "@/pages/profile/Affiliates";
 import Game from "@/pages/Game";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
@@ -72,6 +73,7 @@ function Router() {
       <Route path="/profile/settings" component={Settings} />
       <Route path="/profile/security" component={Security} />
       <Route path="/profile/verification" component={Verification} />
+      <Route path="/affiliates" component={Affiliates} />
       
       <Route component={NotFound} />
     </Switch>
