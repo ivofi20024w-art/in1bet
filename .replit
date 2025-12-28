@@ -55,3 +55,6 @@ integrations = ["javascript_database:1.0.0"]
 
 [userenv.shared]
 JWT_SECRET = "11c0909ada462b9de7f3911ad3c0d8d8b7044e791a506f1cc53a27a187ab5b24cf1b48426cdb440a8e481ad4cabb860e3991cce985447c67bd10e82acb902ec8"
+
+[userenv.production]
+NEON_DATABASE_URL = "postgresql://neondb_owner:npg_rE15cDGWeBTO@ep-purple-grass-ahk928kt-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
