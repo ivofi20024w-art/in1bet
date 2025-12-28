@@ -9,7 +9,6 @@ import Casino from "@/pages/Casino";
 import Sports from "@/pages/Sports";
 import LiveBetting from "@/pages/LiveBetting";
 import LiveCasino from "@/pages/LiveCasino";
-import VirtualSports from "@/pages/VirtualSports";
 import Promotions from "@/pages/Promotions";
 import VIP from "@/pages/VIP";
 import History from "@/pages/History";
@@ -17,6 +16,10 @@ import Support from "@/pages/Support";
 import CreateTicket from "@/pages/support/CreateTicket";
 import TicketHistory from "@/pages/support/TicketHistory";
 import ResponsibleGaming from "@/pages/ResponsibleGaming";
+import Terms from "@/pages/Terms";
+import Privacy from "@/pages/Privacy";
+import AML from "@/pages/AML";
+import Cookies from "@/pages/Cookies";
 import Profile from "@/pages/profile/Profile";
 import Settings from "@/pages/profile/Settings";
 import Security from "@/pages/profile/Security";
@@ -105,6 +108,10 @@ function Router() {
         <Route path="/promotions" component={Promotions} />
         <Route path="/vip" component={VIP} />
         <Route path="/responsible-gaming" component={ResponsibleGaming} />
+        <Route path="/terms" component={Terms} />
+        <Route path="/privacy" component={Privacy} />
+        <Route path="/aml" component={AML} />
+        <Route path="/cookies" component={Cookies} />
         <Route path="/game/:id" component={Game} />
         <Route path="/games/crash" component={Crash} />
         <Route path="/games/double" component={Double} />

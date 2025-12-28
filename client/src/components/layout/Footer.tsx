@@ -43,6 +43,8 @@ export function Footer() {
               <li><Link href="/support/tickets" className="hover:text-primary transition-colors">Meus Tickets</Link></li>
               <li><Link href="/terms" className="hover:text-primary transition-colors">Termos e Condições</Link></li>
               <li><Link href="/privacy" className="hover:text-primary transition-colors">Política de Privacidade</Link></li>
+              <li><Link href="/aml" className="hover:text-primary transition-colors">Política AML / KYC</Link></li>
+              <li><Link href="/cookies" className="hover:text-primary transition-colors">Política de Cookies</Link></li>
               <li><Link href="/responsible-gaming" className="hover:text-primary transition-colors">Jogo Responsável</Link></li>
             </ul>
           </div>
