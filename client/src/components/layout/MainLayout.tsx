@@ -9,12 +9,14 @@ import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { MobileNav } from "./MobileNav";
+import { AgeVerificationModal } from "../shared/AgeVerificationModal";
 
 export function MainLayout({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
 
   return (
     <div className="min-h-screen bg-background text-foreground flex overflow-hidden font-sans">
+      <AgeVerificationModal />
       {/* Desktop Sidebar */}
       <div className="hidden lg:block h-screen sticky top-0 z-40">
         <Sidebar />
