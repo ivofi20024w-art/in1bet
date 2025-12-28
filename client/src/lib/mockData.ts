@@ -52,6 +52,17 @@ export const ORIGINALS_GAMES = [
     { id: "slide", name: "Slide" },
 ];
 
+export const PROVIDERS = [
+  { id: "pragmatic", name: "Pragmatic Play" },
+  { id: "evolution", name: "Evolution" },
+  { id: "pgsoft", name: "PG Soft" },
+  { id: "spribe", name: "Spribe" },
+  { id: "playtech", name: "Playtech" },
+  { id: "hacksaw", name: "Hacksaw Gaming" },
+  { id: "nolimit", name: "NoLimit City" },
+  { id: "relax", name: "Relax Gaming" },
+];
+
 export const CASINO_GAMES = [
   { id: 1, title: "Gates of Olympus", provider: "Pragmatic Play", image: "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?auto=format&fit=crop&q=80&w=500", hot: true, category: "Slots" },
   { id: 2, title: "Sweet Bonanza", provider: "Pragmatic Play", image: "https://images.unsplash.com/photo-1605218427306-633ba87c9759?auto=format&fit=crop&q=80&w=500", hot: false, category: "Slots" },
