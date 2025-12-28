@@ -83,7 +83,7 @@ export default function Register() {
         title: "Conta criada com sucesso!",
         description: "Bem-vindo ao IN1Bet.",
       });
-      setLocation("/");
+      setLocation("/profile");
     } catch (err: any) {
       setApiError(err.message || "Erro ao criar conta");
       toast({

@@ -158,9 +158,24 @@ export async function loginUser(data: LoginUser): Promise<AuthResponse> {
       accessToken,
       refreshToken,
     };
-  } catch (error) {
-    console.error("Login error:", error);
-    return { success: false, error: "Erro ao fazer login" };
+  } catch (error: any) {
+    console.error("Login error details:", {
+      message: error?.message,
+      code: error?.code,
+      detail: error?.detail,
+    });
+    
+    // Check for connection errors
+    if (
+      error?.code === 'EAI_AGAIN' ||
+      error?.code === 'ECONNREFUSED' ||
+      error?.message?.includes('connect') ||
+      error?.message?.includes('getaddrinfo')
+    ) {
+      return { success: false, error: "Erro de conexão. Tente novamente em instantes." };
+    }
+    
+    return { success: false, error: `Erro ao fazer login: ${error?.message || 'erro desconhecido'}` };
   }
 }
 
