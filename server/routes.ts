@@ -8,6 +8,8 @@ import walletRoutes from "./modules/wallet/wallet.routes";
 import paymentsRoutes from "./modules/payments/payments.routes";
 import adminRoutes from "./modules/admin/admin.routes";
 import ondapayRoutes from "./modules/payments/ondapay/ondapay.routes";
+import kycRoutes from "./modules/kyc/kyc.routes";
+import withdrawalRoutes from "./modules/withdrawals/withdrawal.routes";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -29,6 +31,8 @@ export async function registerRoutes(
   app.use("/api/users", usersRoutes);
   app.use("/api/wallet", walletRoutes);
   app.use("/api/payments", paymentsRoutes);
+  app.use("/api/kyc", kycRoutes);
+  app.use("/api/withdrawals", withdrawalRoutes);
   app.use("/api/admin", adminRoutes);
 
   // Health check endpoint

@@ -111,6 +111,22 @@ export async function processBalanceChange(
       newBalance = currentBalance - amount;
       break;
       
+    case TransactionType.WITHDRAW_RESERVE:
+      if (currentBalance < amount) {
+        return { success: false, error: "Saldo insuficiente" };
+      }
+      newBalance = currentBalance - amount;
+      newLockedBalance = currentLockedBalance + amount;
+      break;
+      
+    case TransactionType.WITHDRAW_RELEASE:
+      if (currentLockedBalance < amount) {
+        return { success: false, error: "Saldo bloqueado insuficiente" };
+      }
+      newBalance = currentBalance + amount;
+      newLockedBalance = currentLockedBalance - amount;
+      break;
+      
     case TransactionType.BONUS:
       newLockedBalance = currentLockedBalance + amount;
       break;
@@ -157,6 +173,22 @@ export async function processBalanceChange(
             throw new Error("Saldo insuficiente");
           }
           finalBalance = actualBalance - amount;
+          break;
+        case TransactionType.WITHDRAW_RESERVE:
+          // Reserve balance for pending withdrawal (move from available to locked)
+          if (actualBalance < amount) {
+            throw new Error("Saldo insuficiente");
+          }
+          finalBalance = actualBalance - amount;
+          finalLockedBalance = actualLockedBalance + amount;
+          break;
+        case TransactionType.WITHDRAW_RELEASE:
+          // Release reserved balance back to available (withdrawal rejected)
+          if (actualLockedBalance < amount) {
+            throw new Error("Saldo bloqueado insuficiente");
+          }
+          finalBalance = actualBalance + amount;
+          finalLockedBalance = actualLockedBalance - amount;
           break;
         case TransactionType.BONUS:
           finalLockedBalance = actualLockedBalance + amount;
@@ -262,4 +294,79 @@ export async function getTransactionByReference(
     .where(eq(transactions.referenceId, referenceId));
   
   return transaction || null;
+}
+
+// Clear locked balance when withdrawal is paid (just removes from locked, doesn't add anywhere)
+export async function clearLockedBalance(
+  userId: string,
+  amount: number,
+  referenceId: string,
+  description?: string
+): Promise<TransactionResult> {
+  if (amount <= 0) {
+    return { success: false, error: "O valor deve ser maior que zero" };
+  }
+
+  try {
+    const result = await db.transaction(async (tx) => {
+      const [wallet] = await tx
+        .select()
+        .from(wallets)
+        .where(eq(wallets.userId, userId))
+        .for("update");
+
+      if (!wallet) {
+        throw new Error("Carteira não encontrada");
+      }
+
+      const lockedBalance = parseFloat(wallet.lockedBalance);
+      
+      if (lockedBalance < amount) {
+        throw new Error("Saldo bloqueado insuficiente");
+      }
+
+      const newLockedBalance = lockedBalance - amount;
+
+      // Create transaction record for the withdrawal completion
+      const [newTransaction] = await tx
+        .insert(transactions)
+        .values({
+          userId,
+          walletId: wallet.id,
+          type: TransactionType.WITHDRAW,
+          amount: amount.toFixed(2),
+          balanceBefore: wallet.balance,
+          balanceAfter: wallet.balance,
+          status: TransactionStatus.COMPLETED,
+          referenceId,
+          description: description || "Saque PIX pago",
+          metadata: null,
+        })
+        .returning();
+
+      // Update wallet - only reduce locked balance
+      const [updatedWallet] = await tx
+        .update(wallets)
+        .set({
+          lockedBalance: newLockedBalance.toFixed(2),
+          updatedAt: new Date(),
+        })
+        .where(eq(wallets.userId, userId))
+        .returning();
+
+      return { transaction: newTransaction, wallet: updatedWallet };
+    });
+
+    return {
+      success: true,
+      transaction: result.transaction,
+      wallet: result.wallet,
+    };
+  } catch (error: any) {
+    console.error("Clear locked balance error:", error);
+    return {
+      success: false,
+      error: error.message || "Erro ao processar saque",
+    };
+  }
 }
