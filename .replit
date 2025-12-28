@@ -58,3 +58,4 @@ JWT_SECRET = "11c0909ada462b9de7f3911ad3c0d8d8b7044e791a506f1cc53a27a187ab5b24cf
 
 [userenv.production]
 NEON_DATABASE_URL = "postgresql://neondb_owner:npg_rE15cDGWeBTO@ep-purple-grass-ahk928kt-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require"
+ONDAPAY_WEBHOOK_URL = "https://in1bet.com/api/webhook/ondapay"
