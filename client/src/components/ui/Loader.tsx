@@ -27,7 +27,7 @@ export function Loader({ isLoading, type }: LoaderProps) {
         isLoading ? "opacity-100" : "opacity-0 pointer-events-none"
       )}
     >
-      <div className="relative mb-8">
+      <div className="relative mb-16">
         {/* Spinner rings - increased spacing and size */}
         <div className="absolute inset-[-40px] border-[3px] border-transparent border-t-primary border-r-primary/30 rounded-full animate-spin duration-[1.5s]" />
         <div className="absolute inset-[-20px] border-2 border-transparent border-b-secondary border-l-secondary/30 rounded-full animate-spin duration-[2s] direction-reverse" />
