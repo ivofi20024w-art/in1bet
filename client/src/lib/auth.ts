@@ -222,6 +222,13 @@ export async function getWallet(): Promise<{ balance: number; lockedBalance: num
     });
     
     if (!response.ok) {
+      // Try to refresh token on 401
+      if (response.status === 401 && auth.refreshToken) {
+        const refreshed = await refreshToken();
+        if (refreshed) {
+          return getWallet();
+        }
+      }
       return null;
     }
     
