@@ -66,7 +66,7 @@ export default function Support() {
                     <h3 className="text-xl font-bold text-white mb-2">Email</h3>
                     <p className="text-sm text-gray-400 mb-6 leading-relaxed flex-1">Envie documentos ou dúvidas gerais para nossa equipe.</p>
                     <Button variant="outline" className="w-full border-white/10 hover:bg-white/5 hover:border-primary/50 hover:text-primary">
-                        suporte@primebet.com
+                        suporte@in1bet.com
                     </Button>
                 </CardContent>
             </Card>

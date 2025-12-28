@@ -67,7 +67,7 @@ export default function Register() {
       // Simulate API call
       setTimeout(() => {
           setLoading(false);
-          localStorage.setItem("primebet_auth", "true");
+          localStorage.setItem("in1bet_auth", "true");
           toast({
               title: "Conta criada com sucesso!",
               description: "Bem-vindo ao IN1Bet.",

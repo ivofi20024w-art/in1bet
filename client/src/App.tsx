@@ -38,7 +38,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     const [location, setLocation] = useLocation();
     // Simulate auth state - for prototype we default to true, 
     // but specific actions might check this
-    const isAuthenticated = localStorage.getItem("primebet_auth") === "true";
+    const isAuthenticated = localStorage.getItem("in1bet_auth") === "true";
 
     return <>{children}</>;
 }

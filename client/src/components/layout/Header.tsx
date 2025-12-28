@@ -20,11 +20,11 @@ export function Header() {
 
   useEffect(() => {
     // Check auth status (mock)
-    setIsAuthenticated(localStorage.getItem("primebet_auth") === "true");
+    setIsAuthenticated(localStorage.getItem("in1bet_auth") === "true");
   }, []);
 
   const handleLogout = () => {
-      localStorage.removeItem("primebet_auth");
+      localStorage.removeItem("in1bet_auth");
       setIsAuthenticated(false);
       setLocation("/login");
   };

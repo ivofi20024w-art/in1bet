@@ -15,14 +15,14 @@ export function AgeVerificationModal() {
 
   useEffect(() => {
     // Check if age verified in localStorage
-    const verified = localStorage.getItem("primebet_age_verified");
+    const verified = localStorage.getItem("in1bet_age_verified");
     if (!verified) {
       setOpen(true);
     }
   }, []);
 
   const handleConfirm = () => {
-    localStorage.setItem("primebet_age_verified", "true");
+    localStorage.setItem("in1bet_age_verified", "true");
     setOpen(false);
   };
 

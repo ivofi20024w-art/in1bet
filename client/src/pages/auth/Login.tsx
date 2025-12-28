@@ -22,7 +22,7 @@ export default function Login() {
     setTimeout(() => {
         setLoading(false);
         if (identifier && password) {
-            localStorage.setItem("primebet_auth", "true");
+            localStorage.setItem("in1bet_auth", "true");
             toast({
                 title: "Login realizado com sucesso",
                 description: "Redirecionando para o lobby...",

@@ -12,7 +12,7 @@ export const USER = {
   notifications: 3,
   kycStatus: "Pendente", // Verificada, Pendente, Rejeitada
   joinDate: "15/05/2024",
-  referralCode: "PRIME88"
+  referralCode: "IN1BET88"
 };
 
 export const CASINO_MENU = [
@@ -187,7 +187,7 @@ export const AFFILIATE_DATA = {
     todaySignups: 12,
     todayEarnings: 85.20,
     commissionRate: 30, // Percentage
-    referralLink: "https://primebet.com/r/joaosilva88",
+    referralLink: "https://in1bet.com/r/joaosilva88",
     campaigns: [
         { id: 1, name: "Instagram Bio", clicks: 1240, signups: 85, earnings: 850.50 },
         { id: 2, name: "Youtube Video", clicks: 540, signups: 32, earnings: 320.00 },
