@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import { storage, sanitizeUser } from "../../storage";
+import { withRetry } from "../../db";
 import { 
   registerUserSchema, 
   loginUserSchema, 
@@ -43,14 +44,14 @@ export async function registerUser(data: RegisterUser): Promise<AuthResponse> {
       return { success: false, error: "CPF inválido" };
     }
 
-    // Check if email already exists
-    const existingEmail = await storage.getUserByEmail(email);
+    // Check if email already exists (with retry for DNS issues)
+    const existingEmail = await withRetry(() => storage.getUserByEmail(email));
     if (existingEmail) {
       return { success: false, error: "Este email já está cadastrado" };
     }
 
-    // Check if CPF already exists
-    const existingCPF = await storage.getUserByCPF(cpf);
+    // Check if CPF already exists (with retry for DNS issues)
+    const existingCPF = await withRetry(() => storage.getUserByCPF(cpf));
     if (existingCPF) {
       return { success: false, error: "Este CPF já está cadastrado" };
     }
@@ -58,26 +59,26 @@ export async function registerUser(data: RegisterUser): Promise<AuthResponse> {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-    // Create user
-    const user = await storage.createUser({
+    // Create user (with retry for DNS issues)
+    const user = await withRetry(() => storage.createUser({
       name,
       email,
       cpf,
       password: hashedPassword,
       phone: phone || null,
       birthDate: birthDate ? new Date(birthDate) : null,
-    });
+    }));
 
-    // Create wallet automatically
-    await storage.createWallet({ userId: user.id });
+    // Create wallet automatically (with retry for DNS issues)
+    await withRetry(() => storage.createWallet({ userId: user.id }));
 
     // Generate tokens
     const accessToken = generateAccessToken(user.id, user.email);
     const refreshToken = generateRefreshToken(user.id, user.email);
 
-    // Store refresh token
+    // Store refresh token (with retry for DNS issues)
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
-    await storage.createRefreshToken(user.id, refreshToken, expiresAt);
+    await withRetry(() => storage.createRefreshToken(user.id, refreshToken, expiresAt));
 
     return {
       success: true,
@@ -131,8 +132,8 @@ export async function loginUser(data: LoginUser): Promise<AuthResponse> {
 
     const { identifier, password } = validationResult.data;
 
-    // Find user by email or CPF
-    const user = await storage.getUserByEmailOrCPF(identifier);
+    // Find user by email or CPF (with retry for DNS issues)
+    const user = await withRetry(() => storage.getUserByEmailOrCPF(identifier));
     if (!user) {
       return { success: false, error: "Email/CPF ou senha incorretos" };
     }
@@ -147,9 +148,9 @@ export async function loginUser(data: LoginUser): Promise<AuthResponse> {
     const accessToken = generateAccessToken(user.id, user.email);
     const refreshToken = generateRefreshToken(user.id, user.email);
 
-    // Store refresh token
+    // Store refresh token (with retry for DNS issues)
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    await storage.createRefreshToken(user.id, refreshToken, expiresAt);
+    await withRetry(() => storage.createRefreshToken(user.id, refreshToken, expiresAt));
 
     return {
       success: true,
