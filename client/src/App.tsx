@@ -39,7 +39,12 @@ import MatchDetail from "@/pages/sports/MatchDetail";
 import MyBets from "@/pages/sports/MyBets";
 import SportsResults from "@/pages/sports/Results";
 import Prematch from "@/pages/sports/Prematch";
-import AdminPanel from "@/pages/admin/AdminPanel";
+import AdminDashboard from "@/pages/admin/Dashboard";
+import AdminUsers from "@/pages/admin/Users";
+import AdminDeposits from "@/pages/admin/Deposits";
+import AdminWithdrawals from "@/pages/admin/Withdrawals";
+import AdminTransactions from "@/pages/admin/Transactions";
+import AdminBonuses from "@/pages/admin/Bonuses";
 import { useEffect, useState } from "react";
 import { Loader } from "@/components/ui/Loader";
 
@@ -135,7 +140,12 @@ function Router() {
         <Route path="/wallet" component={WalletPage} />
         <Route path="/casino/popular" component={Casino} />
         <Route path="/casino/recent" component={Casino} />
-        <Route path="/admin" component={AdminPanel} />
+        <Route path="/admin" component={AdminDashboard} />
+        <Route path="/admin/users" component={AdminUsers} />
+        <Route path="/admin/deposits" component={AdminDeposits} />
+        <Route path="/admin/withdrawals" component={AdminWithdrawals} />
+        <Route path="/admin/transactions" component={AdminTransactions} />
+        <Route path="/admin/bonuses" component={AdminBonuses} />
         
         <Route component={NotFound} />
       </Switch>

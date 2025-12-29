@@ -1,0 +1,127 @@
+Contexto do projeto:
+Estamos construindo uma plataforma de casino online brasileira (PIX, CPF, bônus, rollover).
+O backend financeiro (wallet, ledger, PIX Ondapay, bônus) já está funcional e seguro.
+
+Objetivo deste update:
+Criar um DASHBOARD ADMIN COMPLETO, PROFISSIONAL, NÍVEL BETANO/BLAZE, focado em controle financeiro, risco e operação, sem alterar regras existentes.
+
+Regras obrigatórias:
+	•	NÃO alterar lógica financeira existente
+	•	NÃO criar atalhos que burlem ledger ou bônus
+	•	Todo dado exibido deve vir de fontes reais (wallet, transactions, deposits, withdrawals, bonuses)
+	•	Código limpo, escalável, separado por módulos
+	•	Dashboard protegido por role ADMIN
+
+⸻
+
+1️⃣ VISÃO GERAL (HOME DO ADMIN)
+
+Criar uma página /admin/dashboard com:
+	•	Total depositado (hoje / 7 dias / 30 dias)
+	•	Total sacado (hoje / 7 dias / 30 dias)
+	•	Lucro bruto (depositado - sacado)
+	•	Valor total em bônus concedidos
+	•	Valor já convertido via rollover
+	•	Número de usuários ativos
+	•	Número de novos cadastros
+
+Gráficos:
+	•	Entradas PIX por dia
+	•	Saídas (saques) por dia
+	•	Conversão de bônus (bônus → saldo real)
+
+⸻
+
+2️⃣ GESTÃO FINANCEIRA
+
+Criar secções:
+
+📥 Depósitos PIX
+	•	Lista paginada
+	•	Filtros por data, status, CPF, usuário
+	•	Campos: usuário, CPF, valor, status, externalId, data
+
+📤 Saques PIX
+	•	Lista de saques
+	•	Status: pendente / aprovado / pago / rejeitado
+	•	Aprovação manual (botão)
+	•	Visualizar motivo de bloqueio (ex: rollover pendente)
+
+⸻
+
+3️⃣ WALLET & LEDGER (CRÍTICO)
+
+Criar visualização detalhada:
+	•	Saldo real
+	•	Saldo de bônus
+	•	Rollover pendente
+	•	Histórico de transações (ledger)
+
+Cada transação deve mostrar:
+	•	Tipo (depósito, aposta, bônus, conversão, saque)
+	•	Valor
+	•	Origem
+	•	Data
+	•	ID interno
+
+⸻
+
+4️⃣ USUÁRIOS & RISCO
+
+Criar página /admin/users:
+	•	Lista de usuários
+	•	CPF
+	•	Status KYC (pendente / verificado / bloqueado)
+	•	Total depositado
+	•	Total sacado
+	•	Bônus recebidos
+
+Ações admin:
+	•	Bloquear usuário
+	•	Suspender saques
+	•	Cancelar bônus ativo
+	•	Resetar sessão
+
+⸻
+
+5️⃣ BÔNUS & ROLLOVER
+
+Dashboard específico:
+	•	Bônus ativos por usuário
+	•	Rollover pendente
+	•	Histórico de conversões
+
+Alertas:
+	•	Usuários com rollover alto e saldo baixo
+	•	Possível abuso de bônus
+
+⸻
+
+6️⃣ LOGS & AUDITORIA
+
+Criar sistema de logs admin:
+	•	Toda ação administrativa registrada
+	•	Quem fez
+	•	O que foi feito
+	•	Antes / depois
+	•	Data
+
+⸻
+
+7️⃣ UX / UI
+	•	Visual profissional, dark, clean
+	•	Layout semelhante a dashboards SaaS financeiros
+	•	Sidebar admin separada do frontend
+	•	Totalmente responsivo
+
+⸻
+
+8️⃣ SEGURANÇA
+	•	Middleware isAdmin
+	•	Nenhuma rota admin acessível por usuários comuns
+	•	Proteção contra ações destrutivas (confirmação dupla)
+
+⸻
+
+Resultado esperado:
+Um ADMIN DASHBOARD REAL, pronto para operar dinheiro de verdade, com visão financeira, controle de risco e auditoria completa.
