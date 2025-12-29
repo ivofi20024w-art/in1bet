@@ -45,6 +45,7 @@ import AdminDeposits from "@/pages/admin/Deposits";
 import AdminWithdrawals from "@/pages/admin/Withdrawals";
 import AdminTransactions from "@/pages/admin/Transactions";
 import AdminBonuses from "@/pages/admin/Bonuses";
+import AdminSecurity from "@/pages/admin/Security";
 import { useEffect, useState } from "react";
 import { Loader } from "@/components/ui/Loader";
 
@@ -146,6 +147,7 @@ function Router() {
         <Route path="/admin/withdrawals" component={AdminWithdrawals} />
         <Route path="/admin/transactions" component={AdminTransactions} />
         <Route path="/admin/bonuses" component={AdminBonuses} />
+        <Route path="/admin/security" component={AdminSecurity} />
         
         <Route component={NotFound} />
       </Switch>
