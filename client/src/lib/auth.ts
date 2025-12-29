@@ -207,7 +207,15 @@ export function getAuthHeader(): Record<string, string> {
 }
 
 // Get wallet balance
-export async function getWallet(): Promise<{ balance: number; lockedBalance: number; currency: string } | null> {
+export async function getWallet(): Promise<{ 
+  balance: number; 
+  lockedBalance: number; 
+  bonusBalance: number;
+  rolloverRemaining: number;
+  rolloverTotal: number;
+  rolloverProgress: number;
+  currency: string;
+} | null> {
   const auth = getStoredAuth();
   
   if (!auth.accessToken) {
@@ -222,7 +230,6 @@ export async function getWallet(): Promise<{ balance: number; lockedBalance: num
     });
     
     if (!response.ok) {
-      // Try to refresh token on 401
       if (response.status === 401 && auth.refreshToken) {
         const refreshed = await refreshToken();
         if (refreshed) {
@@ -236,6 +243,10 @@ export async function getWallet(): Promise<{ balance: number; lockedBalance: num
     return {
       balance: data.wallet?.balance || 0,
       lockedBalance: data.wallet?.lockedBalance || 0,
+      bonusBalance: data.wallet?.bonusBalance || 0,
+      rolloverRemaining: data.wallet?.rolloverRemaining || 0,
+      rolloverTotal: data.wallet?.rolloverTotal || 0,
+      rolloverProgress: data.wallet?.rolloverProgress || 100,
       currency: data.wallet?.currency || "BRL",
     };
   } catch (e) {

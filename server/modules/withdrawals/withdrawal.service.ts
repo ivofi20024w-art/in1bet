@@ -14,6 +14,7 @@ import {
   clearLockedBalance,
   getWalletBalance,
 } from "../wallet/wallet.service";
+import { checkRolloverForWithdrawal } from "../bonus/bonus.service";
 
 const MIN_WITHDRAWAL_AMOUNT = 20;
 
@@ -23,6 +24,14 @@ export interface WithdrawalResult {
   error?: string;
 }
 
+/**
+ * Request a PIX withdrawal.
+ * 
+ * IMPORTANT INVARIANT: Withdrawals are only created when rolloverRemaining = 0.
+ * This is enforced by checkRolloverForWithdrawal() before any balance reservation.
+ * Therefore, when a withdrawal is rejected/released, no bonus rollback is needed
+ * since the bonus was already completed before the withdrawal was created.
+ */
 export async function requestWithdrawal(
   userId: string,
   amount: number,
@@ -41,6 +50,11 @@ export async function requestWithdrawal(
 
   if (user.kycStatus !== "verified") {
     return { success: false, error: "É necessário validar seus dados (KYC) antes de sacar" };
+  }
+
+  const rolloverCheck = await checkRolloverForWithdrawal(userId);
+  if (!rolloverCheck.canWithdraw) {
+    return { success: false, error: rolloverCheck.message || "Rollover pendente" };
   }
 
   const walletBalance = await getWalletBalance(userId);

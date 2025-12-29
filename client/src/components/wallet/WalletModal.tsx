@@ -47,6 +47,10 @@ interface WithdrawalHistoryItem {
 interface WalletBalance {
   balance: number;
   lockedBalance: number;
+  bonusBalance: number;
+  rolloverRemaining: number;
+  rolloverTotal: number;
+  rolloverProgress: number;
   currency: string;
 }
 
@@ -637,7 +641,7 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
                     <h2 className="text-4xl font-bold font-heading text-white" data-testid="text-withdraw-balance">
                       R$ {walletBalance ? walletBalance.balance.toFixed(2).replace('.', ',') : '0,00'}
                     </h2>
-                    {walletBalance && walletBalance.balance >= 20 && (
+                    {walletBalance && walletBalance.balance >= 20 && walletBalance.rolloverRemaining <= 0 && (
                       <div className="text-xs text-emerald-400 flex items-center justify-center gap-1 mt-2">
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                         Disponível para saque
@@ -649,6 +653,42 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
                       </div>
                     )}
                   </div>
+
+                  {walletBalance && (walletBalance.bonusBalance > 0 || walletBalance.rolloverRemaining > 0) && (
+                    <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-4 border border-purple-500/20">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-sm text-purple-300 font-medium">Saldo de Bônus</span>
+                        <span className="text-lg font-bold text-white">
+                          R$ {walletBalance.bonusBalance.toFixed(2).replace('.', ',')}
+                        </span>
+                      </div>
+                      {walletBalance.rolloverRemaining > 0 && (
+                        <>
+                          <div className="flex items-center justify-between text-xs mb-2">
+                            <span className="text-muted-foreground">Rollover Restante</span>
+                            <span className="text-yellow-400">
+                              R$ {walletBalance.rolloverRemaining.toFixed(2).replace('.', ',')}
+                            </span>
+                          </div>
+                          <div className="w-full h-2 bg-secondary/50 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500"
+                              style={{ width: `${walletBalance.rolloverProgress}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-center text-muted-foreground mt-2">
+                            {walletBalance.rolloverProgress}% concluído
+                          </p>
+                          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-2 mt-3 flex gap-2 items-center">
+                            <AlertCircle className="w-4 h-4 text-yellow-500 shrink-0" />
+                            <p className="text-xs text-yellow-500/90">
+                              Complete o rollover para liberar saques
+                            </p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
 
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -718,10 +758,10 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
                     <Button 
                       className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 shadow-[0_0_15px_-3px_rgba(242,102,49,0.4)] transition-all hover:scale-[1.02]"
                       onClick={handleWithdrawRequest}
-                      disabled={!walletBalance || walletBalance.balance < 20}
+                      disabled={!walletBalance || walletBalance.balance < 20 || walletBalance.rolloverRemaining > 0}
                       data-testid="button-request-withdraw"
                     >
-                      SOLICITAR SAQUE
+                      {walletBalance && walletBalance.rolloverRemaining > 0 ? 'ROLLOVER PENDENTE' : 'SOLICITAR SAQUE'}
                     </Button>
                   </div>
                 </>

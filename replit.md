@@ -105,15 +105,42 @@ Key tables:
 - GET /api/kyc/status - Check KYC verification status
 - Validates CPF matches user's registration data
 
+### Bonus System
+- **Bonus Types**: FIRST_DEPOSIT, RELOAD, CASHBACK, FREE_BET, VIP
+- **Rollover Control**: Users must bet (bonusAmount × rolloverMultiplier) to convert bonus to real balance
+- **Tables**:
+  - `bonuses` - Bonus templates created by admin
+  - `user_bonuses` - User bonus instances with status tracking
+- **Wallet Fields**: bonusBalance, rolloverRemaining, rolloverTotal
+- **Transaction Types**: BONUS_CREDIT, BONUS_CONVERT, ROLLOVER_CONSUME
+- **Rules**:
+  - Only one active bonus per user at a time (prevents stacking)
+  - Automatic bonus application on deposits based on eligibility
+  - Withdrawals blocked until rolloverRemaining = 0
+  - Bonus auto-converts to real balance when rollover complete
+- Endpoints:
+  - GET /api/bonus/available - List active bonuses
+  - GET /api/bonus/my-bonuses - User's active bonuses
+  - GET /api/bonus/history - User's bonus history
+  - GET /api/bonus/wallet-info - Bonus balance and rollover info
+  - GET /api/bonus/withdrawal-check - Check if user can withdraw
+
 ### Admin Panel (/admin)
 - Only accessible by users with isAdmin flag set to true in database
-- Endpoints:
+- **Withdrawal Endpoints**:
   - GET /api/admin/stats - Platform statistics
   - GET /api/admin/users - List all users
   - GET /api/admin/withdrawals - List withdrawals (filterable by status)
   - POST /api/admin/withdrawals/:id/approve - Approve pending withdrawal
   - POST /api/admin/withdrawals/:id/reject - Reject withdrawal (releases locked balance)
   - POST /api/admin/withdrawals/:id/pay - Mark approved withdrawal as paid
+- **Bonus Management Endpoints**:
+  - GET /api/admin/bonuses - List all bonus templates
+  - POST /api/admin/bonuses - Create new bonus template
+  - PUT /api/admin/bonuses/:id - Update bonus template
+  - POST /api/admin/bonuses/:id/toggle - Toggle bonus active status
+  - GET /api/admin/user-bonuses - List user bonus instances
+  - POST /api/admin/user-bonuses/:id/cancel - Cancel user bonus
 
 - JivoChat widget (placeholder in index.html)
 

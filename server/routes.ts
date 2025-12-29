@@ -10,6 +10,7 @@ import adminRoutes from "./modules/admin/admin.routes";
 import ondapayRoutes from "./modules/payments/ondapay/ondapay.routes";
 import kycRoutes from "./modules/kyc/kyc.routes";
 import withdrawalRoutes from "./modules/withdrawals/withdrawal.routes";
+import bonusRoutes from "./modules/bonus/bonus.routes";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -33,6 +34,7 @@ export async function registerRoutes(
   app.use("/api/payments", paymentsRoutes);
   app.use("/api/kyc", kycRoutes);
   app.use("/api/withdrawals", withdrawalRoutes);
+  app.use("/api/bonus", bonusRoutes);
   app.use("/api/admin", adminRoutes);
 
   // Health check endpoint

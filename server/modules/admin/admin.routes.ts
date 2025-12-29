@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { authMiddleware } from "../auth/auth.middleware";
 import { db } from "../../db";
-import { users, wallets, pixWithdrawals, transactions } from "@shared/schema";
+import { users, wallets, pixWithdrawals, transactions, bonuses, userBonuses } from "@shared/schema";
 import { eq, desc, count, sql } from "drizzle-orm";
 import {
   getAllPendingWithdrawals,
@@ -11,6 +11,13 @@ import {
   rejectWithdrawal,
   markWithdrawalAsPaid,
 } from "../withdrawals/withdrawal.service";
+import {
+  getAllBonuses,
+  createBonus,
+  updateBonus,
+  toggleBonusStatus,
+  cancelUserBonus,
+} from "../bonus/bonus.service";
 
 const router = Router();
 
@@ -234,6 +241,172 @@ router.post("/withdrawals/:id/pay", adminCheck, async (req: Request, res: Respon
   } catch (error: any) {
     console.error("Admin pay withdrawal error:", error);
     res.status(500).json({ error: "Erro ao marcar saque como pago" });
+  }
+});
+
+router.get("/bonuses", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const allBonuses = await getAllBonuses();
+    
+    res.json({
+      bonuses: allBonuses.map((b) => ({
+        id: b.id,
+        name: b.name,
+        description: b.description,
+        type: b.type,
+        percentage: parseFloat(b.percentage),
+        maxValue: parseFloat(b.maxValue),
+        rolloverMultiplier: parseFloat(b.rolloverMultiplier),
+        minDeposit: parseFloat(b.minDeposit),
+        isActive: b.isActive,
+        isFirstDepositOnly: b.isFirstDepositOnly,
+        validDays: parseInt(b.validDays),
+        createdAt: b.createdAt,
+      })),
+    });
+  } catch (error: any) {
+    console.error("Admin get bonuses error:", error);
+    res.status(500).json({ error: "Erro ao buscar bônus" });
+  }
+});
+
+router.post("/bonuses", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const data = req.body;
+    
+    const result = await createBonus({
+      name: data.name,
+      description: data.description,
+      type: data.type,
+      percentage: data.percentage,
+      maxValue: data.maxValue,
+      rolloverMultiplier: data.rolloverMultiplier,
+      minDeposit: data.minDeposit,
+      isFirstDepositOnly: data.isFirstDepositOnly,
+      validDays: data.validDays,
+    });
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    res.json({ success: true, bonus: result.bonus });
+  } catch (error: any) {
+    console.error("Admin create bonus error:", error);
+    res.status(500).json({ error: "Erro ao criar bônus" });
+  }
+});
+
+router.put("/bonuses/:id", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const data = req.body;
+
+    const result = await updateBonus(id, data);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    res.json({ success: true, bonus: result.bonus });
+  } catch (error: any) {
+    console.error("Admin update bonus error:", error);
+    res.status(500).json({ error: "Erro ao atualizar bônus" });
+  }
+});
+
+router.post("/bonuses/:id/toggle", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const result = await toggleBonusStatus(id);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    res.json({ 
+      success: true, 
+      bonus: result.bonus,
+      message: result.bonus?.isActive ? "Bônus ativado" : "Bônus desativado",
+    });
+  } catch (error: any) {
+    console.error("Admin toggle bonus error:", error);
+    res.status(500).json({ error: "Erro ao alterar status do bônus" });
+  }
+});
+
+router.get("/user-bonuses", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const userId = req.query.userId as string;
+    const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
+
+    let query = db
+      .select()
+      .from(userBonuses)
+      .orderBy(desc(userBonuses.createdAt))
+      .limit(limit);
+
+    if (userId) {
+      query = db
+        .select()
+        .from(userBonuses)
+        .where(eq(userBonuses.userId, userId))
+        .orderBy(desc(userBonuses.createdAt))
+        .limit(limit);
+    }
+
+    const userBonusesList = await query;
+
+    const result = [];
+    for (const ub of userBonusesList) {
+      const [bonus] = await db.select().from(bonuses).where(eq(bonuses.id, ub.bonusId));
+      const [user] = await db.select().from(users).where(eq(users.id, ub.userId));
+      
+      result.push({
+        id: ub.id,
+        bonusName: bonus?.name || "Bônus",
+        bonusAmount: parseFloat(ub.bonusAmount),
+        rolloverTotal: parseFloat(ub.rolloverTotal),
+        rolloverRemaining: parseFloat(ub.rolloverRemaining),
+        status: ub.status,
+        expiresAt: ub.expiresAt,
+        createdAt: ub.createdAt,
+        user: user ? {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        } : null,
+      });
+    }
+
+    res.json({ userBonuses: result });
+  } catch (error: any) {
+    console.error("Admin get user bonuses error:", error);
+    res.status(500).json({ error: "Erro ao buscar bônus de usuários" });
+  }
+});
+
+router.post("/user-bonuses/:id/cancel", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const adminId = req.user!.id;
+
+    if (!reason || reason.trim().length === 0) {
+      return res.status(400).json({ error: "Motivo é obrigatório" });
+    }
+
+    const result = await cancelUserBonus(id, adminId, reason);
+
+    if (!result.success) {
+      return res.status(400).json({ error: result.error });
+    }
+
+    res.json({ success: true, message: "Bônus cancelado" });
+  } catch (error: any) {
+    console.error("Admin cancel user bonus error:", error);
+    res.status(500).json({ error: "Erro ao cancelar bônus" });
   }
 });
 

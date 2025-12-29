@@ -29,13 +29,23 @@ router.get("/", async (req: Request, res: Response) => {
 
     const balance = parseFloat(wallet.balance);
     const lockedBalance = parseFloat(wallet.lockedBalance);
+    const bonusBalance = parseFloat(wallet.bonusBalance);
+    const rolloverRemaining = parseFloat(wallet.rolloverRemaining);
+    const rolloverTotal = parseFloat(wallet.rolloverTotal);
+    const rolloverProgress = rolloverTotal > 0
+      ? Math.round(((rolloverTotal - rolloverRemaining) / rolloverTotal) * 100)
+      : 100;
 
     res.json({
       wallet: {
         id: wallet.id,
         balance,
         lockedBalance,
-        totalBalance: balance + lockedBalance,
+        bonusBalance,
+        totalBalance: balance + bonusBalance,
+        rolloverRemaining,
+        rolloverTotal,
+        rolloverProgress,
         currency: wallet.currency,
         createdAt: wallet.createdAt,
         updatedAt: wallet.updatedAt,
