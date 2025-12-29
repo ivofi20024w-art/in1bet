@@ -34,6 +34,7 @@ const navItems = [
   { href: "/admin/withdrawals", label: "Saques PIX", icon: ArrowUpFromLine },
   { href: "/admin/transactions", label: "Transações", icon: FileText },
   { href: "/admin/bonuses", label: "Bônus", icon: Gift },
+  { href: "/admin/audit", label: "Auditoria", icon: FileText },
 ];
 
 export function AdminLayout({ children, title }: AdminLayoutProps) {

@@ -21,6 +21,14 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Dialog as ConfirmDialog,
+  DialogContent as ConfirmDialogContent,
+  DialogHeader as ConfirmDialogHeader,
+  DialogTitle as ConfirmDialogTitle,
+  DialogFooter as ConfirmDialogFooter,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import {
   Search,
   RefreshCw,
   Eye,
@@ -29,7 +37,11 @@ import {
   ArrowUpFromLine,
   Gift,
   FileText,
+  Ban,
+  CheckCircle,
+  AlertTriangle,
 } from "lucide-react";
+import { toast } from "sonner";
 
 interface User {
   id: string;
@@ -39,6 +51,8 @@ interface User {
   kycStatus: string;
   vipLevel: number;
   isVerified: boolean;
+  isBlocked: boolean;
+  blockReason?: string;
   createdAt: string;
   balance: number;
   lockedBalance: number;
@@ -104,6 +118,10 @@ export default function AdminUsers() {
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
+  const [showBlockDialog, setShowBlockDialog] = useState(false);
+  const [userToBlock, setUserToBlock] = useState<User | null>(null);
+  const [blockReason, setBlockReason] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
   const auth = getStoredAuth();
 
   const fetchUsers = useCallback(async () => {
@@ -163,6 +181,65 @@ export default function AdminUsers() {
       default:
         return <Badge className="bg-gray-500/20 text-gray-500">{status}</Badge>;
     }
+  };
+
+  const handleBlockUser = async () => {
+    if (!userToBlock || !blockReason.trim()) {
+      toast.error("Motivo do bloqueio é obrigatório");
+      return;
+    }
+    setActionLoading(true);
+    try {
+      const response = await fetch(`/api/admin/users/${userToBlock.id}/block`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+        body: JSON.stringify({ reason: blockReason }),
+      });
+      if (response.ok) {
+        toast.success("Usuário bloqueado com sucesso");
+        setShowBlockDialog(false);
+        setBlockReason("");
+        setUserToBlock(null);
+        fetchUsers();
+      } else {
+        const data = await response.json();
+        toast.error(data.error || "Erro ao bloquear usuário");
+      }
+    } catch (error) {
+      toast.error("Erro ao bloquear usuário");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleUnblockUser = async (user: User) => {
+    setActionLoading(true);
+    try {
+      const response = await fetch(`/api/admin/users/${user.id}/unblock`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${auth.accessToken}` },
+      });
+      if (response.ok) {
+        toast.success("Usuário desbloqueado com sucesso");
+        fetchUsers();
+      } else {
+        const data = await response.json();
+        toast.error(data.error || "Erro ao desbloquear usuário");
+      }
+    } catch (error) {
+      toast.error("Erro ao desbloquear usuário");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const openBlockDialog = (user: User) => {
+    setUserToBlock(user);
+    setBlockReason("");
+    setShowBlockDialog(true);
   };
 
   return (

@@ -40,6 +40,10 @@ export const users = pgTable("users", {
   birthDate: timestamp("birth_date"),
   isVerified: boolean("is_verified").default(false),
   isAdmin: boolean("is_admin").default(false),
+  isBlocked: boolean("is_blocked").default(false),
+  blockReason: text("block_reason"),
+  blockedAt: timestamp("blocked_at"),
+  blockedBy: varchar("blocked_by"),
   kycStatus: varchar("kyc_status", { length: 20 }).default("pending"),
   vipLevel: varchar("vip_level", { length: 20 }).default("bronze"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -367,7 +371,37 @@ export const createBonusSchema = z.object({
   validDays: z.number().min(1).max(365).optional(),
 });
 
+// Admin Audit Log Actions
+export const AdminAction = {
+  USER_BLOCK: "USER_BLOCK",
+  USER_UNBLOCK: "USER_UNBLOCK",
+  WITHDRAWAL_APPROVE: "WITHDRAWAL_APPROVE",
+  WITHDRAWAL_REJECT: "WITHDRAWAL_REJECT",
+  WITHDRAWAL_PAY: "WITHDRAWAL_PAY",
+  BONUS_CREATE: "BONUS_CREATE",
+  BONUS_UPDATE: "BONUS_UPDATE",
+  BONUS_TOGGLE: "BONUS_TOGGLE",
+  USER_BONUS_CANCEL: "USER_BONUS_CANCEL",
+  USER_MAKE_ADMIN: "USER_MAKE_ADMIN",
+  USER_REMOVE_ADMIN: "USER_REMOVE_ADMIN",
+} as const;
+
+// Admin Audit Logs table
+export const adminAuditLogs = pgTable("admin_audit_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  adminId: varchar("admin_id").notNull().references(() => users.id),
+  action: varchar("action", { length: 50 }).notNull(),
+  targetType: varchar("target_type", { length: 30 }).notNull(),
+  targetId: varchar("target_id", { length: 100 }).notNull(),
+  dataBefore: text("data_before"),
+  dataAfter: text("data_after"),
+  reason: text("reason"),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Types
+export type AdminAuditLog = typeof adminAuditLogs.$inferSelect;
 export type PixDeposit = typeof pixDeposits.$inferSelect;
 export type InsertPixDeposit = z.infer<typeof insertPixDepositSchema>;
 export type PixWithdrawal = typeof pixWithdrawals.$inferSelect;

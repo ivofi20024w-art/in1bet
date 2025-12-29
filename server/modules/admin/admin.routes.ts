@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { authMiddleware } from "../auth/auth.middleware";
 import { db } from "../../db";
-import { users, wallets, pixWithdrawals, pixDeposits, transactions, bonuses, userBonuses, TransactionType } from "@shared/schema";
+import { users, wallets, pixWithdrawals, pixDeposits, transactions, bonuses, userBonuses, adminAuditLogs, TransactionType, AdminAction } from "@shared/schema";
 import { eq, desc, count, sql, and, gte, lte, sum } from "drizzle-orm";
 import {
   getAllPendingWithdrawals,
@@ -18,6 +18,7 @@ import {
   toggleBonusStatus,
   cancelUserBonus,
 } from "../bonus/bonus.service";
+import { createAuditLog } from "./audit.service";
 
 const router = Router();
 
@@ -575,11 +576,21 @@ router.post("/withdrawals/:id/approve", adminCheck, async (req: Request, res: Re
     const { id } = req.params;
     const adminId = req.user!.id;
 
+    const withdrawalBefore = await getWithdrawalById(id);
     const result = await approveWithdrawal(id, adminId);
 
     if (!result.success) {
       return res.status(400).json({ error: result.error });
     }
+
+    await createAuditLog({
+      adminId,
+      action: AdminAction.WITHDRAWAL_APPROVE,
+      targetType: "withdrawal",
+      targetId: id,
+      dataBefore: { status: withdrawalBefore?.status },
+      dataAfter: { status: "APPROVED" },
+    });
 
     res.json({
       success: true,
@@ -602,11 +613,22 @@ router.post("/withdrawals/:id/reject", adminCheck, async (req: Request, res: Res
       return res.status(400).json({ error: "Motivo da rejeição é obrigatório" });
     }
 
+    const withdrawalBefore = await getWithdrawalById(id);
     const result = await rejectWithdrawal(id, adminId, reason);
 
     if (!result.success) {
       return res.status(400).json({ error: result.error });
     }
+
+    await createAuditLog({
+      adminId,
+      action: AdminAction.WITHDRAWAL_REJECT,
+      targetType: "withdrawal",
+      targetId: id,
+      dataBefore: { status: withdrawalBefore?.status },
+      dataAfter: { status: "REJECTED", rejectionReason: reason },
+      reason,
+    });
 
     res.json({
       success: true,
@@ -624,11 +646,21 @@ router.post("/withdrawals/:id/pay", adminCheck, async (req: Request, res: Respon
     const { id } = req.params;
     const adminId = req.user!.id;
 
+    const withdrawalBefore = await getWithdrawalById(id);
     const result = await markWithdrawalAsPaid(id, adminId);
 
     if (!result.success) {
       return res.status(400).json({ error: result.error });
     }
+
+    await createAuditLog({
+      adminId,
+      action: AdminAction.WITHDRAWAL_PAY,
+      targetType: "withdrawal",
+      targetId: id,
+      dataBefore: { status: withdrawalBefore?.status },
+      dataAfter: { status: "PAID" },
+    });
 
     res.json({
       success: true,
@@ -795,16 +827,159 @@ router.post("/user-bonuses/:id/cancel", adminCheck, async (req: Request, res: Re
       return res.status(400).json({ error: "Motivo é obrigatório" });
     }
 
+    const [userBonusBefore] = await db.select().from(userBonuses).where(eq(userBonuses.id, id));
+
     const result = await cancelUserBonus(id, adminId, reason);
 
     if (!result.success) {
       return res.status(400).json({ error: result.error });
     }
 
+    await createAuditLog({
+      adminId,
+      action: AdminAction.USER_BONUS_CANCEL,
+      targetType: "user_bonus",
+      targetId: id,
+      dataBefore: userBonusBefore,
+      dataAfter: { status: "CANCELLED" },
+      reason,
+    });
+
     res.json({ success: true, message: "Bônus cancelado" });
   } catch (error: any) {
     console.error("Admin cancel user bonus error:", error);
     res.status(500).json({ error: "Erro ao cancelar bônus" });
+  }
+});
+
+router.post("/users/:id/block", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const adminId = req.user!.id;
+
+    if (!reason || reason.trim().length === 0) {
+      return res.status(400).json({ error: "Motivo do bloqueio é obrigatório" });
+    }
+
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    if (user.isAdmin) {
+      return res.status(400).json({ error: "Não é possível bloquear um administrador" });
+    }
+
+    if (user.isBlocked) {
+      return res.status(400).json({ error: "Usuário já está bloqueado" });
+    }
+
+    await db.update(users)
+      .set({
+        isBlocked: true,
+        blockReason: reason,
+        blockedAt: new Date(),
+        blockedBy: adminId,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id));
+
+    await createAuditLog({
+      adminId,
+      action: AdminAction.USER_BLOCK,
+      targetType: "user",
+      targetId: id,
+      dataBefore: { isBlocked: false },
+      dataAfter: { isBlocked: true, blockReason: reason },
+      reason,
+    });
+
+    res.json({ success: true, message: "Usuário bloqueado com sucesso" });
+  } catch (error: any) {
+    console.error("Admin block user error:", error);
+    res.status(500).json({ error: "Erro ao bloquear usuário" });
+  }
+});
+
+router.post("/users/:id/unblock", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const adminId = req.user!.id;
+
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    if (!user.isBlocked) {
+      return res.status(400).json({ error: "Usuário não está bloqueado" });
+    }
+
+    const previousReason = user.blockReason;
+
+    await db.update(users)
+      .set({
+        isBlocked: false,
+        blockReason: null,
+        blockedAt: null,
+        blockedBy: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id));
+
+    await createAuditLog({
+      adminId,
+      action: AdminAction.USER_UNBLOCK,
+      targetType: "user",
+      targetId: id,
+      dataBefore: { isBlocked: true, blockReason: previousReason },
+      dataAfter: { isBlocked: false },
+    });
+
+    res.json({ success: true, message: "Usuário desbloqueado com sucesso" });
+  } catch (error: any) {
+    console.error("Admin unblock user error:", error);
+    res.status(500).json({ error: "Erro ao desbloquear usuário" });
+  }
+});
+
+router.get("/audit-logs", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
+
+    const logs = await db
+      .select()
+      .from(adminAuditLogs)
+      .orderBy(desc(adminAuditLogs.createdAt))
+      .limit(limit);
+
+    const logsWithAdmins = [];
+    for (const log of logs) {
+      const [admin] = await db.select().from(users).where(eq(users.id, log.adminId));
+      logsWithAdmins.push({
+        id: log.id,
+        action: log.action,
+        targetType: log.targetType,
+        targetId: log.targetId,
+        dataBefore: log.dataBefore ? JSON.parse(log.dataBefore) : null,
+        dataAfter: log.dataAfter ? JSON.parse(log.dataAfter) : null,
+        reason: log.reason,
+        createdAt: log.createdAt,
+        admin: admin ? {
+          id: admin.id,
+          name: admin.name,
+          email: admin.email,
+        } : null,
+      });
+    }
+
+    res.json({ logs: logsWithAdmins });
+  } catch (error: any) {
+    console.error("Admin audit logs error:", error);
+    res.status(500).json({ error: "Erro ao buscar logs de auditoria" });
   }
 });
 

@@ -1,0 +1,156 @@
+🔴 REGRA DE OURO
+
+Se qualquer item abaixo falhar → NÃO abrir tráfego pago / NÃO aceitar volume.
+
+⸻
+
+1️⃣ ACESSO & SEGURANÇA ADMIN
+
+Verificações:
+	•	Usuário comum NÃO consegue acessar /admin
+	•	Middleware isAdmin ativo em todas as rotas admin
+	•	Logout invalida sessão admin
+	•	Refresh de página não perde proteção
+	•	Ações críticas pedem confirmação (modal “Tem certeza?”)
+
+🚨 Red flag: qualquer endpoint admin acessível via Postman sem role.
+
+⸻
+
+2️⃣ DASHBOARD GERAL (VERDADE DOS NÚMEROS)
+
+Conferir:
+	•	Total depositado = soma real do ledger (PIX pagos)
+	•	Total sacado = soma real dos saques pagos
+	•	Lucro = depositado − sacado
+	•	Bônus concedidos ≠ bônus convertidos
+	•	Datas (hoje / 7 dias / 30 dias) batem corretamente
+
+🧪 Teste:
+	•	Faz 1 depósito teste → número atualiza?
+	•	Faz 1 saque → lucro muda?
+
+🚨 Red flag: números “bonitos” mas que não batem com o ledger.
+
+⸻
+
+3️⃣ DEPÓSITOS PIX (ONDAPAY)
+
+Conferir:
+	•	Lista mostra apenas PIX pagos (não criados)
+	•	ExternalId único
+	•	Valor líquido ≠ valor bruto (se houver fee)
+	•	Webhook duplicado não duplica crédito
+	•	Status sempre vem do webhook, nunca manual
+
+🧪 Teste:
+	•	Simula webhook duplicado
+	•	Simula PIX criado e nunca pago
+
+🚨 Red flag: crédito antes do webhook.
+
+⸻
+
+4️⃣ SAQUES PIX (CRÍTICO)
+
+Conferir:
+	•	Saque bloqueado com rollover pendente
+	•	Admin vê motivo do bloqueio
+	•	Aprovação manual funciona
+	•	Saque muda status corretamente
+	•	Saldo reduz somente após confirmação
+
+🧪 Teste:
+	•	Usuário com bônus tenta sacar
+	•	Admin tenta aprovar saque bloqueado
+
+🚨 Red flag: saque sem reduzir saldo real.
+
+⸻
+
+5️⃣ WALLET & LEDGER (CORAÇÃO DO SISTEMA)
+
+Conferir:
+	•	Nenhuma função altera saldo fora do ledger
+	•	Cada mudança tem:
+	•	tipo
+	•	origem
+	•	data
+	•	valor
+	•	Conversão de bônus gera transação própria
+	•	Histórico imutável (não editável)
+
+🧪 Teste:
+	•	Deposita
+	•	Aposta
+	•	Perde
+	•	Ganha
+	•	Completa rollover
+	•	Saca
+
+🚨 Red flag: qualquer “update direto” no saldo.
+
+⸻
+
+6️⃣ BÔNUS & ROLLOVER
+
+Conferir:
+	•	Apenas 1 bônus ativo por usuário
+	•	CPF impede bônus duplicado
+	•	Rollover diminui apenas com apostas reais
+	•	Conversão respeita limite máximo
+	•	Excedente é descartado corretamente
+
+🧪 Teste:
+	•	Usuário ganha acima do limite
+	•	Usuário tenta receber outro bônus
+
+🚨 Red flag: rollover sendo burlado.
+
+⸻
+
+7️⃣ USUÁRIOS & ANTI-FRAUDE
+
+Conferir:
+	•	Lista de usuários mostra CPF
+	•	CPFs duplicados detectáveis
+	•	Admin consegue bloquear conta
+	•	Bloqueio impede login / saque
+	•	Sessões são invalidadas
+
+🧪 Teste:
+	•	Bloqueia usuário logado
+	•	Tenta apostar / sacar
+
+🚨 Red flag: usuário bloqueado ainda operando.
+
+⸻
+
+8️⃣ LOGS & AUDITORIA ADMIN
+
+Conferir:
+	•	Toda ação admin gera log
+	•	Log mostra:
+	•	quem fez
+	•	o que fez
+	•	antes / depois
+	•	Logs não são apagáveis via UI
+
+🧪 Teste:
+	•	Cancela bônus
+	•	Bloqueia usuário
+	•	Aprova saque
+
+🚨 Red flag: admin sem rastro.
+
+⸻
+
+9️⃣ PERFORMANCE & ESTABILIDADE
+
+Conferir:
+	•	Dashboard carrega com muitos dados
+	•	Paginação funciona
+	•	Filtros não quebram queries
+	•	Nenhum endpoint pesado sem limite
+
+🚨 Red flag: admin lento = problemas futuros.

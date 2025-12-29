@@ -165,6 +165,12 @@ export async function loginUser(data: LoginUser): Promise<AuthResponse> {
       return { success: false, error: "Email/CPF ou senha incorretos" };
     }
 
+    // Check if user is blocked
+    if (user.isBlocked) {
+      console.log("[LOGIN] User is blocked:", user.email, user.blockReason);
+      return { success: false, error: "Sua conta foi bloqueada. Entre em contato com o suporte." };
+    }
+
     // Generate tokens
     const accessToken = generateAccessToken(user.id, user.email);
     const refreshToken = generateRefreshToken(user.id, user.email);

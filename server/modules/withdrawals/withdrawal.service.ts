@@ -48,6 +48,10 @@ export async function requestWithdrawal(
     return { success: false, error: "Usuário não encontrado" };
   }
 
+  if (user.isBlocked) {
+    return { success: false, error: "Sua conta está bloqueada. Entre em contato com o suporte." };
+  }
+
   if (user.kycStatus !== "verified") {
     return { success: false, error: "É necessário validar seus dados (KYC) antes de sacar" };
   }
