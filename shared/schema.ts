@@ -107,6 +107,7 @@ export const BonusType = {
   CASHBACK: "CASHBACK",
   FREE_BET: "FREE_BET",
   VIP: "VIP",
+  NO_DEPOSIT: "NO_DEPOSIT",
 } as const;
 
 // Bonus status
@@ -131,6 +132,8 @@ export const bonuses = pgTable("bonuses", {
   type: varchar("type", { length: 30 }).notNull(),
   percentage: numeric("percentage", { precision: 5, scale: 2 }).notNull(),
   maxValue: numeric("max_value", { precision: 15, scale: 2 }).notNull(),
+  fixedAmount: numeric("fixed_amount", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  maxWithdrawal: numeric("max_withdrawal", { precision: 15, scale: 2 }).default("0.00").notNull(),
   rolloverMultiplier: numeric("rollover_multiplier", { precision: 5, scale: 2 }).notNull(),
   minDeposit: numeric("min_deposit", { precision: 15, scale: 2 }).default("0.00").notNull(),
   isActive: boolean("is_active").default(true).notNull(),
@@ -138,6 +141,16 @@ export const bonuses = pgTable("bonuses", {
   validDays: numeric("valid_days", { precision: 5, scale: 0 }).default("30").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Welcome bonus CPF tracking - Anti-fraud for no-deposit bonuses
+export const welcomeBonusClaims = pgTable("welcome_bonus_claims", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cpf: varchar("cpf", { length: 14 }).notNull().unique(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  bonusId: varchar("bonus_id").notNull().references(() => bonuses.id),
+  userBonusId: varchar("user_bonus_id").notNull().references(() => userBonuses.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // User bonuses table - Tracks bonus applied to users

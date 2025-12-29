@@ -5,6 +5,7 @@ import {
   wallets,
   transactions,
   pixDeposits,
+  welcomeBonusClaims,
   TransactionType,
   TransactionStatus,
   UserBonusStatus,
@@ -53,6 +54,8 @@ export async function createBonus(data: {
   type: string;
   percentage: number;
   maxValue: number;
+  fixedAmount?: number;
+  maxWithdrawal?: number;
   rolloverMultiplier: number;
   minDeposit?: number;
   isFirstDepositOnly?: boolean;
@@ -67,6 +70,8 @@ export async function createBonus(data: {
         type: data.type,
         percentage: data.percentage.toFixed(2),
         maxValue: data.maxValue.toFixed(2),
+        fixedAmount: (data.fixedAmount || 0).toFixed(2),
+        maxWithdrawal: (data.maxWithdrawal || 0).toFixed(2),
         rolloverMultiplier: data.rolloverMultiplier.toFixed(2),
         minDeposit: (data.minDeposit || 0).toFixed(2),
         isFirstDepositOnly: data.isFirstDepositOnly || false,
@@ -364,6 +369,14 @@ export async function consumeRollover(
   }
 }
 
+/**
+ * Convert bonus balance to real balance after rollover completion.
+ * Respects maxWithdrawal limit from the bonus template.
+ * 
+ * IMPORTANT: This is called when rolloverRemaining reaches 0, before the
+ * userBonus status is marked as COMPLETED. Therefore we look up ACTIVE
+ * bonuses with rolloverRemaining = 0, not COMPLETED ones.
+ */
 export async function convertBonusToReal(userId: string): Promise<boolean> {
   try {
     const [wallet] = await db.select().from(wallets).where(eq(wallets.userId, userId));
@@ -375,10 +388,37 @@ export async function convertBonusToReal(userId: string): Promise<boolean> {
 
     if (bonusBalance <= 0) return true;
 
+    const activeBonusesWithZeroRollover = await db
+      .select()
+      .from(userBonuses)
+      .where(and(
+        eq(userBonuses.userId, userId),
+        eq(userBonuses.status, UserBonusStatus.ACTIVE)
+      ))
+      .orderBy(desc(userBonuses.createdAt))
+      .limit(1);
+
+    let amountToConvert = bonusBalance;
+    let discarded = 0;
+
+    if (activeBonusesWithZeroRollover.length > 0) {
+      const userBonus = activeBonusesWithZeroRollover[0];
+      const [bonus] = await db.select().from(bonuses).where(eq(bonuses.id, userBonus.bonusId));
+      
+      if (bonus && parseFloat(bonus.maxWithdrawal) > 0) {
+        const maxWithdrawal = parseFloat(bonus.maxWithdrawal);
+        if (bonusBalance > maxWithdrawal) {
+          amountToConvert = maxWithdrawal;
+          discarded = bonusBalance - maxWithdrawal;
+          console.log(`Bonus capped to max withdrawal: R$ ${maxWithdrawal}, discarded: R$ ${discarded}`);
+        }
+      }
+    }
+
     await db
       .update(wallets)
       .set({
-        balance: (realBalance + bonusBalance).toFixed(2),
+        balance: (realBalance + amountToConvert).toFixed(2),
         bonusBalance: "0.00",
         rolloverRemaining: "0.00",
         rolloverTotal: "0.00",
@@ -390,15 +430,17 @@ export async function convertBonusToReal(userId: string): Promise<boolean> {
       userId,
       walletId: wallet.id,
       type: TransactionType.BONUS_CONVERT,
-      amount: bonusBalance.toFixed(2),
+      amount: amountToConvert.toFixed(2),
       balanceBefore: realBalance.toFixed(2),
-      balanceAfter: (realBalance + bonusBalance).toFixed(2),
+      balanceAfter: (realBalance + amountToConvert).toFixed(2),
       status: TransactionStatus.COMPLETED,
       referenceId: `BONUS_CONVERT_${userId}_${Date.now()}`,
-      description: `Bônus convertido em saldo real após rollover`,
+      description: discarded > 0 
+        ? `Bônus convertido em saldo real (R$ ${discarded.toFixed(2)} descartado por limite máximo)`
+        : `Bônus convertido em saldo real após rollover`,
     });
 
-    console.log(`Bonus converted to real: R$ ${bonusBalance} for user ${userId}`);
+    console.log(`Bonus converted to real: R$ ${amountToConvert} for user ${userId}`);
 
     return true;
   } catch (error: any) {
@@ -516,4 +558,152 @@ export async function getWalletBonusInfo(userId: string): Promise<{
     rolloverTotal,
     rolloverProgress,
   };
+}
+
+/**
+ * Check if CPF already claimed welcome bonus (anti-fraud).
+ */
+export async function hasCPFClaimedWelcomeBonus(cpf: string): Promise<boolean> {
+  const cleanCPF = cpf.replace(/\D/g, '');
+  const [claim] = await db
+    .select()
+    .from(welcomeBonusClaims)
+    .where(eq(welcomeBonusClaims.cpf, cleanCPF));
+  return !!claim;
+}
+
+/**
+ * Get active no-deposit welcome bonus.
+ */
+export async function getActiveWelcomeBonus(): Promise<Bonus | null> {
+  const [bonus] = await db
+    .select()
+    .from(bonuses)
+    .where(and(
+      eq(bonuses.type, BonusType.NO_DEPOSIT),
+      eq(bonuses.isActive, true)
+    ))
+    .limit(1);
+  return bonus || null;
+}
+
+/**
+ * Apply welcome bonus to new user registration.
+ * Called automatically after user registration.
+ * Uses a transaction to ensure consistency between bonus credit and anti-fraud tracking.
+ */
+export async function applyWelcomeBonus(
+  userId: string,
+  cpf: string
+): Promise<ApplyBonusResult> {
+  const cleanCPF = cpf.replace(/\D/g, '');
+
+  try {
+    const alreadyClaimed = await hasCPFClaimedWelcomeBonus(cleanCPF);
+    if (alreadyClaimed) {
+      console.log(`CPF ${cleanCPF} already claimed welcome bonus`);
+      return { success: false, error: "CPF já recebeu bônus de boas-vindas" };
+    }
+
+    const existingBonuses = await getUserActiveBonuses(userId);
+    if (existingBonuses.length > 0) {
+      console.log(`User ${userId} already has active bonus`);
+      return { success: false, error: "Usuário já possui bônus ativo" };
+    }
+
+    const welcomeBonus = await getActiveWelcomeBonus();
+    if (!welcomeBonus) {
+      console.log("No active welcome bonus found");
+      return { success: false, error: "Bônus de boas-vindas não disponível" };
+    }
+
+    const bonusAmount = parseFloat(welcomeBonus.fixedAmount) > 0 
+      ? parseFloat(welcomeBonus.fixedAmount)
+      : parseFloat(welcomeBonus.maxValue);
+    
+    const rolloverMultiplier = parseFloat(welcomeBonus.rolloverMultiplier);
+    const rolloverTotal = bonusAmount * rolloverMultiplier;
+    const validDays = parseInt(welcomeBonus.validDays);
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + validDays);
+
+    const result = await db.transaction(async (tx) => {
+      const [userBonus] = await tx
+        .insert(userBonuses)
+        .values({
+          userId,
+          bonusId: welcomeBonus.id,
+          depositId: null,
+          bonusAmount: bonusAmount.toFixed(2),
+          rolloverTotal: rolloverTotal.toFixed(2),
+          rolloverRemaining: rolloverTotal.toFixed(2),
+          status: UserBonusStatus.ACTIVE,
+          expiresAt,
+        })
+        .returning();
+
+      const [wallet] = await tx.select().from(wallets).where(eq(wallets.userId, userId));
+      
+      if (!wallet) {
+        throw new Error("Carteira não encontrada");
+      }
+
+      const currentBonusBalance = parseFloat(wallet.bonusBalance);
+      const currentRolloverRemaining = parseFloat(wallet.rolloverRemaining);
+      const currentRolloverTotal = parseFloat(wallet.rolloverTotal);
+
+      await tx
+        .update(wallets)
+        .set({
+          bonusBalance: (currentBonusBalance + bonusAmount).toFixed(2),
+          rolloverRemaining: (currentRolloverRemaining + rolloverTotal).toFixed(2),
+          rolloverTotal: (currentRolloverTotal + rolloverTotal).toFixed(2),
+          updatedAt: new Date(),
+        })
+        .where(eq(wallets.userId, userId));
+
+      await tx.insert(transactions).values({
+        userId,
+        walletId: wallet.id,
+        type: TransactionType.BONUS_CREDIT,
+        amount: bonusAmount.toFixed(2),
+        balanceBefore: currentBonusBalance.toFixed(2),
+        balanceAfter: (currentBonusBalance + bonusAmount).toFixed(2),
+        status: TransactionStatus.COMPLETED,
+        referenceId: `WELCOME_BONUS_${userBonus.id}`,
+        description: `Bônus de boas-vindas R$ ${bonusAmount.toFixed(2)} - Rollover ${rolloverMultiplier}x`,
+        metadata: JSON.stringify({
+          bonusId: welcomeBonus.id,
+          bonusName: welcomeBonus.name,
+          rolloverTotal,
+          rolloverMultiplier,
+          maxWithdrawal: parseFloat(welcomeBonus.maxWithdrawal),
+        }),
+      });
+
+      await tx.insert(welcomeBonusClaims).values({
+        cpf: cleanCPF,
+        userId,
+        bonusId: welcomeBonus.id,
+        userBonusId: userBonus.id,
+      });
+
+      return userBonus;
+    });
+
+    console.log(
+      `Welcome bonus applied: R$ ${bonusAmount} for user ${userId} (CPF: ${cleanCPF}), rollover: R$ ${rolloverTotal}`
+    );
+
+    return {
+      success: true,
+      bonusAmount,
+      rolloverTotal,
+      userBonus: result,
+    };
+  } catch (error: any) {
+    console.error("Apply welcome bonus error:", error);
+    return { success: false, error: "Erro ao aplicar bônus de boas-vindas" };
+  }
 }

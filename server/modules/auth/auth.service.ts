@@ -14,6 +14,7 @@ import {
   generateRefreshToken, 
   verifyRefreshToken 
 } from "./auth.middleware";
+import { applyWelcomeBonus } from "../bonus/bonus.service";
 
 const SALT_ROUNDS = 10;
 
@@ -71,6 +72,16 @@ export async function registerUser(data: RegisterUser): Promise<AuthResponse> {
 
     // Create wallet automatically (with retry for DNS issues)
     await withRetry(() => storage.createWallet({ userId: user.id }));
+
+    // Apply welcome bonus automatically (non-blocking)
+    try {
+      const bonusResult = await applyWelcomeBonus(user.id, cpf);
+      if (bonusResult.success) {
+        console.log(`Welcome bonus applied to user ${user.id}: R$ ${bonusResult.bonusAmount}`);
+      }
+    } catch (bonusError) {
+      console.error("Failed to apply welcome bonus:", bonusError);
+    }
 
     // Generate tokens
     const accessToken = generateAccessToken(user.id, user.email);

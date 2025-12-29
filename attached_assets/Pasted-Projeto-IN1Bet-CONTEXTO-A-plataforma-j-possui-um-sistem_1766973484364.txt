@@ -1,0 +1,129 @@
+Projeto: IN1Bet
+
+CONTEXTO
+
+A plataforma já possui um sistema profissional de bônus com rollover, ledger, bloqueio de saque e painel admin.
+Agora é necessário criar UM bônus de boas-vindas sem depósito, simples e controlado, para novos usuários.
+
+⸻
+
+🎯 OBJETIVO
+
+Criar um bônus de cadastro que:
+	•	concede R$5 gratuitamente
+	•	NÃO exige depósito
+	•	NÃO permite saque imediato
+	•	exige rollover antes de liberar saque
+
+⸻
+
+🚨 REGRAS ABSOLUTAS
+	•	Bônus concedido automaticamente após cadastro
+	•	Apenas 1 vez por usuário
+	•	Apenas 1 vez por CPF
+	•	Não acumulável com outros bônus
+	•	Totalmente controlado pelo backend
+
+⸻
+
+🧩 CONFIGURAÇÃO DO BÔNUS
+
+Criar um bônus com as seguintes características:
+
+📌 Dados do bônus
+	•	Nome: “Bônus de Boas-Vindas R$5”
+	•	Tipo: SEM_DEPÓSITO
+	•	Valor fixo: R$5
+	•	Depósito mínimo: NÃO APLICÁVEL
+	•	Rollover: 20x
+	•	Valor máximo de saque: R$50
+	•	Apenas para novos usuários
+	•	Ativo: true
+
+⸻
+
+🧩 FLUXO CORRETO
+	1.	Usuário cria conta
+	2.	Backend verifica:
+	•	se é primeira conta
+	•	se CPF não recebeu bônus antes
+	3.	Backend credita:
+	•	saldo_bônus += R$5
+	•	rollover_restante = R$100 (5 × 20)
+	4.	Ledger registra:
+	•	crédito de bônus
+	•	criação de rollover
+	5.	Saque fica bloqueado até rollover = 0
+
+⸻
+
+🧩 CONTROLE DE ROLLOVER
+	•	Cada aposta válida reduz o rollover
+	•	Ganhos não reduzem rollover
+	•	Cancelamentos não contam
+	•	Ao completar rollover:
+	•	bônus é convertido em saldo real
+	•	respeitar limite máximo de saque
+
+⸻
+
+🧩 BLOQUEIO DE SAQUE
+
+Enquanto rollover > 0:
+	•	botão de saque desabilitado
+	•	mensagem clara:
+“Complete o rollover do bônus para liberar o saque”
+
+Se atingir o limite máximo de saque:
+	•	converter apenas até o limite
+	•	descartar excedente (se houver)
+
+⸻
+
+🧩 FRONTEND (SEM MUDAR DESIGN)
+	•	Mostrar na carteira:
+	•	Saldo Bônus: R$5
+	•	Rollover restante
+	•	Barra de progresso
+	•	Texto simples explicativo:
+“Bônus de boas-vindas — aposte R$100 para liberar o saque.”
+
+⸻
+
+🧩 ADMIN
+
+Admin pode:
+	•	Ativar/desativar o bônus
+	•	Ver usuários que receberam
+	•	Cancelar bônus manualmente
+	•	Ajustar valor / rollover se necessário
+
+⸻
+
+🧠 SEGURANÇA
+	•	Tudo registrado no ledger
+	•	Nenhuma lógica no frontend
+	•	Nenhum saque permitido sem rollover completo
+	•	CPF como chave antifraude principal
+
+⸻
+
+✅ CHECKLIST FINAL
+	•	Bônus concedido apenas uma vez
+	•	Rollover obrigatório
+	•	Saque bloqueado corretamente
+	•	Limite máximo respeitado
+	•	Ledger registra tudo
+	•	Admin tem controle
+
+⸻
+
+🏁 RESULTADO ESPERADO
+
+Um bônus de boas-vindas:
+	•	atrativo
+	•	seguro
+	•	sustentável
+	•	idêntico ao padrão de casinos reais
+
+👉 Implementa exatamente este bônus, sem criar variações extras neste momento.

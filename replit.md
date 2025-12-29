@@ -106,11 +106,12 @@ Key tables:
 - Validates CPF matches user's registration data
 
 ### Bonus System
-- **Bonus Types**: FIRST_DEPOSIT, RELOAD, CASHBACK, FREE_BET, VIP
+- **Bonus Types**: FIRST_DEPOSIT, RELOAD, CASHBACK, FREE_BET, VIP, NO_DEPOSIT
 - **Rollover Control**: Users must bet (bonusAmount × rolloverMultiplier) to convert bonus to real balance
 - **Tables**:
-  - `bonuses` - Bonus templates created by admin
+  - `bonuses` - Bonus templates created by admin (includes fixedAmount and maxWithdrawal fields)
   - `user_bonuses` - User bonus instances with status tracking
+  - `welcome_bonus_claims` - CPF tracking for no-deposit bonus anti-fraud
 - **Wallet Fields**: bonusBalance, rolloverRemaining, rolloverTotal
 - **Transaction Types**: BONUS_CREDIT, BONUS_CONVERT, ROLLOVER_CONSUME
 - **Rules**:
@@ -118,6 +119,13 @@ Key tables:
   - Automatic bonus application on deposits based on eligibility
   - Withdrawals blocked until rolloverRemaining = 0
   - Bonus auto-converts to real balance when rollover complete
+  - Max withdrawal limit enforced on conversion (excess is discarded)
+- **Welcome Bonus (No-Deposit)**:
+  - R$5 grátis ao se cadastrar
+  - Rollover: 20x (R$100 de apostas necessárias)
+  - Limite máximo de saque: R$50
+  - Apenas 1 vez por CPF (anti-fraude)
+  - Aplicado automaticamente no registro
 - Endpoints:
   - GET /api/bonus/available - List active bonuses
   - GET /api/bonus/my-bonuses - User's active bonuses

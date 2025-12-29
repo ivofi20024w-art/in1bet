@@ -256,6 +256,8 @@ router.get("/bonuses", adminCheck, async (req: Request, res: Response) => {
         type: b.type,
         percentage: parseFloat(b.percentage),
         maxValue: parseFloat(b.maxValue),
+        fixedAmount: parseFloat(b.fixedAmount),
+        maxWithdrawal: parseFloat(b.maxWithdrawal),
         rolloverMultiplier: parseFloat(b.rolloverMultiplier),
         minDeposit: parseFloat(b.minDeposit),
         isActive: b.isActive,
@@ -341,22 +343,21 @@ router.get("/user-bonuses", adminCheck, async (req: Request, res: Response) => {
     const userId = req.query.userId as string;
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
 
-    let query = db
-      .select()
-      .from(userBonuses)
-      .orderBy(desc(userBonuses.createdAt))
-      .limit(limit);
-
+    let userBonusesList;
     if (userId) {
-      query = db
+      userBonusesList = await db
         .select()
         .from(userBonuses)
         .where(eq(userBonuses.userId, userId))
         .orderBy(desc(userBonuses.createdAt))
         .limit(limit);
+    } else {
+      userBonusesList = await db
+        .select()
+        .from(userBonuses)
+        .orderBy(desc(userBonuses.createdAt))
+        .limit(limit);
     }
-
-    const userBonusesList = await query;
 
     const result = [];
     for (const ub of userBonusesList) {
