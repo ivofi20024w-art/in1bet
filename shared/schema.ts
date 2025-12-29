@@ -40,6 +40,7 @@ export const users = pgTable("users", {
   birthDate: timestamp("birth_date"),
   isVerified: boolean("is_verified").default(false),
   isAdmin: boolean("is_admin").default(false),
+  adminRole: varchar("admin_role", { length: 20 }).default("USER"),
   isBlocked: boolean("is_blocked").default(false),
   blockReason: text("block_reason"),
   blockedAt: timestamp("blocked_at"),
@@ -371,6 +372,67 @@ export const createBonusSchema = z.object({
   validDays: z.number().min(1).max(365).optional(),
 });
 
+// Admin Roles
+export const AdminRole = {
+  USER: "USER",
+  ADMIN: "ADMIN",
+  SECURITY: "SECURITY",
+  FINANCIAL: "FINANCIAL",
+  SUPPORT: "SUPPORT",
+} as const;
+
+// KYC Document Types
+export const KycDocumentType = {
+  RG: "RG",
+  CNH: "CNH",
+} as const;
+
+// KYC Verification Status (detailed)
+export const KycVerificationStatus = {
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+} as const;
+
+// KYC Verifications table - Document-based verification
+export const kycVerifications = pgTable("kyc_verifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  cpf: varchar("cpf", { length: 14 }).notNull(),
+  documentType: varchar("document_type", { length: 10 }).notNull(),
+  documentFrontUrl: text("document_front_url").notNull(),
+  documentBackUrl: text("document_back_url"),
+  selfieUrl: text("selfie_url").notNull(),
+  status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+  rejectionReason: text("rejection_reason"),
+  reviewedBy: varchar("reviewed_by").references(() => users.id),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Security Audit Logs - Immutable security logs
+export const securityLogs = pgTable("security_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  adminId: varchar("admin_id").notNull().references(() => users.id),
+  action: varchar("action", { length: 50 }).notNull(),
+  targetType: varchar("target_type", { length: 30 }).notNull(),
+  targetId: varchar("target_id", { length: 100 }).notNull(),
+  userId: varchar("user_id").references(() => users.id),
+  details: text("details"),
+  reason: text("reason"),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Security Actions
+export const SecurityAction = {
+  KYC_APPROVE: "KYC_APPROVE",
+  KYC_REJECT: "KYC_REJECT",
+  KYC_SUBMIT: "KYC_SUBMIT",
+  FRAUD_FLAG: "FRAUD_FLAG",
+  FRAUD_CLEAR: "FRAUD_CLEAR",
+} as const;
+
 // Admin Audit Log Actions
 export const AdminAction = {
   USER_BLOCK: "USER_BLOCK",
@@ -398,6 +460,29 @@ export const adminAuditLogs = pgTable("admin_audit_logs", {
   reason: text("reason"),
   ipAddress: varchar("ip_address", { length: 45 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// KYC Verification Schemas
+export const insertKycVerificationSchema = createInsertSchema(kycVerifications).omit({
+  id: true,
+  status: true,
+  rejectionReason: true,
+  reviewedBy: true,
+  reviewedAt: true,
+  createdAt: true,
+});
+
+export const submitKycDocumentsSchema = z.object({
+  documentType: z.enum(["RG", "CNH"]),
+  documentFrontUrl: z.string().min(1, "Frente do documento obrigatória"),
+  documentBackUrl: z.string().optional(),
+  selfieUrl: z.string().min(1, "Selfie obrigatória"),
+});
+
+// Security Log Schema
+export const insertSecurityLogSchema = createInsertSchema(securityLogs).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Types
@@ -430,6 +515,15 @@ export type InsertUserBonus = z.infer<typeof insertUserBonusSchema>;
 export type BonusTypeValue = typeof BonusType[keyof typeof BonusType];
 export type BonusStatusValue = typeof BonusStatus[keyof typeof BonusStatus];
 export type UserBonusStatusValue = typeof UserBonusStatus[keyof typeof UserBonusStatus];
+export type KycVerification = typeof kycVerifications.$inferSelect;
+export type InsertKycVerification = z.infer<typeof insertKycVerificationSchema>;
+export type SubmitKycDocuments = z.infer<typeof submitKycDocumentsSchema>;
+export type SecurityLog = typeof securityLogs.$inferSelect;
+export type InsertSecurityLog = z.infer<typeof insertSecurityLogSchema>;
+export type AdminRoleValue = typeof AdminRole[keyof typeof AdminRole];
+export type KycDocumentTypeValue = typeof KycDocumentType[keyof typeof KycDocumentType];
+export type KycVerificationStatusValue = typeof KycVerificationStatus[keyof typeof KycVerificationStatus];
+export type SecurityActionValue = typeof SecurityAction[keyof typeof SecurityAction];
 
 // Safe user type (without password)
 export type SafeUser = Omit<User, 'password'>;
