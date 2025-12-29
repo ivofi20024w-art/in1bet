@@ -51,7 +51,10 @@ export const wallets = pgTable("wallets", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id).unique(),
   balance: numeric("balance", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  bonusBalance: numeric("bonus_balance", { precision: 15, scale: 2 }).default("0.00").notNull(),
   lockedBalance: numeric("locked_balance", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  rolloverRemaining: numeric("rollover_remaining", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  rolloverTotal: numeric("rollover_total", { precision: 15, scale: 2 }).default("0.00").notNull(),
   currency: varchar("currency", { length: 3 }).default("BRL").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -92,7 +95,66 @@ export const TransactionType = {
   WIN: "WIN",
   ROLLBACK: "ROLLBACK",
   BONUS: "BONUS",
+  BONUS_CREDIT: "BONUS_CREDIT",
+  BONUS_CONVERT: "BONUS_CONVERT",
+  ROLLOVER_CONSUME: "ROLLOVER_CONSUME",
 } as const;
+
+// Bonus types
+export const BonusType = {
+  FIRST_DEPOSIT: "FIRST_DEPOSIT",
+  RELOAD: "RELOAD",
+  CASHBACK: "CASHBACK",
+  FREE_BET: "FREE_BET",
+  VIP: "VIP",
+} as const;
+
+// Bonus status
+export const BonusStatus = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+} as const;
+
+// User bonus status
+export const UserBonusStatus = {
+  ACTIVE: "ACTIVE",
+  COMPLETED: "COMPLETED",
+  EXPIRED: "EXPIRED",
+  CANCELLED: "CANCELLED",
+} as const;
+
+// Bonuses table - Available bonus templates
+export const bonuses = pgTable("bonuses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  description: text("description"),
+  type: varchar("type", { length: 30 }).notNull(),
+  percentage: numeric("percentage", { precision: 5, scale: 2 }).notNull(),
+  maxValue: numeric("max_value", { precision: 15, scale: 2 }).notNull(),
+  rolloverMultiplier: numeric("rollover_multiplier", { precision: 5, scale: 2 }).notNull(),
+  minDeposit: numeric("min_deposit", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  isFirstDepositOnly: boolean("is_first_deposit_only").default(false).notNull(),
+  validDays: numeric("valid_days", { precision: 5, scale: 0 }).default("30").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// User bonuses table - Tracks bonus applied to users
+export const userBonuses = pgTable("user_bonuses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  bonusId: varchar("bonus_id").notNull().references(() => bonuses.id),
+  depositId: varchar("deposit_id").references(() => pixDeposits.id),
+  bonusAmount: numeric("bonus_amount", { precision: 15, scale: 2 }).notNull(),
+  rolloverTotal: numeric("rollover_total", { precision: 15, scale: 2 }).notNull(),
+  rolloverRemaining: numeric("rollover_remaining", { precision: 15, scale: 2 }).notNull(),
+  status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
 export const TransactionStatus = {
   PENDING: "PENDING",
@@ -215,7 +277,10 @@ export const insertWalletSchema = createInsertSchema(wallets).omit({
   createdAt: true,
   updatedAt: true,
   balance: true,
+  bonusBalance: true,
   lockedBalance: true,
+  rolloverRemaining: true,
+  rolloverTotal: true,
   currency: true,
 });
 
@@ -263,6 +328,32 @@ export const submitKycSchema = z.object({
   birthDate: z.string().optional(),
 });
 
+// Bonus schemas
+export const insertBonusSchema = createInsertSchema(bonuses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertUserBonusSchema = createInsertSchema(userBonuses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  completedAt: true,
+});
+
+export const createBonusSchema = z.object({
+  name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
+  description: z.string().optional(),
+  type: z.enum(["FIRST_DEPOSIT", "RELOAD", "CASHBACK", "FREE_BET", "VIP"]),
+  percentage: z.number().min(1).max(500),
+  maxValue: z.number().min(1),
+  rolloverMultiplier: z.number().min(1).max(100),
+  minDeposit: z.number().min(0).optional(),
+  isFirstDepositOnly: z.boolean().optional(),
+  validDays: z.number().min(1).max(365).optional(),
+});
+
 // Types
 export type PixDeposit = typeof pixDeposits.$inferSelect;
 export type InsertPixDeposit = z.infer<typeof insertPixDepositSchema>;
@@ -284,6 +375,14 @@ export type TransactionStatusValue = typeof TransactionStatus[keyof typeof Trans
 export type WithdrawalStatusValue = typeof WithdrawalStatus[keyof typeof WithdrawalStatus];
 export type KycStatusValue = typeof KycStatus[keyof typeof KycStatus];
 export type PixKeyTypeValue = typeof PixKeyType[keyof typeof PixKeyType];
+export type Bonus = typeof bonuses.$inferSelect;
+export type InsertBonus = z.infer<typeof insertBonusSchema>;
+export type CreateBonus = z.infer<typeof createBonusSchema>;
+export type UserBonus = typeof userBonuses.$inferSelect;
+export type InsertUserBonus = z.infer<typeof insertUserBonusSchema>;
+export type BonusTypeValue = typeof BonusType[keyof typeof BonusType];
+export type BonusStatusValue = typeof BonusStatus[keyof typeof BonusStatus];
+export type UserBonusStatusValue = typeof UserBonusStatus[keyof typeof UserBonusStatus];
 
 // Safe user type (without password)
 export type SafeUser = Omit<User, 'password'>;

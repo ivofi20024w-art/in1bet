@@ -1,0 +1,144 @@
+CONTEXTO
+
+A plataforma já possui sistema financeiro robusto com wallet, transaction ledger, depósitos e saques via PIX.
+Agora é necessário implementar um SISTEMA DE BÔNUS PROFISSIONAL, com controle de rollover, bloqueio de saque e regras claras, seguindo padrões de casinos reais.
+
+⸻
+
+🎯 OBJETIVO
+
+Criar um módulo completo de Bônus & Rollover, com exemplos de bônus ativos, controle automático via ledger e integração total com wallet e saque.
+
+⸻
+
+🚨 REGRAS ABSOLUTAS
+	•	Bônus NÃO é sacável diretamente
+	•	Todo bônus deve ter rollover
+	•	Saque só é permitido quando rollover = 0
+	•	Tudo deve ser auditável no ledger
+	•	Backend controla 100% das regras
+	•	Frontend apenas exibe estados
+
+⸻
+
+🧩 PARTE 1 — MODELO DE BÔNUS
+
+Criar modelo de bônus com campos como:
+	•	id
+	•	nome
+	•	tipo (ex: DEPOSITO)
+	•	percentual (ex: 100%)
+	•	valor_maximo (ex: R$500)
+	•	rollover_multiplicador (ex: 10x)
+	•	ativo (true/false)
+
+Exemplos de bônus a criar:
+
+1️⃣ Bônus de Boas-vindas
+	•	Nome: “100% até R$500”
+	•	Percentual: 100%
+	•	Rollover: 10x
+	•	Apenas primeiro depósito
+
+2️⃣ Bônus Reload
+	•	Nome: “50% Reload”
+	•	Percentual: 50%
+	•	Rollover: 8x
+	•	Depósitos recorrentes
+
+⸻
+
+🧩 PARTE 2 — APLICAÇÃO DO BÔNUS
+
+Fluxo correto:
+	1.	Usuário faz depósito PIX
+	2.	Backend verifica se há bônus ativo
+	3.	Calcula valor do bônus
+	4.	Cria:
+	•	saldo_real (depósito)
+	•	saldo_bonus (bônus)
+	•	rollover_total = bônus × multiplicador
+	5.	Tudo registrado no ledger
+
+⚠️ Nunca misturar saldo real com bônus
+
+⸻
+
+🧩 PARTE 3 — CONTROLE DE ROLLOVER
+
+Criar sistema que:
+	•	A cada aposta válida:
+	•	diminui rollover_restante
+	•	Quando rollover_restante chega a 0:
+	•	bônus é convertido em saldo real
+	•	usuário passa a poder sacar
+
+Regras:
+	•	Apenas apostas com dinheiro real/bônus contam
+	•	Cancelamentos NÃO contam
+	•	Ganhos não reduzem rollover, apenas apostas
+
+⸻
+
+🧩 PARTE 4 — BLOQUEIO DE SAQUE
+
+Modificar regra de saque:
+	•	Se rollover_restante > 0:
+	•	bloquear saque
+	•	mostrar mensagem clara:
+“Você precisa apostar R$ X para liberar seu saque.”
+
+⸻
+
+🧩 PARTE 5 — FRONTEND (USANDO UI EXISTENTE)
+
+Adicionar na carteira:
+	•	Saldo Real
+	•	Saldo Bônus
+	•	Rollover restante (progress bar)
+
+UX clara:
+	•	Texto explicativo simples
+	•	Sem termos técnicos confusos
+
+⸻
+
+🧩 PARTE 6 — ADMIN (CONTROLE)
+
+Admin pode:
+	•	Criar / editar bônus
+	•	Ativar / desativar bônus
+	•	Ver bônus aplicado por usuário
+	•	Remover bônus manualmente (fraude / erro)
+
+⸻
+
+🧠 SEGURANÇA & FINANCEIRO
+	•	Ledger registra:
+	•	crédito de bônus
+	•	consumo de rollover
+	•	conversão para saldo real
+	•	Nenhuma lógica no frontend
+	•	Nenhum saque permitido com rollover ativo
+
+⸻
+
+✅ CHECKLIST FINAL
+	•	Bônus não sacável diretamente
+	•	Rollover obrigatório
+	•	Ledger registra tudo
+	•	Saque bloqueado corretamente
+	•	UX clara para o usuário
+	•	Admin tem controle total
+
+⸻
+
+🏁 RESULTADO ESPERADO
+
+Um sistema de bônus:
+	•	seguro
+	•	auditável
+	•	sustentável financeiramente
+	•	idêntico aos grandes casinos do mercado
+
+👉 Avança com esta implementação mantendo o padrão AAA+++ do projeto.
