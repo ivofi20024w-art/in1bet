@@ -46,6 +46,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
   useEffect(() => {
     const checkAdmin = async () => {
       if (!auth.accessToken || !auth.user) {
+        setLoading(false);
         setLocation("/login");
         return;
       }
@@ -56,19 +57,20 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
         });
 
         if (response.status === 403 || !response.ok) {
+          setLoading(false);
           setLocation("/");
           toast.error("Acesso negado");
           return;
         }
 
         setIsAdmin(true);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
         setLocation("/");
         toast.error("Erro ao verificar permissões");
         return;
       }
-
-      setLoading(false);
     };
 
     checkAdmin();
