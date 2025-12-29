@@ -1,0 +1,175 @@
+👉 Somente admins com role SECURITY ou ADMIN acessam essa área.
+👉 Todas as ações aqui impactam saque e risco, então precisam de logs.
+
+⸻
+
+🎯 O QUE ESSE KYC VAI FAZER (NÍVEL AAA)
+
+Para o usuário:
+	•	Cadastro normal com CPF
+	•	Pode depositar e jogar
+	•	NÃO pode sacar sem KYC
+	•	Vê status claro: pendente / aprovado / rejeitado
+	•	Upload simples e guiado
+
+Para o admin (segurança):
+	•	Fila de revisão profissional
+	•	Visualização clara dos documentos
+	•	Histórico do usuário (depósitos, bônus, IP)
+	•	Aprovação ou rejeição com motivo
+	•	Log completo de decisão
+
+⸻
+
+🚀 PROMPT AAA+++ — KYC INTERNO + DEPARTAMENTO DE SEGURANÇA
+
+👉 Copia e cola no Replit AI exatamente como está abaixo
+
+⸻
+
+🔥 PROMPT (KYC INTERNO PROFISSIONAL)
+
+Contexto do projeto:
+Plataforma de casino online brasileira com PIX, wallet, ledger, bônus e dashboard admin já funcional.
+
+Objetivo deste update:
+Implementar um SISTEMA DE KYC INTERNO COMPLETO, com DEPARTAMENTO DE SEGURANÇA DEDICADO dentro do /admin, nível operador profissional.
+
+Princípios obrigatórios:
+	•	KYC NÃO pode alterar saldo
+	•	KYC NÃO pode creditar/descreditar dinheiro
+	•	KYC apenas controla PERMISSÃO DE SAQUE e RISCO
+	•	Tudo deve ser auditável
+	•	Estrutura preparada para futura integração com APIs externas
+
+⸻
+
+1️⃣ MODELO DE DADOS (KYC)
+
+Criar entidade KycVerification:
+	•	userId
+	•	cpf
+	•	documentType (RG | CNH)
+	•	documentFrontUrl
+	•	documentBackUrl
+	•	selfieUrl
+	•	status (PENDING | APPROVED | REJECTED)
+	•	rejectionReason (nullable)
+	•	reviewedBy (adminId)
+	•	reviewedAt
+	•	createdAt
+
+Garantir:
+	•	Apenas 1 KYC ativo por usuário
+	•	Histórico preservado (não sobrescrever)
+
+⸻
+
+2️⃣ FLUXO DO USUÁRIO
+
+Criar páginas:
+	•	/perfil/verificacao
+
+Funcionalidades:
+	•	Upload guiado de documentos (frente, verso, selfie)
+	•	Validações básicas de arquivo (tipo, tamanho)
+	•	Status visível em tempo real
+	•	Mensagens claras:
+	•	“Verificação pendente”
+	•	“Verificado”
+	•	“Rejeitado – enviar novamente”
+
+Regras:
+	•	Usuário pode depositar e apostar sem KYC
+	•	Usuário NÃO pode sacar sem KYC aprovado
+
+⸻
+
+3️⃣ BLOQUEIO DE SAQUE (INTEGRAÇÃO)
+
+Integrar com sistema de saque:
+	•	Se KYC ≠ APPROVED → saque bloqueado
+	•	Mensagem clara: “Verificação de identidade pendente”
+	•	Admin vê exatamente o motivo do bloqueio
+
+⸻
+
+4️⃣ DEPARTAMENTO DE SEGURANÇA (ADMIN)
+
+Criar nova aba /admin/seguranca
+
+Subsecções:
+
+🔍 KYC Pendentes
+	•	Lista paginada
+	•	Filtros por data, CPF, usuário
+	•	Visualização completa dos documentos
+	•	Acesso ao perfil financeiro do usuário
+
+Ações:
+	•	Aprovar KYC
+	•	Rejeitar KYC (campo obrigatório de motivo)
+
+⸻
+
+✅ KYC Aprovados
+	•	Histórico de verificações
+	•	Admin responsável
+	•	Data de aprovação
+
+⸻
+
+❌ KYC Rejeitados
+	•	Motivo
+	•	Tentativas
+	•	Possível flag antifraude
+
+⸻
+
+5️⃣ AUDITORIA & LOGS DE SEGURANÇA
+
+Criar logs específicos:
+	•	Ação (approve / reject)
+	•	Admin responsável
+	•	Usuário afetado
+	•	Data/hora
+	•	Motivo
+
+Logs imutáveis.
+
+⸻
+
+6️⃣ ROLES & PERMISSÕES
+
+Criar role:
+	•	SECURITY
+
+Regras:
+	•	SECURITY acessa apenas /admin/seguranca
+	•	ADMIN acessa tudo
+	•	Usuários comuns não acessam nada disso
+
+⸻
+
+7️⃣ UX / UI
+	•	Interface limpa, profissional, sem poluição
+	•	Estilo consistente com dashboard existente
+	•	Visualização clara de documentos (zoom)
+	•	Confirmação dupla em decisões
+
+⸻
+
+8️⃣ PREPARAÇÃO PARA FUTURO
+
+Estruturar código para permitir futuramente:
+	•	Validação automática de CPF
+	•	OCR
+	•	Face match
+	•	Integração com APIs externas
+
+Sem refatorações futuras necessárias.
+
+⸻
+
+Resultado esperado:
+Um SISTEMA DE KYC INTERNO DE NÍVEL OPERADOR REAL, com departamento de segurança dedicado, controle total de risco, pronto para escalar.
