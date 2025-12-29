@@ -122,11 +122,11 @@ export default function AdminSecurity() {
       const headers = { Authorization: `Bearer ${auth.accessToken}` };
 
       const [statsRes, pendingRes, approvedRes, rejectedRes, logsRes] = await Promise.all([
-        fetch("/api/admin/security/stats", { headers }),
-        fetch("/api/admin/security/kyc/pending", { headers }),
-        fetch("/api/admin/security/kyc/approved", { headers }),
-        fetch("/api/admin/security/kyc/rejected", { headers }),
-        fetch("/api/admin/security/logs", { headers }),
+        fetch("/api/admin/security/stats", { headers, credentials: "include" }),
+        fetch("/api/admin/security/kyc/pending", { headers, credentials: "include" }),
+        fetch("/api/admin/security/kyc/approved", { headers, credentials: "include" }),
+        fetch("/api/admin/security/kyc/rejected", { headers, credentials: "include" }),
+        fetch("/api/admin/security/logs", { headers, credentials: "include" }),
       ]);
 
       if (statsRes.ok) setStats(await statsRes.json());
@@ -164,6 +164,7 @@ export default function AdminSecurity() {
       const response = await fetch(`/api/admin/security/kyc/${kycId}/approve`, {
         method: "POST",
         headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: "include",
       });
 
       if (response.ok) {
@@ -195,6 +196,7 @@ export default function AdminSecurity() {
           Authorization: `Bearer ${auth.accessToken}`,
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ reason: rejectionReason }),
       });
 
@@ -621,6 +623,7 @@ export default function AdminSecurity() {
                     <div
                       className="relative aspect-[4/3] bg-gray-800 rounded-lg overflow-hidden cursor-pointer group"
                       onClick={() => setViewingImage(selectedKyc.documentFrontUrl!)}
+                      data-testid="image-document-front"
                     >
                       <img
                         src={selectedKyc.documentFrontUrl}
@@ -639,6 +642,7 @@ export default function AdminSecurity() {
                     <div
                       className="relative aspect-[4/3] bg-gray-800 rounded-lg overflow-hidden cursor-pointer group"
                       onClick={() => setViewingImage(selectedKyc.documentBackUrl!)}
+                      data-testid="image-document-back"
                     >
                       <img
                         src={selectedKyc.documentBackUrl}
@@ -657,6 +661,7 @@ export default function AdminSecurity() {
                     <div
                       className="relative aspect-[4/3] bg-gray-800 rounded-lg overflow-hidden cursor-pointer group"
                       onClick={() => setViewingImage(selectedKyc.selfieUrl!)}
+                      data-testid="image-selfie"
                     >
                       <img
                         src={selectedKyc.selfieUrl}
@@ -695,6 +700,7 @@ export default function AdminSecurity() {
               variant="outline"
               onClick={() => setSelectedKyc(null)}
               className="border-gray-700"
+              data-testid="button-close-modal"
             >
               Fechar
             </Button>
@@ -755,6 +761,7 @@ export default function AdminSecurity() {
               variant="outline"
               onClick={() => setShowRejectDialog(false)}
               className="border-gray-700"
+              data-testid="button-cancel-reject"
             >
               Cancelar
             </Button>

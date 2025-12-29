@@ -47,6 +47,10 @@ export default function Verification() {
     },
     onSuccess: () => {
       toast.success("Documentos enviados! Aguarde a análise.");
+      setDocumentFront("");
+      setDocumentBack("");
+      setSelfie("");
+      setStep(1);
       queryClient.invalidateQueries({ queryKey: ["/api/kyc/status"] });
     },
     onError: (error: any) => {
@@ -108,8 +112,8 @@ export default function Verification() {
   }
 
   const isVerified = kycData?.kycStatus === "verified";
-  const isPending = kycData?.verification?.status === "PENDING";
-  const isRejected = kycData?.verification?.status === "REJECTED";
+  const isPending = kycData?.verification?.status?.toUpperCase() === "PENDING" || kycData?.kycStatus === "pending";
+  const isRejected = kycData?.verification?.status?.toUpperCase() === "REJECTED";
 
   return (
     <MainLayout>
