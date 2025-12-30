@@ -24,13 +24,13 @@ Preferred communication style: Simple, everyday language.
 - **Authentication**: JWT-based (access/refresh tokens)
 - **Password Security**: bcrypt
 - **API Structure**: RESTful endpoints
-- **Modular Design**: Separate modules for `auth`, `users`, `wallet`, `payments`, `withdrawals`, `kyc`, `admin`, `betting`, `games`, `history`, and `affiliate`.
+- **Modular Design**: Separate modules for `auth`, `users`, `wallet`, `payments`, `withdrawals`, `kyc`, `admin`, `betting`, `games`, `history`, `affiliate`, and `playfivers`.
 
 ### Data Storage
 - **Database**: PostgreSQL
 - **ORM**: Drizzle ORM with drizzle-kit for migrations
 - **Schema**: `shared/schema.ts` (shared between frontend/backend)
-- **Key Tables**: `users`, `wallets`, `refreshTokens`, `pixDeposits`, `pixWithdrawals`, `transactions`, `bets`, `minesGames`, `bonuses`, `user_bonuses`, `welcome_bonus_claims`, `affiliates`, `affiliate_links`, `affiliate_conversions`, `affiliate_payouts`, `affiliate_clicks`.
+- **Key Tables**: `users`, `wallets`, `refreshTokens`, `pixDeposits`, `pixWithdrawals`, `transactions`, `bets`, `minesGames`, `bonuses`, `user_bonuses`, `welcome_bonus_claims`, `affiliates`, `affiliate_links`, `affiliate_conversions`, `affiliate_payouts`, `affiliate_clicks`, `playfivers_providers`, `playfivers_games`, `playfivers_sessions`, `playfivers_transactions`.
 
 ### Authentication
 - User registration with CPF validation.
@@ -50,6 +50,7 @@ Preferred communication style: Simple, everyday language.
 ### Security
 - **Rate Limiting**: Applied to general API access, authentication, registration, PIX creation, withdrawals, and webhooks.
 - **Webhook Security**: HMAC-SHA256 signature verification for OndaPay webhooks (required in production).
+- **PlayFivers Webhook Security**: Agent credentials validation (agent_code/agent_secret), timestamp verification (5-minute tolerance), duplicate transaction prevention via idempotency keys.
 
 ## External Dependencies
 
@@ -58,6 +59,13 @@ Preferred communication style: Simple, everyday language.
 
 ### Third-Party Integrations
 - **OndaPay PIX**: For real PIX payment deposits and webhooks.
+- **PlayFivers API**: Gaming provider integration for slots and live casino games. Features:
+  - Providers/games synchronization and caching
+  - Game launch with session tracking
+  - Webhook handlers for balance queries and transactions (Bet/WinBet)
+  - Idempotent transaction processing with atomic DB operations
+  - Timestamp validation for webhook security
+  - Required secrets: `PLAYFIVERS_AGENT_TOKEN`, `PLAYFIVERS_SECRET_KEY`, `PLAYFIVERS_AGENT_CODE`, `PLAYFIVERS_AGENT_SECRET`
 - **JivoChat**: Live chat widget (placeholder).
 
 ### Key NPM Packages
