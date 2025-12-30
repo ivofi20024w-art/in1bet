@@ -6,9 +6,6 @@ export const generalLimiter = rateLimit({
   message: { error: "Muitas requisições. Tente novamente em alguns minutos." },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    return req.ip || req.headers["x-forwarded-for"]?.toString() || "unknown";
-  },
 });
 
 export const authLimiter = rateLimit({
@@ -17,9 +14,6 @@ export const authLimiter = rateLimit({
   message: { error: "Muitas tentativas de login. Tente novamente em 15 minutos." },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    return req.ip || req.headers["x-forwarded-for"]?.toString() || "unknown";
-  },
   skipSuccessfulRequests: false,
 });
 
@@ -29,9 +23,6 @@ export const registrationLimiter = rateLimit({
   message: { error: "Muitas tentativas de registro. Tente novamente em 1 hora." },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => {
-    return req.ip || req.headers["x-forwarded-for"]?.toString() || "unknown";
-  },
 });
 
 export const pixLimiter = rateLimit({
@@ -41,8 +32,10 @@ export const pixLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
-    return (req as any).user?.id || req.ip || "unknown";
+    const userId = (req as any).user?.id;
+    return userId || req.ip || "unknown";
   },
+  validate: false,
 });
 
 export const withdrawalLimiter = rateLimit({
@@ -52,8 +45,10 @@ export const withdrawalLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
-    return (req as any).user?.id || req.ip || "unknown";
+    const userId = (req as any).user?.id;
+    return userId || req.ip || "unknown";
   },
+  validate: false,
 });
 
 export const webhookLimiter = rateLimit({

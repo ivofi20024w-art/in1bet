@@ -199,6 +199,27 @@ Key tables:
 
 - JivoChat widget (placeholder in index.html)
 
+### Security Features
+
+#### Rate Limiting (server/middleware/rateLimit.ts)
+- **General Limiter**: 100 requests per 15 minutes for all /api routes
+- **Auth Limiter**: 10 login attempts per 15 minutes per IP
+- **Registration Limiter**: 5 registrations per hour per IP
+- **PIX Limiter**: 3 PIX creations per minute per user
+- **Withdrawal Limiter**: 2 withdrawal requests per minute per user
+- **Webhook Limiter**: 50 webhook requests per second
+
+#### Webhook Security
+- **Production Mode**: ONDAPAY_WEBHOOK_SECRET is required
+- **Development Mode**: Unsigned webhooks accepted with warning log
+- HMAC-SHA256 signature verification using `x-ondapay-signature` header
+- Timing-safe comparison to prevent timing attacks
+
+#### Required Environment Variables for Production
+- `NODE_ENV=production` - Enables strict security checks
+- `ONDAPAY_WEBHOOK_SECRET` - Required for webhook signature verification
+- `JWT_SECRET` - Required for JWT signing
+
 ### Development Tools
 - Replit-specific Vite plugins for development banner and cartographer
 - Custom meta images plugin for OpenGraph tags
