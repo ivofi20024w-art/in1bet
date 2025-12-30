@@ -722,6 +722,148 @@ export const minesGames = pgTable("mines_games", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// =============================================
+// PLAYFIVERS INTEGRATION TABLES
+// =============================================
+
+// PlayFivers Provider Status
+export const PlayfiversProviderStatus = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+} as const;
+
+// PlayFivers Game Status
+export const PlayfiversGameStatus = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+} as const;
+
+// PlayFivers Session Status
+export const PlayfiversSessionStatus = {
+  ACTIVE: "ACTIVE",
+  CLOSED: "CLOSED",
+} as const;
+
+// PlayFivers Transaction Type
+export const PlayfiversTransactionType = {
+  BALANCE: "BALANCE",
+  BET: "Bet",
+  WIN_BET: "WinBet",
+  REFUND: "Refund",
+} as const;
+
+// PlayFivers Transaction Status
+export const PlayfiversTransactionStatus = {
+  SUCCESS: "SUCCESS",
+  FAILED: "FAILED",
+  DUPLICATE: "DUPLICATE",
+} as const;
+
+// PlayFivers Providers - Cache of available game providers
+export const playfiversProviders = pgTable("playfivers_providers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  externalId: numeric("external_id", { precision: 15, scale: 0 }).notNull().unique(),
+  name: text("name").notNull(),
+  imageUrl: text("image_url"),
+  walletName: text("wallet_name"),
+  status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
+  lastSyncedAt: timestamp("last_synced_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// PlayFivers Games - Cache of available games
+export const playfiversGames = pgTable("playfivers_games", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  gameCode: varchar("game_code", { length: 100 }).notNull().unique(),
+  name: text("name").notNull(),
+  imageUrl: text("image_url"),
+  providerId: varchar("provider_id").references(() => playfiversProviders.id),
+  providerName: varchar("provider_name", { length: 100 }).notNull(),
+  isOriginal: boolean("is_original").default(false).notNull(),
+  supportsFreeRounds: boolean("supports_free_rounds").default(false).notNull(),
+  gameType: varchar("game_type", { length: 30 }).default("slot"),
+  status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
+  lastSyncedAt: timestamp("last_synced_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// PlayFivers Sessions - Track active game sessions
+export const playfiversSessions = pgTable("playfivers_sessions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  gameId: varchar("game_id").references(() => playfiversGames.id),
+  gameCode: varchar("game_code", { length: 100 }).notNull(),
+  providerName: varchar("provider_name", { length: 100 }).notNull(),
+  launchUrl: text("launch_url").notNull(),
+  balanceAtStart: numeric("balance_at_start", { precision: 15, scale: 2 }).notNull(),
+  status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
+  closedAt: timestamp("closed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// PlayFivers Transactions - Track all webhook transactions for idempotency and audit
+export const playfiversTransactions = pgTable("playfivers_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  externalTransactionId: varchar("external_transaction_id", { length: 200 }).notNull().unique(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  sessionId: varchar("session_id").references(() => playfiversSessions.id),
+  transactionType: varchar("transaction_type", { length: 30 }).notNull(),
+  gameCode: varchar("game_code", { length: 100 }),
+  providerName: varchar("provider_name", { length: 100 }),
+  betAmount: numeric("bet_amount", { precision: 15, scale: 2 }).default("0.00"),
+  winAmount: numeric("win_amount", { precision: 15, scale: 2 }).default("0.00"),
+  balanceBefore: numeric("balance_before", { precision: 15, scale: 2 }).notNull(),
+  balanceAfter: numeric("balance_after", { precision: 15, scale: 2 }).notNull(),
+  status: varchar("status", { length: 20 }).default("SUCCESS").notNull(),
+  walletTransactionId: varchar("wallet_transaction_id").references(() => transactions.id),
+  rawPayload: text("raw_payload"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// PlayFivers Relations
+export const playfiversProvidersRelations = relations(playfiversProviders, ({ many }) => ({
+  games: many(playfiversGames),
+}));
+
+export const playfiversGamesRelations = relations(playfiversGames, ({ one, many }) => ({
+  provider: one(playfiversProviders, {
+    fields: [playfiversGames.providerId],
+    references: [playfiversProviders.id],
+  }),
+  sessions: many(playfiversSessions),
+}));
+
+export const playfiversSessionsRelations = relations(playfiversSessions, ({ one, many }) => ({
+  user: one(users, {
+    fields: [playfiversSessions.userId],
+    references: [users.id],
+  }),
+  game: one(playfiversGames, {
+    fields: [playfiversSessions.gameId],
+    references: [playfiversGames.id],
+  }),
+  transactions: many(playfiversTransactions),
+}));
+
+export const playfiversTransactionsRelations = relations(playfiversTransactions, ({ one }) => ({
+  user: one(users, {
+    fields: [playfiversTransactions.userId],
+    references: [users.id],
+  }),
+  session: one(playfiversSessions, {
+    fields: [playfiversTransactions.sessionId],
+    references: [playfiversSessions.id],
+  }),
+  walletTransaction: one(transactions, {
+    fields: [playfiversTransactions.walletTransactionId],
+    references: [transactions.id],
+  }),
+}));
+
 // KYC Verification Schemas
 export const insertKycVerificationSchema = createInsertSchema(kycVerifications).omit({
   id: true,
@@ -908,3 +1050,30 @@ export type ChangePassword = z.infer<typeof changePasswordSchema>;
 // User settings types
 export type UserSettings = typeof userSettings.$inferSelect;
 export type UpdateUserSettings = z.infer<typeof updateUserSettingsSchema>;
+
+// PlayFivers types
+export type PlayfiversProvider = typeof playfiversProviders.$inferSelect;
+export type PlayfiversGame = typeof playfiversGames.$inferSelect;
+export type PlayfiversSession = typeof playfiversSessions.$inferSelect;
+export type PlayfiversTransaction = typeof playfiversTransactions.$inferSelect;
+export type PlayfiversProviderStatusValue = typeof PlayfiversProviderStatus[keyof typeof PlayfiversProviderStatus];
+export type PlayfiversGameStatusValue = typeof PlayfiversGameStatus[keyof typeof PlayfiversGameStatus];
+export type PlayfiversSessionStatusValue = typeof PlayfiversSessionStatus[keyof typeof PlayfiversSessionStatus];
+export type PlayfiversTransactionTypeValue = typeof PlayfiversTransactionType[keyof typeof PlayfiversTransactionType];
+export type PlayfiversTransactionStatusValue = typeof PlayfiversTransactionStatus[keyof typeof PlayfiversTransactionStatus];
+
+// PlayFivers schemas
+export const launchGameSchema = z.object({
+  gameCode: z.string().min(1, "Código do jogo obrigatório"),
+  providerName: z.string().min(1, "Nome do provedor obrigatório"),
+  isOriginal: z.boolean().optional().default(false),
+  lang: z.enum(["pt", "en", "es", "ja", "zh", "ru", "th", "hi"]).optional().default("pt"),
+});
+
+export const grantFreeRoundsSchema = z.object({
+  gameCode: z.string().min(1, "Código do jogo obrigatório"),
+  rounds: z.number().min(1).max(23, "Máximo 23 rodadas grátis"),
+});
+
+export type LaunchGame = z.infer<typeof launchGameSchema>;
+export type GrantFreeRounds = z.infer<typeof grantFreeRoundsSchema>;
