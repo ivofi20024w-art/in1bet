@@ -1,8 +1,11 @@
 import { MainLayout } from "@/components/layout/MainLayout";
+import { GameCard } from "@/components/shared/GameCard";
+import { SectionHeader } from "@/components/shared/SectionHeader";
+import { CASINO_GAMES } from "@/lib/mockData";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Rocket, Star } from "lucide-react";
+import { Rocket, Gamepad2, Trophy, Flame, Play, Star, Sparkles, TrendingUp, Zap } from "lucide-react";
 import { Link } from "wouter";
 import Autoplay from "embla-carousel-autoplay";
 
@@ -12,13 +15,24 @@ import cashbackBanner from "@assets/generated_images/weekly_cashback_promo_banne
 import dropsBanner from "@assets/generated_images/drops_and_wins_tournament_banner.png";
 
 const BANNERS = [
-  { id: 1, img: welcomeBanner, title: "BÔNUS DE BOAS-VINDAS", subtitle: "100% até R$ 500 no primeiro depósito", cta: "PEGAR BÔNUS", link: "/wallet" },
-  { id: 2, img: cashbackBanner, title: "CASHBACK SEMANAL", subtitle: "Receba até 10% das suas perdas de volta", cta: "SAIBA MAIS", link: "/wallet" },
-  { id: 3, img: dropsBanner, title: "JOGAR MINES", subtitle: "Jogo exclusivo IN1Bet com dinheiro real", cta: "JOGAR AGORA", link: "/games/mines" },
+  { id: 1, img: welcomeBanner, title: "BÔNUS DE BOAS-VINDAS", subtitle: "100% até R$ 500 no primeiro depósito", cta: "PEGAR BÔNUS", link: "/promotions" },
+  { id: 2, img: cashbackBanner, title: "CASHBACK SEMANAL", subtitle: "Receba até 10% das suas perdas de volta", cta: "SAIBA MAIS", link: "/promotions" },
+  { id: 3, img: dropsBanner, title: "DROPS & WINS", subtitle: "Prêmios diários e torneios semanais", cta: "PARTICIPAR", link: "/casino" },
 ];
 
 const ORIGINALS = [
+  { id: "crash", name: "Crashmania", image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop", link: "/games/crash", color: "from-orange-500 to-red-600", icon: Rocket },
+  { id: "double", name: "Double", image: "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?q=80&w=600&auto=format&fit=crop", link: "/games/double", color: "from-red-600 to-black", icon: Zap },
   { id: "mines", name: "Mines", image: "https://images.unsplash.com/photo-1615858603610-8356165d496e?q=80&w=600&auto=format&fit=crop", link: "/games/mines", color: "from-blue-500 to-indigo-600", icon: Star },
+  { id: "plinko", name: "Plinko", image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=600&auto=format&fit=crop", link: "/games/plinko", color: "from-green-500 to-green-700", icon: Gamepad2 },
+];
+
+const CATEGORIES = [
+  { id: "lobby", label: "Lobby", icon: Gamepad2 },
+  { id: "slots", label: "Slots", icon: Flame },
+  { id: "live", label: "Ao Vivo", icon: Play },
+  { id: "originals", label: "Originais", icon: Rocket },
+  { id: "favorites", label: "Favoritos", icon: Star },
 ];
 
 export default function Home() {
@@ -61,15 +75,19 @@ export default function Home() {
         </Carousel>
       </section>
 
-      {/* Quick Navigation */}
-      <section className="mb-10">
-        <div className="flex gap-3">
-          <Link href="/games/mines">
-            <Button className="h-12 rounded-xl bg-primary hover:bg-primary/90 text-white transition-all gap-2 px-8 font-bold shadow-lg shadow-primary/20">
-              <Star className="w-4 h-4" />
-              Jogar Mines
+      {/* Quick Navigation / Categories */}
+      <section className="mb-10 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex gap-3 min-w-max">
+          {CATEGORIES.map((cat) => (
+            <Button 
+              key={cat.id} 
+              variant="outline" 
+              className="h-12 rounded-xl border-white/10 bg-white/5 hover:bg-primary hover:border-primary hover:text-white transition-all gap-2 px-6 font-bold"
+            >
+              <cat.icon className="w-4 h-4" />
+              {cat.label}
             </Button>
-          </Link>
+          ))}
         </div>
       </section>
 
@@ -85,6 +103,7 @@ export default function Home() {
                     <p className="text-xs text-muted-foreground">Jogos exclusivos com RTP de 99%</p>
                 </div>
             </div>
+            <Link href="/casino" className="text-sm font-bold text-primary hover:text-white transition-colors">Ver todos</Link>
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -116,22 +135,73 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Call to Action */}
+      {/* Popular Slots */}
       <section className="mb-12">
-        <div className="relative h-56 md:h-64 rounded-2xl overflow-hidden bg-gradient-to-r from-blue-900 to-indigo-900 border border-white/10 shadow-2xl group">
+        <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2">
+                <div className="p-2 bg-orange-500/20 rounded-lg">
+                    <Flame className="w-6 h-6 text-orange-500" />
+                </div>
+                <div>
+                    <h2 className="text-2xl font-heading font-bold text-white leading-none">Slots Populares</h2>
+                    <p className="text-xs text-muted-foreground">Os jogos mais quentes do momento</p>
+                </div>
+            </div>
+            <div className="flex gap-2">
+                <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-white/10 hover:bg-white/10"><Sparkles className="w-4 h-4" /></Button>
+            </div>
+        </div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {CASINO_GAMES.map(game => (
+            <GameCard key={game.id} {...game} />
+          ))}
+        </div>
+      </section>
+
+       {/* Live Casino Banner */}
+       <section className="mb-12">
+        <div className="relative h-56 md:h-64 rounded-2xl overflow-hidden bg-gradient-to-r from-purple-900 to-indigo-900 border border-white/10 shadow-2xl group cursor-pointer">
             <div className="absolute inset-0 flex items-center justify-between p-8 md:p-12 z-10">
                 <div className="max-w-lg space-y-4">
-                    <h3 className="text-3xl md:text-5xl font-heading font-black text-white italic leading-none">JOGUE <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-400">MINES</span></h3>
-                    <p className="text-gray-300 max-w-sm text-sm md:text-base font-medium">Nosso jogo exclusivo com dinheiro real, provably fair e 99% de RTP.</p>
-                    <Link href="/games/mines">
-                      <Button className="bg-white text-blue-900 hover:bg-gray-100 font-bold rounded-full px-8 h-12 shadow-lg transition-transform hover:scale-105">
-                          Jogar Agora
-                      </Button>
-                    </Link>
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="flex h-3 w-3 relative">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                        </span>
+                        <span className="text-xs font-bold text-red-400 uppercase tracking-widest bg-red-500/10 px-2 py-0.5 rounded">Ao Vivo Agora</span>
+                    </div>
+                    <h3 className="text-3xl md:text-5xl font-heading font-black text-white italic leading-none">CASINO <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">AO VIVO</span></h3>
+                    <p className="text-gray-300 max-w-sm text-sm md:text-base font-medium">Sinta a emoção de Las Vegas na palma da sua mão com dealers reais 24/7.</p>
+                    <Button className="bg-white text-purple-900 hover:bg-gray-100 font-bold rounded-full px-8 h-12 shadow-lg transition-transform hover:scale-105">
+                        Entrar no Lobby
+                    </Button>
                 </div>
             </div>
             
-            <Star className="absolute -bottom-12 -right-12 w-64 h-64 text-white/5" />
+            {/* Background Image / Decorative */}
+            <div className="absolute right-0 top-0 bottom-0 w-2/3 md:w-1/2 bg-[url('https://images.unsplash.com/photo-1605901309584-818e25960b8f?q=80&w=1000')] bg-cover bg-center opacity-30 mask-fade-left transition-transform duration-700 group-hover:scale-105" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+        </div>
+      </section>
+      
+      {/* Recent Big Wins */}
+      <section className="bg-card/50 border border-white/5 rounded-xl p-4 mb-8 backdrop-blur-sm">
+        <div className="flex items-center gap-2 mb-4">
+            <Trophy className="w-4 h-4 text-yellow-500" />
+            <span className="font-bold text-sm text-white">Últimos Ganhadores</span>
+        </div>
+        <div className="overflow-hidden relative h-8">
+            <div className="flex items-center gap-8 animate-marquee whitespace-nowrap absolute top-0">
+                {[1,2,3,4,5,6,7,8,9,10].map((i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm">
+                        <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px]">👑</span>
+                        <span className="text-gray-400 font-bold">user***{i}9</span>
+                        <span className="text-green-400 font-bold bg-green-500/10 px-1.5 rounded">R$ {(Math.random() * 5000 + 100).toFixed(2)}</span>
+                        <span className="text-gray-600 text-xs">- Sweet Bonanza</span>
+                    </div>
+                ))}
+            </div>
         </div>
       </section>
 

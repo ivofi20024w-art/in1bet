@@ -1,26 +1,44 @@
-import { Switch, Route, useLocation, Redirect } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
+import Casino from "@/pages/Casino";
+import Sports from "@/pages/Sports";
+import LiveBetting from "@/pages/LiveBetting";
+import LiveCasino from "@/pages/LiveCasino";
+import Promotions from "@/pages/Promotions";
+import VIP from "@/pages/VIP";
 import History from "@/pages/History";
 import Support from "@/pages/Support";
+import CreateTicket from "@/pages/support/CreateTicket";
+import TicketHistory from "@/pages/support/TicketHistory";
 import ResponsibleGaming from "@/pages/ResponsibleGaming";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
 import AML from "@/pages/AML";
 import Cookies from "@/pages/Cookies";
 import Profile from "@/pages/profile/Profile";
+import Settings from "@/pages/profile/Settings";
 import Security from "@/pages/profile/Security";
 import Verification from "@/pages/profile/Verification";
 import Affiliates from "@/pages/profile/Affiliates";
+import Originals from "@/pages/Originals";
 import WalletPage from "@/pages/Wallet";
+import Game from "@/pages/Game";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
+import Crash from "@/pages/games/Crash";
+import Double from "@/pages/games/Double";
 import Mines from "@/pages/games/Mines";
+import Plinko from "@/pages/games/Plinko";
+import MatchDetail from "@/pages/sports/MatchDetail";
+import MyBets from "@/pages/sports/MyBets";
+import SportsResults from "@/pages/sports/Results";
+import Prematch from "@/pages/sports/Prematch";
 import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminUsers from "@/pages/admin/Users";
 import AdminDeposits from "@/pages/admin/Deposits";
@@ -89,38 +107,43 @@ function Router() {
         <Route path="/register" component={Register} />
         <Route path="/forgot-password" component={ForgotPassword} />
 
-        {/* Main Routes */}
+        {/* Protected Routes (Mock Guard) */}
         <Route path="/" component={Home} />
-        <Route path="/games/mines" component={Mines} />
-        
-        {/* Legal Pages */}
+        <Route path="/casino" component={Casino} />
+        <Route path="/sports" component={Sports} />
+        <Route path="/sports/match/:id" component={MatchDetail} />
+        <Route path="/sports/my-bets" component={MyBets} />
+        <Route path="/sports/results" component={SportsResults} />
+        <Route path="/sports/prematch" component={Prematch} />
+        <Route path="/live-betting" component={LiveBetting} />
+        <Route path="/live-casino" component={LiveCasino} />
+        <Route path="/promotions" component={Promotions} />
+        <Route path="/vip" component={VIP} />
         <Route path="/responsible-gaming" component={ResponsibleGaming} />
         <Route path="/terms" component={Terms} />
         <Route path="/privacy" component={Privacy} />
         <Route path="/aml" component={AML} />
         <Route path="/cookies" component={Cookies} />
+        <Route path="/game/:id" component={Game} />
+        <Route path="/games/crash" component={Crash} />
+        <Route path="/games/double" component={Double} />
+        <Route path="/games/mines" component={Mines} />
+        <Route path="/games/plinko" component={Plinko} />
         
-        {/* Account Routes - Functional Only */}
+        {/* Account Routes */}
         <Route path="/history" component={History} />
         <Route path="/support" component={Support} />
+        <Route path="/support/tickets" component={TicketHistory} />
+        <Route path="/support/tickets/new" component={CreateTicket} />
         <Route path="/profile" component={Profile} />
+        <Route path="/profile/settings" component={Settings} />
         <Route path="/profile/security" component={Security} />
         <Route path="/profile/verification" component={Verification} />
         <Route path="/affiliates" component={Affiliates} />
+        <Route path="/originals" component={Originals} />
         <Route path="/wallet" component={WalletPage} />
-
-        {/* Redirects for removed routes */}
-        <Route path="/casino">{() => <Redirect to="/games/mines" />}</Route>
-        <Route path="/originals">{() => <Redirect to="/games/mines" />}</Route>
-        <Route path="/games/crash">{() => <Redirect to="/games/mines" />}</Route>
-        <Route path="/games/double">{() => <Redirect to="/games/mines" />}</Route>
-        <Route path="/games/plinko">{() => <Redirect to="/games/mines" />}</Route>
-        <Route path="/sports">{() => <Redirect to="/" />}</Route>
-        <Route path="/live-betting">{() => <Redirect to="/" />}</Route>
-        <Route path="/live-casino">{() => <Redirect to="/" />}</Route>
-        <Route path="/profile/settings">{() => <Redirect to="/profile" />}</Route>
-
-        {/* Admin Routes - All Functional */}
+        <Route path="/casino/popular" component={Casino} />
+        <Route path="/casino/recent" component={Casino} />
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/admin/users" component={AdminUsers} />
         <Route path="/admin/deposits" component={AdminDeposits} />
