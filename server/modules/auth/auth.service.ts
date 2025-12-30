@@ -1,12 +1,15 @@
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 import { storage, sanitizeUser } from "../../storage";
 import { withRetry } from "../../db";
 import { db } from "../../db";
-import { users } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { users, passwordResetTokens } from "@shared/schema";
+import { eq, and, isNull, gt } from "drizzle-orm";
 import { 
   registerUserSchema, 
   loginUserSchema, 
+  forgotPasswordSchema,
+  resetPasswordSchema,
   isValidCPF,
   type RegisterUser, 
   type LoginUser,
@@ -316,5 +319,182 @@ export async function logoutUser(refreshToken: string): Promise<boolean> {
   } catch (error) {
     console.error("Logout error:", error);
     return false;
+  }
+}
+
+// Hash a token using SHA-256
+function hashToken(token: string): string {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+// Generate a secure random token
+function generateSecureToken(): string {
+  return crypto.randomBytes(32).toString("hex");
+}
+
+// Request password reset - creates token and returns it (email would be sent separately)
+export async function requestPasswordReset(identifier: string): Promise<{
+  success: boolean;
+  email?: string;
+  token?: string;
+  error?: string;
+}> {
+  try {
+    const validationResult = forgotPasswordSchema.safeParse({ identifier });
+    if (!validationResult.success) {
+      return { 
+        success: false, 
+        error: validationResult.error.errors[0]?.message || "Dados inválidos" 
+      };
+    }
+
+    // Find user by email or CPF
+    const user = await withRetry(() => storage.getUserByEmailOrCPF(identifier));
+    
+    // Always return success to prevent enumeration attacks
+    if (!user) {
+      console.log("[PASSWORD_RESET] User not found for identifier:", identifier);
+      return { success: true }; // Don't reveal if user exists
+    }
+
+    // Invalidate any existing reset tokens for this user
+    await db
+      .delete(passwordResetTokens)
+      .where(eq(passwordResetTokens.userId, user.id));
+
+    // Generate secure token
+    const plainToken = generateSecureToken();
+    const tokenHash = hashToken(plainToken);
+    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+
+    // Store hashed token
+    await db.insert(passwordResetTokens).values({
+      userId: user.id,
+      tokenHash,
+      expiresAt,
+    });
+
+    console.log("[PASSWORD_RESET] Token created for user:", user.email);
+
+    return {
+      success: true,
+      email: user.email,
+      token: plainToken, // In production, this would be sent via email
+    };
+  } catch (error: any) {
+    console.error("Password reset request error:", error);
+    return { success: false, error: "Erro ao processar solicitação" };
+  }
+}
+
+// Reset password using token
+export async function resetPasswordWithToken(
+  token: string,
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const validationResult = resetPasswordSchema.safeParse({ token, newPassword });
+    if (!validationResult.success) {
+      return { 
+        success: false, 
+        error: validationResult.error.errors[0]?.message || "Dados inválidos" 
+      };
+    }
+
+    // Hash the provided token
+    const tokenHash = hashToken(token);
+
+    // Find valid token
+    const [resetToken] = await db
+      .select()
+      .from(passwordResetTokens)
+      .where(
+        and(
+          eq(passwordResetTokens.tokenHash, tokenHash),
+          isNull(passwordResetTokens.usedAt),
+          gt(passwordResetTokens.expiresAt, new Date())
+        )
+      );
+
+    if (!resetToken) {
+      return { success: false, error: "Token inválido ou expirado" };
+    }
+
+    // Get user
+    const user = await storage.getUser(resetToken.userId);
+    if (!user) {
+      return { success: false, error: "Usuário não encontrado" };
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    // Update user password
+    await db
+      .update(users)
+      .set({ password: hashedPassword, updatedAt: new Date() })
+      .where(eq(users.id, user.id));
+
+    // Mark token as used
+    await db
+      .update(passwordResetTokens)
+      .set({ usedAt: new Date() })
+      .where(eq(passwordResetTokens.id, resetToken.id));
+
+    // Invalidate all refresh tokens (logout all devices)
+    await storage.deleteUserRefreshTokens(user.id);
+
+    console.log("[PASSWORD_RESET] Password reset completed for user:", user.email);
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Password reset error:", error);
+    return { success: false, error: "Erro ao redefinir senha" };
+  }
+}
+
+// Change password for authenticated user
+export async function changeUserPassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Get user
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return { success: false, error: "Usuário não encontrado" };
+    }
+
+    // Verify current password
+    const isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    if (!isValidPassword) {
+      return { success: false, error: "Senha atual incorreta" };
+    }
+
+    // Check if new password is different
+    const isSamePassword = await bcrypt.compare(newPassword, user.password);
+    if (isSamePassword) {
+      return { success: false, error: "A nova senha deve ser diferente da atual" };
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, SALT_ROUNDS);
+
+    // Update password
+    await db
+      .update(users)
+      .set({ password: hashedPassword, updatedAt: new Date() })
+      .where(eq(users.id, userId));
+
+    // Invalidate all refresh tokens (logout all devices)
+    await storage.deleteUserRefreshTokens(userId);
+
+    console.log("[PASSWORD_CHANGE] Password changed for user:", user.email);
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Password change error:", error);
+    return { success: false, error: "Erro ao alterar senha" };
   }
 }

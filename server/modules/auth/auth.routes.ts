@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { registerUser, loginUser, refreshAccessToken, logoutUser } from "./auth.service";
+import { registerUser, loginUser, refreshAccessToken, logoutUser, requestPasswordReset, resetPasswordWithToken } from "./auth.service";
 import { authMiddleware } from "./auth.middleware";
 import { authLimiter, registrationLimiter } from "../../middleware/rateLimit";
 
@@ -103,6 +103,61 @@ router.get("/me", authMiddleware, async (req: Request, res: Response) => {
     res.json({ user: req.user });
   } catch (error) {
     console.error("Me route error:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+});
+
+// POST /api/auth/forgot-password - Request password reset
+router.post("/forgot-password", authLimiter, async (req: Request, res: Response) => {
+  try {
+    const { identifier } = req.body;
+    
+    if (!identifier) {
+      res.status(400).json({ error: "Email ou CPF obrigatório" });
+      return;
+    }
+
+    const result = await requestPasswordReset(identifier);
+    
+    // Always return success to prevent enumeration attacks
+    // In production, send email with the token
+    if (result.token) {
+      // For development/testing, we return the token
+      // In production, this would only send an email
+      console.log("[FORGOT_PASSWORD] Token generated:", result.token);
+    }
+
+    res.json({ 
+      message: "Se o email/CPF estiver cadastrado, você receberá instruções para redefinir sua senha.",
+      // For development testing only - remove in production
+      ...(process.env.NODE_ENV !== "production" && result.token ? { resetToken: result.token } : {})
+    });
+  } catch (error) {
+    console.error("Forgot password route error:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+});
+
+// POST /api/auth/reset-password - Reset password with token
+router.post("/reset-password", authLimiter, async (req: Request, res: Response) => {
+  try {
+    const { token, newPassword } = req.body;
+    
+    if (!token || !newPassword) {
+      res.status(400).json({ error: "Token e nova senha obrigatórios" });
+      return;
+    }
+
+    const result = await resetPasswordWithToken(token, newPassword);
+    
+    if (!result.success) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+
+    res.json({ message: "Senha redefinida com sucesso! Você pode fazer login com sua nova senha." });
+  } catch (error) {
+    console.error("Reset password route error:", error);
     res.status(500).json({ error: "Erro interno do servidor" });
   }
 });
