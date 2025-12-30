@@ -24,13 +24,13 @@ Preferred communication style: Simple, everyday language.
 - **Authentication**: JWT-based (access/refresh tokens)
 - **Password Security**: bcrypt
 - **API Structure**: RESTful endpoints
-- **Modular Design**: Separate modules for `auth`, `users`, `wallet`, `payments`, `withdrawals`, `kyc`, `admin`, `betting`, `games`, `history`, `affiliate`, and `playfivers`.
+- **Modular Design**: Separate modules for `auth`, `users`, `wallet`, `payments`, `withdrawals`, `kyc`, `admin`, `betting`, `games`, `history`, `affiliate`, `playfivers`, and `support`.
 
 ### Data Storage
 - **Database**: PostgreSQL
 - **ORM**: Drizzle ORM with drizzle-kit for migrations
 - **Schema**: `shared/schema.ts` (shared between frontend/backend)
-- **Key Tables**: `users`, `wallets`, `refreshTokens`, `pixDeposits`, `pixWithdrawals`, `transactions`, `bets`, `minesGames`, `bonuses`, `user_bonuses`, `welcome_bonus_claims`, `affiliates`, `affiliate_links`, `affiliate_conversions`, `affiliate_payouts`, `affiliate_clicks`, `playfivers_providers`, `playfivers_games`, `playfivers_sessions`, `playfivers_transactions`.
+- **Key Tables**: `users`, `wallets`, `refreshTokens`, `pixDeposits`, `pixWithdrawals`, `transactions`, `bets`, `minesGames`, `bonuses`, `user_bonuses`, `welcome_bonus_claims`, `affiliates`, `affiliate_links`, `affiliate_conversions`, `affiliate_payouts`, `affiliate_clicks`, `playfivers_providers`, `playfivers_games`, `playfivers_sessions`, `playfivers_transactions`, `support_departments`, `admin_departments`, `support_chats`, `support_chat_messages`, `support_chat_transfers`, `support_tickets`, `support_ticket_messages`, `support_ticket_escalations`, `support_canned_responses`, `support_sla_rules`, `support_audit_logs`, `support_triage_rules`.
 
 ### Authentication
 - User registration with CPF validation.
@@ -46,6 +46,14 @@ Preferred communication style: Simple, everyday language.
 - **Betting System**: Instant game betting with atomic transactions and idempotency.
 - **Provably Fair Gaming**: HMAC-SHA256 based with server, client seeds, and nonce for verifiable game outcomes (e.g., Mines game).
 - **Affiliate System**: Referral tracking, CPA/REV_SHARE/HYBRID commission models, payout balance locking, maturation windows for conversions, and anti-fraud mechanisms (CPF/IP duplication checks).
+- **Enterprise Support System**: Complete customer support solution with:
+  - **Live Chat**: Real-time messaging with queue management, agent assignment, VIP priority
+  - **Ticketing**: Async support with ticket numbers, SLA tracking, escalation levels
+  - **Departments**: Financeiro, Suporte Técnico, KYC/Verificação, Bônus e Promoções, Jogos, VIP
+  - **Intelligent Triage**: Keyword-based auto-classification and routing to correct departments
+  - **SLA Management**: Configurable response/resolution times, automatic breach detection
+  - **Canned Responses**: Pre-defined response templates for agents
+  - **Complete Audit Trail**: All actions logged for compliance
 
 ### Security
 - **Rate Limiting**: Applied to general API access, authentication, registration, PIX creation, withdrawals, and webhooks.

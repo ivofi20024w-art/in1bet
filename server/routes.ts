@@ -20,6 +20,7 @@ import { bettingRouter } from "./modules/betting";
 import { minesRouter } from "./modules/games";
 import historyRoutes from "./modules/history/history.routes";
 import playfiversRoutes from "./modules/playfivers/playfivers.routes";
+import { supportRouter, initializeDefaultDepartments, initializeDefaultSlaRules, initializeDefaultTriageRules } from "./modules/support";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -55,10 +56,20 @@ export async function registerRoutes(
   app.use("/api/games/mines", minesRouter);
   app.use("/api/history", historyRoutes);
   app.use("/api/playfivers", playfiversRoutes);
+  app.use("/api/support", supportRouter);
 
   // Initialize default settings
   initializeDefaultSettings().catch(err => {
     console.error("Failed to initialize default settings:", err);
+  });
+
+  // Initialize support system defaults
+  Promise.all([
+    initializeDefaultDepartments(),
+    initializeDefaultSlaRules(),
+    initializeDefaultTriageRules(),
+  ]).catch(err => {
+    console.error("Failed to initialize support defaults:", err);
   });
 
   // Health check endpoint

@@ -864,6 +864,354 @@ export const playfiversTransactionsRelations = relations(playfiversTransactions,
   }),
 }));
 
+// =============================================
+// ENTERPRISE SUPPORT SYSTEM TABLES
+// =============================================
+
+// Support Department Status
+export const SupportDepartmentStatus = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+} as const;
+
+// Support Agent Role
+export const SupportAgentRole = {
+  JUNIOR: "JUNIOR",
+  SENIOR: "SENIOR",
+  SUPERVISOR: "SUPERVISOR",
+} as const;
+
+// Support Chat Status
+export const SupportChatStatus = {
+  WAITING: "WAITING",
+  ACTIVE: "ACTIVE",
+  TRANSFERRED: "TRANSFERRED",
+  CLOSED: "CLOSED",
+} as const;
+
+// Support Ticket Status
+export const SupportTicketStatus = {
+  OPEN: "OPEN",
+  WAITING_USER: "WAITING_USER",
+  WAITING_INTERNAL: "WAITING_INTERNAL",
+  ESCALATED: "ESCALATED",
+  RESOLVED: "RESOLVED",
+  CLOSED: "CLOSED",
+} as const;
+
+// Support Ticket Priority
+export const SupportTicketPriority = {
+  LOW: "LOW",
+  NORMAL: "NORMAL",
+  HIGH: "HIGH",
+  URGENT: "URGENT",
+  VIP: "VIP",
+} as const;
+
+// Support Message Sender Type
+export const SupportSenderType = {
+  USER: "USER",
+  ADMIN: "ADMIN",
+  SYSTEM: "SYSTEM",
+  BOT: "BOT",
+} as const;
+
+// Support Triage Category
+export const SupportTriageCategory = {
+  WITHDRAWAL: "WITHDRAWAL",
+  DEPOSIT: "DEPOSIT",
+  KYC: "KYC",
+  BONUS: "BONUS",
+  TECHNICAL: "TECHNICAL",
+  ACCOUNT: "ACCOUNT",
+  GAME: "GAME",
+  OTHER: "OTHER",
+} as const;
+
+// Support Departments table
+export const supportDepartments = pgTable("support_departments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull().unique(),
+  description: text("description"),
+  isActive: boolean("is_active").default(true).notNull(),
+  priorityWeight: numeric("priority_weight", { precision: 5, scale: 0 }).default("1").notNull(),
+  workingHours: text("working_hours"), // JSON: {start: "09:00", end: "18:00", timezone: "America/Sao_Paulo", days: [1,2,3,4,5]}
+  autoAssign: boolean("auto_assign").default(true).notNull(),
+  maxQueueSize: numeric("max_queue_size", { precision: 5, scale: 0 }).default("50").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Admin-Department relationship (which admins belong to which departments)
+export const adminDepartments = pgTable("admin_departments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  adminId: varchar("admin_id").notNull().references(() => users.id),
+  departmentId: varchar("department_id").notNull().references(() => supportDepartments.id),
+  role: varchar("role", { length: 20 }).default("JUNIOR").notNull(),
+  maxConcurrentChats: numeric("max_concurrent_chats", { precision: 3, scale: 0 }).default("5").notNull(),
+  isAvailable: boolean("is_available").default(true).notNull(),
+  lastActiveAt: timestamp("last_active_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Support Chats table (live chat sessions)
+export const supportChats = pgTable("support_chats", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  departmentId: varchar("department_id").references(() => supportDepartments.id),
+  assignedAdminId: varchar("assigned_admin_id").references(() => users.id),
+  status: varchar("status", { length: 20 }).default("WAITING").notNull(),
+  priority: varchar("priority", { length: 20 }).default("NORMAL").notNull(),
+  category: varchar("category", { length: 30 }),
+  tags: text("tags"), // JSON array of tags
+  queuePosition: numeric("queue_position", { precision: 10, scale: 0 }),
+  triageCompleted: boolean("triage_completed").default(false).notNull(),
+  triageResponse: text("triage_response"), // JSON with bot classification
+  userRating: numeric("user_rating", { precision: 1, scale: 0 }), // 1-5 stars
+  userFeedback: text("user_feedback"),
+  startedAt: timestamp("started_at"),
+  closedAt: timestamp("closed_at"),
+  closedBy: varchar("closed_by").references(() => users.id),
+  closeReason: text("close_reason"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Support Chat Messages table
+export const supportChatMessages = pgTable("support_chat_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  chatId: varchar("chat_id").notNull().references(() => supportChats.id),
+  senderType: varchar("sender_type", { length: 20 }).notNull(), // USER, ADMIN, SYSTEM, BOT
+  senderId: varchar("sender_id").references(() => users.id), // nullable for SYSTEM/BOT
+  message: text("message").notNull(),
+  attachments: text("attachments"), // JSON array of attachment URLs
+  isRead: boolean("is_read").default(false).notNull(),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Support Chat Transfers table (tracks department transfers)
+export const supportChatTransfers = pgTable("support_chat_transfers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  chatId: varchar("chat_id").notNull().references(() => supportChats.id),
+  fromDepartmentId: varchar("from_department_id").references(() => supportDepartments.id),
+  toDepartmentId: varchar("to_department_id").notNull().references(() => supportDepartments.id),
+  fromAdminId: varchar("from_admin_id").references(() => users.id),
+  toAdminId: varchar("to_admin_id").references(() => users.id),
+  transferredByAdminId: varchar("transferred_by_admin_id").notNull().references(() => users.id),
+  reason: text("reason").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Support Tickets table (async support requests)
+export const supportTickets = pgTable("support_tickets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ticketNumber: varchar("ticket_number", { length: 20 }).notNull().unique(), // Human readable: SUP-2024-0001
+  userId: varchar("user_id").notNull().references(() => users.id),
+  departmentId: varchar("department_id").references(() => supportDepartments.id),
+  assignedAdminId: varchar("assigned_admin_id").references(() => users.id),
+  fromChatId: varchar("from_chat_id").references(() => supportChats.id), // If converted from chat
+  subject: text("subject").notNull(),
+  status: varchar("status", { length: 20 }).default("OPEN").notNull(),
+  priority: varchar("priority", { length: 20 }).default("NORMAL").notNull(),
+  category: varchar("category", { length: 30 }),
+  tags: text("tags"), // JSON array of tags
+  escalationLevel: numeric("escalation_level", { precision: 2, scale: 0 }).default("0").notNull(),
+  slaDeadline: timestamp("sla_deadline"),
+  slaBreached: boolean("sla_breached").default(false).notNull(),
+  firstResponseAt: timestamp("first_response_at"),
+  resolvedAt: timestamp("resolved_at"),
+  resolvedBy: varchar("resolved_by").references(() => users.id),
+  closedAt: timestamp("closed_at"),
+  closedBy: varchar("closed_by").references(() => users.id),
+  userRating: numeric("user_rating", { precision: 1, scale: 0 }), // 1-5 stars
+  userFeedback: text("user_feedback"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Support Ticket Messages table
+export const supportTicketMessages = pgTable("support_ticket_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ticketId: varchar("ticket_id").notNull().references(() => supportTickets.id),
+  senderType: varchar("sender_type", { length: 20 }).notNull(), // USER, ADMIN, SYSTEM
+  senderId: varchar("sender_id").references(() => users.id),
+  message: text("message").notNull(),
+  attachments: text("attachments"), // JSON array of attachment URLs
+  isInternal: boolean("is_internal").default(false).notNull(), // Internal notes not visible to user
+  isRead: boolean("is_read").default(false).notNull(),
+  readAt: timestamp("read_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Support Ticket Escalations table
+export const supportTicketEscalations = pgTable("support_ticket_escalations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ticketId: varchar("ticket_id").notNull().references(() => supportTickets.id),
+  fromLevel: numeric("from_level", { precision: 2, scale: 0 }).notNull(),
+  toLevel: numeric("to_level", { precision: 2, scale: 0 }).notNull(),
+  fromAdminId: varchar("from_admin_id").references(() => users.id),
+  toAdminId: varchar("to_admin_id").references(() => users.id),
+  escalatedBy: varchar("escalated_by").notNull().references(() => users.id),
+  reason: text("reason").notNull(),
+  isAutomatic: boolean("is_automatic").default(false).notNull(), // SLA breach auto-escalation
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Support Canned Responses (pre-defined responses for agents)
+export const supportCannedResponses = pgTable("support_canned_responses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  departmentId: varchar("department_id").references(() => supportDepartments.id),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  category: varchar("category", { length: 30 }),
+  shortcut: varchar("shortcut", { length: 20 }), // e.g., "/kyc" to insert response
+  isActive: boolean("is_active").default(true).notNull(),
+  usageCount: numeric("usage_count", { precision: 10, scale: 0 }).default("0").notNull(),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Support SLA Rules table
+export const supportSlaRules = pgTable("support_sla_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  departmentId: varchar("department_id").references(() => supportDepartments.id),
+  priority: varchar("priority", { length: 20 }).notNull(),
+  firstResponseMinutes: numeric("first_response_minutes", { precision: 10, scale: 0 }).notNull(),
+  resolutionMinutes: numeric("resolution_minutes", { precision: 10, scale: 0 }).notNull(),
+  escalateAfterMinutes: numeric("escalate_after_minutes", { precision: 10, scale: 0 }),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Support Audit Logs table (complete audit trail)
+export const supportAuditLogs = pgTable("support_audit_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  entityType: varchar("entity_type", { length: 30 }).notNull(), // CHAT, TICKET, DEPARTMENT, AGENT
+  entityId: varchar("entity_id", { length: 100 }).notNull(),
+  action: varchar("action", { length: 50 }).notNull(), // CREATED, ASSIGNED, TRANSFERRED, ESCALATED, CLOSED, etc
+  adminId: varchar("admin_id").references(() => users.id),
+  userId: varchar("user_id").references(() => users.id),
+  dataBefore: text("data_before"), // JSON snapshot before
+  dataAfter: text("data_after"), // JSON snapshot after
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Triage Rules table (for intelligent routing)
+export const supportTriageRules = pgTable("support_triage_rules", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  keywords: text("keywords").notNull(), // JSON array of keywords to match
+  category: varchar("category", { length: 30 }).notNull(),
+  departmentId: varchar("department_id").references(() => supportDepartments.id),
+  priority: varchar("priority", { length: 20 }).default("NORMAL").notNull(),
+  autoResponse: text("auto_response"), // Automatic response if matched
+  canAutoResolve: boolean("can_auto_resolve").default(false).notNull(),
+  priorityOrder: numeric("priority_order", { precision: 5, scale: 0 }).default("100").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  matchCount: numeric("match_count", { precision: 15, scale: 0 }).default("0").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Support Department Relations
+export const supportDepartmentsRelations = relations(supportDepartments, ({ many }) => ({
+  adminDepartments: many(adminDepartments),
+  chats: many(supportChats),
+  tickets: many(supportTickets),
+  cannedResponses: many(supportCannedResponses),
+  slaRules: many(supportSlaRules),
+  triageRules: many(supportTriageRules),
+}));
+
+export const adminDepartmentsRelations = relations(adminDepartments, ({ one }) => ({
+  admin: one(users, {
+    fields: [adminDepartments.adminId],
+    references: [users.id],
+  }),
+  department: one(supportDepartments, {
+    fields: [adminDepartments.departmentId],
+    references: [supportDepartments.id],
+  }),
+}));
+
+export const supportChatsRelations = relations(supportChats, ({ one, many }) => ({
+  user: one(users, {
+    fields: [supportChats.userId],
+    references: [users.id],
+  }),
+  department: one(supportDepartments, {
+    fields: [supportChats.departmentId],
+    references: [supportDepartments.id],
+  }),
+  assignedAdmin: one(users, {
+    fields: [supportChats.assignedAdminId],
+    references: [users.id],
+  }),
+  messages: many(supportChatMessages),
+  transfers: many(supportChatTransfers),
+}));
+
+export const supportChatMessagesRelations = relations(supportChatMessages, ({ one }) => ({
+  chat: one(supportChats, {
+    fields: [supportChatMessages.chatId],
+    references: [supportChats.id],
+  }),
+  sender: one(users, {
+    fields: [supportChatMessages.senderId],
+    references: [users.id],
+  }),
+}));
+
+export const supportTicketsRelations = relations(supportTickets, ({ one, many }) => ({
+  user: one(users, {
+    fields: [supportTickets.userId],
+    references: [users.id],
+  }),
+  department: one(supportDepartments, {
+    fields: [supportTickets.departmentId],
+    references: [supportDepartments.id],
+  }),
+  assignedAdmin: one(users, {
+    fields: [supportTickets.assignedAdminId],
+    references: [users.id],
+  }),
+  fromChat: one(supportChats, {
+    fields: [supportTickets.fromChatId],
+    references: [supportChats.id],
+  }),
+  messages: many(supportTicketMessages),
+  escalations: many(supportTicketEscalations),
+}));
+
+export const supportTicketMessagesRelations = relations(supportTicketMessages, ({ one }) => ({
+  ticket: one(supportTickets, {
+    fields: [supportTicketMessages.ticketId],
+    references: [supportTickets.id],
+  }),
+  sender: one(users, {
+    fields: [supportTicketMessages.senderId],
+    references: [users.id],
+  }),
+}));
+
+export const supportTicketEscalationsRelations = relations(supportTicketEscalations, ({ one }) => ({
+  ticket: one(supportTickets, {
+    fields: [supportTicketEscalations.ticketId],
+    references: [supportTickets.id],
+  }),
+  escalatedByUser: one(users, {
+    fields: [supportTicketEscalations.escalatedBy],
+    references: [users.id],
+  }),
+}));
+
 // KYC Verification Schemas
 export const insertKycVerificationSchema = createInsertSchema(kycVerifications).omit({
   id: true,
@@ -1077,3 +1425,165 @@ export const grantFreeRoundsSchema = z.object({
 
 export type LaunchGame = z.infer<typeof launchGameSchema>;
 export type GrantFreeRounds = z.infer<typeof grantFreeRoundsSchema>;
+
+// =============================================
+// ENTERPRISE SUPPORT SYSTEM TYPES & SCHEMAS
+// =============================================
+
+// Support Types
+export type SupportDepartment = typeof supportDepartments.$inferSelect;
+export type AdminDepartment = typeof adminDepartments.$inferSelect;
+export type SupportChat = typeof supportChats.$inferSelect;
+export type SupportChatMessage = typeof supportChatMessages.$inferSelect;
+export type SupportChatTransfer = typeof supportChatTransfers.$inferSelect;
+export type SupportTicket = typeof supportTickets.$inferSelect;
+export type SupportTicketMessage = typeof supportTicketMessages.$inferSelect;
+export type SupportTicketEscalation = typeof supportTicketEscalations.$inferSelect;
+export type SupportCannedResponse = typeof supportCannedResponses.$inferSelect;
+export type SupportSlaRule = typeof supportSlaRules.$inferSelect;
+export type SupportAuditLog = typeof supportAuditLogs.$inferSelect;
+export type SupportTriageRule = typeof supportTriageRules.$inferSelect;
+
+// Support Status Value Types
+export type SupportDepartmentStatusValue = typeof SupportDepartmentStatus[keyof typeof SupportDepartmentStatus];
+export type SupportAgentRoleValue = typeof SupportAgentRole[keyof typeof SupportAgentRole];
+export type SupportChatStatusValue = typeof SupportChatStatus[keyof typeof SupportChatStatus];
+export type SupportTicketStatusValue = typeof SupportTicketStatus[keyof typeof SupportTicketStatus];
+export type SupportTicketPriorityValue = typeof SupportTicketPriority[keyof typeof SupportTicketPriority];
+export type SupportSenderTypeValue = typeof SupportSenderType[keyof typeof SupportSenderType];
+export type SupportTriageCategoryValue = typeof SupportTriageCategory[keyof typeof SupportTriageCategory];
+
+// Support Schemas
+export const createSupportDepartmentSchema = z.object({
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  description: z.string().optional(),
+  isActive: z.boolean().optional().default(true),
+  priorityWeight: z.number().min(1).max(100).optional().default(1),
+  workingHours: z.object({
+    start: z.string(),
+    end: z.string(),
+    timezone: z.string(),
+    days: z.array(z.number().min(0).max(6)),
+  }).optional(),
+  autoAssign: z.boolean().optional().default(true),
+  maxQueueSize: z.number().min(1).max(1000).optional().default(50),
+});
+
+export const updateSupportDepartmentSchema = createSupportDepartmentSchema.partial();
+
+export const assignAdminToDepartmentSchema = z.object({
+  adminId: z.string().uuid("ID do admin inválido"),
+  departmentId: z.string().uuid("ID do departamento inválido"),
+  role: z.enum(["JUNIOR", "SENIOR", "SUPERVISOR"]).optional().default("JUNIOR"),
+  maxConcurrentChats: z.number().min(1).max(50).optional().default(5),
+});
+
+export const createSupportChatSchema = z.object({
+  departmentId: z.string().uuid().optional(),
+  category: z.enum(["WITHDRAWAL", "DEPOSIT", "KYC", "BONUS", "TECHNICAL", "ACCOUNT", "GAME", "OTHER"]).optional(),
+  initialMessage: z.string().min(1, "Mensagem inicial obrigatória"),
+});
+
+export const sendChatMessageSchema = z.object({
+  chatId: z.string().uuid("ID do chat inválido"),
+  message: z.string().min(1, "Mensagem não pode estar vazia"),
+  attachments: z.array(z.string().url()).optional(),
+});
+
+export const transferChatSchema = z.object({
+  chatId: z.string().uuid("ID do chat inválido"),
+  toDepartmentId: z.string().uuid("ID do departamento destino inválido"),
+  toAdminId: z.string().uuid().optional(),
+  reason: z.string().min(3, "Motivo da transferência obrigatório"),
+});
+
+export const closeChatSchema = z.object({
+  chatId: z.string().uuid("ID do chat inválido"),
+  reason: z.string().optional(),
+  convertToTicket: z.boolean().optional().default(false),
+});
+
+export const rateChatSchema = z.object({
+  chatId: z.string().uuid("ID do chat inválido"),
+  rating: z.number().min(1).max(5),
+  feedback: z.string().optional(),
+});
+
+export const createSupportTicketSchema = z.object({
+  subject: z.string().min(5, "Assunto deve ter pelo menos 5 caracteres"),
+  message: z.string().min(10, "Mensagem deve ter pelo menos 10 caracteres"),
+  departmentId: z.string().uuid().optional(),
+  category: z.enum(["WITHDRAWAL", "DEPOSIT", "KYC", "BONUS", "TECHNICAL", "ACCOUNT", "GAME", "OTHER"]).optional(),
+  priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).optional().default("NORMAL"),
+  attachments: z.array(z.string().url()).optional(),
+});
+
+export const replyToTicketSchema = z.object({
+  ticketId: z.string().uuid("ID do ticket inválido"),
+  message: z.string().min(1, "Mensagem não pode estar vazia"),
+  attachments: z.array(z.string().url()).optional(),
+  isInternal: z.boolean().optional().default(false),
+});
+
+export const escalateTicketSchema = z.object({
+  ticketId: z.string().uuid("ID do ticket inválido"),
+  reason: z.string().min(5, "Motivo do escalonamento obrigatório"),
+  toAdminId: z.string().uuid().optional(),
+});
+
+export const closeTicketSchema = z.object({
+  ticketId: z.string().uuid("ID do ticket inválido"),
+  resolution: z.string().optional(),
+});
+
+export const rateTicketSchema = z.object({
+  ticketId: z.string().uuid("ID do ticket inválido"),
+  rating: z.number().min(1).max(5),
+  feedback: z.string().optional(),
+});
+
+export const createCannedResponseSchema = z.object({
+  title: z.string().min(3, "Título deve ter pelo menos 3 caracteres"),
+  content: z.string().min(10, "Conteúdo deve ter pelo menos 10 caracteres"),
+  departmentId: z.string().uuid().optional(),
+  category: z.string().optional(),
+  shortcut: z.string().max(20).optional(),
+});
+
+export const createSlaRuleSchema = z.object({
+  name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
+  departmentId: z.string().uuid().optional(),
+  priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT", "VIP"]),
+  firstResponseMinutes: z.number().min(1, "Tempo de primeira resposta obrigatório"),
+  resolutionMinutes: z.number().min(1, "Tempo de resolução obrigatório"),
+  escalateAfterMinutes: z.number().optional(),
+});
+
+export const createTriageRuleSchema = z.object({
+  name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
+  keywords: z.array(z.string()).min(1, "Pelo menos uma palavra-chave obrigatória"),
+  category: z.enum(["WITHDRAWAL", "DEPOSIT", "KYC", "BONUS", "TECHNICAL", "ACCOUNT", "GAME", "OTHER"]),
+  departmentId: z.string().uuid().optional(),
+  priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT", "VIP"]).optional().default("NORMAL"),
+  autoResponse: z.string().optional(),
+  canAutoResolve: z.boolean().optional().default(false),
+  priorityOrder: z.number().min(1).optional().default(100),
+});
+
+// Support Schema Types
+export type CreateSupportDepartment = z.infer<typeof createSupportDepartmentSchema>;
+export type UpdateSupportDepartment = z.infer<typeof updateSupportDepartmentSchema>;
+export type AssignAdminToDepartment = z.infer<typeof assignAdminToDepartmentSchema>;
+export type CreateSupportChat = z.infer<typeof createSupportChatSchema>;
+export type SendChatMessage = z.infer<typeof sendChatMessageSchema>;
+export type TransferChat = z.infer<typeof transferChatSchema>;
+export type CloseChat = z.infer<typeof closeChatSchema>;
+export type RateChat = z.infer<typeof rateChatSchema>;
+export type CreateSupportTicket = z.infer<typeof createSupportTicketSchema>;
+export type ReplyToTicket = z.infer<typeof replyToTicketSchema>;
+export type EscalateTicket = z.infer<typeof escalateTicketSchema>;
+export type CloseTicket = z.infer<typeof closeTicketSchema>;
+export type RateTicket = z.infer<typeof rateTicketSchema>;
+export type CreateCannedResponse = z.infer<typeof createCannedResponseSchema>;
+export type CreateSlaRule = z.infer<typeof createSlaRuleSchema>;
+export type CreateTriageRule = z.infer<typeof createTriageRuleSchema>;
