@@ -1,0 +1,133 @@
+Contexto
+O projeto IN1Bet já possui:
+	•	Backend financeiro robusto (ledger transacional com SELECT FOR UPDATE)
+	•	KYC, bônus, afiliados, saque manual e automático controlado
+	•	Auditoria e rate limiting implementados
+	•	Jogo Mines já funcionando com dinheiro real
+
+Objetivo
+Quero uma auditoria técnica + funcional + visual completa, seguida de um plano de avanço real, focado em tornar o projeto 100% funcional e pronto para escala controlada.
+
+Você deve agir como:
+CTO de plataforma de betting + auditor técnico + product engineer sênior.
+
+⸻
+
+🔍 FASE 1 — MAPA REAL DO SISTEMA (OBRIGATÓRIO)
+
+Gere uma tabela com TODAS as páginas do sistema, contendo:
+	•	Página / Rota
+	•	Status visual (UI pronta / incompleta)
+	•	Backend conectado? (SIM / PARCIAL / NÃO)
+	•	Ações funcionais reais (ex: botão salva mesmo? saque funciona?)
+	•	Dados reais ou mock?
+	•	Risco de produção (BAIXO / MÉDIO / ALTO)
+
+Áreas obrigatórias:
+	•	Perfil do usuário (settings, security, verification)
+	•	Wallet, history, withdrawals
+	•	Admin (users, deposits, withdrawals, security, audit)
+	•	Games (Mines, Crash, Double, Plinko, outros listados)
+	•	Afiliados (user + admin)
+	•	Suporte / tickets
+
+Não assuma nada. Verifique cada página.
+
+⸻
+
+🎮 FASE 2 — JOGOS (ESTADO REAL)
+
+Para cada jogo listado no frontend:
+	•	Mines
+	•	Crash
+	•	Double
+	•	Plinko
+
+Informe:
+	•	Se a aposta usa dinheiro real ou simulação
+	•	Se passa pelo ledger
+	•	Onde o RNG acontece (frontend ou backend)
+	•	Se há proteção contra race condition
+	•	Se o histórico do usuário registra corretamente
+
+Classifique cada jogo como:
+	•	❌ Visual apenas
+	•	🟡 Parcialmente funcional
+	•	🟢 Pronto para produção
+
+⸻
+
+🧱 FASE 3 — BETTING CORE (VALIDAÇÃO)
+
+Explique claramente:
+	•	Se existe um core reutilizável de apostas
+	•	Quais jogos já usam esse core
+	•	Onde ele falha ou não é usado
+
+Se necessário, proponha:
+	•	Refatoração mínima
+	•	Padronização obrigatória
+
+⸻
+
+🧑‍💼 FASE 4 — PERFIL & EXPERIÊNCIA DO USUÁRIO
+
+Verifique se:
+	•	Alterar senha funciona de verdade
+	•	2FA existe ou é apenas UI
+	•	Configurações de segurança persistem
+	•	Histórico mostra dados reais
+
+Liste tudo que:
+	•	Parece funcional mas não é
+	•	Precisa de backend
+
+⸻
+
+🛠️ FASE 5 — ADMIN & OPERAÇÃO
+
+Audite:
+	•	Se números do dashboard são reais
+	•	Se ações administrativas refletem no sistema
+	•	Se logs de auditoria estão visíveis e completos
+	•	Se SECURITY vê apenas o que deve
+
+Liste riscos operacionais.
+
+⸻
+
+🚀 FASE 6 — PLANO DE AVANÇO (O MAIS IMPORTANTE)
+
+Gere um plano em 3 blocos:
+
+🔴 BLOQUEADORES DE PRODUÇÃO
+
+(o que impede lançar com dinheiro real)
+
+🟡 MELHORIAS CRÍTICAS
+
+(segurança, consistência, escala)
+
+🟢 MELHORIAS DE PRODUTO
+
+(UX, retenção, crescimento)
+
+Para cada item:
+	•	O que fazer
+	•	Onde mexer
+	•	Esforço estimado
+	•	Risco se não fizer
+
+⸻
+
+🎯 REGRAS IMPORTANTES
+	•	Não implemente nada ainda
+	•	Não simplifique
+	•	Não pule etapas
+	•	Seja brutalmente honesto
+	•	Se algo estiver “meio feito”, marque como risco
+
+No final, responda:
+“O projeto está pronto para produção real hoje? Se não, exatamente por quê.”
+
+Depois de entregar essa auditoria, aguarde minha decisão antes de codar.
