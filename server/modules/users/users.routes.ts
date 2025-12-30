@@ -1,6 +1,10 @@
 import { Router, Request, Response } from "express";
 import { storage, sanitizeUser } from "../../storage";
 import { authMiddleware } from "../auth/auth.middleware";
+import { changeUserPassword } from "../auth/auth.service";
+import { db } from "../../db";
+import { userSettings, updateUserSettingsSchema, changePasswordSchema } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 const router = Router();
 
@@ -77,6 +81,135 @@ router.get("/kyc-status", async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Get KYC status error:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+});
+
+// POST /api/users/change-password - Change user password
+router.post("/change-password", async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: "Não autenticado" });
+      return;
+    }
+
+    const validationResult = changePasswordSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      res.status(400).json({ 
+        error: validationResult.error.errors[0]?.message || "Dados inválidos" 
+      });
+      return;
+    }
+
+    const { currentPassword, newPassword } = validationResult.data;
+
+    const result = await changeUserPassword(req.user.id, currentPassword, newPassword);
+    
+    if (!result.success) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+
+    res.json({ message: "Senha alterada com sucesso! Você será desconectado de todos os dispositivos." });
+  } catch (error) {
+    console.error("Change password error:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+});
+
+// GET /api/users/settings - Get user settings
+router.get("/settings", async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: "Não autenticado" });
+      return;
+    }
+
+    const [settings] = await db
+      .select()
+      .from(userSettings)
+      .where(eq(userSettings.userId, req.user.id));
+
+    if (!settings) {
+      res.json({
+        settings: {
+          language: "pt-BR",
+          oddsFormat: "decimal",
+          emailMarketing: false,
+          pushNotifications: true,
+          smsNotifications: true,
+        }
+      });
+      return;
+    }
+
+    res.json({
+      settings: {
+        language: settings.language,
+        oddsFormat: settings.oddsFormat,
+        emailMarketing: settings.emailMarketing,
+        pushNotifications: settings.pushNotifications,
+        smsNotifications: settings.smsNotifications,
+      }
+    });
+  } catch (error) {
+    console.error("Get settings error:", error);
+    res.status(500).json({ error: "Erro interno do servidor" });
+  }
+});
+
+// POST /api/users/settings - Update user settings
+router.post("/settings", async (req: Request, res: Response) => {
+  try {
+    if (!req.user) {
+      res.status(401).json({ error: "Não autenticado" });
+      return;
+    }
+
+    const validationResult = updateUserSettingsSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      res.status(400).json({ 
+        error: validationResult.error.errors[0]?.message || "Dados inválidos" 
+      });
+      return;
+    }
+
+    const updateData = validationResult.data;
+
+    const [existingSettings] = await db
+      .select()
+      .from(userSettings)
+      .where(eq(userSettings.userId, req.user.id));
+
+    let settings;
+    if (existingSettings) {
+      [settings] = await db
+        .update(userSettings)
+        .set({ ...updateData, updatedAt: new Date() })
+        .where(eq(userSettings.userId, req.user.id))
+        .returning();
+    } else {
+      [settings] = await db
+        .insert(userSettings)
+        .values({
+          userId: req.user.id,
+          ...updateData,
+        })
+        .returning();
+    }
+
+    res.json({ 
+      message: "Configurações salvas com sucesso",
+      settings: {
+        language: settings.language,
+        oddsFormat: settings.oddsFormat,
+        emailMarketing: settings.emailMarketing,
+        pushNotifications: settings.pushNotifications,
+        smsNotifications: settings.smsNotifications,
+      }
+    });
+  } catch (error) {
+    console.error("Update settings error:", error);
     res.status(500).json({ error: "Erro interno do servidor" });
   }
 });
