@@ -49,7 +49,10 @@ export default function Support() {
                 </CardHeader>
                 <CardContent className="text-center">
                     <p className="text-sm text-gray-400 mb-6 px-4">Fale com nossos especialistas em tempo real para resolver problemas urgentes.</p>
-                    <Button className="w-full bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl h-12" onClick={() => alert("Simulando abertura do JivoChat...")}>
+                    <Button className="w-full bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl h-12" onClick={() => {
+                        const chatButton = document.querySelector('[data-testid="button-open-chat"]') as HTMLButtonElement;
+                        if (chatButton) chatButton.click();
+                    }}>
                         Iniciar Chat
                     </Button>
                 </CardContent>

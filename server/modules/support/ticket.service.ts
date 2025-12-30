@@ -488,6 +488,73 @@ export async function getOpenTickets(): Promise<SupportTicket[]> {
     .orderBy(desc(supportTickets.priority), supportTickets.createdAt);
 }
 
+export async function getAllTickets(filters?: { 
+  status?: string; 
+  priority?: string;
+  departmentId?: string;
+  slaBreached?: boolean;
+}): Promise<(SupportTicket & { user?: { id: string; username: string; email: string } | null; department?: { id: string; name: string } | null })[]> {
+  const conditions = [];
+  
+  if (filters?.status === "open") {
+    conditions.push(
+      or(
+        eq(supportTickets.status, SupportTicketStatus.OPEN),
+        eq(supportTickets.status, SupportTicketStatus.WAITING_USER),
+        eq(supportTickets.status, SupportTicketStatus.WAITING_INTERNAL)
+      )
+    );
+  } else if (filters?.status && filters.status !== "all") {
+    conditions.push(eq(supportTickets.status, filters.status));
+  }
+  
+  if (filters?.priority && filters.priority !== "all") {
+    conditions.push(eq(supportTickets.priority, filters.priority));
+  }
+  
+  if (filters?.departmentId) {
+    conditions.push(eq(supportTickets.departmentId, filters.departmentId));
+  }
+  
+  if (filters?.slaBreached) {
+    conditions.push(eq(supportTickets.slaBreached, true));
+  }
+  
+  let whereClause;
+  if (conditions.length === 1) {
+    whereClause = conditions[0];
+  } else if (conditions.length > 1) {
+    whereClause = and(...conditions);
+  }
+  
+  const baseQuery = db
+    .select({
+      ticket: supportTickets,
+      user: {
+        id: users.id,
+        username: users.username,
+        email: users.email,
+      },
+      department: {
+        id: supportDepartments.id,
+        name: supportDepartments.name,
+      },
+    })
+    .from(supportTickets)
+    .leftJoin(users, eq(supportTickets.userId, users.id))
+    .leftJoin(supportDepartments, eq(supportTickets.departmentId, supportDepartments.id));
+  
+  const results = whereClause 
+    ? await baseQuery.where(whereClause).orderBy(desc(supportTickets.createdAt))
+    : await baseQuery.orderBy(desc(supportTickets.createdAt));
+  
+  return results.map(r => ({
+    ...r.ticket,
+    user: r.user,
+    department: r.department,
+  }));
+}
+
 export async function getBreachedSlaTickets(): Promise<SupportTicket[]> {
   return await db
     .select()

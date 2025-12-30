@@ -630,13 +630,77 @@ router.get("/admin/tickets/open", authMiddleware, adminCheck, async (req: Reques
   }
 });
 
+router.get("/admin/tickets", authMiddleware, adminCheck, async (req: Request, res: Response) => {
+  try {
+    let status = req.query.status as string | undefined;
+    const priority = req.query.priority as string | undefined;
+    const departmentId = req.query.departmentId as string | undefined;
+    const slaBreached = req.query.slaBreached === "true";
+    
+    if (slaBreached && !status) {
+      status = "open";
+    }
+    
+    const tickets = await TicketService.getAllTickets({ status, priority, departmentId, slaBreached });
+    res.json({ success: true, tickets });
+  } catch (error: any) {
+    console.error("Get all tickets error:", error);
+    res.status(500).json({ error: "Erro ao buscar tickets" });
+  }
+});
+
 router.get("/admin/tickets/sla-breached", authMiddleware, adminCheck, async (req: Request, res: Response) => {
   try {
-    const tickets = await TicketService.getBreachedSlaTickets();
+    const tickets = await TicketService.getAllTickets({ slaBreached: true, status: "open" });
     res.json({ success: true, tickets });
   } catch (error: any) {
     console.error("Get breached tickets error:", error);
     res.status(500).json({ error: "Erro ao buscar tickets" });
+  }
+});
+
+router.get("/admin/tickets/:id", authMiddleware, adminCheck, async (req: Request, res: Response) => {
+  try {
+    const ticket = await TicketService.getTicketById(req.params.id);
+    if (!ticket) {
+      return res.status(404).json({ error: "Ticket não encontrado" });
+    }
+    
+    let user = null;
+    if (ticket.userId) {
+      const [userResult] = await db
+        .select({ id: users.id, username: users.username, email: users.email })
+        .from(users)
+        .where(eq(users.id, ticket.userId));
+      user = userResult || null;
+    }
+    
+    let department = null;
+    if (ticket.departmentId) {
+      department = await DepartmentService.getDepartmentById(ticket.departmentId);
+    }
+    
+    res.json({ 
+      success: true, 
+      ticket: { 
+        ...ticket, 
+        user: user || { id: null, username: "Usuário Desconhecido", email: null },
+        department: department || { id: null, name: "Sem Departamento" }
+      } 
+    });
+  } catch (error: any) {
+    console.error("Get admin ticket error:", error);
+    res.status(500).json({ error: "Erro ao buscar ticket" });
+  }
+});
+
+router.get("/admin/tickets/:id/messages", authMiddleware, adminCheck, async (req: Request, res: Response) => {
+  try {
+    const messages = await TicketService.getTicketMessages(req.params.id, true);
+    res.json({ success: true, messages });
+  } catch (error: any) {
+    console.error("Get admin ticket messages error:", error);
+    res.status(500).json({ error: "Erro ao buscar mensagens" });
   }
 });
 

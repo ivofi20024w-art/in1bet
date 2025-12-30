@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 
 import { MobileNav } from "./MobileNav";
 import { AgeVerificationModal } from "../shared/AgeVerificationModal";
+import { ChatWidget } from "../support/ChatWidget";
 
 export function MainLayout({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
@@ -44,6 +45,8 @@ export function MainLayout({ children }: { children: ReactNode }) {
         
         <MobileNav />
       </div>
+      
+      <ChatWidget />
     </div>
   );
 }

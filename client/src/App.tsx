@@ -15,6 +15,7 @@ import History from "@/pages/History";
 import Support from "@/pages/Support";
 import CreateTicket from "@/pages/support/CreateTicket";
 import TicketHistory from "@/pages/support/TicketHistory";
+import TicketDetail from "@/pages/support/TicketDetail";
 import ResponsibleGaming from "@/pages/ResponsibleGaming";
 import Terms from "@/pages/Terms";
 import Privacy from "@/pages/Privacy";
@@ -51,6 +52,10 @@ import AdminSettings from "@/pages/admin/Settings";
 import AdminAffiliates from "@/pages/admin/Affiliates";
 import AdminAudit from "@/pages/admin/Audit";
 import AdminGames from "@/pages/admin/Games";
+import AdminSupport from "@/pages/admin/Support";
+import AdminSupportChats from "@/pages/admin/SupportChats";
+import AdminSupportTickets from "@/pages/admin/SupportTickets";
+import AdminSupportDepartments from "@/pages/admin/SupportDepartments";
 import { useEffect, useState } from "react";
 import { Loader } from "@/components/ui/Loader";
 
@@ -138,6 +143,7 @@ function Router() {
         <Route path="/support" component={Support} />
         <Route path="/support/tickets" component={TicketHistory} />
         <Route path="/support/tickets/new" component={CreateTicket} />
+        <Route path="/support/tickets/:id" component={TicketDetail} />
         <Route path="/profile" component={Profile} />
         <Route path="/profile/settings" component={Settings} />
         <Route path="/profile/security" component={Security} />
@@ -158,6 +164,11 @@ function Router() {
         <Route path="/admin/settings" component={AdminSettings} />
         <Route path="/admin/affiliates" component={AdminAffiliates} />
         <Route path="/admin/audit" component={AdminAudit} />
+        <Route path="/admin/support" component={AdminSupport} />
+        <Route path="/admin/support/chats" component={AdminSupportChats} />
+        <Route path="/admin/support/tickets" component={AdminSupportTickets} />
+        <Route path="/admin/support/tickets/:id" component={AdminSupportTickets} />
+        <Route path="/admin/support/departments" component={AdminSupportDepartments} />
         
         <Route component={NotFound} />
       </Switch>

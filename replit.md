@@ -47,13 +47,18 @@ Preferred communication style: Simple, everyday language.
 - **Provably Fair Gaming**: HMAC-SHA256 based with server, client seeds, and nonce for verifiable game outcomes (e.g., Mines game).
 - **Affiliate System**: Referral tracking, CPA/REV_SHARE/HYBRID commission models, payout balance locking, maturation windows for conversions, and anti-fraud mechanisms (CPF/IP duplication checks).
 - **Enterprise Support System**: Complete customer support solution with:
-  - **Live Chat**: Real-time messaging with queue management, agent assignment, VIP priority
-  - **Ticketing**: Async support with ticket numbers, SLA tracking, escalation levels
+  - **Live Chat**: Real-time messaging with queue management, agent assignment, VIP priority, rating system with lifecycle tracking
+  - **Ticketing**: Async support with ticket numbers, SLA tracking, escalation levels, internal notes for agents
   - **Departments**: Financeiro, Suporte Técnico, KYC/Verificação, Bônus e Promoções, Jogos, VIP
   - **Intelligent Triage**: Keyword-based auto-classification and routing to correct departments
   - **SLA Management**: Configurable response/resolution times, automatic breach detection
   - **Canned Responses**: Pre-defined response templates for agents
   - **Complete Audit Trail**: All actions logged for compliance
+  - **Admin Dashboard**: 
+    - Dedicated admin endpoints with enriched user/department data via JOINs
+    - Ticket filtering (status, priority, department, SLA-breached)
+    - Grouped "open" status support (OPEN, WAITING_USER, WAITING_INTERNAL)
+    - Management actions: assign, reply, escalate, resolve with internal notes
 
 ### Security
 - **Rate Limiting**: Applied to general API access, authentication, registration, PIX creation, withdrawals, and webhooks.
