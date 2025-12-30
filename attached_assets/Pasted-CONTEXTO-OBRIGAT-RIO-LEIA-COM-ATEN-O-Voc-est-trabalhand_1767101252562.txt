@@ -1,0 +1,245 @@
+CONTEXTO OBRIGATÓRIO (LEIA COM ATENÇÃO)
+
+Você está trabalhando em um projeto já existente, grande e funcional, chamado IN1Bet.
+⚠️ REGRA ABSOLUTA:
+	•	NÃO remover código existente
+	•	NÃO simplificar funcionalidades
+	•	NÃO criar mocks
+	•	NÃO deixar funcionalidades “só UI”
+	•	NÃO quebrar fluxos existentes
+	•	TUDO deve ser real, persistente e integrado
+
+O objetivo é transformar o sistema de suporte mockado em um sistema de suporte ENTERPRISE, no nível de grandes casinos internacionais.
+
+⸻
+
+🎯 OBJETIVO GERAL
+
+Implementar UM SISTEMA COMPLETO DE SUPORTE, composto por:
+	1.	Live Chat em tempo real (WebSocket)
+	2.	Sistema de Tickets avançado
+	3.	Departamentos de suporte
+	4.	Fila inteligente
+	5.	Transferência de chats entre departamentos
+	6.	Escalonamento (SLA, prioridade, VIP)
+	7.	IA de triagem inicial (regra-based, extensível para IA real)
+	8.	Histórico completo do jogador
+	9.	Auditoria total
+	10.	Admin Panel completo para suporte
+
+Tudo deve rodar na mesma VPS, com arquitetura preparada para escalar, mas sem exigir Redis ou microserviços agora.
+
+⸻
+
+🧱 ARQUITETURA GERAL (OBRIGATÓRIA)
+
+Stack esperada
+	•	Backend: Node.js (mesmo padrão atual)
+	•	Database: mesma base atual (Drizzle / PostgreSQL)
+	•	Real-time: WebSocket (Socket.IO ou ws)
+	•	Auth: JWT existente
+	•	Admin roles já existentes
+
+⸻
+
+🗂️ CAMADA 1 — DEPARTAMENTOS DE SUPORTE
+
+Criar sistema real de departamentos.
+
+Tabela: support_departments
+
+Campos mínimos:
+	•	id
+	•	name
+	•	description
+	•	isActive
+	•	priorityWeight
+	•	workingHours (json)
+	•	createdAt
+
+Relacionamento admin ↔ departamentos
+
+Tabela: admin_departments
+	•	adminId
+	•	departmentId
+	•	role (junior | senior | supervisor)
+	•	maxConcurrentChats
+
+⚠️ Cada chat e ticket DEVE pertencer a um departamento.
+
+⸻
+
+🤖 CAMADA 2 — TRIAGEM AUTOMÁTICA (IA SIMULADA, NÃO MOCK)
+
+Criar um módulo de triagem inteligente, baseado em regras, mas estruturado como “IA”.
+
+Fluxo:
+	1.	Usuário abre chat
+	2.	Sistema inicia bot de triagem
+	3.	Bot pergunta o motivo do contato
+	4.	Classifica:
+	•	departmentId
+	•	priority
+	•	tags (ex: withdrawal, kyc, bug)
+	5.	Se possível, responde automaticamente
+	6.	Se não resolver → entra na fila humana
+
+⚠️ NÃO usar respostas hardcoded no frontend
+⚠️ Toda lógica fica no backend (support_triage_service)
+
+⸻
+
+💬 CAMADA 3 — LIVE CHAT ENTERPRISE
+
+Tabelas obrigatórias
+
+support_chats
+	•	id
+	•	userId
+	•	departmentId
+	•	status (waiting | active | transferred | closed)
+	•	priority
+	•	assignedAdminId
+	•	startedAt
+	•	closedAt
+
+support_chat_messages
+	•	id
+	•	chatId
+	•	senderType (user | admin | system | bot)
+	•	senderId (nullable)
+	•	message
+	•	createdAt
+
+support_chat_transfers
+	•	chatId
+	•	fromDepartmentId
+	•	toDepartmentId
+	•	transferredByAdminId
+	•	reason
+	•	createdAt
+
+⸻
+
+Regras de chat
+	•	Admin só recebe chat do seu departamento
+	•	Limite de chats simultâneos por admin
+	•	Transferência mantém histórico
+	•	Chat VIP tem prioridade automática
+	•	Chat pode virar ticket com 1 clique
+
+⸻
+
+🎫 CAMADA 4 — SISTEMA DE TICKETS ENTERPRISE
+
+Tabela: support_tickets
+	•	id
+	•	userId
+	•	departmentId
+	•	priority
+	•	status (open, waiting_user, waiting_internal, escalated, resolved, closed)
+	•	assignedAdminId
+	•	slaDeadline
+	•	escalationLevel
+	•	createdAt
+	•	closedAt
+
+Tabela: support_ticket_messages
+	•	ticketId
+	•	senderType
+	•	senderId
+	•	message
+	•	createdAt
+
+Tabela: support_ticket_escalations
+	•	ticketId
+	•	fromLevel
+	•	toLevel
+	•	reason
+	•	escalatedBy
+
+⸻
+
+Regras:
+	•	Tickets têm SLA real
+	•	Sistema marca atrasados
+	•	Admin recebe alertas
+	•	Histórico nunca é apagado
+
+⸻
+
+🧠 CAMADA 5 — HISTÓRICO ÚNICO DO JOGADOR
+
+Criar endpoint/admin view que mostre:
+	•	Chats
+	•	Tickets
+	•	Saques
+	•	KYC
+	•	Afiliado
+	•	Alertas de fraude
+
+Tudo numa timeline unificada.
+
+⸻
+
+🔐 CAMADA 6 — AUDITORIA COMPLETA
+
+Tabela: support_audit_logs
+	•	entityType (chat/ticket)
+	•	entityId
+	•	action
+	•	adminId
+	•	dataBefore
+	•	dataAfter
+	•	createdAt
+
+⚠️ Nenhuma ação administrativa ocorre sem log.
+
+⸻
+
+🖥️ CAMADA 7 — ADMIN PANEL (SUPORTE)
+
+Criar páginas reais (não mock):
+	•	/admin/support/chats
+	•	/admin/support/tickets
+	•	/admin/support/departments
+	•	/admin/support/agents
+	•	/admin/support/sla-dashboard
+
+Funcionalidades:
+	•	Puxar chats da fila
+	•	Transferir chats
+	•	Escalar tickets
+	•	Responder usuários
+	•	Ver histórico completo
+
+⸻
+
+🔔 CAMADA 8 — NOTIFICAÇÕES
+
+Implementar sistema interno:
+	•	Usuário recebe update de chat/ticket
+	•	Admin recebe alerta de SLA, VIP, escalonamento
+
+⸻
+
+🚨 REGRAS CRÍTICAS DE QUALIDADE
+	•	❌ Não criar código morto
+	•	❌ Não criar endpoints sem uso
+	•	❌ Não criar UI sem backend
+	•	❌ Não sobrescrever módulos existentes
+	•	✅ Seguir padrão atual do projeto
+	•	✅ Código limpo, modular
+	•	✅ Transações onde necessário
+	•	✅ Segurança por padrão
+
+⸻
+
+✅ RESULTADO FINAL ESPERADO
+
+Ao final:
+	•	Sistema de suporte 100% funcional
+	•	Nenhum mock restante
+	•	Suporte comparável a casinos grandes
+	•	Base pronta para IA real no futuro
+	•	Escalável sem reescrever
