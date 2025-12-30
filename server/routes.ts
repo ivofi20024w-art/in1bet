@@ -12,6 +12,9 @@ import kycRoutes from "./modules/kyc/kyc.routes";
 import withdrawalRoutes from "./modules/withdrawals/withdrawal.routes";
 import bonusRoutes from "./modules/bonus/bonus.routes";
 import securityRoutes from "./modules/security/security.routes";
+import { settingsRouter } from "./modules/settings";
+import { initializeDefaultSettings } from "./modules/settings/settings.service";
+import { affiliateRouter } from "./modules/affiliates";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -38,6 +41,13 @@ export async function registerRoutes(
   app.use("/api/bonus", bonusRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/admin/security", securityRoutes);
+  app.use("/api/admin/settings", settingsRouter);
+  app.use("/api/affiliate", affiliateRouter);
+
+  // Initialize default settings
+  initializeDefaultSettings().catch(err => {
+    console.error("Failed to initialize default settings:", err);
+  });
 
   // Health check endpoint
   app.get("/api/health", (req, res) => {

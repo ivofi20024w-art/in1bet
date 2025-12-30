@@ -1,0 +1,212 @@
+Contexto Geral:
+A plataforma IN1Bet já possui:
+- Autenticação com CPF brasileiro
+- Wallet com ledger financeiro atômico (toda alteração passa pelo ledger)
+- Depósitos PIX via OndaPay (crédito somente via webhook)
+- Saques PIX manuais funcionando
+- Sistema de bônus com rollover
+- KYC interno completo com departamento de segurança
+- Painel admin com roles (ADMIN / SECURITY)
+- Logs de auditoria e segurança
+
+Objetivo:
+Implementar DOIS SISTEMAS CRÍTICOS E INDEPENDENTES, mantendo consistência financeira, segurança e auditoria total:
+1) Sistema de SAQUE PIX AUTOMÁTICO CONFIGURÁVEL (GLOBAL + POR USUÁRIO)
+2) Sistema de AFILIADOS PROFISSIONAL, AVANÇADO E ANTIFRAUDE
+
+====================================================
+1) SISTEMA DE SAQUE PIX AUTOMÁTICO CONFIGURÁVEL
+====================================================
+
+Regras Fundamentais:
+- O saque PIX automático NÃO será padrão
+- Deve existir controle GLOBAL e controle INDIVIDUAL por usuário
+- Nenhuma regra financeira existente pode ser quebrada
+- Ledger é obrigatório em qualquer mudança de saldo
+- Tudo deve ser auditável
+
+Requisitos Técnicos:
+
+1.1 Configuração Global (Admin)
+- Criar configuração global persistida (ex: settings table):
+  - key: PIX_AUTO_WITHDRAW_GLOBAL
+  - value: boolean
+- Apenas ADMIN ou SECURITY podem alterar
+- Toda alteração gera audit log:
+  - quem alterou
+  - valor anterior
+  - novo valor
+  - timestamp
+
+1.2 Configuração por Usuário
+- Adicionar flag no usuário:
+  - user.autoWithdrawAllowed (boolean)
+- Apenas ADMIN ou SECURITY podem alterar
+- Toda alteração gera audit log
+- Deve existir UI no admin (detalhe do usuário)
+
+1.3 Lógica de Decisão do Saque
+Um saque PIX será automático SE:
+- user.kycStatus === "verified"
+- NÃO existir rollover pendente
+- E uma das condições abaixo:
+  a) PIX_AUTO_WITHDRAW_GLOBAL === true
+  b) PIX_AUTO_WITHDRAW_GLOBAL === false E user.autoWithdrawAllowed === true
+
+Caso contrário:
+- Saque permanece MANUAL (status PENDING)
+
+1.4 Segurança Obrigatória
+- Nenhum saque automático se:
+  - KYC não aprovado
+  - rollover pendente
+  - saldo insuficiente
+- Logs de todas decisões automáticas
+- Middleware de role aplicado em todas rotas admin
+
+Resultado esperado:
+Sistema híbrido de saque PIX (manual + automático), totalmente controlável pela equipe, seguro, auditável e escalável.
+
+====================================================
+2) SISTEMA DE AFILIADOS PROFISSIONAL & AVANÇADO
+====================================================
+
+Objetivo:
+Criar um sistema de afiliados moderno, flexível e antifraude, permitindo crescimento orgânico da plataforma com controle total.
+
+Modelos de Comissão (todos suportados):
+- CPA (Cost Per Acquisition)
+- Revenue Share (RevShare)
+- Hybrid (CPA + RevShare)
+- Performance Bonus (metas)
+
+----------------------------------------------------
+2.1 Estrutura de Dados
+----------------------------------------------------
+
+Criar entidades:
+
+Affiliate:
+- id
+- name
+- email
+- status (active/inactive)
+- createdAt
+
+AffiliateLink:
+- id
+- affiliateId
+- code (único)
+- url (/ref/{code})
+- createdAt
+
+AffiliateConversion:
+- id
+- affiliateId
+- userId
+- depositAmount
+- wagerAmount
+- netRevenue
+- commissionType (CPA, REVSHARE, HYBRID)
+- commissionValue
+- status (pending, approved, paid, cancelled)
+- createdAt
+
+AffiliatePayout:
+- id
+- affiliateId
+- amount
+- status (pending, approved, paid)
+- createdAt
+
+----------------------------------------------------
+2.2 Rastreamento de Conversões
+----------------------------------------------------
+
+- Usuário criado com /ref/{code} deve ser vinculado ao affiliateId
+- Conversão válida apenas se:
+  - CPF único
+  - KYC aprovado
+  - Depósitos mínimos atingidos
+  - Apostas mínimas atingidas
+- Conversões sempre começam como PENDING
+
+----------------------------------------------------
+2.3 Modelos de Comissão
+----------------------------------------------------
+
+CPA:
+- Valor fixo por usuário qualificado
+- Regras configuráveis (depósito mínimo, wager mínimo)
+
+RevShare:
+- Percentual da receita líquida
+- Calculado mensalmente
+
+Hybrid:
+- CPA + RevShare combinados
+
+Performance Bonus:
+- Metas configuráveis (ex: 50 usuários ativos)
+- Bônus extra ao atingir metas
+
+----------------------------------------------------
+2.4 Anti-Fraude (OBRIGATÓRIO)
+----------------------------------------------------
+
+Bloquear e marcar conversões se:
+- Auto-referral detectado (CPF, IP, device, email)
+- Padrões suspeitos
+- Múltiplas contas relacionadas
+
+Conversões fraudulentas:
+- Status CANCELLED
+- Log de auditoria criado
+
+----------------------------------------------------
+2.5 Painel do Afiliado
+----------------------------------------------------
+
+Criar dashboard em /affiliate/dashboard com:
+- Links de referral
+- Usuários indicados
+- Depósitos gerados
+- Apostas geradas
+- Receita líquida
+- Comissões por tipo
+- Metas e bônus
+- Histórico de pagamentos
+
+----------------------------------------------------
+2.6 Painel Admin (Afiliados)
+----------------------------------------------------
+
+Admin pode:
+- Criar afiliados
+- Ativar/desativar afiliados
+- Criar templates de comissão
+- Ver conversões
+- Aprovar/cancelar payouts
+- Ver relatórios detalhados
+
+Todas ações:
+- Devem gerar audit logs
+- Devem respeitar roles
+
+====================================================
+REGRAS FINAIS (NÃO NEGOCIÁVEIS)
+====================================================
+
+- Nenhuma alteração direta de saldo fora do ledger
+- Nenhum saque sem validações completas
+- Nenhuma comissão sem rastreabilidade
+- Logs obrigatórios para:
+  - saques automáticos
+  - alterações de configuração
+  - conversões de afiliados
+  - payouts
+- Código organizado, modular e legível
+- Seguir padrões já existentes no projeto
+
+Resultado Final Esperado:
+Dois sistemas robustos, seguros, escaláveis e prontos para produção, integrados ao ecossistema atual da IN1Bet sem quebrar regras existentes.

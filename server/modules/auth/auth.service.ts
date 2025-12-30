@@ -1,6 +1,9 @@
 import bcrypt from "bcrypt";
 import { storage, sanitizeUser } from "../../storage";
 import { withRetry } from "../../db";
+import { db } from "../../db";
+import { users } from "@shared/schema";
+import { eq } from "drizzle-orm";
 import { 
   registerUserSchema, 
   loginUserSchema, 
@@ -15,6 +18,11 @@ import {
   verifyRefreshToken 
 } from "./auth.middleware";
 import { applyWelcomeBonus } from "../bonus/bonus.service";
+import { 
+  getAffiliateLinkByCode, 
+  createConversion, 
+  checkForFraud 
+} from "../affiliates/affiliate.service";
 
 const SALT_ROUNDS = 10;
 
@@ -26,8 +34,12 @@ export interface AuthResponse {
   error?: string;
 }
 
-// Register new user with CPF validation
-export async function registerUser(data: RegisterUser): Promise<AuthResponse> {
+// Register new user with CPF validation and optional referral tracking
+export async function registerUser(
+  data: RegisterUser, 
+  referralCode?: string,
+  registrationIp?: string
+): Promise<AuthResponse> {
   try {
     // Validate input
     const validationResult = registerUserSchema.safeParse(data);
@@ -81,6 +93,55 @@ export async function registerUser(data: RegisterUser): Promise<AuthResponse> {
       }
     } catch (bonusError) {
       console.error("Failed to apply welcome bonus:", bonusError);
+    }
+
+    // Handle affiliate referral tracking
+    if (referralCode) {
+      try {
+        const affiliateLink = await getAffiliateLinkByCode(referralCode);
+        
+        if (affiliateLink) {
+          const fraudCheck = await checkForFraud(
+            user.id,
+            affiliateLink.affiliateId,
+            registrationIp,
+            cpf,
+            email
+          );
+
+          if (fraudCheck.isFraud) {
+            console.log(`[AFFILIATE] Fraud detected for user ${user.id}: ${fraudCheck.reasons.join(", ")}`);
+          }
+
+          const conversion = await createConversion(
+            user.id,
+            affiliateLink.affiliateId,
+            affiliateLink.id,
+            "CPA",
+            registrationIp,
+            undefined
+          );
+
+          if (fraudCheck.isFraud) {
+            const { markConversionAsFraudSystem } = await import("../affiliates/affiliate.service");
+            await markConversionAsFraudSystem(conversion.id, fraudCheck.reasons.join("; "));
+          }
+
+          await db
+            .update(users)
+            .set({
+              affiliateId: affiliateLink.affiliateId,
+              referralCode: referralCode,
+              registrationIp: registrationIp,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, user.id));
+
+          console.log(`[AFFILIATE] Conversion created for user ${user.id} via link ${referralCode}`);
+        }
+      } catch (affiliateError) {
+        console.error("Failed to process affiliate referral:", affiliateError);
+      }
     }
 
     // Generate tokens

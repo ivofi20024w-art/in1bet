@@ -983,4 +983,70 @@ router.get("/audit-logs", adminCheck, async (req: Request, res: Response) => {
   }
 });
 
+router.put("/users/:id/auto-withdraw", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { enabled } = req.body;
+    const adminId = req.user!.id;
+
+    if (typeof enabled !== "boolean") {
+      return res.status(400).json({ error: "Valor inválido para enabled" });
+    }
+
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    const previousValue = user.autoWithdrawAllowed || false;
+
+    await db.update(users)
+      .set({
+        autoWithdrawAllowed: enabled,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id));
+
+    await createAuditLog({
+      adminId,
+      action: AdminAction.USER_AUTO_WITHDRAW_TOGGLE,
+      targetType: "user",
+      targetId: id,
+      dataBefore: { autoWithdrawAllowed: previousValue },
+      dataAfter: { autoWithdrawAllowed: enabled },
+    });
+
+    res.json({ 
+      success: true, 
+      message: enabled 
+        ? "Saque automático habilitado para este usuário" 
+        : "Saque automático desabilitado para este usuário"
+    });
+  } catch (error: any) {
+    console.error("Admin toggle auto-withdraw error:", error);
+    res.status(500).json({ error: "Erro ao alterar configuração de saque automático" });
+  }
+});
+
+router.get("/users/:id/auto-withdraw", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    res.json({ 
+      enabled: user.autoWithdrawAllowed || false,
+      kycStatus: user.kycStatus,
+    });
+  } catch (error: any) {
+    console.error("Admin get auto-withdraw error:", error);
+    res.status(500).json({ error: "Erro ao buscar configuração de saque automático" });
+  }
+});
+
 export default router;

@@ -47,6 +47,10 @@ export const users = pgTable("users", {
   blockedBy: varchar("blocked_by"),
   kycStatus: varchar("kyc_status", { length: 20 }).default("pending"),
   vipLevel: varchar("vip_level", { length: 20 }).default("bronze"),
+  autoWithdrawAllowed: boolean("auto_withdraw_allowed").default(false),
+  affiliateId: varchar("affiliate_id"),
+  referralCode: varchar("referral_code", { length: 50 }),
+  registrationIp: varchar("registration_ip", { length: 45 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -440,12 +444,27 @@ export const AdminAction = {
   WITHDRAWAL_APPROVE: "WITHDRAWAL_APPROVE",
   WITHDRAWAL_REJECT: "WITHDRAWAL_REJECT",
   WITHDRAWAL_PAY: "WITHDRAWAL_PAY",
+  WITHDRAWAL_AUTO_PAY: "WITHDRAWAL_AUTO_PAY",
   BONUS_CREATE: "BONUS_CREATE",
   BONUS_UPDATE: "BONUS_UPDATE",
   BONUS_TOGGLE: "BONUS_TOGGLE",
   USER_BONUS_CANCEL: "USER_BONUS_CANCEL",
   USER_MAKE_ADMIN: "USER_MAKE_ADMIN",
   USER_REMOVE_ADMIN: "USER_REMOVE_ADMIN",
+  SETTING_UPDATE: "SETTING_UPDATE",
+  USER_AUTO_WITHDRAW_TOGGLE: "USER_AUTO_WITHDRAW_TOGGLE",
+  AFFILIATE_CREATE: "AFFILIATE_CREATE",
+  AFFILIATE_UPDATE: "AFFILIATE_UPDATE",
+  AFFILIATE_SUSPEND: "AFFILIATE_SUSPEND",
+  AFFILIATE_ACTIVATE: "AFFILIATE_ACTIVATE",
+  AFFILIATE_LINK_CREATE: "AFFILIATE_LINK_CREATE",
+  AFFILIATE_LINK_TOGGLE: "AFFILIATE_LINK_TOGGLE",
+  AFFILIATE_CONVERSION_APPROVE: "AFFILIATE_CONVERSION_APPROVE",
+  AFFILIATE_CONVERSION_CANCEL: "AFFILIATE_CONVERSION_CANCEL",
+  AFFILIATE_CONVERSION_FRAUD: "AFFILIATE_CONVERSION_FRAUD",
+  AFFILIATE_PAYOUT_APPROVE: "AFFILIATE_PAYOUT_APPROVE",
+  AFFILIATE_PAYOUT_REJECT: "AFFILIATE_PAYOUT_REJECT",
+  AFFILIATE_PAYOUT_PAY: "AFFILIATE_PAYOUT_PAY",
 } as const;
 
 // Admin Audit Logs table
@@ -459,6 +478,150 @@ export const adminAuditLogs = pgTable("admin_audit_logs", {
   dataAfter: text("data_after"),
   reason: text("reason"),
   ipAddress: varchar("ip_address", { length: 45 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// =============================================
+// SETTINGS TABLE - Global platform configuration
+// =============================================
+export const settings = pgTable("settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedBy: varchar("updated_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Settings Keys
+export const SettingsKey = {
+  PIX_AUTO_WITHDRAW_GLOBAL: "PIX_AUTO_WITHDRAW_GLOBAL",
+} as const;
+
+// =============================================
+// AFFILIATE SYSTEM TABLES
+// =============================================
+
+// Affiliate Status
+export const AffiliateStatus = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+  SUSPENDED: "SUSPENDED",
+} as const;
+
+// Commission Types
+export const CommissionType = {
+  CPA: "CPA",
+  REVSHARE: "REVSHARE",
+  HYBRID: "HYBRID",
+} as const;
+
+// Conversion Status
+export const ConversionStatus = {
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  PAID: "PAID",
+  CANCELLED: "CANCELLED",
+  FRAUD: "FRAUD",
+} as const;
+
+// Payout Status
+export const PayoutStatus = {
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  PAID: "PAID",
+  REJECTED: "REJECTED",
+} as const;
+
+// Affiliates table
+export const affiliates = pgTable("affiliates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => users.id),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  phone: varchar("phone", { length: 20 }),
+  cpf: varchar("cpf", { length: 14 }),
+  status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
+  commissionType: varchar("commission_type", { length: 20 }).default("CPA").notNull(),
+  cpaValue: numeric("cpa_value", { precision: 15, scale: 2 }).default("50.00").notNull(),
+  revsharePercentage: numeric("revshare_percentage", { precision: 5, scale: 2 }).default("30.00").notNull(),
+  minDepositForCpa: numeric("min_deposit_for_cpa", { precision: 15, scale: 2 }).default("50.00").notNull(),
+  minWagerForCpa: numeric("min_wager_for_cpa", { precision: 15, scale: 2 }).default("100.00").notNull(),
+  totalEarnings: numeric("total_earnings", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  pendingBalance: numeric("pending_balance", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  paidBalance: numeric("paid_balance", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  totalReferrals: numeric("total_referrals", { precision: 10, scale: 0 }).default("0").notNull(),
+  qualifiedReferrals: numeric("qualified_referrals", { precision: 10, scale: 0 }).default("0").notNull(),
+  isFraudSuspect: boolean("is_fraud_suspect").default(false),
+  fraudReason: text("fraud_reason"),
+  createdBy: varchar("created_by").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Affiliate Links table
+export const affiliateLinks = pgTable("affiliate_links", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").notNull().references(() => affiliates.id),
+  code: varchar("code", { length: 50 }).notNull().unique(),
+  name: text("name"),
+  utmSource: varchar("utm_source", { length: 100 }),
+  utmMedium: varchar("utm_medium", { length: 100 }),
+  utmCampaign: varchar("utm_campaign", { length: 100 }),
+  clicks: numeric("clicks", { precision: 15, scale: 0 }).default("0").notNull(),
+  registrations: numeric("registrations", { precision: 15, scale: 0 }).default("0").notNull(),
+  conversions: numeric("conversions", { precision: 15, scale: 0 }).default("0").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Affiliate Conversions table
+export const affiliateConversions = pgTable("affiliate_conversions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").notNull().references(() => affiliates.id),
+  affiliateLinkId: varchar("affiliate_link_id").references(() => affiliateLinks.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  depositAmount: numeric("deposit_amount", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  wagerAmount: numeric("wager_amount", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  netRevenue: numeric("net_revenue", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  commissionType: varchar("commission_type", { length: 20 }).notNull(),
+  commissionValue: numeric("commission_value", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+  qualifiedAt: timestamp("qualified_at"),
+  fraudReason: text("fraud_reason"),
+  userIp: varchar("user_ip", { length: 45 }),
+  userDevice: text("user_device"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Affiliate Payouts table
+export const affiliatePayouts = pgTable("affiliate_payouts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  affiliateId: varchar("affiliate_id").notNull().references(() => affiliates.id),
+  amount: numeric("amount", { precision: 15, scale: 2 }).notNull(),
+  pixKey: text("pix_key").notNull(),
+  pixKeyType: varchar("pix_key_type", { length: 20 }).notNull(),
+  status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+  periodStart: timestamp("period_start"),
+  periodEnd: timestamp("period_end"),
+  approvedBy: varchar("approved_by").references(() => users.id),
+  approvedAt: timestamp("approved_at"),
+  paidAt: timestamp("paid_at"),
+  rejectionReason: text("rejection_reason"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Affiliate Clicks tracking (for analytics)
+export const affiliateClicks = pgTable("affiliate_clicks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  affiliateLinkId: varchar("affiliate_link_id").notNull().references(() => affiliateLinks.id),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  referer: text("referer"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -527,3 +690,64 @@ export type SecurityActionValue = typeof SecurityAction[keyof typeof SecurityAct
 
 // Safe user type (without password)
 export type SafeUser = Omit<User, 'password'>;
+
+// Settings types
+export type Setting = typeof settings.$inferSelect;
+export type SettingsKeyValue = typeof SettingsKey[keyof typeof SettingsKey];
+
+// Affiliate types
+export type Affiliate = typeof affiliates.$inferSelect;
+export type AffiliateLink = typeof affiliateLinks.$inferSelect;
+export type AffiliateConversion = typeof affiliateConversions.$inferSelect;
+export type AffiliatePayout = typeof affiliatePayouts.$inferSelect;
+export type AffiliateClick = typeof affiliateClicks.$inferSelect;
+export type AffiliateStatusValue = typeof AffiliateStatus[keyof typeof AffiliateStatus];
+export type CommissionTypeValue = typeof CommissionType[keyof typeof CommissionType];
+export type ConversionStatusValue = typeof ConversionStatus[keyof typeof ConversionStatus];
+export type PayoutStatusValue = typeof PayoutStatus[keyof typeof PayoutStatus];
+
+// Affiliate schemas
+export const insertAffiliateSchema = createInsertSchema(affiliates).omit({
+  id: true,
+  totalEarnings: true,
+  pendingBalance: true,
+  paidBalance: true,
+  totalReferrals: true,
+  qualifiedReferrals: true,
+  isFraudSuspect: true,
+  fraudReason: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const createAffiliateSchema = z.object({
+  name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
+  email: z.string().email("Email inválido"),
+  phone: z.string().optional(),
+  cpf: z.string().optional(),
+  commissionType: z.enum(["CPA", "REVSHARE", "HYBRID"]),
+  cpaValue: z.number().min(0).optional(),
+  revsharePercentage: z.number().min(0).max(100).optional(),
+  minDepositForCpa: z.number().min(0).optional(),
+  minWagerForCpa: z.number().min(0).optional(),
+});
+
+export const createAffiliateLinkSchema = z.object({
+  affiliateId: z.string().uuid(),
+  code: z.string().min(3, "Código deve ter pelo menos 3 caracteres").max(50),
+  name: z.string().optional(),
+  utmSource: z.string().optional(),
+  utmMedium: z.string().optional(),
+  utmCampaign: z.string().optional(),
+});
+
+export const requestAffiliatePayoutSchema = z.object({
+  amount: z.number().min(50, "Valor mínimo de saque é R$ 50,00"),
+  pixKey: z.string().min(1, "Chave PIX obrigatória"),
+  pixKeyType: z.enum(["CPF", "EMAIL", "PHONE", "RANDOM"]),
+});
+
+export type InsertAffiliate = z.infer<typeof insertAffiliateSchema>;
+export type CreateAffiliate = z.infer<typeof createAffiliateSchema>;
+export type CreateAffiliateLink = z.infer<typeof createAffiliateLinkSchema>;
+export type RequestAffiliatePayout = z.infer<typeof requestAffiliatePayoutSchema>;

@@ -8,7 +8,11 @@ const router = Router();
 router.post("/register", async (req: Request, res: Response) => {
   try {
     console.log("Register request body:", JSON.stringify(req.body, null, 2));
-    const result = await registerUser(req.body);
+    
+    const referralCode = req.body.referralCode || req.query.ref as string;
+    const registrationIp = req.headers["x-forwarded-for"] as string || req.ip;
+    
+    const result = await registerUser(req.body, referralCode, registrationIp);
     
     if (!result.success) {
       res.status(400).json({ error: result.error });

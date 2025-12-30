@@ -3,8 +3,10 @@ import {
   pixWithdrawals, 
   users, 
   wallets,
+  adminAuditLogs,
   TransactionType,
   WithdrawalStatus,
+  AdminAction,
   type PixWithdrawal,
   type User,
 } from "@shared/schema";
@@ -15,8 +17,105 @@ import {
   getWalletBalance,
 } from "../wallet/wallet.service";
 import { checkRolloverForWithdrawal } from "../bonus/bonus.service";
+import { isAutoWithdrawGlobalEnabled } from "../settings/settings.service";
 
 const MIN_WITHDRAWAL_AMOUNT = 20;
+
+/**
+ * Check if a user is eligible for automatic PIX withdrawal.
+ * Auto-withdraw is enabled if:
+ * 1. User has KYC verified
+ * 2. No pending rollover
+ * 3. Either global auto-withdraw is enabled OR user has individual permission
+ */
+export async function isAutoWithdrawEligible(userId: string): Promise<{
+  eligible: boolean;
+  reason?: string;
+}> {
+  const [user] = await db.select().from(users).where(eq(users.id, userId));
+  
+  if (!user) {
+    return { eligible: false, reason: "Usuário não encontrado" };
+  }
+
+  if (user.kycStatus !== "verified") {
+    return { eligible: false, reason: "KYC não verificado" };
+  }
+
+  const rolloverCheck = await checkRolloverForWithdrawal(userId);
+  if (!rolloverCheck.canWithdraw) {
+    return { eligible: false, reason: "Rollover pendente" };
+  }
+
+  const globalEnabled = await isAutoWithdrawGlobalEnabled();
+  
+  if (globalEnabled) {
+    return { eligible: true };
+  }
+
+  if (user.autoWithdrawAllowed) {
+    return { eligible: true };
+  }
+
+  return { eligible: false, reason: "Saque automático não habilitado" };
+}
+
+/**
+ * Process automatic withdrawal (approve + pay in one step).
+ * Only called when user is eligible for auto-withdraw.
+ */
+async function processAutoWithdrawal(
+  withdrawal: PixWithdrawal
+): Promise<{ success: boolean; error?: string }> {
+  const amount = parseFloat(withdrawal.amount);
+  
+  const [approvedWithdrawal] = await db
+    .update(pixWithdrawals)
+    .set({
+      status: WithdrawalStatus.APPROVED,
+      approvedBy: "SYSTEM_AUTO",
+      approvedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(pixWithdrawals.id, withdrawal.id))
+    .returning();
+
+  const referenceId = `WITHDRAW_AUTO_PAID_${withdrawal.id}_${Date.now()}`;
+  
+  const clearResult = await clearLockedBalance(
+    withdrawal.userId,
+    amount,
+    referenceId,
+    `Saque PIX automático - ${withdrawal.pixKey}`
+  );
+
+  if (!clearResult.success) {
+    console.error(`Auto-withdraw clear balance failed for ${withdrawal.id}:`, clearResult.error);
+    return { success: false, error: clearResult.error };
+  }
+
+  await db
+    .update(pixWithdrawals)
+    .set({
+      status: WithdrawalStatus.PAID,
+      paidAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(pixWithdrawals.id, withdrawal.id));
+
+  await db.insert(adminAuditLogs).values({
+    adminId: "SYSTEM_AUTO",
+    action: AdminAction.WITHDRAWAL_AUTO_PAY,
+    targetType: "WITHDRAWAL",
+    targetId: withdrawal.id,
+    dataBefore: JSON.stringify({ status: "PENDING", userId: withdrawal.userId }),
+    dataAfter: JSON.stringify({ status: "PAID", amount: withdrawal.amount }),
+  });
+
+  console.log(`[AUTO-WITHDRAW] Withdrawal ${withdrawal.id} auto-processed for user ${withdrawal.userId}, amount R$ ${amount}`);
+
+  return { success: true };
+}
 
 export interface WithdrawalResult {
   success: boolean;
@@ -99,6 +198,25 @@ export async function requestWithdrawal(
       .returning();
 
     console.log(`Withdrawal requested: ${withdrawal.id} for user ${userId}, amount R$ ${amount}`);
+
+    const autoEligibility = await isAutoWithdrawEligible(userId);
+    
+    if (autoEligibility.eligible) {
+      console.log(`[AUTO-WITHDRAW] User ${userId} eligible for auto-withdraw, processing...`);
+      
+      const autoResult = await processAutoWithdrawal(withdrawal);
+      
+      if (autoResult.success) {
+        const [paidWithdrawal] = await db
+          .select()
+          .from(pixWithdrawals)
+          .where(eq(pixWithdrawals.id, withdrawal.id));
+        
+        return { success: true, withdrawal: paidWithdrawal };
+      } else {
+        console.error(`[AUTO-WITHDRAW] Failed for ${withdrawal.id}: ${autoResult.error}`);
+      }
+    }
 
     return { success: true, withdrawal };
   } catch (error: any) {
