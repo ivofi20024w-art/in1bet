@@ -92,7 +92,7 @@ router.get("/dashboard-stats", adminCheck, async (req: Request, res: Response) =
       .select({ total: sum(pixDeposits.amount) })
       .from(pixDeposits)
       .where(and(
-        eq(pixDeposits.status, "PAID"),
+        eq(pixDeposits.status, "COMPLETED"),
         gte(pixDeposits.paidAt, todayStart)
       ));
 
@@ -100,7 +100,7 @@ router.get("/dashboard-stats", adminCheck, async (req: Request, res: Response) =
       .select({ total: sum(pixDeposits.amount) })
       .from(pixDeposits)
       .where(and(
-        eq(pixDeposits.status, "PAID"),
+        eq(pixDeposits.status, "COMPLETED"),
         gte(pixDeposits.paidAt, weekAgo)
       ));
 
@@ -108,7 +108,7 @@ router.get("/dashboard-stats", adminCheck, async (req: Request, res: Response) =
       .select({ total: sum(pixDeposits.amount) })
       .from(pixDeposits)
       .where(and(
-        eq(pixDeposits.status, "PAID"),
+        eq(pixDeposits.status, "COMPLETED"),
         gte(pixDeposits.paidAt, monthAgo)
       ));
 
@@ -180,7 +180,7 @@ router.get("/dashboard-stats", adminCheck, async (req: Request, res: Response) =
         .select({ total: sum(pixDeposits.amount) })
         .from(pixDeposits)
         .where(and(
-          eq(pixDeposits.status, "PAID"),
+          eq(pixDeposits.status, "COMPLETED"),
           gte(pixDeposits.paidAt, dayStart),
           lte(pixDeposits.paidAt, dayEnd)
         ));

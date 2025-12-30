@@ -117,7 +117,7 @@ async function enrichVerificationsWithUserData(
       const [depositsSum] = await db
         .select({ total: sum(pixDeposits.amount) })
         .from(pixDeposits)
-        .where(and(eq(pixDeposits.userId, v.userId), eq(pixDeposits.status, "PAID")));
+        .where(and(eq(pixDeposits.userId, v.userId), eq(pixDeposits.status, "COMPLETED")));
 
       const [withdrawalsSum] = await db
         .select({ total: sum(pixWithdrawals.amount) })
