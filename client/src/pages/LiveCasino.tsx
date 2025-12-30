@@ -106,8 +106,7 @@ export default function LiveCasino() {
                                 id={100+i} 
                                 title={`Mesa ${i+1}`} 
                                 provider="Evolution" 
-                                image="https://images.unsplash.com/photo-1518893494013-481c1d8ed3fd?auto=format&fit=crop&q=80&w=500" 
-                                category="Live" 
+                                image="https://images.unsplash.com/photo-1518893494013-481c1d8ed3fd?auto=format&fit=crop&q=80&w=500"
                              />
                         ))}
                     </div>

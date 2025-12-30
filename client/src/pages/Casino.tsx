@@ -1,18 +1,41 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { GameCard } from "@/components/shared/GameCard";
-import { CASINO_GAMES, PROVIDERS, ORIGINALS_GAMES } from "@/lib/mockData";
+import { ORIGINALS_GAMES } from "@/lib/mockData";
 import casinoHero from "@assets/generated_images/casino_lobby_luxurious_background.png";
 import slotsTournamentBanner from "@assets/generated_images/promotional_banner_for_slots_tournament.png";
-import { Flame, Star, History, Rocket, Search, Filter, Play, Crown, Trophy, Users, Zap, Dice5, Timer, ChevronDown } from "lucide-react";
+import { Flame, Star, History, Rocket, Search, Filter, Play, Crown, Trophy, Users, Zap, Dice5, Timer, ChevronDown, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+
+interface PlayfiversProvider {
+  id: string;
+  externalId: string;
+  name: string;
+  imageUrl: string | null;
+  status: string;
+}
+
+interface PlayfiversGame {
+  id: string;
+  gameCode: string;
+  name: string;
+  imageUrl: string | null;
+  providerId: string | null;
+  providerName: string;
+  isOriginal: boolean;
+  supportsFreeRounds: boolean;
+  gameType: string | null;
+  status: string;
+}
 
 const GAME_CATEGORIES = [
     { id: "all", label: "Todos", icon: Dice5 },
@@ -55,40 +78,110 @@ function TableIcon(props: any) {
     )
 }
 
+async function fetchProviders(): Promise<PlayfiversProvider[]> {
+  const res = await fetch('/api/playfivers/providers');
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  return data.data;
+}
+
+async function fetchGames(providerId?: string): Promise<PlayfiversGame[]> {
+  const url = providerId ? `/api/playfivers/games?providerId=${providerId}` : '/api/playfivers/games';
+  const res = await fetch(url);
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  return data.data;
+}
+
+async function launchGame(params: { gameCode: string; providerName: string; isOriginal: boolean }): Promise<{ launchUrl: string; sessionId: string }> {
+  const res = await fetch('/api/playfivers/launch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify(params),
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error);
+  return data.data;
+}
+
 export default function Casino() {
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState("all");
-  
-  // Collapsible states
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(true);
   const [isProvidersOpen, setIsProvidersOpen] = useState(true);
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
-  // Simulate loading state
-  useEffect(() => {
-      const timer = setTimeout(() => setLoading(false), 800);
-      return () => clearTimeout(timer);
-  }, []);
+  const { data: providers = [], isLoading: loadingProviders } = useQuery({
+    queryKey: ['playfivers-providers'],
+    queryFn: fetchProviders,
+    staleTime: 5 * 60 * 1000,
+  });
 
-  const filteredGames = CASINO_GAMES.filter(game => {
-      const matchesSearch = game.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            game.provider.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesProvider = selectedProvider ? game.provider === selectedProvider : true;
+  const { data: games = [], isLoading: loadingGames } = useQuery({
+    queryKey: ['playfivers-games', selectedProvider],
+    queryFn: () => fetchGames(selectedProvider || undefined),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const launchMutation = useMutation({
+    mutationFn: launchGame,
+    onSuccess: (data) => {
+      window.open(data.launchUrl, '_blank');
+    },
+    onError: (error: Error) => {
+      if (error.message.includes('Authentication')) {
+        toast({
+          title: "Login necessário",
+          description: "Faça login para jogar",
+          variant: "destructive",
+        });
+        setLocation('/login');
+      } else {
+        toast({
+          title: "Erro",
+          description: error.message || "Falha ao iniciar jogo",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  const handlePlayGame = (game: PlayfiversGame) => {
+    launchMutation.mutate({
+      gameCode: game.gameCode,
+      providerName: game.providerName,
+      isOriginal: game.isOriginal,
+    });
+  };
+
+  const loading = loadingProviders || loadingGames;
+
+  const filteredGames = games.filter(game => {
+      const matchesSearch = game.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            game.providerName.toLowerCase().includes(searchQuery.toLowerCase());
       
       let matchesCategory = true;
-      if (activeCategory === 'slots') matchesCategory = game.category === 'Slots';
-      else if (activeCategory === 'live') matchesCategory = game.category === 'Live';
-      else if (activeCategory === 'crash') matchesCategory = game.category === 'Crash';
-      else if (activeCategory === 'roulette') matchesCategory = game.title.toLowerCase().includes('roleta') || game.title.toLowerCase().includes('roulette');
-      else if (activeCategory === 'blackjack') matchesCategory = game.title.toLowerCase().includes('blackjack');
+      if (activeCategory === 'slots') matchesCategory = game.gameType === 'slot' || !game.gameType;
+      else if (activeCategory === 'live') matchesCategory = game.gameType === 'live';
+      else if (activeCategory === 'crash') matchesCategory = game.gameType === 'crash';
+      else if (activeCategory === 'roulette') matchesCategory = game.name.toLowerCase().includes('roleta') || game.name.toLowerCase().includes('roulette');
+      else if (activeCategory === 'blackjack') matchesCategory = game.name.toLowerCase().includes('blackjack');
       
-      return matchesSearch && matchesProvider && matchesCategory;
+      return matchesSearch && matchesCategory;
+  });
+
+  const convertToGameCard = (game: PlayfiversGame, index: number) => ({
+    id: index,
+    title: game.name,
+    provider: game.providerName,
+    image: game.imageUrl || 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=400',
   });
 
   return (
     <MainLayout>
-      {/* Featured Slider */}
       <div className="relative h-[300px] md:h-[400px] rounded-2xl overflow-hidden mb-6 group shadow-2xl">
           <Carousel className="w-full h-full" opts={{ loop: true }} plugins={[Autoplay({ delay: 5000 })]}>
               <CarouselContent>
@@ -137,7 +230,6 @@ export default function Casino() {
           </Carousel>
       </div>
 
-      {/* Live Winners Ticker */}
       <div className="bg-white/5 border-y border-white/5 -mx-4 md:-mx-8 py-2 mb-8 overflow-hidden relative">
           <div className="flex items-center gap-8 animate-marquee whitespace-nowrap px-4">
               {[...Array(10)].map((_, i) => (
@@ -156,7 +248,6 @@ export default function Casino() {
           <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
       </div>
 
-      {/* Quick Access Menu */}
       <div className="flex gap-4 mb-10 overflow-x-auto pb-4 scrollbar-none snap-x px-1">
           {ORIGINALS_GAMES.slice(0, 4).map((game) => (
              <Link key={game.id} href={`/games/${game.id}`}>
@@ -188,11 +279,9 @@ export default function Casino() {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Left Sidebar Filters */}
         <aside className="lg:w-64 flex-shrink-0 space-y-4">
             <div className="sticky top-24 space-y-4">
                 
-                {/* Search */}
                 <div className="relative group">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input 
@@ -200,14 +289,15 @@ export default function Casino() {
                         className="pl-10 bg-secondary/30 border-white/10 h-11 focus:bg-secondary/50 focus:border-primary/50 transition-all"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
+                        data-testid="input-search-games"
                     />
                 </div>
 
-                {/* Categories Collapsible */}
                 <div className="bg-card border border-white/5 rounded-xl overflow-hidden">
                     <button 
                         onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
                         className="flex items-center justify-between w-full p-4 hover:bg-white/5 transition-colors group"
+                        data-testid="button-toggle-categories"
                     >
                         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-hover:text-primary transition-colors">Categorias</h3>
                         <ChevronDown className={cn("w-4 h-4 text-gray-500 transition-transform duration-300", isCategoriesOpen ? "rotate-180" : "")} />
@@ -219,6 +309,7 @@ export default function Casino() {
                                 <button
                                     key={cat.id}
                                     onClick={() => setActiveCategory(cat.id)}
+                                    data-testid={`button-category-${cat.id}`}
                                     className={cn(
                                         "flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all group",
                                         activeCategory === cat.id ? "bg-primary text-white shadow-md shadow-primary/20" : "text-gray-400 hover:bg-white/5 hover:text-white"
@@ -235,11 +326,11 @@ export default function Casino() {
                     )}
                 </div>
 
-                {/* Providers Collapsible */}
                 <div className="bg-card border border-white/5 rounded-xl overflow-hidden">
                      <button 
                         onClick={() => setIsProvidersOpen(!isProvidersOpen)}
                         className="flex items-center justify-between w-full p-4 hover:bg-white/5 transition-colors group"
+                        data-testid="button-toggle-providers"
                      >
                         <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider group-hover:text-primary transition-colors flex items-center">
                             Provedores
@@ -250,6 +341,7 @@ export default function Casino() {
                                 <span 
                                     className="text-[10px] text-red-400 hover:text-red-300 hover:underline px-2 py-1 cursor-pointer" 
                                     onClick={(e) => { e.stopPropagation(); setSelectedProvider(null); }}
+                                    data-testid="button-clear-provider"
                                 >
                                     Limpar
                                 </span>
@@ -260,30 +352,43 @@ export default function Casino() {
                      
                      {isProvidersOpen && (
                         <div className="p-2 pt-0 animate-in slide-in-from-top-2 duration-200">
-                            <ScrollArea className="h-[250px] pr-2">
-                                <div className="space-y-1">
-                                    {PROVIDERS.map(provider => (
-                                        <button
-                                            key={provider.id}
-                                            onClick={() => setSelectedProvider(selectedProvider === provider.name ? null : provider.name)}
-                                            className={cn(
-                                                "flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm transition-all group border border-transparent",
-                                                selectedProvider === provider.name ? "bg-secondary text-white border-white/10" : "text-gray-400 hover:bg-white/5 hover:text-white"
-                                            )}
-                                        >
-                                            {provider.name}
-                                            {selectedProvider === provider.name && <CheckIcon className="w-3 h-3 text-primary" />}
-                                        </button>
-                                    ))}
-                                </div>
-                            </ScrollArea>
+                            {loadingProviders ? (
+                              <div className="flex items-center justify-center py-8">
+                                <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                              </div>
+                            ) : providers.length === 0 ? (
+                              <p className="text-center text-muted-foreground text-sm py-4">Nenhum provedor disponível</p>
+                            ) : (
+                              <ScrollArea className="h-[250px] pr-2">
+                                  <div className="space-y-1">
+                                      {providers.map(provider => (
+                                          <button
+                                              key={provider.id}
+                                              onClick={() => setSelectedProvider(selectedProvider === provider.id ? null : provider.id)}
+                                              data-testid={`button-provider-${provider.name}`}
+                                              className={cn(
+                                                  "flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm transition-all group border border-transparent",
+                                                  selectedProvider === provider.id ? "bg-secondary text-white border-white/10" : "text-gray-400 hover:bg-white/5 hover:text-white"
+                                              )}
+                                          >
+                                              <div className="flex items-center gap-2">
+                                                {provider.imageUrl && (
+                                                  <img src={provider.imageUrl} alt={provider.name} className="w-5 h-5 rounded object-contain" />
+                                                )}
+                                                {provider.name}
+                                              </div>
+                                              {selectedProvider === provider.id && <CheckIcon className="w-3 h-3 text-primary" />}
+                                          </button>
+                                      ))}
+                                  </div>
+                              </ScrollArea>
+                            )}
                         </div>
                      )}
                 </div>
             </div>
         </aside>
 
-        {/* Main Grid */}
         <div className="flex-1 min-w-0">
              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                  <div className="flex items-center gap-2">
@@ -291,83 +396,97 @@ export default function Casino() {
                         {activeCategory === 'all' ? <Dice5 className="w-5 h-5 text-primary" /> : <Filter className="w-5 h-5 text-primary" />}
                     </div>
                     <div>
-                        <h2 className="text-2xl font-bold text-white leading-none mb-1">
+                        <h2 className="text-2xl font-bold text-white leading-none mb-1" data-testid="text-games-title">
                             {searchQuery ? `Resultados para "${searchQuery}"` : 
                             GAME_CATEGORIES.find(c => c.id === activeCategory)?.label}
                         </h2>
                          <p className="text-xs text-muted-foreground">Mostrando os melhores jogos do mercado</p>
                     </div>
                  </div>
-                 <span className="text-sm text-muted-foreground font-medium bg-secondary/30 px-3 py-1 rounded-full border border-white/5 whitespace-nowrap">
+                 <span className="text-sm text-muted-foreground font-medium bg-secondary/30 px-3 py-1 rounded-full border border-white/5 whitespace-nowrap" data-testid="text-games-count">
                      {filteredGames.length} jogos disponíveis
                  </span>
              </div>
 
              <div className="space-y-8">
-                 {/* Top Section */}
-                 {filteredGames.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {filteredGames.slice(0, 8).map(game => (
-                            <GameCard key={game.id} {...game} loading={loading} />
-                        ))}
-                    </div>
-                 ) : null}
+                 {loading ? (
+                   <div className="flex flex-col items-center justify-center py-24">
+                     <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
+                     <p className="text-muted-foreground">Carregando jogos...</p>
+                   </div>
+                 ) : filteredGames.length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                          {filteredGames.slice(0, 15).map((game, index) => (
+                              <div 
+                                key={game.id} 
+                                onClick={() => handlePlayGame(game)}
+                                className="cursor-pointer"
+                                data-testid={`card-game-${game.gameCode}`}
+                              >
+                                <GameCard {...convertToGameCard(game, index)} loading={false} />
+                              </div>
+                          ))}
+                      </div>
 
-                 {/* Promotional Banner Middle */}
-                 {!searchQuery && !selectedProvider && activeCategory === 'all' && (
-                     <div className="relative h-40 rounded-xl overflow-hidden my-4 border border-white/10 group cursor-pointer shadow-lg">
-                        <img src={slotsTournamentBanner} alt="Tournament" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
-                            <div className="max-w-md">
-                                <Badge className="mb-2 bg-yellow-500 text-black border-none font-bold">TORNEIO DE SLOTS</Badge>
-                                <h3 className="text-2xl font-heading font-black text-white italic mb-1">PRÊMIO DE R$ 50.000</h3>
-                                <p className="text-gray-300 text-sm mb-4">Jogue os slots selecionados e suba no ranking.</p>
-                                <Button size="sm" className="rounded-full font-bold">Ver Ranking</Button>
+                      {!searchQuery && !selectedProvider && activeCategory === 'all' && (
+                         <div className="relative h-40 rounded-xl overflow-hidden my-4 border border-white/10 group cursor-pointer shadow-lg">
+                            <img src={slotsTournamentBanner} alt="Tournament" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
+                                <div className="max-w-md">
+                                    <Badge className="mb-2 bg-yellow-500 text-black border-none font-bold">TORNEIO DE SLOTS</Badge>
+                                    <h3 className="text-2xl font-heading font-black text-white italic mb-1">PRÊMIO DE R$ 50.000</h3>
+                                    <p className="text-gray-300 text-sm mb-4">Jogue os slots selecionados e suba no ranking.</p>
+                                    <Button size="sm" className="rounded-full font-bold">Ver Ranking</Button>
+                                </div>
                             </div>
-                        </div>
-                     </div>
-                 )}
+                         </div>
+                      )}
 
-                 {/* Bottom Section */}
-                 {filteredGames.length > 0 ? (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                        {filteredGames.slice(8).map(game => (
-                            <GameCard key={game.id} {...game} loading={loading} />
-                        ))}
-                        
-                        {/* Mock duplicates for full grid feel */}
-                        {!searchQuery && !selectedProvider && Array.from({ length: 4 }).map((_, i) => (
-                            CASINO_GAMES.map(game => (
-                                <GameCard key={`${game.id}-dup-${i}`} {...game} loading={loading} />
-                            ))
-                        ))}
-                    </div>
+                      {filteredGames.length > 15 && (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                            {filteredGames.slice(15).map((game, index) => (
+                                <div 
+                                  key={game.id} 
+                                  onClick={() => handlePlayGame(game)}
+                                  className="cursor-pointer"
+                                  data-testid={`card-game-${game.gameCode}`}
+                                >
+                                  <GameCard {...convertToGameCard(game, index + 15)} loading={false} />
+                                </div>
+                            ))}
+                        </div>
+                      )}
+                    </>
                  ) : (
                     <div className="flex flex-col items-center justify-center py-24 border border-dashed border-white/10 rounded-2xl bg-white/5">
                         <Search className="w-16 h-16 text-muted-foreground mb-4 opacity-30" />
                         <h3 className="text-xl font-bold text-white mb-2">Nenhum jogo encontrado</h3>
-                        <p className="text-muted-foreground max-w-xs text-center">Não encontramos jogos com os filtros selecionados. Tente buscar por outro termo.</p>
-                        <Button 
-                            variant="link" 
-                            className="mt-4 text-primary"
-                            onClick={() => { setSearchQuery(""); setSelectedProvider(null); setActiveCategory("all"); }}
-                        >
-                            Limpar todos os filtros
-                        </Button>
+                        <p className="text-muted-foreground max-w-xs text-center">
+                          {games.length === 0 
+                            ? "Os jogos ainda não foram sincronizados. Aguarde a configuração da API."
+                            : "Não encontramos jogos com os filtros selecionados. Tente buscar por outro termo."}
+                        </p>
+                        {games.length > 0 && (
+                          <Button 
+                              variant="link" 
+                              className="mt-4 text-primary"
+                              onClick={() => { setSearchQuery(""); setSelectedProvider(null); setActiveCategory("all"); }}
+                              data-testid="button-clear-filters"
+                          >
+                              Limpar todos os filtros
+                          </Button>
+                        )}
                     </div>
                  )}
              </div>
              
-             {/* Infinite Scroll Trigger Mock */}
              {filteredGames.length > 0 && (
                  <div className="mt-12 text-center pb-8">
-                     <p className="text-muted-foreground text-xs mb-4">Exibindo {filteredGames.length + (searchQuery ? 0 : 32)} de 4.521 jogos</p>
+                     <p className="text-muted-foreground text-xs mb-4">Exibindo {filteredGames.length} jogos</p>
                      <div className="w-full max-w-xs mx-auto h-1 bg-secondary rounded-full overflow-hidden mb-6">
-                         <div className="h-full bg-primary w-1/4 rounded-full" />
+                         <div className="h-full bg-primary w-full rounded-full" />
                      </div>
-                     <Button variant="outline" className="border-white/10 hover:bg-white/5 min-w-[200px] h-12 font-bold" disabled={loading}>
-                         {loading ? "Carregando..." : "Carregar Mais Jogos"}
-                     </Button>
                  </div>
              )}
         </div>
