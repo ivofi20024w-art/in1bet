@@ -633,6 +633,68 @@ export const affiliateClicks = pgTable("affiliate_clicks", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// =============================================
+// BETTING SYSTEM TABLES
+// =============================================
+
+// Bet Status
+export const BetStatus = {
+  PENDING: "PENDING",
+  ACTIVE: "ACTIVE",
+  WON: "WON",
+  LOST: "LOST",
+  CANCELLED: "CANCELLED",
+  TIMEOUT: "TIMEOUT",
+} as const;
+
+// Game Types
+export const GameType = {
+  MINES: "MINES",
+  CRASH: "CRASH",
+  PLINKO: "PLINKO",
+  DOUBLE: "DOUBLE",
+  SLOTS: "SLOTS",
+  SPORTS: "SPORTS",
+} as const;
+
+// Bets table - Central betting ledger
+export const bets = pgTable("bets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  gameType: varchar("game_type", { length: 30 }).notNull(),
+  gameId: varchar("game_id", { length: 100 }),
+  betAmount: numeric("bet_amount", { precision: 15, scale: 2 }).notNull(),
+  winAmount: numeric("win_amount", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  profit: numeric("profit", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  multiplier: numeric("multiplier", { precision: 10, scale: 4 }).default("1.0000").notNull(),
+  status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+  serverSeed: text("server_seed"),
+  clientSeed: text("client_seed"),
+  nonce: numeric("nonce", { precision: 15, scale: 0 }),
+  serverSeedHash: text("server_seed_hash"),
+  gamePayload: text("game_payload"),
+  gameResult: text("game_result"),
+  reserveTransactionId: varchar("reserve_transaction_id").references(() => transactions.id),
+  settleTransactionId: varchar("settle_transaction_id").references(() => transactions.id),
+  usedBonusBalance: boolean("used_bonus_balance").default(false),
+  settledAt: timestamp("settled_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Mines Game State - Persists active games across restarts
+export const minesGames = pgTable("mines_games", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  betId: varchar("bet_id").notNull().references(() => bets.id).unique(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  minePositions: text("mine_positions").notNull(),
+  mineCount: numeric("mine_count", { precision: 2, scale: 0 }).notNull(),
+  revealed: text("revealed").default("[]").notNull(),
+  status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // KYC Verification Schemas
 export const insertKycVerificationSchema = createInsertSchema(kycVerifications).omit({
   id: true,
@@ -709,6 +771,12 @@ export type AffiliateLink = typeof affiliateLinks.$inferSelect;
 export type AffiliateConversion = typeof affiliateConversions.$inferSelect;
 export type AffiliatePayout = typeof affiliatePayouts.$inferSelect;
 export type AffiliateClick = typeof affiliateClicks.$inferSelect;
+
+// Betting types
+export type Bet = typeof bets.$inferSelect;
+export type BetStatusValue = typeof BetStatus[keyof typeof BetStatus];
+export type GameTypeValue = typeof GameType[keyof typeof GameType];
+export type MinesGame = typeof minesGames.$inferSelect;
 export type AffiliateStatusValue = typeof AffiliateStatus[keyof typeof AffiliateStatus];
 export type CommissionTypeValue = typeof CommissionType[keyof typeof CommissionType];
 export type ConversionStatusValue = typeof ConversionStatus[keyof typeof ConversionStatus];
@@ -759,3 +827,30 @@ export type InsertAffiliate = z.infer<typeof insertAffiliateSchema>;
 export type CreateAffiliate = z.infer<typeof createAffiliateSchema>;
 export type CreateAffiliateLink = z.infer<typeof createAffiliateLinkSchema>;
 export type RequestAffiliatePayout = z.infer<typeof requestAffiliatePayoutSchema>;
+
+// Betting types and schemas
+export type Bet = typeof bets.$inferSelect;
+export type BetStatusValue = typeof BetStatus[keyof typeof BetStatus];
+export type GameTypeValue = typeof GameType[keyof typeof GameType];
+
+export const insertBetSchema = createInsertSchema(bets).omit({
+  id: true,
+  winAmount: true,
+  profit: true,
+  status: true,
+  reserveTransactionId: true,
+  settleTransactionId: true,
+  settledAt: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const placeBetSchema = z.object({
+  gameType: z.enum(["MINES", "CRASH", "PLINKO", "DOUBLE", "SLOTS", "SPORTS"]),
+  betAmount: z.number().min(1, "Aposta mínima é R$ 1,00").max(10000, "Aposta máxima é R$ 10.000,00"),
+  gamePayload: z.record(z.any()).optional(),
+  clientSeed: z.string().optional(),
+});
+
+export type InsertBet = z.infer<typeof insertBetSchema>;
+export type PlaceBet = z.infer<typeof placeBetSchema>;

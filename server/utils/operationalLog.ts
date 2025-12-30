@@ -12,7 +12,11 @@ export type OperationalLogType =
   | "WEBHOOK_SIGNATURE_FAILED"
   | "BALANCE_OPERATION_FAILED"
   | "KYC_VERIFICATION_SUBMITTED"
-  | "CONVERSION_MATURATION_PENDING";
+  | "CONVERSION_MATURATION_PENDING"
+  | "BET_PLACED"
+  | "BET_WON"
+  | "BET_LOST"
+  | "BET_CANCELLED";
 
 interface OperationalLogEntry {
   type: OperationalLogType;

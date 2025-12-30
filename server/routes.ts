@@ -16,6 +16,9 @@ import securityRoutes from "./modules/security/security.routes";
 import { settingsRouter } from "./modules/settings";
 import { initializeDefaultSettings } from "./modules/settings/settings.service";
 import { affiliateRouter } from "./modules/affiliates";
+import { bettingRouter } from "./modules/betting";
+import { minesRouter } from "./modules/games";
+import historyRoutes from "./modules/history/history.routes";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -47,6 +50,9 @@ export async function registerRoutes(
   app.use("/api/admin/security", securityRoutes);
   app.use("/api/admin/settings", settingsRouter);
   app.use("/api/affiliate", affiliateRouter);
+  app.use("/api/bets", bettingRouter);
+  app.use("/api/games/mines", minesRouter);
+  app.use("/api/history", historyRoutes);
 
   // Initialize default settings
   initializeDefaultSettings().catch(err => {
