@@ -1,0 +1,166 @@
+ATENÇÃO:
+NÃO IMPLEMENTAR NADA.
+NÃO MODIFICAR CÓDIGO.
+APENAS AUDITAR, ANALISAR E CONCLUIR.
+
+Assuma o papel de:
+SENIOR TECHNICAL AUDITOR / FRAUD & PAYMENTS SPECIALIST
+com experiência em iGaming, fintech, PIX, afiliados e antifraude.
+
+Objetivo:
+Realizar uma AUDITORIA PROFUNDA E CRÍTICA de DOIS SISTEMAS
+já implementados na plataforma IN1Bet:
+
+1) Sistema de SAQUE PIX AUTOMÁTICO (modelo híbrido)
+2) Sistema de AFILIADOS com DETECÇÃO ANTI-FRAUDE
+
+Analise TODO o código relevante:
+- backend
+- frontend
+- rotas
+- services
+- models
+- admin UI
+- logs
+- regras de negócio
+
+====================================================
+1️⃣ AUDITORIA — SAQUE PIX AUTOMÁTICO
+====================================================
+
+Verifique e responda EXPLICITAMENTE:
+
+1.1 Arquitetura & Fluxo
+- Existe distinção clara entre:
+  - saque manual
+  - saque automático?
+- Onde ocorre a decisão automática?
+- Existe fallback seguro para manual?
+
+1.2 Controles Administrativos
+- Existe flag GLOBAL para ativar/desativar saque automático?
+- Existe flag POR USUÁRIO (whitelist)?
+- Quem pode alterar essas flags (ADMIN / SECURITY)?
+- Essas alterações geram audit log?
+
+1.3 Validações Obrigatórias
+Confirme se TODAS são aplicadas antes do saque automático:
+- KYC aprovado
+- rollover zerado
+- saldo disponível
+- rate limiting
+- idempotência
+- proteção contra duplo saque
+
+1.4 Ledger & Consistência Financeira
+- O saque automático usa o MESMO fluxo do ledger?
+- Existe:
+  - reserva de saldo?
+  - confirmação posterior?
+  - rollback em falha?
+- Há risco de race condition?
+
+1.5 Logs & Auditoria
+- Existe log específico indicando:
+  - saque automático vs manual?
+  - motivo da decisão?
+- É possível reconstruir um incidente apenas pelos logs?
+
+1.6 Classificação de Risco
+Classifique o sistema de saque automático:
+- 🟢 Seguro para escala
+- 🟡 Seguro com limites
+- 🔴 Arriscado para produção
+
+Explique o porquê.
+
+====================================================
+2️⃣ AUDITORIA — SISTEMA DE AFILIADOS
+====================================================
+
+2.1 Estrutura & Estados
+- Existem estados claros de conversão?
+  (PENDING / APPROVED / PAID / CANCELLED)
+- Existe janela de maturação?
+- Conversões podem ser revertidas?
+
+2.2 Rastreamento & Associação
+- O vínculo usuário ↔ afiliado é imutável?
+- É possível fraude via:
+  - auto-referral
+  - múltiplas contas
+  - CPF/IP/device?
+
+2.3 Comissão & Cálculo
+- Comissão é calculada quando?
+- Está baseada em:
+  - depósito?
+  - wager?
+  - net revenue?
+- Existe risco de comissão indevida?
+
+2.4 Antifraude
+- Quais mecanismos antifraude existem hoje?
+- O que é bloqueado automaticamente?
+- O que depende de ação humana?
+- Fraude tardia pode ser corrigida?
+
+2.5 Wallet & Pagamentos de Afiliados
+- Comissão entra no wallet normal ou separado?
+- Existe payout de afiliado separado?
+- Ledger é usado?
+- Há risco de pagar duas vezes?
+
+2.6 Admin & Visibilidade
+- Admin consegue:
+  - ver conversões detalhadas?
+  - aprovar / cancelar?
+  - bloquear afiliado?
+- Tudo gera audit log?
+
+2.7 Classificação de Maturidade
+Classifique o sistema de afiliados:
+- MVP
+- Produção controlada
+- Escalável com tráfego pago
+
+Explique claramente.
+
+====================================================
+3️⃣ CENÁRIOS DE ATAQUE & FALHA
+====================================================
+
+Simule mentalmente e responda:
+- Usuário tenta burlar rollover + saque automático
+- Afiliado cria contas falsas com KYC real
+- Webhook atrasado + saque automático
+- Admin mal-intencionado
+- Afiliado tenta payout duplicado
+
+O sistema resiste? Onde falha?
+
+====================================================
+📊 FORMATO FINAL DA RESPOSTA (OBRIGATÓRIO)
+====================================================
+
+1️⃣ RESUMO EXECUTIVO (linguagem de founder)
+2️⃣ STATUS REAL DOS DOIS SISTEMAS
+   - O que está completo
+   - O que está parcial
+   - O que é risco
+3️⃣ RISCOS IDENTIFICADOS
+   🔴 críticos
+   🟡 médios
+   🟢 baixos
+4️⃣ O QUE ESTÁ PRONTO PARA PRODUÇÃO
+5️⃣ O QUE NÃO DEVE SER ATIVADO AINDA
+6️⃣ PRÓXIMOS 3 PASSOS COM MAIOR ROI
+
+====================================================
+REGRAS FINAIS
+====================================================
+- NÃO ESCREVER CÓDIGO
+- NÃO IMPLEMENTAR FEATURES
+- NÃO SER OTIMISTA
+- ASSUMIR DINHEIRO REAL E FRAUDE REAL
+- SER HONESTO E DIRETO
