@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { generalLimiter } from "./middleware/rateLimit";
 
 // Import module routes
 import authRoutes from "./modules/auth/auth.routes";
@@ -27,6 +28,9 @@ export async function registerRoutes(
     }
     next(err);
   });
+
+  // Apply general rate limiting to all API routes
+  app.use("/api", generalLimiter);
 
   // Webhook endpoint (no auth required - comes from OndaPay)
   app.use("/api", ondapayRoutes);

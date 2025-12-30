@@ -9,6 +9,7 @@ import {
 } from "./ondapay.service";
 import { storage } from "../../../storage";
 import crypto from "crypto";
+import { pixLimiter, webhookLimiter } from "../../../middleware/rateLimit";
 
 const router = Router();
 
@@ -16,7 +17,7 @@ const createPixSchema = z.object({
   amount: z.number().min(100, "Valor mínimo é R$ 1,00 (100 centavos)"),
 });
 
-router.post("/pix/create", authMiddleware, async (req: Request, res: Response) => {
+router.post("/pix/create", authMiddleware, pixLimiter, async (req: Request, res: Response) => {
   try {
     const { amount } = createPixSchema.parse(req.body);
     const userId = req.user!.id;
@@ -88,15 +89,27 @@ router.get("/pix/history", authMiddleware, async (req: Request, res: Response) =
   }
 });
 
-function verifyWebhookSignature(req: Request): boolean {
+interface WebhookVerificationResult {
+  valid: boolean;
+  error?: string;
+}
+
+function verifyWebhookSignature(req: Request): WebhookVerificationResult {
   const webhookSecret = process.env.ONDAPAY_WEBHOOK_SECRET;
+  const isProduction = process.env.NODE_ENV === "production";
+  
   if (!webhookSecret) {
-    return true;
+    if (isProduction) {
+      console.error("[SECURITY] ONDAPAY_WEBHOOK_SECRET is required in production");
+      return { valid: false, error: "Webhook secret not configured" };
+    }
+    console.warn("[SECURITY] ONDAPAY_WEBHOOK_SECRET not set - accepting webhook without signature (development mode only)");
+    return { valid: true };
   }
 
   const signature = req.headers["x-ondapay-signature"] as string;
   if (!signature) {
-    return false;
+    return { valid: false, error: "Missing signature header" };
   }
 
   const payload = JSON.stringify(req.body);
@@ -105,19 +118,25 @@ function verifyWebhookSignature(req: Request): boolean {
     .update(payload)
     .digest("hex");
 
-  return crypto.timingSafeEqual(
-    Buffer.from(signature),
-    Buffer.from(expectedSignature)
-  );
+  try {
+    const isValid = crypto.timingSafeEqual(
+      Buffer.from(signature),
+      Buffer.from(expectedSignature)
+    );
+    return { valid: isValid, error: isValid ? undefined : "Invalid signature" };
+  } catch (error) {
+    return { valid: false, error: "Signature verification failed" };
+  }
 }
 
-router.post("/webhook/ondapay", async (req: Request, res: Response) => {
+router.post("/webhook/ondapay", webhookLimiter, async (req: Request, res: Response) => {
   try {
     console.log("OndaPay webhook received:", JSON.stringify(req.body, null, 2));
 
-    if (!verifyWebhookSignature(req)) {
-      console.error("Invalid webhook signature");
-      return res.status(401).json({ error: "Invalid signature" });
+    const verificationResult = verifyWebhookSignature(req);
+    if (!verificationResult.valid) {
+      console.error("Webhook signature verification failed:", verificationResult.error);
+      return res.status(401).json({ error: verificationResult.error || "Invalid signature" });
     }
 
     const result = await processPixWebhook(req.body);

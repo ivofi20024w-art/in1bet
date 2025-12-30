@@ -1,0 +1,186 @@
+ATENÇÃO: NÃO IMPLEMENTAR NADA.
+ESTE É UM PROCESSO DE AUDITORIA COMPLETA.
+LEIA TODO O PROJETO ANTES DE RESPONDER.
+
+Perfil que você deve assumir:
+Você é um SENIOR TECHNICAL AUDITOR / PRINCIPAL SOFTWARE ARCHITECT,
+especialista em plataformas financeiras, iGaming, pagamentos, KYC,
+antifraude e sistemas de alto risco.
+
+Objetivo:
+Realizar uma AUDITORIA TÉCNICA, FUNCIONAL E ARQUITETURAL COMPLETA
+do projeto IN1Bet, analisando o sistema de cima a baixo,
+arquivo por arquivo, rota por rota, fluxo por fluxo.
+
+====================================================
+ESCOPO OBRIGATÓRIO DA AUDITORIA
+====================================================
+
+1️⃣ ARQUITETURA GERAL
+- Analise a estrutura de pastas (frontend e backend)
+- Avalie modularização, acoplamento e coesão
+- Identifique:
+  - dependências circulares
+  - responsabilidades misturadas
+  - padrões inconsistentes
+- Classifique o nível arquitetural:
+  (Protótipo / MVP / Produção / Escalável)
+
+----------------------------------------------------
+
+2️⃣ BACKEND — ANÁLISE FILE-BY-FILE
+Analise cada módulo criticamente:
+
+- Auth (login, register, refresh, CPF)
+- Users / Profile
+- Wallet & Ledger
+- Payments (PIX / OndaPay)
+- Withdrawals
+- Bonus & Rollover
+- KYC
+- Affiliates
+- Admin
+- Security
+- Webhooks
+- Logs & Audit
+
+Para cada módulo, responda:
+- Está correto funcionalmente?
+- Está seguro?
+- Está pronto para produção?
+- Onde pode falhar?
+- Onde pode escalar mal?
+
+----------------------------------------------------
+
+3️⃣ CONSISTÊNCIA FINANCEIRA (CRÍTICO)
+- Verifique se TODA alteração de saldo passa pelo ledger
+- Analise:
+  - race conditions
+  - transações atômicas
+  - idempotência
+  - estados inválidos possíveis
+- Simule mentalmente cenários de falha:
+  - webhook duplicado
+  - saque simultâneo
+  - conversão de bônus + saque
+  - rollback parcial
+
+Classifique o risco financeiro:
+🟢 baixo / 🟡 médio / 🔴 alto
+
+----------------------------------------------------
+
+4️⃣ SEGURANÇA & ANTIFRAUDE
+- Autenticação e autorização
+- Roles e permissões
+- Webhooks
+- Rate limiting
+- Validação de input
+- Proteções contra abuso
+
+Identifique:
+- bypass possíveis
+- falhas silenciosas
+- dependência excessiva de frontend
+- riscos de fraude real (não teóricos)
+
+----------------------------------------------------
+
+5️⃣ KYC & COMPLIANCE
+- Fluxo de submissão
+- Aprovação / rejeição
+- Logs
+- Impacto financeiro
+- Possíveis falhas operacionais
+
+Avalie se o KYC:
+- bloqueia corretamente saque
+- não interfere indevidamente em saldo
+- é auditável juridicamente
+
+----------------------------------------------------
+
+6️⃣ FRONTEND & UX CRÍTICA
+- Rotas órfãs
+- Estados não tratados (loading, error)
+- Fluxos que quebram confiança
+- Ações possíveis no frontend que o backend bloqueia
+- Experiência mobile vs desktop
+
+Foque em UX de:
+- depósito
+- saque
+- bônus
+- KYC
+- suporte
+
+----------------------------------------------------
+
+7️⃣ ADMIN & OPERAÇÃO
+- O que depende de ação humana?
+- Onde um erro humano pode causar prejuízo?
+- Falta de alertas?
+- Falta de métricas?
+- Falta de visibilidade operacional?
+
+----------------------------------------------------
+
+8️⃣ PERFORMANCE & ESCALABILIDADE
+- O que quebra com:
+  - 1k usuários
+  - 10k usuários
+  - 100k usuários
+- Onde cache faz sentido
+- Onde filas seriam necessárias
+- Onde NÃO mexer agora
+
+----------------------------------------------------
+
+9️⃣ LOGS & AUDITORIA
+- Logs são completos?
+- Logs são imutáveis?
+- Logs permitem reconstruir um incidente?
+- Falta algum tipo de log crítico?
+
+----------------------------------------------------
+📊 FORMATO OBRIGATÓRIO DA RESPOSTA
+----------------------------------------------------
+
+1️⃣ RESUMO EXECUTIVO (para founders)
+- Estado geral do sistema
+- Se está pronto para escalar ou não
+- Maiores riscos reais
+
+2️⃣ SCORECARD
+Classifique de 0 a 10:
+- Segurança
+- Financeiro
+- Arquitetura
+- Operação
+- Escalabilidade
+
+3️⃣ RISCOS IDENTIFICADOS
+- 🔴 Críticos (corrigir imediatamente)
+- 🟡 Médios (antes de escalar)
+- 🟢 Baixos (técnicos / estéticos)
+
+4️⃣ DÍVIDA TÉCNICA
+- Onde existe
+- Impacto futuro
+- Prioridade real
+
+5️⃣ ROADMAP RECOMENDADO
+- Próximos 3 passos com maior ROI
+- O que NÃO fazer agora
+- O que só faz sentido depois de escalar
+
+====================================================
+REGRAS ABSOLUTAS
+====================================================
+- NÃO ESCREVER CÓDIGO
+- NÃO IMPLEMENTAR NADA
+- NÃO SIMPLIFICAR
+- SEJA CRÍTICO E HONESTO
+- ASSUMA CONTEXTO DE DINHEIRO REAL
+- ANALISE COMO SE FOSSE UM AUDITOR EXTERNO

@@ -6,10 +6,11 @@ import {
   getUserWithdrawals,
   getWithdrawalById,
 } from "./withdrawal.service";
+import { withdrawalLimiter } from "../../middleware/rateLimit";
 
 const router = Router();
 
-router.post("/request", authMiddleware, async (req: Request, res: Response) => {
+router.post("/request", authMiddleware, withdrawalLimiter, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
     const validation = requestWithdrawalSchema.safeParse(req.body);

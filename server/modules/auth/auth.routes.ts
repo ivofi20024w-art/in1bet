@@ -1,11 +1,12 @@
 import { Router, Request, Response } from "express";
 import { registerUser, loginUser, refreshAccessToken, logoutUser } from "./auth.service";
 import { authMiddleware } from "./auth.middleware";
+import { authLimiter, registrationLimiter } from "../../middleware/rateLimit";
 
 const router = Router();
 
 // POST /api/auth/register - Register new user
-router.post("/register", async (req: Request, res: Response) => {
+router.post("/register", registrationLimiter, async (req: Request, res: Response) => {
   try {
     console.log("Register request body:", JSON.stringify(req.body, null, 2));
     
@@ -32,7 +33,7 @@ router.post("/register", async (req: Request, res: Response) => {
 });
 
 // POST /api/auth/login - Login with email or CPF
-router.post("/login", async (req: Request, res: Response) => {
+router.post("/login", authLimiter, async (req: Request, res: Response) => {
   try {
     const result = await loginUser(req.body);
     
