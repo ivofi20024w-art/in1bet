@@ -18,6 +18,7 @@ import {
   Shield,
   Wallet,
   TrendingUp,
+  Gamepad2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -30,6 +31,7 @@ interface AdminLayoutProps {
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/users", label: "Usuários", icon: Users },
+  { href: "/admin/games", label: "Jogos", icon: Gamepad2 },
   { href: "/admin/deposits", label: "Depósitos PIX", icon: ArrowDownToLine },
   { href: "/admin/withdrawals", label: "Saques PIX", icon: ArrowUpFromLine },
   { href: "/admin/transactions", label: "Transações", icon: FileText },

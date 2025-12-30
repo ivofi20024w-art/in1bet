@@ -19,6 +19,7 @@ const transactionWebhookSchema = z.object({
   user_balance: z.number().optional(),
   game_original: z.boolean().optional(),
   game_type: z.string().optional(),
+  timestamp: z.number().optional(),
   slot: z.object({
     game_code: z.string().optional(),
     provider: z.string().optional(),
@@ -27,6 +28,16 @@ const transactionWebhookSchema = z.object({
     transaction_id: z.string(),
   }),
 });
+
+const WEBHOOK_TIMESTAMP_TOLERANCE_MS = 5 * 60 * 1000;
+
+function validateWebhookTimestamp(timestamp?: number): boolean {
+  if (!timestamp) return true;
+  const now = Date.now();
+  const requestTime = timestamp * 1000;
+  const diff = Math.abs(now - requestTime);
+  return diff <= WEBHOOK_TIMESTAMP_TOLERANCE_MS;
+}
 
 router.get("/providers", async (req: Request, res: Response) => {
   try {
@@ -303,7 +314,12 @@ router.post("/webhook", async (req: Request, res: Response) => {
       return res.status(400).json({ msg: "Invalid request", balance: 0 });
     }
 
-    const { type, agent_code, agent_secret, user_code, slot } = parsed.data;
+    const { type, agent_code, agent_secret, user_code, slot, timestamp } = parsed.data;
+
+    if (!validateWebhookTimestamp(timestamp)) {
+      console.error("[PlayFivers Webhook] Request timestamp too old or in future");
+      return res.status(400).json({ msg: "Request expired", balance: 0 });
+    }
 
     const expectedAgentCode = process.env.PLAYFIVERS_AGENT_CODE;
     const expectedAgentSecret = process.env.PLAYFIVERS_AGENT_SECRET;
@@ -313,6 +329,8 @@ router.post("/webhook", async (req: Request, res: Response) => {
         console.error("[PlayFivers Webhook] Invalid agent credentials");
         return res.status(401).json({ msg: "Unauthorized", balance: 0 });
       }
+    } else {
+      console.warn("[PlayFivers Webhook] Agent credentials not configured - running in development mode");
     }
 
     const result = await playfiversService.processTransaction({

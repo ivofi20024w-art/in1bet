@@ -304,26 +304,82 @@ export class PlayfiversService {
       throw new PlayfiversApiError("User not found", 404);
     }
 
-    const [wallet] = await db
-      .select()
-      .from(wallets)
-      .where(eq(wallets.userId, user.id))
-      .limit(1);
+    return db.transaction(async (tx) => {
+      const [wallet] = await tx
+        .select()
+        .from(wallets)
+        .where(eq(wallets.userId, user.id))
+        .limit(1);
 
-    if (!wallet) {
-      throw new PlayfiversApiError("Wallet not found", 404);
-    }
+      if (!wallet) {
+        throw new PlayfiversApiError("Wallet not found", 404);
+      }
 
-    const balanceBefore = parseFloat(wallet.balance);
-    const betAmount = slot.bet || 0;
-    const winAmount = slot.win || 0;
+      const txCheck = await tx
+        .select()
+        .from(playfiversTransactions)
+        .where(eq(playfiversTransactions.externalTransactionId, transactionId))
+        .limit(1);
 
-    let balanceAfter = balanceBefore;
-    let transactionType = type;
+      if (txCheck.length > 0) {
+        console.log(`[PlayFivers] Duplicate transaction (in tx) ${transactionId}`);
+        const balance = parseFloat(wallet.balance) + parseFloat(wallet.bonusBalance);
+        return { balance, msg: "DUPLICATE" };
+      }
 
-    if (type === "Bet") {
-      if (balanceBefore < betAmount) {
-        await db.insert(playfiversTransactions).values({
+      const balanceBefore = parseFloat(wallet.balance);
+      const betAmount = slot.bet || 0;
+      const winAmount = slot.win || 0;
+
+      let balanceAfter = balanceBefore;
+
+      if (type === "Bet") {
+        if (balanceBefore < betAmount) {
+          await tx.insert(playfiversTransactions).values({
+            externalTransactionId: transactionId,
+            userId: user.id,
+            transactionType: PlayfiversTransactionType.BET,
+            gameCode: slot.game_code,
+            providerName: slot.provider,
+            betAmount: String(betAmount),
+            winAmount: "0",
+            balanceBefore: String(balanceBefore),
+            balanceAfter: String(balanceBefore),
+            status: PlayfiversTransactionStatus.FAILED,
+            errorMessage: "Insufficient balance",
+            rawPayload: JSON.stringify(params),
+          });
+
+          throw new PlayfiversApiError("Insufficient balance", 400);
+        }
+
+        balanceAfter = balanceBefore - betAmount;
+
+        await tx
+          .update(wallets)
+          .set({
+            balance: String(balanceAfter),
+            updatedAt: new Date(),
+          })
+          .where(eq(wallets.id, wallet.id));
+
+        const [walletTxRecord] = await tx
+          .insert(transactions)
+          .values({
+            userId: user.id,
+            walletId: wallet.id,
+            type: TransactionType.BET,
+            amount: String(-betAmount),
+            balanceBefore: String(balanceBefore),
+            balanceAfter: String(balanceAfter),
+            status: TransactionStatus.COMPLETED,
+            referenceId: `playfivers_bet_${transactionId}`,
+            description: `Aposta ${slot.provider} - ${slot.game_code}`,
+            metadata: JSON.stringify({ playfiversTransactionId: transactionId }),
+          })
+          .returning();
+
+        await tx.insert(playfiversTransactions).values({
           externalTransactionId: transactionId,
           userId: user.id,
           transactionType: PlayfiversTransactionType.BET,
@@ -332,99 +388,56 @@ export class PlayfiversService {
           betAmount: String(betAmount),
           winAmount: "0",
           balanceBefore: String(balanceBefore),
-          balanceAfter: String(balanceBefore),
-          status: PlayfiversTransactionStatus.FAILED,
-          errorMessage: "Insufficient balance",
+          balanceAfter: String(balanceAfter),
+          status: PlayfiversTransactionStatus.SUCCESS,
+          walletTransactionId: walletTxRecord.id,
           rawPayload: JSON.stringify(params),
         });
+      } else if (type === "WinBet") {
+        balanceAfter = balanceBefore + winAmount;
 
-        throw new PlayfiversApiError("Insufficient balance", 400);
+        await tx
+          .update(wallets)
+          .set({
+            balance: String(balanceAfter),
+            updatedAt: new Date(),
+          })
+          .where(eq(wallets.id, wallet.id));
+
+        const [walletTxRecord] = await tx
+          .insert(transactions)
+          .values({
+            userId: user.id,
+            walletId: wallet.id,
+            type: TransactionType.WIN,
+            amount: String(winAmount),
+            balanceBefore: String(balanceBefore),
+            balanceAfter: String(balanceAfter),
+            status: TransactionStatus.COMPLETED,
+            referenceId: `playfivers_win_${transactionId}`,
+            description: `Ganho ${slot.provider} - ${slot.game_code}`,
+            metadata: JSON.stringify({ playfiversTransactionId: transactionId }),
+          })
+          .returning();
+
+        await tx.insert(playfiversTransactions).values({
+          externalTransactionId: transactionId,
+          userId: user.id,
+          transactionType: PlayfiversTransactionType.WIN_BET,
+          gameCode: slot.game_code,
+          providerName: slot.provider,
+          betAmount: "0",
+          winAmount: String(winAmount),
+          balanceBefore: String(balanceBefore),
+          balanceAfter: String(balanceAfter),
+          status: PlayfiversTransactionStatus.SUCCESS,
+          walletTransactionId: walletTxRecord.id,
+          rawPayload: JSON.stringify(params),
+        });
       }
 
-      balanceAfter = balanceBefore - betAmount;
-
-      await db
-        .update(wallets)
-        .set({
-          balance: String(balanceAfter),
-          updatedAt: new Date(),
-        })
-        .where(eq(wallets.id, wallet.id));
-
-      const [walletTx] = await db
-        .insert(transactions)
-        .values({
-          userId: user.id,
-          walletId: wallet.id,
-          type: TransactionType.BET,
-          amount: String(-betAmount),
-          balanceBefore: String(balanceBefore),
-          balanceAfter: String(balanceAfter),
-          status: TransactionStatus.COMPLETED,
-          referenceId: `playfivers_bet_${transactionId}`,
-          description: `Aposta ${slot.provider} - ${slot.game_code}`,
-          metadata: JSON.stringify({ playfiversTransactionId: transactionId }),
-        })
-        .returning();
-
-      await db.insert(playfiversTransactions).values({
-        externalTransactionId: transactionId,
-        userId: user.id,
-        transactionType: PlayfiversTransactionType.BET,
-        gameCode: slot.game_code,
-        providerName: slot.provider,
-        betAmount: String(betAmount),
-        winAmount: "0",
-        balanceBefore: String(balanceBefore),
-        balanceAfter: String(balanceAfter),
-        status: PlayfiversTransactionStatus.SUCCESS,
-        walletTransactionId: walletTx.id,
-        rawPayload: JSON.stringify(params),
-      });
-    } else if (type === "WinBet") {
-      balanceAfter = balanceBefore + winAmount;
-
-      await db
-        .update(wallets)
-        .set({
-          balance: String(balanceAfter),
-          updatedAt: new Date(),
-        })
-        .where(eq(wallets.id, wallet.id));
-
-      const [walletTx] = await db
-        .insert(transactions)
-        .values({
-          userId: user.id,
-          walletId: wallet.id,
-          type: TransactionType.WIN,
-          amount: String(winAmount),
-          balanceBefore: String(balanceBefore),
-          balanceAfter: String(balanceAfter),
-          status: TransactionStatus.COMPLETED,
-          referenceId: `playfivers_win_${transactionId}`,
-          description: `Ganho ${slot.provider} - ${slot.game_code}`,
-          metadata: JSON.stringify({ playfiversTransactionId: transactionId }),
-        })
-        .returning();
-
-      await db.insert(playfiversTransactions).values({
-        externalTransactionId: transactionId,
-        userId: user.id,
-        transactionType: PlayfiversTransactionType.WIN_BET,
-        gameCode: slot.game_code,
-        providerName: slot.provider,
-        betAmount: "0",
-        winAmount: String(winAmount),
-        balanceBefore: String(balanceBefore),
-        balanceAfter: String(balanceAfter),
-        status: PlayfiversTransactionStatus.SUCCESS,
-        walletTransactionId: walletTx.id,
-        rawPayload: JSON.stringify(params),
-      });
-    }
-
-    return { balance: balanceAfter, msg: "" };
+      return { balance: balanceAfter, msg: "" };
+    });
   }
 
   async getAgentInfo() {

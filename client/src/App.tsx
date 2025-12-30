@@ -50,6 +50,7 @@ import AdminSecurity from "@/pages/admin/Security";
 import AdminSettings from "@/pages/admin/Settings";
 import AdminAffiliates from "@/pages/admin/Affiliates";
 import AdminAudit from "@/pages/admin/Audit";
+import AdminGames from "@/pages/admin/Games";
 import { useEffect, useState } from "react";
 import { Loader } from "@/components/ui/Loader";
 
@@ -148,6 +149,7 @@ function Router() {
         <Route path="/casino/recent" component={Casino} />
         <Route path="/admin" component={AdminDashboard} />
         <Route path="/admin/users" component={AdminUsers} />
+        <Route path="/admin/games" component={AdminGames} />
         <Route path="/admin/deposits" component={AdminDeposits} />
         <Route path="/admin/withdrawals" component={AdminWithdrawals} />
         <Route path="/admin/transactions" component={AdminTransactions} />
