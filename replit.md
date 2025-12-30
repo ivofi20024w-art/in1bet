@@ -149,6 +149,53 @@ Key tables:
   - POST /api/admin/bonuses/:id/toggle - Toggle bonus active status
   - GET /api/admin/user-bonuses - List user bonus instances
   - POST /api/admin/user-bonuses/:id/cancel - Cancel user bonus
+- **Settings Endpoints**:
+  - GET /api/admin/settings - Get all platform settings
+  - POST /api/admin/settings/pix-auto-withdraw - Toggle global auto-withdraw
+  - PUT /api/admin/users/:id/auto-withdraw - Toggle user auto-withdraw permission
+
+### Automatic PIX Withdrawal System
+- **Global Toggle**: PIX_AUTO_WITHDRAW_GLOBAL setting in `settings` table
+- **User Permission**: `autoWithdrawAllowed` flag in `users` table (defaults to true)
+- **Eligibility Requirements**:
+  - Global auto-withdraw must be enabled
+  - User must have autoWithdrawAllowed = true
+  - User must have KYC verified (kycStatus = "VERIFIED")
+  - User must have completed rollover (rolloverRemaining = 0)
+- **Auto-Payment Flow**:
+  - When eligible withdrawal is requested, it's immediately approved and paid
+  - System uses "SYSTEM_AUTO" as adminId in audit logs
+  - Transaction logged with WITHDRAW_RESERVE and status set to PAID
+
+### Affiliate System
+- **Tables**:
+  - `affiliates` - Affiliate accounts linked to users
+  - `affiliate_links` - Trackable referral links with unique codes
+  - `affiliate_conversions` - Conversion records (CPA, RevShare, Hybrid)
+  - `affiliate_payouts` - Payout requests and history
+  - `affiliate_clicks` - Click tracking for analytics
+- **Commission Types**:
+  - CPA: Fixed value per qualified conversion
+  - REV_SHARE: Percentage of net revenue
+  - HYBRID: CPA + RevShare combination
+- **Referral Tracking**:
+  - Users can register with ?ref=CODE parameter
+  - Registration captures IP address for fraud detection
+  - Conversion created automatically on registration
+- **Anti-Fraud System**:
+  - Platform-wide CPF duplication check (across all affiliates)
+  - Platform-wide IP duplication check (3+ conversions = suspicious)
+  - Self-referral detection (affiliate CPF/email matches user)
+  - Fraud flagged conversions use "SYSTEM_FRAUD_DETECTION" for audit
+- **Affiliate Endpoints**:
+  - GET /api/affiliate/track/:code - Redirect tracking link
+  - GET /api/affiliate/dashboard - Affiliate stats
+  - POST /api/affiliate/payouts/request - Request payout
+  - GET /api/affiliate/admin - List all affiliates (admin)
+  - POST /api/affiliate/admin - Create affiliate (admin)
+  - POST /api/affiliate/admin/:id/toggle-status - Toggle affiliate status (admin)
+  - POST /api/affiliate/admin/conversions/:id/fraud - Mark as fraud (admin)
+  - POST /api/affiliate/admin/payouts/:id/approve - Approve payout (admin)
 
 - JivoChat widget (placeholder in index.html)
 

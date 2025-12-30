@@ -24,7 +24,7 @@ import { toast } from "sonner";
 
 interface AdminLayoutProps {
   children: ReactNode;
-  title: string;
+  title?: string;
 }
 
 const navItems = [
@@ -34,7 +34,9 @@ const navItems = [
   { href: "/admin/withdrawals", label: "Saques PIX", icon: ArrowUpFromLine },
   { href: "/admin/transactions", label: "Transações", icon: FileText },
   { href: "/admin/bonuses", label: "Bônus", icon: Gift },
+  { href: "/admin/affiliates", label: "Afiliados", icon: TrendingUp },
   { href: "/admin/security", label: "Segurança", icon: Shield },
+  { href: "/admin/settings", label: "Configurações", icon: Settings },
   { href: "/admin/audit", label: "Auditoria", icon: FileText },
 ];
 
