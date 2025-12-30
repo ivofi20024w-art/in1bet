@@ -1,11 +1,10 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { FAQS } from "@/lib/mockData";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { MessageCircle, Mail, Phone, Ticket, Search, ChevronRight, LifeBuoy, FileText, ArrowRight, HelpCircle } from "lucide-react";
+import { MessageCircle, Mail, Phone, Search, ChevronRight, LifeBuoy, FileText, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Link } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function Support() {
@@ -58,21 +57,16 @@ export default function Support() {
              <Card className="bg-card border-white/5 shadow-xl hover:border-primary/50 transition-all cursor-pointer group hover:-translate-y-1 duration-300">
                 <CardHeader className="text-center pb-2">
                     <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                        <Ticket className="w-8 h-8 text-blue-500" />
+                        <Phone className="w-8 h-8 text-blue-500" />
                     </div>
-                    <CardTitle className="text-xl font-bold text-white">Tickets</CardTitle>
-                    <CardDescription className="text-gray-400">Para casos complexos</CardDescription>
+                    <CardTitle className="text-xl font-bold text-white">WhatsApp</CardTitle>
+                    <CardDescription className="text-gray-400">Atendimento personalizado</CardDescription>
                 </CardHeader>
                 <CardContent className="text-center">
-                    <p className="text-sm text-gray-400 mb-6 px-4">Acompanhe o status das suas solicitações ou abra um novo chamado.</p>
-                    <div className="grid grid-cols-2 gap-3">
-                        <Link href="/support/tickets/new" className="w-full">
-                            <Button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl">Novo</Button>
-                        </Link>
-                        <Link href="/support/tickets" className="w-full">
-                            <Button variant="outline" className="w-full border-white/10 hover:bg-white/5 rounded-xl">Meus Tickets</Button>
-                        </Link>
-                    </div>
+                    <p className="text-sm text-gray-400 mb-6 px-4">Fale diretamente com nossa equipe pelo WhatsApp para atendimento rápido.</p>
+                    <Button className="w-full bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl h-12" onClick={() => window.open("https://wa.me/5511999999999", "_blank")}>
+                        Chamar no WhatsApp
+                    </Button>
                 </CardContent>
             </Card>
 
@@ -100,8 +94,7 @@ export default function Support() {
                 {[
                     { icon: FileText, label: "Depósitos e Saques", desc: "Métodos, prazos e limites" },
                     { icon: HelpCircle, label: "Minha Conta", desc: "Verificação, senha e segurança" },
-                    { icon: Ticket, label: "Apostas Esportivas", desc: "Regras, cashout e tipos de aposta" },
-                    { icon: LifeBuoy, label: "Cassino", desc: "Jogos, erros técnicos e rodadas" },
+                    { icon: LifeBuoy, label: "Jogos", desc: "Mines, erros técnicos e rodadas" },
                     { icon: MessageCircle, label: "Bônus e Promoções", desc: "Rollover, termos e ativação" },
                     { icon: Phone, label: "Jogo Responsável", desc: "Limites e autoexclusão" },
                 ].map((item, i) => (

@@ -17,28 +17,16 @@ export const USER = {
 };
 
 export const CASINO_MENU = [
-  { icon: Flame, label: "Casino", path: "/casino" },
-  { icon: CircleDollarSign, label: "Casino Ao Vivo", path: "/live-casino" },
-  { icon: Rocket, label: "Originais", path: "/originals" }, // Crash, Double, etc under a category or page
-  { icon: TrendingUp, label: "Populares", path: "/casino/popular" },
-  { icon: History, label: "Recentes", path: "/casino/recent" },
+  { icon: Gamepad2, label: "Jogos IN1Bet", path: "/originals" },
 ];
 
-export const SPORTS_MENU = [
-  { icon: Trophy, label: "Esportes", path: "/sports" },
-  { icon: MonitorPlay, label: "Ao Vivo", path: "/live-betting" },
-  { icon: Clock, label: "Pré-Jogo", path: "/sports/prematch" },
-  { icon: Ticket, label: "Minhas Apostas", path: "/sports/my-bets" },
-  { icon: Swords, label: "Resultados", path: "/sports/results" },
-];
+export const SPORTS_MENU: { icon: any; label: string; path: string }[] = [];
 
 export const PROFILE_MENU_ITEMS = [
   { icon: User, label: "Minha Conta", path: "/profile" },
-  { icon: Wallet, label: "Carteira", path: "/wallet" }, // Triggers modal usually
+  { icon: Wallet, label: "Carteira", path: "/wallet" },
   { icon: Users, label: "Afiliados", path: "/affiliates" },
   { icon: History, label: "Histórico", path: "/history" },
-  { icon: Settings, label: "Preferências", path: "/profile/settings" },
-  { icon: Gift, label: "Recompensas", path: "/vip" },
   { icon: FileCheck, label: "Verificação", path: "/profile/verification" },
   { icon: Lock, label: "Segurança", path: "/profile/security" },
   { icon: HelpCircle, label: "Suporte", path: "/support" },
