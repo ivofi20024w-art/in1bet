@@ -1,0 +1,142 @@
+Contexto:
+Plataforma de casino online brasileira com PIX (OndaPay), wallet com ledger, bônus com rollover, dashboard admin e sistema de KYC interno recentemente implementado.
+
+Objetivo desta tarefa:
+Executar uma AUDITORIA TÉCNICA E FUNCIONAL COMPLETA do projeto, verificando segurança, integridade financeira, KYC, permissões, rotas, UI e fluxos críticos, SEM implementar novas funcionalidades.
+
+⚠️ Regra absoluta:
+	•	NÃO adicionar features
+	•	NÃO alterar regras financeiras
+	•	NÃO refatorar sem necessidade
+	•	Apenas analisar, validar, apontar riscos e corrigir bugs críticos se existirem
+
+⸻
+
+1️⃣ AUDITORIA DE ROTAS & LINKS
+
+Verificar:
+	•	Todas as rotas frontend existentes
+	•	Todas as rotas backend expostas
+	•	Links quebrados ou rotas sem página
+	•	Possíveis erros 404
+	•	Rotas admin protegidas corretamente
+
+Resultado esperado:
+Lista clara de:
+	•	Rotas OK
+	•	Rotas órfãs
+	•	Rotas acessíveis indevidamente
+
+⸻
+
+2️⃣ AUDITORIA DE PERMISSÕES & ROLES
+
+Validar:
+	•	Usuário comum NÃO acessa /admin
+	•	Apenas ADMIN e SECURITY acessam /admin/security
+	•	SECURITY não acessa financeiro/admin global
+	•	Middleware ativo em TODAS as rotas sensíveis
+
+Testar:
+	•	Acesso direto via URL
+	•	Acesso via chamadas HTTP
+
+⸻
+
+3️⃣ AUDITORIA DO KYC
+
+Validar fluxo completo:
+	•	Upload de documentos
+	•	Persistência dos arquivos
+	•	Associação correta com usuário
+	•	Status PENDING / APPROVED / REJECTED
+	•	Motivo de rejeição obrigatório
+
+Verificar:
+	•	Apenas 1 KYC ativo por usuário
+	•	Histórico preservado
+	•	Admin responsável registrado
+	•	Logs de decisão criados
+
+Confirmar:
+	•	KYC NÃO altera saldo
+	•	KYC NÃO altera bônus
+	•	KYC bloqueia saque corretamente
+
+⸻
+
+4️⃣ AUDITORIA FINANCEIRA (CRÍTICO)
+
+Verificar:
+	•	Nenhuma função altera saldo fora do ledger
+	•	Depósitos PIX creditados SOMENTE via webhook
+	•	Saques reduzem saldo apenas após confirmação
+	•	Conversão de bônus respeita limites
+	•	Rollover bloqueia saque corretamente
+
+Simular:
+	•	Webhook duplicado
+	•	Saque com rollover pendente
+	•	Saque sem KYC
+
+⸻
+
+5️⃣ WALLET & TRANSACTION LEDGER
+
+Validar:
+	•	Toda mudança gera transação
+	•	Tipos de transação corretos
+	•	Histórico imutável
+	•	Totais batem com dashboard
+
+⸻
+
+6️⃣ DASHBOARD ADMIN
+
+Verificar:
+	•	Números exibidos refletem dados reais
+	•	Filtros funcionam
+	•	Paginação correta
+	•	Performance aceitável
+
+Conferir:
+	•	Total depositado
+	•	Total sacado
+	•	Lucro bruto
+	•	Bônus concedidos vs convertidos
+
+⸻
+
+7️⃣ SEGURANÇA GERAL
+
+Avaliar:
+	•	URLs de documentos não públicos
+	•	Proteção contra acesso cruzado
+	•	Validação de inputs
+	•	Possíveis bypass de regras
+
+⸻
+
+8️⃣ LOGS & AUDITORIA
+
+Confirmar:
+	•	Toda ação admin gera log
+	•	Logs mostram quem, quando e o quê
+	•	Logs não são editáveis via UI
+
+⸻
+
+9️⃣ RELATÓRIO FINAL
+
+Ao final, gerar um relatório contendo:
+	•	✅ Pontos OK
+	•	⚠️ Riscos médios
+	•	🔴 Riscos críticos (se houver)
+	•	Recomendações objetivas
+
+Não executar correções automáticas sem apontar antes.
+
+⸻
+
+Objetivo final:
+Confirmar se a plataforma está segura, consistente e pronta para operação real, ou identificar exatamente o que precisa ser corrigido antes disso.
