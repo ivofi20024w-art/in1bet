@@ -1,0 +1,120 @@
+•	Reset invalida todas as sessões JWT existentes do usuário
+	•	Audit log:
+	•	PASSWORD_RESET_REQUESTED
+	•	PASSWORD_RESET_COMPLETED
+
+❌ Não implementar envio real de email se já existir sistema mock — pode usar logger ou placeholder se necessário
+✅ Mas o fluxo precisa estar completo no backend
+
+⸻
+
+2️⃣ PROFILE SETTINGS — PERSISTÊNCIA REAL
+
+Estado Atual
+	•	Página /profile/settings existe
+	•	Switches e selects funcionam visualmente
+	•	Nada é salvo
+
+Objetivo
+Persistir preferências reais do usuário, sem mudar UI.
+
+Requisitos Técnicos
+	•	Criar tabela ou campo userSettings
+	•	Endpoint:
+	•	GET /api/users/settings
+	•	POST /api/users/settings
+	•	Campos mínimos:
+	•	language
+	•	emailNotifications
+	•	marketingOptIn
+	•	Frontend:
+	•	Conectar botão “Salvar”
+	•	Carregar valores reais ao entrar na página
+	•	Audit log:
+	•	USER_SETTINGS_UPDATED
+
+⚠️ Não criar sistema de preferências complexo
+⚠️ Não adicionar novas opções visuais
+
+⸻
+
+3️⃣ PROFILE SECURITY — SENHA REAL + 2FA HONESTO
+
+Estado Atual
+	•	Página /profile/security existe
+	•	Botões são decorativos
+	•	2FA é apenas visual (crítico)
+
+⸻
+
+3.1 🔑 ALTERAÇÃO DE SENHA (OBRIGATÓRIO)
+
+Objetivo
+Tornar o botão “Alterar senha” funcional de verdade.
+
+Requisitos
+	•	Endpoint: POST /api/users/change-password
+	•	Validar:
+	•	senha atual
+	•	força mínima da nova senha
+	•	Atualizar hash
+	•	Invalidar sessões existentes
+	•	Audit log:
+	•	PASSWORD_CHANGED
+
+⸻
+
+3.2 🔐 2FA — TRATAMENTO CORRETO (SEM FALSA SEGURANÇA)
+
+Regra Importante
+⚠️ Se não implementar 2FA real agora, a UI deve refletir isso com clareza.
+
+Escolher UMA abordagem:
+
+OPÇÃO A — IMPLEMENTAR 2FA REAL (se já houver base)
+	•	TOTP (Google Authenticator)
+	•	Secret por usuário
+	•	QR Code
+	•	Endpoint de verificação
+	•	Enforcement no login
+
+OPÇÃO B — DESABILITAR VISUALMENTE 2FA (preferível agora)
+	•	Manter layout
+	•	Mostrar badge:
+“Em breve”
+	•	Desabilitar toggle
+	•	Nenhuma falsa promessa de segurança
+
+❌ Não deixar botão ativo sem backend
+❌ Não simular segurança
+
+⸻
+
+🧪 TESTES OBRIGATÓRIOS
+	•	Forgot password:
+	•	token inválido
+	•	token expirado
+	•	uso duplo
+	•	Change password:
+	•	senha errada
+	•	senha fraca
+	•	Settings:
+	•	persistência
+	•	reload da página mantém estado
+
+⸻
+
+📦 ENTREGA ESPERADA
+	1.	Forgot Password funcionando de ponta a ponta
+	2.	Profile Settings persistindo de verdade
+	3.	Security honesto e funcional
+	4.	Audit logs completos
+	5.	Zero remoções de código
+	6.	Zero alterações visuais desnecessárias
+
+⸻
+
+🧠 MENTALIDADE DO AGENTE
+
+“Não é adicionar feature.
+É transformar promessa visual em comportamento real.”

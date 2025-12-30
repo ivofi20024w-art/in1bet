@@ -78,6 +78,29 @@ export const refreshTokens = pgTable("refresh_tokens", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Password reset tokens - secure password recovery
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  tokenHash: text("token_hash").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// User settings - persistent user preferences
+export const userSettings = pgTable("user_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id).unique(),
+  language: varchar("language", { length: 10 }).default("pt-BR").notNull(),
+  oddsFormat: varchar("odds_format", { length: 20 }).default("decimal").notNull(),
+  emailMarketing: boolean("email_marketing").default(false).notNull(),
+  pushNotifications: boolean("push_notifications").default(true).notNull(),
+  smsNotifications: boolean("sms_notifications").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // PIX Deposits table - tracks PIX payment requests
 export const pixDeposits = pgTable("pix_deposits", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -468,6 +491,10 @@ export const AdminAction = {
   AFFILIATE_PAYOUT_RESERVED: "AFFILIATE_PAYOUT_RESERVED",
   AFFILIATE_PAYOUT_RELEASED: "AFFILIATE_PAYOUT_RELEASED",
   AUTO_WITHDRAW_LIMIT_EXCEEDED: "AUTO_WITHDRAW_LIMIT_EXCEEDED",
+  PASSWORD_RESET_REQUESTED: "PASSWORD_RESET_REQUESTED",
+  PASSWORD_RESET_COMPLETED: "PASSWORD_RESET_COMPLETED",
+  PASSWORD_CHANGED: "PASSWORD_CHANGED",
+  USER_SETTINGS_UPDATED: "USER_SETTINGS_UPDATED",
 } as const;
 
 // Admin Audit Logs table
@@ -773,9 +800,6 @@ export type AffiliatePayout = typeof affiliatePayouts.$inferSelect;
 export type AffiliateClick = typeof affiliateClicks.$inferSelect;
 
 // Betting types
-export type Bet = typeof bets.$inferSelect;
-export type BetStatusValue = typeof BetStatus[keyof typeof BetStatus];
-export type GameTypeValue = typeof GameType[keyof typeof GameType];
 export type MinesGame = typeof minesGames.$inferSelect;
 export type AffiliateStatusValue = typeof AffiliateStatus[keyof typeof AffiliateStatus];
 export type CommissionTypeValue = typeof CommissionType[keyof typeof CommissionType];
@@ -828,11 +852,7 @@ export type CreateAffiliate = z.infer<typeof createAffiliateSchema>;
 export type CreateAffiliateLink = z.infer<typeof createAffiliateLinkSchema>;
 export type RequestAffiliatePayout = z.infer<typeof requestAffiliatePayoutSchema>;
 
-// Betting types and schemas
-export type Bet = typeof bets.$inferSelect;
-export type BetStatusValue = typeof BetStatus[keyof typeof BetStatus];
-export type GameTypeValue = typeof GameType[keyof typeof GameType];
-
+// Betting schemas
 export const insertBetSchema = createInsertSchema(bets).omit({
   id: true,
   winAmount: true,
@@ -854,3 +874,37 @@ export const placeBetSchema = z.object({
 
 export type InsertBet = z.infer<typeof insertBetSchema>;
 export type PlaceBet = z.infer<typeof placeBetSchema>;
+
+// Password reset schemas
+export const forgotPasswordSchema = z.object({
+  identifier: z.string().min(1, "Email ou CPF obrigatório"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token obrigatório"),
+  newPassword: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Senha atual obrigatória"),
+  newPassword: z.string().min(6, "Nova senha deve ter pelo menos 6 caracteres"),
+});
+
+// User settings schemas
+export const updateUserSettingsSchema = z.object({
+  language: z.enum(["pt-BR", "en", "es"]).optional(),
+  oddsFormat: z.enum(["decimal", "fractional", "american"]).optional(),
+  emailMarketing: z.boolean().optional(),
+  pushNotifications: z.boolean().optional(),
+  smsNotifications: z.boolean().optional(),
+});
+
+// Password reset types
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type ForgotPassword = z.infer<typeof forgotPasswordSchema>;
+export type ResetPassword = z.infer<typeof resetPasswordSchema>;
+export type ChangePassword = z.infer<typeof changePasswordSchema>;
+
+// User settings types
+export type UserSettings = typeof userSettings.$inferSelect;
+export type UpdateUserSettings = z.infer<typeof updateUserSettingsSchema>;
