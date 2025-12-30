@@ -17,7 +17,7 @@ import { settingsRouter } from "./modules/settings";
 import { initializeDefaultSettings } from "./modules/settings/settings.service";
 import { affiliateRouter } from "./modules/affiliates";
 import { bettingRouter } from "./modules/betting";
-import { minesRouter } from "./modules/games";
+import { minesRouter, crashRouter, startCrashGameLoop, doubleRouter, startDoubleGameLoop, plinkoRouter } from "./modules/games";
 import historyRoutes from "./modules/history/history.routes";
 import playfiversRoutes from "./modules/playfivers/playfivers.routes";
 import { supportRouter, initializeDefaultDepartments, initializeDefaultSlaRules, initializeDefaultTriageRules } from "./modules/support";
@@ -54,6 +54,14 @@ export async function registerRoutes(
   app.use("/api/affiliate", affiliateRouter);
   app.use("/api/bets", bettingRouter);
   app.use("/api/games/mines", minesRouter);
+  app.use("/api/games/crash", crashRouter);
+  app.use("/api/games/double", doubleRouter);
+  app.use("/api/games/plinko", plinkoRouter);
+  
+  // Start game loops
+  startCrashGameLoop();
+  startDoubleGameLoop();
+  
   app.use("/api/history", historyRoutes);
   app.use("/api/playfivers", playfiversRoutes);
   app.use("/api/support", supportRouter);

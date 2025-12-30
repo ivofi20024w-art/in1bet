@@ -6,10 +6,12 @@ import {
   BetStatus,
   TransactionType,
   TransactionStatus,
-  type Bet,
-  type BetStatusValue,
-  type GameTypeValue,
+  GameType,
 } from "@shared/schema";
+
+type Bet = typeof bets.$inferSelect;
+type BetStatusValue = (typeof BetStatus)[keyof typeof BetStatus];
+type GameTypeValue = (typeof GameType)[keyof typeof GameType];
 import { eq, and, sql, desc } from "drizzle-orm";
 import { createHash, randomBytes, randomUUID } from "crypto";
 import { logOperational } from "../../utils/operationalLog";
