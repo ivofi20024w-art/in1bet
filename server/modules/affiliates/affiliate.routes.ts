@@ -16,6 +16,7 @@ import {
   getAffiliateDashboardStats,
   requestAffiliatePayout,
   approveAffiliatePayout,
+  rejectAffiliatePayout,
   markPayoutAsPaid,
   checkAndQualifyConversion,
   markConversionAsFraud,
@@ -355,6 +356,25 @@ router.post("/admin/payouts/:id/pay", authMiddleware, adminCheck, async (req: Re
   } catch (error: any) {
     console.error("Admin pay payout error:", error);
     res.status(400).json({ error: error.message || "Erro ao pagar" });
+  }
+});
+
+router.post("/admin/payouts/:id/reject", authMiddleware, adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+    const adminId = (req as any).adminUser.id;
+
+    if (!reason) {
+      return res.status(400).json({ error: "Motivo da rejeição obrigatório" });
+    }
+
+    await rejectAffiliatePayout(id, adminId, reason);
+
+    res.json({ success: true, message: "Pagamento rejeitado e saldo liberado" });
+  } catch (error: any) {
+    console.error("Admin reject payout error:", error);
+    res.status(400).json({ error: error.message || "Erro ao rejeitar pagamento" });
   }
 });
 

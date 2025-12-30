@@ -21,8 +21,15 @@ import {
   type AffiliatePayout,
   type User,
 } from "@shared/schema";
-import { eq, and, desc, sum, count, gte, sql } from "drizzle-orm";
+import { eq, and, desc, sum, count, gte, sql, lt } from "drizzle-orm";
 import { randomBytes } from "crypto";
+import { 
+  logAffiliatePayoutCreated, 
+  logAffiliatePayoutReserved,
+  logAffiliatePayoutReleased,
+  logAffiliateFraudDetected 
+} from "../../utils/operationalLog";
+import { getAffiliateMaturationDays, isRevShareRealPnlEnabled } from "../settings/settings.service";
 
 function generateReferralCode(): string {
   return randomBytes(4).toString("hex").toUpperCase();
@@ -156,6 +163,10 @@ export async function createConversion(
   userIp?: string,
   userDevice?: string
 ): Promise<AffiliateConversion> {
+  const maturationDays = await getAffiliateMaturationDays();
+  const maturesAt = new Date();
+  maturesAt.setDate(maturesAt.getDate() + maturationDays);
+
   const [conversion] = await db
     .insert(affiliateConversions)
     .values({
@@ -166,6 +177,7 @@ export async function createConversion(
       userIp,
       userDevice,
       status: ConversionStatus.PENDING,
+      maturesAt,
     })
     .returning();
 
@@ -252,7 +264,9 @@ export async function checkForFraud(
 
 export async function markConversionAsFraudSystem(
   conversionId: string,
-  reason: string
+  reason: string,
+  affiliateId?: string,
+  userId?: string
 ): Promise<void> {
   await db
     .update(affiliateConversions)
@@ -270,6 +284,10 @@ export async function markConversionAsFraudSystem(
     targetId: conversionId,
     dataAfter: JSON.stringify({ status: "FRAUD", reason, detectedBy: "SYSTEM" }),
   });
+
+  if (affiliateId && userId) {
+    logAffiliateFraudDetected(conversionId, affiliateId, userId, [reason]);
+  }
 
   console.log(`[AFFILIATE_FRAUD] Conversion ${conversionId} marked as fraud: ${reason}`);
 }
@@ -313,9 +331,38 @@ export async function updateConversionStats(
     .where(eq(affiliateConversions.id, conversion.id));
 }
 
+async function calculateRealNetRevenue(userId: string, sinceDate?: Date): Promise<number> {
+  let betQuery = db
+    .select({ total: sum(transactions.amount) })
+    .from(transactions)
+    .where(and(
+      eq(transactions.userId, userId),
+      eq(transactions.type, TransactionType.BET),
+      sinceDate ? gte(transactions.createdAt, sinceDate) : sql`true`
+    ));
+
+  let winQuery = db
+    .select({ total: sum(transactions.amount) })
+    .from(transactions)
+    .where(and(
+      eq(transactions.userId, userId),
+      eq(transactions.type, TransactionType.WIN),
+      sinceDate ? gte(transactions.createdAt, sinceDate) : sql`true`
+    ));
+
+  const [betSum] = await betQuery;
+  const [winSum] = await winQuery;
+
+  const totalBets = Math.abs(parseFloat(betSum?.total || "0"));
+  const totalWins = Math.abs(parseFloat(winSum?.total || "0"));
+  
+  return Math.max(0, totalBets - totalWins);
+}
+
 export async function checkAndQualifyConversion(
   conversionId: string,
-  adminId?: string
+  adminId?: string,
+  skipMaturationCheck: boolean = false
 ): Promise<{ qualified: boolean; reason?: string }> {
   const [conversion] = await db
     .select()
@@ -328,6 +375,14 @@ export async function checkAndQualifyConversion(
 
   if (conversion.status !== ConversionStatus.PENDING) {
     return { qualified: false, reason: "Conversão já processada" };
+  }
+
+  if (!skipMaturationCheck && conversion.maturesAt) {
+    const now = new Date();
+    if (now < conversion.maturesAt) {
+      const daysRemaining = Math.ceil((conversion.maturesAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      return { qualified: false, reason: `Período de maturação: ${daysRemaining} dias restantes` };
+    }
   }
 
   const [affiliate] = await db
@@ -373,7 +428,15 @@ export async function checkAndQualifyConversion(
   }
 
   if (commissionType === CommissionType.REVSHARE || commissionType === CommissionType.HYBRID) {
-    const netRevenue = wagerAmount * 0.05;
+    const useRealPnl = await isRevShareRealPnlEnabled();
+    
+    let netRevenue: number;
+    if (useRealPnl) {
+      netRevenue = await calculateRealNetRevenue(conversion.userId, conversion.createdAt);
+    } else {
+      netRevenue = wagerAmount * 0.05;
+    }
+    
     const revshareAmount = netRevenue * (parseFloat(affiliate.revsharePercentage) / 100);
     commissionValue += revshareAmount;
 
@@ -386,47 +449,89 @@ export async function checkAndQualifyConversion(
       .where(eq(affiliateConversions.id, conversionId));
   }
 
-  await db
-    .update(affiliateConversions)
-    .set({
-      status: ConversionStatus.APPROVED,
-      commissionValue: commissionValue.toFixed(2),
-      qualifiedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(affiliateConversions.id, conversionId));
+  try {
+    await db.transaction(async (tx) => {
+      const [lockedConversion] = await tx
+        .select()
+        .from(affiliateConversions)
+        .where(eq(affiliateConversions.id, conversionId))
+        .for("update");
 
-  await db
-    .update(affiliates)
-    .set({
-      qualifiedReferrals: sql`${affiliates.qualifiedReferrals} + 1`,
-      pendingBalance: sql`${affiliates.pendingBalance} + ${commissionValue}`,
-      totalEarnings: sql`${affiliates.totalEarnings} + ${commissionValue}`,
-      updatedAt: new Date(),
-    })
-    .where(eq(affiliates.id, conversion.affiliateId));
+      if (!lockedConversion || lockedConversion.status !== ConversionStatus.PENDING) {
+        throw new Error("Conversão já foi processada por outra requisição");
+      }
 
-  if (conversion.affiliateLinkId) {
-    await db
-      .update(affiliateLinks)
-      .set({
-        conversions: sql`${affiliateLinks.conversions} + 1`,
-        updatedAt: new Date(),
-      })
-      .where(eq(affiliateLinks.id, conversion.affiliateLinkId));
-  }
+      const [lockedAffiliate] = await tx
+        .select()
+        .from(affiliates)
+        .where(eq(affiliates.id, conversion.affiliateId))
+        .for("update");
 
-  if (adminId) {
-    await db.insert(adminAuditLogs).values({
-      adminId,
-      action: AdminAction.AFFILIATE_CONVERSION_APPROVE,
-      targetType: "AFFILIATE_CONVERSION",
-      targetId: conversionId,
-      dataAfter: JSON.stringify({ commissionValue, status: "APPROVED" }),
+      if (!lockedAffiliate) {
+        throw new Error("Afiliado não encontrado durante atualização");
+      }
+
+      await tx
+        .update(affiliateConversions)
+        .set({
+          status: ConversionStatus.APPROVED,
+          commissionValue: commissionValue.toFixed(2),
+          qualifiedAt: new Date(),
+          updatedAt: new Date(),
+        })
+        .where(eq(affiliateConversions.id, conversionId));
+
+      await tx
+        .update(affiliates)
+        .set({
+          qualifiedReferrals: sql`${affiliates.qualifiedReferrals} + 1`,
+          pendingBalance: sql`${affiliates.pendingBalance} + ${commissionValue}`,
+          totalEarnings: sql`${affiliates.totalEarnings} + ${commissionValue}`,
+          updatedAt: new Date(),
+        })
+        .where(eq(affiliates.id, conversion.affiliateId));
+
+      if (conversion.affiliateLinkId) {
+        await tx
+          .update(affiliateLinks)
+          .set({
+            conversions: sql`${affiliateLinks.conversions} + 1`,
+            updatedAt: new Date(),
+          })
+          .where(eq(affiliateLinks.id, conversion.affiliateLinkId));
+      }
+
+      if (adminId) {
+        await tx.insert(adminAuditLogs).values({
+          adminId,
+          action: AdminAction.AFFILIATE_CONVERSION_APPROVE,
+          targetType: "AFFILIATE_CONVERSION",
+          targetId: conversionId,
+          dataAfter: JSON.stringify({ commissionValue, status: "APPROVED" }),
+        });
+      }
     });
-  }
 
-  return { qualified: true };
+    return { qualified: true };
+  } catch (error: any) {
+    if (error.message?.includes("já foi processada")) {
+      return { qualified: false, reason: error.message };
+    }
+    throw error;
+  }
+}
+
+export async function getMaturedPendingConversions(): Promise<AffiliateConversion[]> {
+  const now = new Date();
+  
+  return await db
+    .select()
+    .from(affiliateConversions)
+    .where(and(
+      eq(affiliateConversions.status, ConversionStatus.PENDING),
+      lt(affiliateConversions.maturesAt, now)
+    ))
+    .orderBy(affiliateConversions.createdAt);
 }
 
 export async function markConversionAsFraud(
@@ -536,37 +641,70 @@ export async function requestAffiliatePayout(
   pixKey: string,
   pixKeyType: string
 ): Promise<AffiliatePayout> {
-  const [affiliate] = await db
-    .select()
-    .from(affiliates)
-    .where(eq(affiliates.id, affiliateId));
-
-  if (!affiliate) {
-    throw new Error("Afiliado não encontrado");
-  }
-
-  const pendingBalance = parseFloat(affiliate.pendingBalance);
-  
-  if (amount > pendingBalance) {
-    throw new Error(`Saldo insuficiente. Disponível: R$ ${pendingBalance.toFixed(2)}`);
-  }
-
   if (amount < 50) {
     throw new Error("Valor mínimo para saque é R$ 50,00");
   }
 
-  const [payout] = await db
-    .insert(affiliatePayouts)
-    .values({
-      affiliateId,
-      amount: amount.toFixed(2),
-      pixKey,
-      pixKeyType,
-      status: PayoutStatus.PENDING,
-    })
-    .returning();
+  const result = await db.transaction(async (tx) => {
+    const [affiliate] = await tx
+      .select()
+      .from(affiliates)
+      .where(eq(affiliates.id, affiliateId))
+      .for("update");
 
-  return payout;
+    if (!affiliate) {
+      throw new Error("Afiliado não encontrado");
+    }
+
+    const pendingBalance = parseFloat(affiliate.pendingBalance);
+    const lockedBalance = parseFloat(affiliate.lockedBalance || "0");
+    const availableBalance = pendingBalance - lockedBalance;
+    
+    if (amount > availableBalance) {
+      throw new Error(`Saldo insuficiente. Disponível: R$ ${availableBalance.toFixed(2)}`);
+    }
+
+    const newLockedBalance = lockedBalance + amount;
+    
+    await tx
+      .update(affiliates)
+      .set({
+        lockedBalance: newLockedBalance.toFixed(2),
+        updatedAt: new Date(),
+      })
+      .where(eq(affiliates.id, affiliateId));
+
+    const [payout] = await tx
+      .insert(affiliatePayouts)
+      .values({
+        affiliateId,
+        amount: amount.toFixed(2),
+        pixKey,
+        pixKeyType,
+        status: PayoutStatus.PENDING,
+      })
+      .returning();
+
+    await tx.insert(adminAuditLogs).values({
+      adminId: "SYSTEM_PAYOUT",
+      action: AdminAction.AFFILIATE_PAYOUT_RESERVED,
+      targetType: "AFFILIATE_PAYOUT",
+      targetId: payout.id,
+      dataAfter: JSON.stringify({ 
+        affiliateId, 
+        amount, 
+        lockedBalance: newLockedBalance,
+        previousLocked: lockedBalance 
+      }),
+    });
+
+    return payout;
+  });
+
+  logAffiliatePayoutCreated(result.id, affiliateId, amount);
+  logAffiliatePayoutReserved(result.id, affiliateId, amount);
+
+  return result;
 }
 
 export async function approveAffiliatePayout(
@@ -609,46 +747,149 @@ export async function markPayoutAsPaid(
   payoutId: string,
   adminId: string
 ): Promise<void> {
+  await db.transaction(async (tx) => {
+    const [payout] = await tx
+      .select()
+      .from(affiliatePayouts)
+      .where(eq(affiliatePayouts.id, payoutId))
+      .for("update");
+
+    if (!payout) {
+      throw new Error("Pagamento não encontrado");
+    }
+
+    if (payout.status !== PayoutStatus.APPROVED) {
+      throw new Error("Pagamento precisa estar aprovado");
+    }
+
+    const amount = parseFloat(payout.amount);
+
+    const [affiliate] = await tx
+      .select()
+      .from(affiliates)
+      .where(eq(affiliates.id, payout.affiliateId))
+      .for("update");
+
+    if (!affiliate) {
+      throw new Error("Afiliado não encontrado");
+    }
+
+    const lockedBalance = parseFloat(affiliate.lockedBalance || "0");
+    const pendingBalance = parseFloat(affiliate.pendingBalance);
+    const paidBalance = parseFloat(affiliate.paidBalance);
+
+    await tx
+      .update(affiliates)
+      .set({
+        pendingBalance: (pendingBalance - amount).toFixed(2),
+        lockedBalance: Math.max(0, lockedBalance - amount).toFixed(2),
+        paidBalance: (paidBalance + amount).toFixed(2),
+        updatedAt: new Date(),
+      })
+      .where(eq(affiliates.id, payout.affiliateId));
+
+    await tx
+      .update(affiliatePayouts)
+      .set({
+        status: PayoutStatus.PAID,
+        paidAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(affiliatePayouts.id, payoutId));
+
+    await tx.insert(adminAuditLogs).values({
+      adminId,
+      action: AdminAction.AFFILIATE_PAYOUT_PAY,
+      targetType: "AFFILIATE_PAYOUT",
+      targetId: payoutId,
+      dataAfter: JSON.stringify({ status: "PAID", amount: payout.amount }),
+    });
+  });
+}
+
+export async function rejectAffiliatePayout(
+  payoutId: string,
+  adminId: string,
+  reason: string
+): Promise<void> {
+  await db.transaction(async (tx) => {
+    const [payout] = await tx
+      .select()
+      .from(affiliatePayouts)
+      .where(eq(affiliatePayouts.id, payoutId))
+      .for("update");
+
+    if (!payout) {
+      throw new Error("Pagamento não encontrado");
+    }
+
+    if (payout.status !== PayoutStatus.PENDING && payout.status !== PayoutStatus.APPROVED) {
+      throw new Error("Pagamento não pode ser rejeitado");
+    }
+
+    const amount = parseFloat(payout.amount);
+
+    const [affiliate] = await tx
+      .select()
+      .from(affiliates)
+      .where(eq(affiliates.id, payout.affiliateId))
+      .for("update");
+
+    if (!affiliate) {
+      throw new Error("Afiliado não encontrado");
+    }
+
+    const lockedBalance = parseFloat(affiliate.lockedBalance || "0");
+    const newLockedBalance = Math.max(0, lockedBalance - amount);
+
+    await tx
+      .update(affiliates)
+      .set({
+        lockedBalance: newLockedBalance.toFixed(2),
+        updatedAt: new Date(),
+      })
+      .where(eq(affiliates.id, payout.affiliateId));
+
+    await tx
+      .update(affiliatePayouts)
+      .set({
+        status: PayoutStatus.REJECTED,
+        rejectionReason: reason,
+        updatedAt: new Date(),
+      })
+      .where(eq(affiliatePayouts.id, payoutId));
+
+    await tx.insert(adminAuditLogs).values({
+      adminId,
+      action: AdminAction.AFFILIATE_PAYOUT_RELEASED,
+      targetType: "AFFILIATE_PAYOUT",
+      targetId: payoutId,
+      dataBefore: JSON.stringify({ lockedBalance }),
+      dataAfter: JSON.stringify({ 
+        status: "REJECTED", 
+        reason, 
+        releasedAmount: amount,
+        newLockedBalance 
+      }),
+    });
+
+    await tx.insert(adminAuditLogs).values({
+      adminId,
+      action: AdminAction.AFFILIATE_PAYOUT_REJECT,
+      targetType: "AFFILIATE_PAYOUT",
+      targetId: payoutId,
+      dataAfter: JSON.stringify({ status: "REJECTED", reason }),
+    });
+  });
+
   const [payout] = await db
     .select()
     .from(affiliatePayouts)
     .where(eq(affiliatePayouts.id, payoutId));
 
-  if (!payout) {
-    throw new Error("Pagamento não encontrado");
+  if (payout) {
+    logAffiliatePayoutReleased(payoutId, payout.affiliateId, parseFloat(payout.amount), reason);
   }
-
-  if (payout.status !== PayoutStatus.APPROVED) {
-    throw new Error("Pagamento precisa estar aprovado");
-  }
-
-  const amount = parseFloat(payout.amount);
-
-  await db
-    .update(affiliates)
-    .set({
-      pendingBalance: sql`${affiliates.pendingBalance} - ${amount}`,
-      paidBalance: sql`${affiliates.paidBalance} + ${amount}`,
-      updatedAt: new Date(),
-    })
-    .where(eq(affiliates.id, payout.affiliateId));
-
-  await db
-    .update(affiliatePayouts)
-    .set({
-      status: PayoutStatus.PAID,
-      paidAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(affiliatePayouts.id, payoutId));
-
-  await db.insert(adminAuditLogs).values({
-    adminId,
-    action: AdminAction.AFFILIATE_PAYOUT_PAY,
-    targetType: "AFFILIATE_PAYOUT",
-    targetId: payoutId,
-    dataAfter: JSON.stringify({ status: "PAID", amount: payout.amount }),
-  });
 }
 
 export async function getAffiliateDashboardStats(affiliateId: string): Promise<{

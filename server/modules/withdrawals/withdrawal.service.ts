@@ -17,7 +17,12 @@ import {
   getWalletBalance,
 } from "../wallet/wallet.service";
 import { checkRolloverForWithdrawal } from "../bonus/bonus.service";
-import { isAutoWithdrawGlobalEnabled } from "../settings/settings.service";
+import { isAutoWithdrawGlobalEnabled, getMaxAutoWithdrawAmount } from "../settings/settings.service";
+import { 
+  logAutoWithdrawLimitExceeded, 
+  logAutoWithdrawFailed, 
+  logAutoWithdrawSuccess 
+} from "../../utils/operationalLog";
 
 const MIN_WITHDRAWAL_AMOUNT = 20;
 
@@ -27,10 +32,15 @@ const MIN_WITHDRAWAL_AMOUNT = 20;
  * 1. User has KYC verified
  * 2. No pending rollover
  * 3. Either global auto-withdraw is enabled OR user has individual permission
+ * 4. Amount does not exceed maxAutoWithdrawAmount
  */
-export async function isAutoWithdrawEligible(userId: string): Promise<{
+export async function isAutoWithdrawEligible(
+  userId: string,
+  amount?: number
+): Promise<{
   eligible: boolean;
   reason?: string;
+  maxAmount?: number;
 }> {
   const [user] = await db.select().from(users).where(eq(users.id, userId));
   
@@ -48,16 +58,23 @@ export async function isAutoWithdrawEligible(userId: string): Promise<{
   }
 
   const globalEnabled = await isAutoWithdrawGlobalEnabled();
+  const userAllowed = user.autoWithdrawAllowed;
   
-  if (globalEnabled) {
-    return { eligible: true };
+  if (!globalEnabled && !userAllowed) {
+    return { eligible: false, reason: "Saque automático não habilitado" };
   }
 
-  if (user.autoWithdrawAllowed) {
-    return { eligible: true };
+  const maxAutoWithdraw = await getMaxAutoWithdrawAmount();
+  
+  if (amount !== undefined && amount > maxAutoWithdraw) {
+    return { 
+      eligible: false, 
+      reason: `Valor excede limite automático de R$ ${maxAutoWithdraw.toFixed(2)}`,
+      maxAmount: maxAutoWithdraw,
+    };
   }
 
-  return { eligible: false, reason: "Saque automático não habilitado" };
+  return { eligible: true, maxAmount: maxAutoWithdraw };
 }
 
 /**
@@ -199,7 +216,7 @@ export async function requestWithdrawal(
 
     console.log(`Withdrawal requested: ${withdrawal.id} for user ${userId}, amount R$ ${amount}`);
 
-    const autoEligibility = await isAutoWithdrawEligible(userId);
+    const autoEligibility = await isAutoWithdrawEligible(userId, amount);
     
     if (autoEligibility.eligible) {
       console.log(`[AUTO-WITHDRAW] User ${userId} eligible for auto-withdraw, processing...`);
@@ -207,6 +224,8 @@ export async function requestWithdrawal(
       const autoResult = await processAutoWithdrawal(withdrawal);
       
       if (autoResult.success) {
+        logAutoWithdrawSuccess(userId, withdrawal.id, amount);
+        
         const [paidWithdrawal] = await db
           .select()
           .from(pixWithdrawals)
@@ -214,8 +233,23 @@ export async function requestWithdrawal(
         
         return { success: true, withdrawal: paidWithdrawal };
       } else {
+        logAutoWithdrawFailed(userId, withdrawal.id, autoResult.error || "Unknown error");
         console.error(`[AUTO-WITHDRAW] Failed for ${withdrawal.id}: ${autoResult.error}`);
       }
+    } else if (autoEligibility.maxAmount !== undefined && amount > autoEligibility.maxAmount) {
+      logAutoWithdrawLimitExceeded(userId, withdrawal.id, amount, autoEligibility.maxAmount);
+      
+      await db.insert(adminAuditLogs).values({
+        adminId: "SYSTEM_AUTO",
+        action: AdminAction.AUTO_WITHDRAW_LIMIT_EXCEEDED,
+        targetType: "WITHDRAWAL",
+        targetId: withdrawal.id,
+        dataAfter: JSON.stringify({ 
+          amount, 
+          maxAmount: autoEligibility.maxAmount,
+          reason: "Valor excede limite de saque automático" 
+        }),
+      });
     }
 
     return { success: true, withdrawal };

@@ -465,6 +465,9 @@ export const AdminAction = {
   AFFILIATE_PAYOUT_APPROVE: "AFFILIATE_PAYOUT_APPROVE",
   AFFILIATE_PAYOUT_REJECT: "AFFILIATE_PAYOUT_REJECT",
   AFFILIATE_PAYOUT_PAY: "AFFILIATE_PAYOUT_PAY",
+  AFFILIATE_PAYOUT_RESERVED: "AFFILIATE_PAYOUT_RESERVED",
+  AFFILIATE_PAYOUT_RELEASED: "AFFILIATE_PAYOUT_RELEASED",
+  AUTO_WITHDRAW_LIMIT_EXCEEDED: "AUTO_WITHDRAW_LIMIT_EXCEEDED",
 } as const;
 
 // Admin Audit Logs table
@@ -497,6 +500,9 @@ export const settings = pgTable("settings", {
 // Settings Keys
 export const SettingsKey = {
   PIX_AUTO_WITHDRAW_GLOBAL: "PIX_AUTO_WITHDRAW_GLOBAL",
+  MAX_AUTO_WITHDRAW_AMOUNT: "MAX_AUTO_WITHDRAW_AMOUNT",
+  AFFILIATE_MATURATION_DAYS: "AFFILIATE_MATURATION_DAYS",
+  REVSHARE_USE_REAL_PNL: "REVSHARE_USE_REAL_PNL",
 } as const;
 
 // =============================================
@@ -550,6 +556,7 @@ export const affiliates = pgTable("affiliates", {
   minWagerForCpa: numeric("min_wager_for_cpa", { precision: 15, scale: 2 }).default("100.00").notNull(),
   totalEarnings: numeric("total_earnings", { precision: 15, scale: 2 }).default("0.00").notNull(),
   pendingBalance: numeric("pending_balance", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  lockedBalance: numeric("locked_balance", { precision: 15, scale: 2 }).default("0.00").notNull(),
   paidBalance: numeric("paid_balance", { precision: 15, scale: 2 }).default("0.00").notNull(),
   totalReferrals: numeric("total_referrals", { precision: 10, scale: 0 }).default("0").notNull(),
   qualifiedReferrals: numeric("qualified_referrals", { precision: 10, scale: 0 }).default("0").notNull(),
@@ -590,6 +597,7 @@ export const affiliateConversions = pgTable("affiliate_conversions", {
   commissionValue: numeric("commission_value", { precision: 15, scale: 2 }).default("0.00").notNull(),
   status: varchar("status", { length: 20 }).default("PENDING").notNull(),
   qualifiedAt: timestamp("qualified_at"),
+  maturesAt: timestamp("matures_at"),
   fraudReason: text("fraud_reason"),
   userIp: varchar("user_ip", { length: 45 }),
   userDevice: text("user_device"),

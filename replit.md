@@ -157,45 +157,72 @@ Key tables:
 ### Automatic PIX Withdrawal System
 - **Global Toggle**: PIX_AUTO_WITHDRAW_GLOBAL setting in `settings` table
 - **User Permission**: `autoWithdrawAllowed` flag in `users` table (defaults to true)
+- **Maximum Amount Limit**: MAX_AUTO_WITHDRAW_AMOUNT setting (default: R$ 500)
+  - Saques acima do limite caem automaticamente para fluxo manual
+  - Configurável via POST /api/admin/settings/max-auto-withdraw
+  - Audit log: AUTO_WITHDRAW_LIMIT_EXCEEDED
 - **Eligibility Requirements**:
   - Global auto-withdraw must be enabled
   - User must have autoWithdrawAllowed = true
   - User must have KYC verified (kycStatus = "VERIFIED")
   - User must have completed rollover (rolloverRemaining = 0)
+  - Amount must not exceed MAX_AUTO_WITHDRAW_AMOUNT
 - **Auto-Payment Flow**:
   - When eligible withdrawal is requested, it's immediately approved and paid
   - System uses "SYSTEM_AUTO" as adminId in audit logs
   - Transaction logged with WITHDRAW_RESERVE and status set to PAID
+- **Operational Logging**:
+  - Structured logs for critical events (server/utils/operationalLog.ts)
+  - Log types: AUTO_WITHDRAW_SUCCESS, AUTO_WITHDRAW_FAILED, AUTO_WITHDRAW_LIMIT_EXCEEDED
+  - Filterable by type, severity, entityId
 
 ### Affiliate System
 - **Tables**:
-  - `affiliates` - Affiliate accounts linked to users
+  - `affiliates` - Affiliate accounts with `lockedBalance` for payout reservations
   - `affiliate_links` - Trackable referral links with unique codes
-  - `affiliate_conversions` - Conversion records (CPA, RevShare, Hybrid)
+  - `affiliate_conversions` - Conversion records with `maturesAt` timestamp
   - `affiliate_payouts` - Payout requests and history
   - `affiliate_clicks` - Click tracking for analytics
 - **Commission Types**:
   - CPA: Fixed value per qualified conversion
-  - REV_SHARE: Percentage of net revenue
+  - REV_SHARE: Percentage of net revenue (configurable: 5% fixed or real P&L)
   - HYBRID: CPA + RevShare combination
+- **Payout Balance Lock**:
+  - When payout is requested, amount is locked in `lockedBalance`
+  - Available balance = pendingBalance - lockedBalance
+  - On rejection: balance is released (audit: AFFILIATE_PAYOUT_RELEASED)
+  - On payment: balance moves from pending+locked to paidBalance
+  - Atomic transactions with SELECT FOR UPDATE prevent race conditions
+- **Maturation Window** (prepared, controlled by setting):
+  - AFFILIATE_MATURATION_DAYS setting (default: 7 days)
+  - Conversions set `maturesAt` = createdAt + maturationDays
+  - Qualification checks maturation before allowing approval
+  - Configurable via POST /api/admin/settings/maturation-days
+- **RevShare P&L Calculation** (prepared, disabled by default):
+  - REVSHARE_USE_REAL_PNL setting (default: false)
+  - When enabled: netRevenue = totalBets - totalWins (from ledger)
+  - When disabled: netRevenue = wagerAmount * 0.05 (5% fixed margin)
 - **Referral Tracking**:
   - Users can register with ?ref=CODE parameter
   - Registration captures IP address for fraud detection
-  - Conversion created automatically on registration
+  - Conversion created automatically on registration with maturesAt set
 - **Anti-Fraud System**:
   - Platform-wide CPF duplication check (across all affiliates)
   - Platform-wide IP duplication check (3+ conversions = suspicious)
   - Self-referral detection (affiliate CPF/email matches user)
   - Fraud flagged conversions use "SYSTEM_FRAUD_DETECTION" for audit
+  - Operational logs for fraud detection events
 - **Affiliate Endpoints**:
   - GET /api/affiliate/track/:code - Redirect tracking link
   - GET /api/affiliate/dashboard - Affiliate stats
-  - POST /api/affiliate/payouts/request - Request payout
+  - POST /api/affiliate/payouts/request - Request payout (with balance lock)
   - GET /api/affiliate/admin - List all affiliates (admin)
   - POST /api/affiliate/admin - Create affiliate (admin)
   - POST /api/affiliate/admin/:id/toggle-status - Toggle affiliate status (admin)
   - POST /api/affiliate/admin/conversions/:id/fraud - Mark as fraud (admin)
   - POST /api/affiliate/admin/payouts/:id/approve - Approve payout (admin)
+  - POST /api/affiliate/admin/payouts/:id/reject - Reject payout (releases balance)
+  - POST /api/affiliate/admin/payouts/:id/pay - Mark as paid (admin)
 
 - JivoChat widget (placeholder in index.html)
 
@@ -223,3 +250,28 @@ Key tables:
 ### Development Tools
 - Replit-specific Vite plugins for development banner and cartographer
 - Custom meta images plugin for OpenGraph tags
+
+## Recent Changes (December 2024)
+
+### Hardening Update - Financial Safety & Scale Preparation
+1. **Maximum Auto-Withdraw Limit** - Saques automáticos agora têm limite configurável (default R$ 500)
+2. **Affiliate Payout Balance Lock** - Saldo é reservado atomicamente ao criar payout request
+3. **Operational Logging System** - Logs estruturados para eventos críticos (server/utils/operationalLog.ts)
+4. **Maturation Window** - Conversões de afiliados têm período de maturação (preparado, desligado)
+5. **RevShare Real P&L** - Cálculo de RevShare baseado em P&L real do ledger (preparado, desligado)
+
+### New Settings Keys
+- `MAX_AUTO_WITHDRAW_AMOUNT` - Limite máximo para saque automático (default: 500)
+- `AFFILIATE_MATURATION_DAYS` - Dias de maturação para conversões (default: 7)
+- `REVSHARE_USE_REAL_PNL` - Usar P&L real para cálculo de RevShare (default: false)
+
+### New Admin Actions (Audit Trail)
+- `AUTO_WITHDRAW_LIMIT_EXCEEDED` - Saque excedeu limite automático
+- `AFFILIATE_PAYOUT_RESERVED` - Saldo de afiliado reservado para payout
+- `AFFILIATE_PAYOUT_RELEASED` - Saldo de afiliado liberado após rejeição
+
+### Project Status Classification
+- **Current Stage**: Produção Controlada
+- **Safe for**: Operação manual com saque automático limitado
+- **Not recommended yet**: Escala total com tráfego pago alto
+- **Next milestone**: Integração gateway de pagamento para saques automáticos

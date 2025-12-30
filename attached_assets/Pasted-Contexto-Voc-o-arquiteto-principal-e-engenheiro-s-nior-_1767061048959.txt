@@ -1,0 +1,74 @@
+Contexto:
+Você é o arquiteto principal e engenheiro sênior responsável pelo projeto IN1Bet.
+O sistema atual já possui backend funcional, ledger financeiro, PIX (OndaPay), KYC interno, bônus com rollover, antifraude inicial, afiliados e auditoria básica.
+
+IMPORTANTE:
+❌ Não implemente código agora
+❌ Não crie novos arquivos
+❌ Não refatore nada
+
+Seu papel aqui é avaliar, criticar e orientar como um CTO experiente de iGaming/fintech.
+
+⸻
+
+🔎 TAREFA 1 — AVALIAÇÃO HONESTA DO ESTADO ATUAL
+
+Analise o projeto como ele está hoje e responda objetivamente:
+	1.	Em qual estágio real o projeto se encontra?
+	•	Protótipo
+	•	MVP técnico
+	•	MVP operacional
+	•	Produção controlada
+	•	Pronto para escalar
+	2.	Quais partes do sistema estão fortes do ponto de vista arquitetural
+(ex: ledger, auth, KYC, antifraude, roles, audit logs)?
+	3.	Quais partes ainda representam risco real se o projeto crescer rápido?
+
+⸻
+
+⚠️ TAREFA 2 — RISCOS PRIORITÁRIOS (VISÃO DE CTO)
+
+Liste:
+	•	3 riscos críticos
+	•	3 riscos médios
+	•	3 riscos baixos
+
+Explique por que cada risco existe e qual o impacto real (financeiro, reputacional ou operacional).
+
+⸻
+
+🧭 TAREFA 3 — PRÓXIMOS PASSOS IDEAIS (SEM CODAR)
+
+Na sua opinião profissional:
+	1.	Quais 3 próximos passos trariam maior ganho com menor risco?
+	2.	O que NÃO deveria ser feito agora, mesmo sendo tecnicamente possível?
+	3.	O que deveria ser preparado agora, mas ativado só mais tarde?
+
+⸻
+
+🏗️ TAREFA 4 — VISÃO DE ESCALA (MAS COM PRUDÊNCIA)
+
+Responda como arquiteto:
+	•	O projeto está estruturalmente bem feito para crescer?
+	•	O que precisaria mudar antes de:
+	•	tráfego pago
+	•	afiliados em escala
+	•	valores altos de saque
+	•	automação total
+
+⸻
+
+🧠 FORMATO DA RESPOSTA
+	•	Linguagem clara, direta, sem buzzwords vazias
+	•	Sem código
+	•	Sem listas genéricas
+	•	Responda como se estivesse falando com o founder do projeto
+
+⸻
+
+🎯 OBJETIVO FINAL
+
+O objetivo desta análise é:
+
+Tomar decisões estratégicas corretas antes de escalar,
+evitando perdas financeiras, fraude e retrabalho técnico.

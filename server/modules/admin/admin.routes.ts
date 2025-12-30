@@ -1049,4 +1049,56 @@ router.get("/users/:id/auto-withdraw", adminCheck, async (req: Request, res: Res
   }
 });
 
+router.post("/settings/max-auto-withdraw", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { amount } = req.body;
+    const adminId = req.user!.id;
+
+    const parsedAmount = Math.floor(Number(amount));
+    if (isNaN(parsedAmount) || parsedAmount <= 0 || parsedAmount > 100000) {
+      return res.status(400).json({ error: "Valor inválido. Deve ser um número inteiro entre 1 e 100000" });
+    }
+
+    const { setMaxAutoWithdrawAmount, getMaxAutoWithdrawAmount } = await import("../settings/settings.service");
+    
+    const previousAmount = await getMaxAutoWithdrawAmount();
+    await setMaxAutoWithdrawAmount(parsedAmount, adminId);
+
+    res.json({ 
+      success: true, 
+      message: `Limite de saque automático alterado de R$ ${previousAmount.toFixed(2)} para R$ ${parsedAmount.toFixed(2)}`,
+      newLimit: parsedAmount
+    });
+  } catch (error: any) {
+    console.error("Admin set max auto-withdraw error:", error);
+    res.status(500).json({ error: "Erro ao alterar limite de saque automático" });
+  }
+});
+
+router.post("/settings/maturation-days", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { days } = req.body;
+    const adminId = req.user!.id;
+
+    const parsedDays = Math.floor(Number(days));
+    if (isNaN(parsedDays) || parsedDays < 0 || parsedDays > 90) {
+      return res.status(400).json({ error: "Valor inválido. Deve ser um número inteiro entre 0 e 90" });
+    }
+
+    const { setAffiliateMaturationDays, getAffiliateMaturationDays } = await import("../settings/settings.service");
+    
+    const previousDays = await getAffiliateMaturationDays();
+    await setAffiliateMaturationDays(parsedDays, adminId);
+
+    res.json({ 
+      success: true, 
+      message: `Período de maturação alterado de ${previousDays} para ${parsedDays} dias`,
+      newDays: parsedDays
+    });
+  } catch (error: any) {
+    console.error("Admin set maturation days error:", error);
+    res.status(500).json({ error: "Erro ao alterar período de maturação" });
+  }
+});
+
 export default router;

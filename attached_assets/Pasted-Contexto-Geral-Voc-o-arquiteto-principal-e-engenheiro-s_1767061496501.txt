@@ -1,0 +1,135 @@
+Contexto Geral
+Você é o arquiteto principal e engenheiro sênior responsável pelo projeto IN1Bet.
+O sistema atual já possui:
+	•	Ledger financeiro transacional com row-level locking
+	•	PIX via OndaPay (depósitos)
+	•	Sistema de bônus com rollover
+	•	KYC interno com departamento de segurança
+	•	Sistema de afiliados (CPA + antifraude inicial)
+	•	Saque manual e automático (com flags)
+	•	Audit logs e rate limiting
+
+O projeto está em MVP Operacional, próximo de produção controlada.
+
+⚠️ REGRAS ABSOLUTAS
+	•	NÃO criar features novas fora do escopo abaixo
+	•	NÃO refatorar código que já funciona
+	•	NÃO ativar automações perigosas sem trava
+	•	NÃO mudar UX/design
+
+O foco é hardening operacional + preparação para escala, não inovação visual.
+
+⸻
+
+🎯 OBJETIVO DESTE MEGA UPDATE
+
+Levar o projeto de MVP Operacional para Produção Controlada Segura, eliminando riscos críticos e preparando a base para escalar depois apenas ligando flags.
+
+⸻
+
+🥇 BLOCO 1 — TRAVAS FINANCEIRAS CRÍTICAS (PRIORIDADE MÁXIMA)
+
+1️⃣ Limite de Saque Automático (OBRIGATÓRIO)
+
+Implemente:
+	•	maxAutoWithdrawAmount (ex: R$ 500)
+	•	Deve existir:
+	•	Global (settings)
+	•	Opcional por usuário (override)
+	•	Fluxo:
+	•	Se saque > limite → cair automaticamente para fluxo manual
+	•	Registrar audit log claro: AUTO_WITHDRAW_LIMIT_EXCEEDED
+
+⚠️ Nenhum saque automático pode ultrapassar esse valor.
+
+⸻
+
+2️⃣ Lock de Saldo em Payout de Afiliado (CRÍTICO)
+
+Corrigir o payout de afiliados para evitar múltiplos saques simultâneos:
+	•	Ao criar payout:
+	•	Subtrair valor de pendingBalance
+	•	Criar reserva similar a WITHDRAW_RESERVE
+	•	Em rejeição:
+	•	Devolver saldo
+	•	Em aprovação:
+	•	Converter reserva em paidBalance
+	•	Garantir:
+	•	Idempotência
+	•	Transação atômica
+	•	Proteção contra race condition
+
+Registrar audit logs com:
+	•	AFFILIATE_PAYOUT_RESERVED
+	•	AFFILIATE_PAYOUT_RELEASED
+
+⸻
+
+🥈 BLOCO 2 — VISIBILIDADE OPERACIONAL (SEM OVERENGINEERING)
+
+3️⃣ Alertas Operacionais Básicos
+
+Sem email, sem Slack, sem serviços externos.
+
+Apenas:
+	•	Logs estruturados para eventos críticos:
+	•	Falha em saque automático
+	•	Conversão marcada como FRAUD
+	•	Payout criado
+	•	Webhook inválido
+	•	Logs devem ser fáceis de filtrar por:
+	•	type
+	•	severity
+	•	entityId
+
+Objetivo: não operar no escuro.
+
+⸻
+
+🥉 BLOCO 3 — PREPARAÇÃO PARA ESCALA (DESLIGADO POR FLAG)
+
+4️⃣ Janela de Maturação de Afiliados
+
+Adicionar suporte (SEM ATIVAR AINDA):
+	•	Campo maturesAt nas conversões
+	•	Conversões só podem ser qualificadas após:
+	•	X dias (ex: 7 ou 14)
+	•	Criar estrutura para cron job:
+	•	NÃO rodar automaticamente
+	•	Apenas preparar lógica
+
+⸻
+
+5️⃣ Estrutura de RevShare Correta (SEM ATIVAR)
+
+Preparar (mas não ativar):
+	•	Cálculo de RevShare baseado em P&L real:
+	•	netRevenue = totalBets - totalWins
+	•	Usar dados do ledger, não porcentagem fixa
+	•	Guardar campo revShareRate por afiliado
+
+❌ Não ativar RevShare ainda.
+
+⸻
+
+🧪 BLOCO 4 — AUTOVERIFICAÇÃO FINAL
+
+Após concluir tudo:
+	1.	Rode uma autoauditoria interna e confirme:
+	•	Nenhum saque automático sem limite
+	•	Nenhum payout duplicado possível
+	•	Nenhuma alteração de saldo fora do ledger
+	2.	Liste:
+	•	O que foi alterado
+	•	O que continua desligado por segurança
+	3.	Classifique o projeto:
+	•	MVP Operacional
+	•	Produção Controlada
+	•	Pronto para Escala (esperado: Produção Controlada)
+
+⸻
+
+🧠 MENTALIDADE ESPERADA
+
+Pense como alguém que vai operar isso com dinheiro real amanhã,
+não como alguém que está só “terminando features”.
