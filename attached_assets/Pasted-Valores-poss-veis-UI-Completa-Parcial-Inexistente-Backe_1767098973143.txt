@@ -1,0 +1,141 @@
+Valores possíveis:
+	•	UI: ✅ Completa / ⚠️ Parcial / ❌ Inexistente
+	•	Backend: ✅ Real / ⚠️ Parcial / ❌ Mock
+	•	Funcional: ✅ Sim / ❌ Não
+	•	Dados: Real / Mock / Hardcoded
+
+⸻
+
+🔹 FASE 2 — FRONTEND (PÁGINA POR PÁGINA)
+
+Para CADA página, informar:
+	•	O que funciona de verdade
+	•	O que é apenas visual
+	•	Botões que não fazem nada
+	•	Formulários que não submetem
+	•	Estados ausentes (loading, error, empty)
+	•	Falta de validação
+	•	Falta de feedback ao usuário
+
+📌 Exemplo de perguntas que devem ser respondidas:
+	•	Ao clicar, acontece o quê?
+	•	Existe loading?
+	•	Existe toast de sucesso?
+	•	Existe toast de erro?
+	•	O usuário entende o que aconteceu?
+
+⸻
+
+🔹 FASE 3 — BACKEND (FUNCIONALIDADE REAL)
+
+Para CADA feature backend, informar:
+	•	Endpoint existe?
+	•	Está ligado ao frontend?
+	•	Usa transação?
+	•	Usa validação?
+	•	Usa autenticação?
+	•	Está protegido contra abuso?
+	•	Está logado no audit log?
+
+⸻
+
+🔹 FASE 4 — JOGOS
+
+Separar claramente:
+
+Jogos Próprios
+	•	Quais usam dinheiro real
+	•	Quais usam BetService
+	•	Quais são provably fair
+	•	Quais persistem estado
+	•	Quais são apenas simulação
+
+Jogos PlayFivers
+	•	Lançamento
+	•	Webhooks
+	•	Sincronização
+	•	Saldo
+	•	Idempotência
+	•	Falhas possíveis
+
+⚠️ Destacar QUALQUER risco legal ou de UX.
+
+⸻
+
+🔹 FASE 5 — FINANCEIRO & SEGURANÇA
+
+Auditar profundamente:
+	•	Wallet
+	•	Ledger
+	•	PIX
+	•	Saques
+	•	Webhooks
+	•	Race conditions
+	•	Double spend
+	•	Replay attack
+	•	Rate limit
+	•	Roles admin
+	•	Ações sensíveis sem confirmação
+
+⸻
+
+🔹 FASE 6 — UX / FEEDBACK / TOASTS
+
+Criar uma lista clara:
+	•	Ações que DEVEM ter toast mas não têm
+	•	Ações que DEVEM ter loading
+	•	Ações críticas sem confirmação
+	•	Mensagens confusas ou inexistentes
+
+⸻
+
+🔹 FASE 7 — CLASSIFICAÇÃO DE RISCO
+
+Classificar tudo como:
+	•	🟢 PRONTO
+	•	🟡 PARCIAL
+	•	🔴 CRÍTICO
+
+Com explicação clara do porquê.
+
+⸻
+
+🔹 FASE 8 — CHECKLIST DE LANÇAMENTO
+
+Responder objetivamente:
+	•	O projeto pode ser lançado HOJE?
+	•	O que BLOQUEIA lançamento?
+	•	O que é recomendável antes do tráfego real?
+	•	O que pode ficar para depois?
+
+⸻
+
+🔹 FASE 9 — PLANO DE AVANÇO INTELIGENTE
+
+Criar um plano em ordem lógica, sem apagar nada:
+	1.	Correções obrigatórias
+	2.	Ajustes críticos
+	3.	Melhorias de produto
+	4.	Escala futura
+
+Com estimativa de esforço (baixo / médio / alto).
+
+⸻
+
+🚨 REGRAS FINAIS (OBRIGATÓRIO)
+	•	❌ Não apagar nada
+	•	❌ Não refatorar nada
+	•	❌ Não remover páginas
+	•	❌ Não ocultar funcionalidades
+	•	❌ Não assumir intenções
+	•	✅ Apenas analisar o que EXISTE hoje
+
+⸻
+
+🎯 RESULTADO ESPERADO
+
+Um RELATÓRIO EXTREMAMENTE DETALHADO, técnico, honesto, direto, sem rodeios, que permita decidir com segurança:
+	•	O que está pronto
+	•	O que falta
+	•	Onde investir tempo
+	•	Onde NÃO mexer agora
