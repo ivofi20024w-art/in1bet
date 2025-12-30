@@ -19,6 +19,7 @@ import { affiliateRouter } from "./modules/affiliates";
 import { bettingRouter } from "./modules/betting";
 import { minesRouter } from "./modules/games";
 import historyRoutes from "./modules/history/history.routes";
+import playfiversRoutes from "./modules/playfivers/playfivers.routes";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -53,6 +54,7 @@ export async function registerRoutes(
   app.use("/api/bets", bettingRouter);
   app.use("/api/games/mines", minesRouter);
   app.use("/api/history", historyRoutes);
+  app.use("/api/playfivers", playfiversRoutes);
 
   // Initialize default settings
   initializeDefaultSettings().catch(err => {
