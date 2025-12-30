@@ -31,6 +31,7 @@ import Game from "@/pages/Game";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPassword from "@/pages/auth/ResetPassword";
 import Crash from "@/pages/games/Crash";
 import Double from "@/pages/games/Double";
 import Mines from "@/pages/games/Mines";
@@ -106,6 +107,7 @@ function Router() {
         <Route path="/login" component={Login} />
         <Route path="/register" component={Register} />
         <Route path="/forgot-password" component={ForgotPassword} />
+        <Route path="/reset-password" component={ResetPassword} />
 
         {/* Protected Routes (Mock Guard) */}
         <Route path="/" component={Home} />
