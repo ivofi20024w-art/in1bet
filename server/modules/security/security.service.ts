@@ -193,22 +193,25 @@ export async function approveKyc(
     .where(eq(kycVerifications.id, kycId))
     .returning();
 
-  await db
-    .update(users)
-    .set({
-      kycStatus: "verified",
-      isVerified: true,
-      updatedAt: new Date(),
-    })
-    .where(eq(users.id, verification.userId));
+  // Use transaction to ensure both updates succeed
+  await db.transaction(async (tx) => {
+    await tx
+      .update(users)
+      .set({
+        kycStatus: "verified",
+        isVerified: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, verification.userId));
 
-  await createSecurityLog({
-    adminId,
-    action: SecurityAction.KYC_APPROVE,
-    targetType: "kyc_verification",
-    targetId: kycId,
-    userId: verification.userId,
-    details: JSON.stringify({ documentType: verification.documentType }),
+    await createSecurityLog({
+      adminId,
+      action: SecurityAction.KYC_APPROVE,
+      targetType: "kyc_verification",
+      targetId: kycId,
+      userId: verification.userId,
+      details: JSON.stringify({ documentType: verification.documentType }),
+    });
   });
 
   console.log(`KYC approved: ${kycId} by admin ${adminId}`);
