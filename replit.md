@@ -45,7 +45,18 @@ Preferred communication style: Simple, everyday language.
 - **Admin Panel**: Provides tools for user management, withdrawal approval/rejection, bonus template creation, and platform settings.
 - **Betting System**: Instant game betting with atomic transactions and idempotency.
 - **Provably Fair Gaming**: HMAC-SHA256 based with server, client seeds, and nonce for verifiable game outcomes (e.g., Mines game).
-- **Affiliate System**: Referral tracking, CPA/REV_SHARE/HYBRID commission models, payout balance locking, maturation windows for conversions, and anti-fraud mechanisms (CPF/IP duplication checks).
+- **Affiliate System**: Complete referral and commission system featuring:
+  - CPA, Revenue Share, and Hybrid commission models
+  - User-facing dashboard with real-time statistics (earnings, referrals, clicks, balance)
+  - Self-registration for users to become affiliates
+  - Custom affiliate link creation with campaign tracking
+  - Withdrawal requests via PIX with balance locking
+  - Conversion history with status tracking (Pending, Qualified, Fraud)
+  - Payout history with status management
+  - Anti-fraud mechanisms (CPF/IP duplication, auto-referral detection)
+  - Maturation windows for conversions (configurable via settings)
+  - Admin panel with user autocomplete for creating affiliates
+  - CPF masking in admin endpoints for PII protection
 - **Enterprise Support System**: Complete customer support solution with:
   - **Live Chat**: Real-time messaging with queue management, agent assignment, VIP priority, rating system with lifecycle tracking
   - **Ticketing**: Async support with ticket numbers, SLA tracking, escalation levels, internal notes for agents
