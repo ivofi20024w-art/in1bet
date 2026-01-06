@@ -142,6 +142,10 @@ export default function AdminAffiliates() {
     revSharePercent: "30",
   });
   const [actionLoading, setActionLoading] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
+  const [userSearchResults, setUserSearchResults] = useState<{ id: string; name: string; email: string; cpf: string | null; isAffiliate: boolean }[]>([]);
+  const [selectedUser, setSelectedUser] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
   const auth = getStoredAuth();
 
   const fetchAffiliates = useCallback(async () => {
@@ -231,6 +235,32 @@ export default function AdminAffiliates() {
     fetchConversions();
     fetchPayouts();
   }, [fetchAffiliates, fetchConversions, fetchPayouts]);
+
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (userSearch.length < 2) {
+        setUserSearchResults([]);
+        return;
+      }
+      setIsSearching(true);
+      try {
+        const response = await fetch(`/api/affiliate/admin/search-users?q=${encodeURIComponent(userSearch)}`, {
+          headers: { Authorization: `Bearer ${auth?.accessToken}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setUserSearchResults(data.users || []);
+        }
+      } catch (error) {
+        console.error("User search failed:", error);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const debounce = setTimeout(searchUsers, 300);
+    return () => clearTimeout(debounce);
+  }, [userSearch, auth?.accessToken]);
 
   const createAffiliate = async () => {
     if (!newAffiliate.userId) {
@@ -793,20 +823,81 @@ export default function AdminAffiliates() {
           </TabsContent>
         </Tabs>
 
-        <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+        <Dialog open={showCreateModal} onOpenChange={(open) => {
+          setShowCreateModal(open);
+          if (!open) {
+            setUserSearch("");
+            setUserSearchResults([]);
+            setSelectedUser(null);
+          }
+        }}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Criar Novo Afiliado</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label>ID do Usuário</Label>
-                <Input
-                  placeholder="UUID do usuário"
-                  value={newAffiliate.userId}
-                  onChange={(e) => setNewAffiliate({ ...newAffiliate, userId: e.target.value })}
-                  data-testid="input-user-id"
-                />
+                <Label>Buscar Usuário</Label>
+                {selectedUser ? (
+                  <div className="flex items-center justify-between p-3 bg-secondary rounded-lg border">
+                    <div>
+                      <p className="font-medium">{selectedUser.name}</p>
+                      <p className="text-sm text-muted-foreground">{selectedUser.email}</p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setSelectedUser(null);
+                        setNewAffiliate({ ...newAffiliate, userId: "" });
+                        setUserSearch("");
+                      }}
+                    >
+                      Alterar
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="relative">
+                    <Input
+                      placeholder="Digite nome, email ou CPF..."
+                      value={userSearch}
+                      onChange={(e) => setUserSearch(e.target.value)}
+                      data-testid="input-user-search"
+                    />
+                    {isSearching && (
+                      <div className="absolute right-3 top-2.5">
+                        <RefreshCw className="w-4 h-4 animate-spin text-muted-foreground" />
+                      </div>
+                    )}
+                    {userSearchResults.length > 0 && (
+                      <div className="absolute z-50 w-full mt-1 bg-popover border rounded-lg shadow-lg max-h-60 overflow-auto">
+                        {userSearchResults.map((user) => (
+                          <button
+                            key={user.id}
+                            className={`w-full px-4 py-3 text-left hover:bg-secondary flex items-center justify-between ${user.isAffiliate ? 'opacity-50' : ''}`}
+                            onClick={() => {
+                              if (!user.isAffiliate) {
+                                setSelectedUser({ id: user.id, name: user.name, email: user.email });
+                                setNewAffiliate({ ...newAffiliate, userId: user.id });
+                                setUserSearchResults([]);
+                                setUserSearch("");
+                              }
+                            }}
+                            disabled={user.isAffiliate}
+                          >
+                            <div>
+                              <p className="font-medium">{user.name}</p>
+                              <p className="text-sm text-muted-foreground">{user.email}</p>
+                            </div>
+                            {user.isAffiliate && (
+                              <Badge variant="secondary">Já é afiliado</Badge>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <Label>Tipo de Comissão</Label>

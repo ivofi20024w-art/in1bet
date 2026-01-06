@@ -176,6 +176,146 @@ router.post("/payouts/request", authMiddleware, async (req: Request, res: Respon
   }
 });
 
+router.post("/links", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    const [affiliate] = await db
+      .select()
+      .from(affiliates)
+      .where(eq(affiliates.userId, userId));
+
+    if (!affiliate) {
+      return res.status(404).json({ error: "Você não é um afiliado" });
+    }
+
+    const parsed = createAffiliateLinkSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: "Dados inválidos", details: parsed.error.errors });
+    }
+
+    const link = await createAffiliateLink(affiliate.id, parsed.data.name, parsed.data.code);
+
+    res.json({ 
+      success: true, 
+      link: {
+        id: link.id,
+        code: link.code,
+        name: link.name,
+        url: `/ref/${link.code}`,
+        clicks: 0,
+        registrations: 0,
+        conversions: 0,
+        isActive: link.isActive,
+      }
+    });
+  } catch (error: any) {
+    console.error("Affiliate create link error:", error);
+    res.status(400).json({ error: error.message || "Erro ao criar link" });
+  }
+});
+
+router.post("/become", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.userId;
+
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId));
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    const [existingAffiliate] = await db
+      .select()
+      .from(affiliates)
+      .where(eq(affiliates.userId, userId));
+
+    if (existingAffiliate) {
+      return res.status(400).json({ error: "Você já é um afiliado" });
+    }
+
+    const affiliate = await createAffiliate({
+      userId,
+      name: user.name,
+      email: user.email,
+      cpf: user.cpf || undefined,
+      commissionType: "CPA",
+      cpaValue: 30,
+      revsharePercentage: 25,
+      minDepositForCpa: 50,
+      minWagerForCpa: 100,
+    });
+
+    const link = await createAffiliateLink(affiliate.id, "Principal", undefined);
+
+    res.json({ 
+      success: true, 
+      affiliate: {
+        id: affiliate.id,
+        name: affiliate.name,
+        status: affiliate.status,
+        commissionType: affiliate.commissionType,
+      },
+      link: {
+        code: link.code,
+        url: `/ref/${link.code}`,
+      }
+    });
+  } catch (error: any) {
+    console.error("Become affiliate error:", error);
+    res.status(400).json({ error: error.message || "Erro ao se tornar afiliado" });
+  }
+});
+
+router.get("/admin/search-users", authMiddleware, adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { q } = req.query;
+    const searchTerm = (q as string || "").toLowerCase();
+
+    if (!searchTerm || searchTerm.length < 2) {
+      return res.json({ users: [] });
+    }
+
+    const allUsers = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        cpf: users.cpf,
+      })
+      .from(users)
+      .limit(50);
+
+    const filtered = allUsers.filter(u => 
+      u.name.toLowerCase().includes(searchTerm) ||
+      u.email.toLowerCase().includes(searchTerm) ||
+      (u.cpf && u.cpf.includes(searchTerm))
+    ).slice(0, 10);
+
+    const existingAffiliateUserIds = await db
+      .select({ userId: affiliates.userId })
+      .from(affiliates);
+    
+    const affiliateUserIds = new Set(existingAffiliateUserIds.map(a => a.userId));
+
+    const usersWithStatus = filtered.map(u => ({
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      cpf: u.cpf ? `***.***.${u.cpf.slice(-6, -3)}-**` : null,
+      isAffiliate: affiliateUserIds.has(u.id),
+    }));
+
+    res.json({ users: usersWithStatus });
+  } catch (error) {
+    console.error("Search users error:", error);
+    res.status(500).json({ error: "Erro ao buscar usuários" });
+  }
+});
+
 router.get("/admin", authMiddleware, adminCheck, async (req: Request, res: Response) => {
   try {
     const allAffiliates = await getAllAffiliates();
