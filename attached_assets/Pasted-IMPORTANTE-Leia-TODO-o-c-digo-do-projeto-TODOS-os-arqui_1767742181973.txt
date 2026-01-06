@@ -1,0 +1,228 @@
+IMPORTANTE:
+Leia TODO o código do projeto, TODOS os arquivos, TODAS as pastas, configs, variáveis de ambiente, rotas, serviços, mocks e integrações.
+Não faça suposições. Se algo não estiver claro, marque explicitamente como indefinido ou incompleto.
+
+🎯 OBJETIVO
+
+Quero um RELATÓRIO DE AUDITORIA TÉCNICA EXTREMAMENTE COMPLETO sobre o estado atual do casino que está em produção neste repositório.
+
+Quero sair deste relatório com 100% de noção real do projeto, sabendo exatamente:
+
+O que existe
+
+O que falta
+
+O que está incompleto
+
+O que é mock
+
+O que já está conectado ao backend
+
+O que está quebrado ou mal implementado
+
+O nível real de maturidade do sistema
+
+🧠 ESCOPO DA AUDITORIA (OBRIGATÓRIO)
+1️⃣ VISÃO GERAL DO PROJETO
+
+Explique:
+
+Qual é o objetivo do sistema hoje
+
+Em que estágio ele realmente está (conceito, MVP, beta, produção parcial, produção real)
+
+O que já funciona de verdade
+
+O que parece funcionar mas não está finalizado
+
+O que não funciona ou não existe
+
+2️⃣ MAPA COMPLETO DA ESTRUTURA DE PASTAS
+
+Crie uma seção chamada “Arquitetura e Organização de Pastas” contendo:
+
+Árvore completa de pastas
+
+Função de cada pasta
+
+Se a organização é:
+
+✅ Boa
+
+⚠️ Aceitável
+
+❌ Confusa / técnica em dívida
+
+Problemas de organização
+
+Pastas ou arquivos duplicados, mortos ou inúteis
+
+Sugestões claras de melhoria estrutural
+
+3️⃣ FRONT-END — AUDITORIA TOTAL
+
+Liste todas as páginas existentes, uma por uma:
+
+Nome da página
+
+Caminho do arquivo
+
+Estado da página:
+
+Finalizada
+
+Parcial
+
+Apenas layout
+
+Não funcional
+
+Usa dados reais ou mock?
+
+Está conectada ao backend?
+
+Possíveis erros ou riscos
+
+Depois disso:
+
+Liste todas as páginas que um casino funcional deveria ter
+
+Marque quais existem e quais faltam
+
+Aponte inconsistências de UX/UI
+
+4️⃣ BACK-END — AUDITORIA PROFUNDA
+
+Explique detalhadamente:
+
+Existe backend próprio ou externo?
+
+Linguagem, framework e arquitetura
+
+Rotas existentes (listar todas)
+
+Quais rotas estão:
+
+Funcionando
+
+Parcialmente implementadas
+
+Apenas mockadas
+
+Lógica crítica ausente (ex: apostas, saldo, odds, histórico, pagamentos)
+
+5️⃣ DADOS: MOCK vs REAIS
+
+Crie uma tabela ou lista clara mostrando:
+
+Onde estão sendo usados dados mockados
+
+Onde os dados são reais
+
+Onde deveriam ser reais mas ainda não são
+
+Riscos de continuar com mocks
+
+6️⃣ AUTENTICAÇÃO, USUÁRIOS E SEGURANÇA
+
+Audite:
+
+Login / registro
+
+Sessão
+
+Tokens
+
+Proteção de rotas
+
+Nível de segurança atual (baixo, médio, alto)
+
+Falhas críticas de segurança
+
+Pontos de atenção para um casino real
+
+7️⃣ PAGAMENTOS, SALDO E FINANCEIRO
+
+Explique com máxima clareza:
+
+Existe sistema de saldo?
+
+Está conectado a pagamento real?
+
+O que é simulado?
+
+O que está totalmente ausente?
+
+Riscos legais e técnicos
+
+8️⃣ ERROS, BUGS E DÍVIDA TÉCNICA
+
+Liste:
+
+Bugs claros
+
+Código quebrável
+
+Má práticas
+
+Trechos perigosos
+
+Código morto
+
+Dependências inúteis
+
+Classifique os problemas em:
+
+🔴 Críticos
+
+🟠 Importantes
+
+🟡 Melhorias
+
+9️⃣ O QUE FALTA PARA UM CASINO COMPLETO
+
+Crie uma lista objetiva com:
+
+Funcionalidades obrigatórias que não existem
+
+Funcionalidades parcialmente feitas
+
+Funcionalidades que parecem feitas mas não estão
+
+🔟 AVALIAÇÃO FINAL
+
+Finalize com:
+
+Nota geral do projeto (0–10)
+
+Nível real de prontidão para produção
+
+Riscos técnicos
+
+Riscos de negócio
+
+Próximos passos recomendados (curto, médio e longo prazo)
+
+🚨 REGRAS IMPORTANTES
+
+Seja crítico
+
+Seja direto
+
+Não suavize problemas
+
+Não elogie sem justificativa técnica
+
+Não esconda nada
+
+Se algo não existir, diga claramente: “NÃO EXISTE”
+
+✅ FORMATO DO OUTPUT
+
+Relatório bem estruturado
+
+Títulos claros
+
+Listas e subtítulos
+
+Linguagem técnica, profissional e objetiva
