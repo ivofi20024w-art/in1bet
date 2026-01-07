@@ -2,6 +2,7 @@ import { db } from "../../../db";
 import { pixDeposits, type PixDeposit, type User, TransactionType } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 import { processBalanceChange } from "../../wallet/wallet.service";
+import { sendNotificationToUser } from "../../notifications/notification.service";
 import { randomUUID } from "crypto";
 
 const ONDAPAY_BASE_URL = "https://api.ondapay.app/api/v1";
@@ -238,6 +239,15 @@ export async function processPixWebhook(
     .where(eq(pixDeposits.externalId, external_id));
 
   console.log(`PIX deposit completed: ${external_id}, credited R$ ${creditAmount}`);
+
+  await sendNotificationToUser(deposit.userId, {
+    type: "DEPOSIT",
+    title: "Depósito Confirmado!",
+    message: `Seu depósito de R$ ${creditAmount.toFixed(2)} foi confirmado e já está disponível na sua carteira.`,
+    icon: "wallet",
+    actionUrl: "/wallet",
+    priority: "HIGH",
+  }).catch(err => console.error("[Notification] Failed to send deposit notification:", err));
 
   return { success: true, message: "Payment processed successfully" };
 }

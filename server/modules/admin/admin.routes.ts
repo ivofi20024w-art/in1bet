@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { authMiddleware } from "../auth/auth.middleware";
 import { db } from "../../db";
-import { users, wallets, pixWithdrawals, pixDeposits, transactions, bonuses, userBonuses, adminAuditLogs, TransactionType, AdminAction } from "@shared/schema";
+import { users, wallets, pixWithdrawals, pixDeposits, transactions, bonuses, userBonuses, adminAuditLogs, TransactionType, AdminAction, sportsBetSlips, sportsMatches, bets } from "@shared/schema";
 import { eq, desc, count, sql, and, gte, lte, sum } from "drizzle-orm";
 import {
   getAllPendingWithdrawals,
@@ -169,6 +169,26 @@ router.get("/dashboard-stats", adminCheck, async (req: Request, res: Response) =
       })
       .from(wallets);
 
+    const [pendingSportsBets] = await db
+      .select({ count: count(), total: sum(sportsBetSlips.stake) })
+      .from(sportsBetSlips)
+      .where(eq(sportsBetSlips.status, "PENDING"));
+
+    const [liveMatches] = await db
+      .select({ count: count() })
+      .from(sportsMatches)
+      .where(eq(sportsMatches.status, "LIVE"));
+
+    const [todaySportsBets] = await db
+      .select({ count: count(), total: sum(sportsBetSlips.stake), potentialPayout: sum(sportsBetSlips.potentialWin) })
+      .from(sportsBetSlips)
+      .where(gte(sportsBetSlips.createdAt, todayStart));
+
+    const [casinoGamesToday] = await db
+      .select({ count: count(), total: sum(bets.betAmount) })
+      .from(bets)
+      .where(gte(bets.createdAt, todayStart));
+
     const last30Days = [];
     for (let i = 29; i >= 0; i--) {
       const dayStart = new Date(todayStart);
@@ -240,6 +260,18 @@ router.get("/dashboard-stats", adminCheck, async (req: Request, res: Response) =
         totalRealBalance: parseFloat(totalWalletBalance?.realBalance || "0"),
         totalBonusBalance: parseFloat(totalWalletBalance?.bonusBalance || "0"),
         totalLockedBalance: parseFloat(totalWalletBalance?.lockedBalance || "0"),
+      },
+      sports: {
+        pendingBets: pendingSportsBets?.count || 0,
+        pendingStake: parseFloat(pendingSportsBets?.total || "0"),
+        liveMatches: liveMatches?.count || 0,
+        todayBets: todaySportsBets?.count || 0,
+        todayStake: parseFloat(todaySportsBets?.total || "0"),
+        todayPotentialPayout: parseFloat(todaySportsBets?.potentialPayout || "0"),
+      },
+      casino: {
+        todayGames: casinoGamesToday?.count || 0,
+        todayVolume: parseFloat(casinoGamesToday?.total || "0"),
       },
       chartData: last30Days,
     });

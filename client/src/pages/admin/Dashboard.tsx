@@ -25,6 +25,10 @@ import {
   Clock,
   AlertCircle,
   RefreshCw,
+  Trophy,
+  Gamepad2,
+  Radio,
+  Ticket,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -61,6 +65,18 @@ interface DashboardStats {
     totalRealBalance: number;
     totalBonusBalance: number;
     totalLockedBalance: number;
+  };
+  sports?: {
+    pendingBets: number;
+    pendingStake: number;
+    liveMatches: number;
+    todayBets: number;
+    todayStake: number;
+    todayPotentialPayout: number;
+  };
+  casino?: {
+    todayGames: number;
+    todayVolume: number;
   };
   chartData: { date: string; deposits: number; withdrawals: number }[];
 }
@@ -186,6 +202,52 @@ export default function AdminDashboard() {
     },
   ];
 
+  const sportsCards = stats.sports ? [
+    {
+      title: "Apostas Pendentes",
+      value: stats.sports.pendingBets.toString(),
+      subtitle: `Stake: ${formatCurrency(stats.sports.pendingStake)}`,
+      icon: Ticket,
+      color: "text-cyan-500",
+      bg: "bg-cyan-500/10",
+    },
+    {
+      title: "Partidas Ao Vivo",
+      value: stats.sports.liveMatches.toString(),
+      subtitle: "Em andamento",
+      icon: Radio,
+      color: "text-red-500",
+      bg: "bg-red-500/10",
+    },
+    {
+      title: "Apostas (Hoje)",
+      value: stats.sports.todayBets.toString(),
+      subtitle: `Volume: ${formatCurrency(stats.sports.todayStake)}`,
+      icon: Trophy,
+      color: "text-yellow-500",
+      bg: "bg-yellow-500/10",
+    },
+    {
+      title: "Payout Potencial",
+      value: formatCurrency(stats.sports.todayPotentialPayout),
+      subtitle: "Apostas pendentes",
+      icon: TrendingUp,
+      color: "text-orange-500",
+      bg: "bg-orange-500/10",
+    },
+  ] : [];
+
+  const casinoCards = stats.casino ? [
+    {
+      title: "Jogos (Hoje)",
+      value: stats.casino.todayGames.toString(),
+      subtitle: `Volume: ${formatCurrency(stats.casino.todayVolume)}`,
+      icon: Gamepad2,
+      color: "text-pink-500",
+      bg: "bg-pink-500/10",
+    },
+  ] : [];
+
   return (
     <AdminLayout title="Dashboard">
       <div className="space-y-6">
@@ -252,6 +314,32 @@ export default function AdminDashboard() {
             </Card>
           ))}
         </div>
+
+        {(sportsCards.length > 0 || casinoCards.length > 0) && (
+          <div>
+            <h3 className="text-lg font-semibold text-white mb-4">Apostas & Jogos</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              {[...sportsCards, ...casinoCards].map((card, i) => (
+                <Card key={i} className="bg-[#111111] border-gray-800">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-gray-400">{card.title}</p>
+                        <p className="text-2xl font-bold text-white mt-1">
+                          {card.value}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">{card.subtitle}</p>
+                      </div>
+                      <div className={`p-3 rounded-lg ${card.bg}`}>
+                        <card.icon className={`h-6 w-6 ${card.color}`} />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="bg-[#111111] border-gray-800">

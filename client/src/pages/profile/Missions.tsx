@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { StreakCard } from "@/components/missions/StreakCard";
 
 interface Mission {
   id: string;
@@ -187,6 +188,8 @@ export default function Missions() {
             <p className="text-muted-foreground">Complete desafios e ganhe recompensas</p>
           </div>
         </div>
+
+        <StreakCard />
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <Card>

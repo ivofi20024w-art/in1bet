@@ -18,6 +18,7 @@ import {
 } from "@shared/schema";
 import { eq, desc, and, or, gte, lte, sql, asc, inArray } from "drizzle-orm";
 import { processBalanceChange } from "../wallet/wallet.service";
+import { sendNotificationToUser } from "../notifications/notification.service";
 import { randomUUID } from "crypto";
 
 // ==========================================
@@ -520,8 +521,25 @@ async function settleMatchBets(matchId: string, result: string) {
         "WIN",
         `Aposta esportiva ganha - ${betSlip.betNumber}`
       );
+
+      await sendNotificationToUser(betSlip.userId, {
+        type: "BET_RESULT",
+        title: "Aposta Ganha!",
+        message: `Parabéns! Sua aposta ${betSlip.betNumber} foi vencedora. Você ganhou R$ ${actualWin.toFixed(2)}!`,
+        icon: "trophy",
+        actionUrl: "/sports/my-bets",
+        priority: "HIGH",
+      }).catch(err => console.error("[Notification] Failed to send bet win notification:", err));
     } else if (anyLost) {
       betStatus = "LOST";
+
+      await sendNotificationToUser(betSlip.userId, {
+        type: "BET_RESULT",
+        title: "Aposta Encerrada",
+        message: `Sua aposta ${betSlip.betNumber} foi encerrada. Boa sorte na próxima!`,
+        icon: "x-circle",
+        actionUrl: "/sports/my-bets",
+      }).catch(err => console.error("[Notification] Failed to send bet loss notification:", err));
     } else {
       betStatus = "VOID";
       await processBalanceChange(
