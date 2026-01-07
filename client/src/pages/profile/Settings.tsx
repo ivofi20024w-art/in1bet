@@ -6,13 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Bell, Globe, Moon, AlertCircle, CheckCircle, Loader2, User, Save, Mail, Smartphone } from "lucide-react";
+import { ArrowLeft, Bell, Globe, Loader2, User, Save, Mail, Smartphone } from "lucide-react";
 import { Link } from "wouter";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { TwoFactorSettings } from "@/components/TwoFactorSettings";
 
 interface UserSettings {
   language: string;
@@ -237,6 +238,8 @@ export default function Settings() {
                   ))}
                 </CardContent>
               </Card>
+
+              <TwoFactorSettings />
             </div>
           </div>
         )}

@@ -65,6 +65,9 @@ export const users = pgTable("users", {
   selfExclusionReason: text("self_exclusion_reason"),
   lastSessionStart: timestamp("last_session_start"),
   chatModeratorRole: varchar("chat_moderator_role", { length: 20 }).default("NONE"),
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+  twoFactorSecret: text("two_factor_secret"),
+  twoFactorBackupCodes: text("two_factor_backup_codes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
