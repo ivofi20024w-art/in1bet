@@ -64,6 +64,7 @@ export const users = pgTable("users", {
   permanentSelfExcluded: boolean("permanent_self_excluded").default(false),
   selfExclusionReason: text("self_exclusion_reason"),
   lastSessionStart: timestamp("last_session_start"),
+  chatModeratorRole: varchar("chat_moderator_role", { length: 20 }).default("NONE"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -2420,6 +2421,34 @@ export const chatUserStatus = pgTable("chat_user_status", {
   lastSeenAt: timestamp("last_seen_at").defaultNow().notNull(),
 });
 
+// User Chat Customization (level 50+ feature)
+export const chatUserCustomization = pgTable("chat_user_customization", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id).unique(),
+  nameColor: varchar("name_color", { length: 20 }),
+  nameEffect: varchar("name_effect", { length: 30 }),
+  messageColor: varchar("message_color", { length: 20 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Chat User Blocks (user-to-user blocking)
+export const chatUserBlocks = pgTable("chat_user_blocks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  blockerId: varchar("blocker_id").notNull().references(() => users.id),
+  blockedId: varchar("blocked_id").notNull().references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Chat Moderator Roles
+export const ChatModeratorRole = {
+  NONE: "NONE",
+  HELPER: "HELPER",
+  CHAT_MODERATOR: "CHAT_MODERATOR",
+  SUPPORT: "SUPPORT",
+  ADMIN: "ADMIN",
+} as const;
+
 // Chat Types
 export type ChatRoom = typeof chatRooms.$inferSelect;
 export type InsertChatRoom = typeof chatRooms.$inferInsert;
@@ -2435,6 +2464,10 @@ export type ChatSetting = typeof chatSettings.$inferSelect;
 export type InsertChatSetting = typeof chatSettings.$inferInsert;
 export type ChatUserStatus = typeof chatUserStatus.$inferSelect;
 export type InsertChatUserStatus = typeof chatUserStatus.$inferInsert;
+export type ChatUserCustomization = typeof chatUserCustomization.$inferSelect;
+export type InsertChatUserCustomization = typeof chatUserCustomization.$inferInsert;
+export type ChatUserBlock = typeof chatUserBlocks.$inferSelect;
+export type InsertChatUserBlock = typeof chatUserBlocks.$inferInsert;
 
 // Chat Validation Schemas
 export const sendCommunityChatMessageSchema = z.object({

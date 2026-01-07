@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from "express";
 import { db } from "../../db";
 import { 
   chatRooms, chatMessages, chatPenalties, chatReports, 
-  chatBadWords, users,
+  chatBadWords, chatUserCustomization, users,
   createChatRoomSchema, addBadWordSchema, issuePenaltySchema, reportMessageSchema
 } from "@shared/schema";
 import { eq, desc, and, count, gte, sql } from "drizzle-orm";
@@ -60,6 +60,59 @@ router.get("/online-users/:roomId", authMiddleware, async (req: Request, res: Re
     res.json(users);
   } catch (error) {
     res.status(500).json({ error: "Erro ao buscar usuários online" });
+  }
+});
+
+router.post("/customization", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const [user] = await db.select().from(users).where(eq(users.id, req.user!.id));
+    if (!user || user.level < 50) {
+      res.status(403).json({ error: "Nível 50+ necessário para personalização" });
+      return;
+    }
+
+    const { nameColor, nameEffect, messageColor } = req.body;
+    
+    const validColors = ["red", "orange", "yellow", "green", "cyan", "blue", "purple", "pink", "white", ""];
+    const validEffects = ["glow", "rainbow", "bold", "italic", ""];
+    
+    if (nameColor && !validColors.includes(nameColor)) {
+      res.status(400).json({ error: "Cor de nome inválida" });
+      return;
+    }
+    if (nameEffect && !validEffects.includes(nameEffect)) {
+      res.status(400).json({ error: "Efeito de nome inválido" });
+      return;
+    }
+    if (messageColor && !validColors.includes(messageColor)) {
+      res.status(400).json({ error: "Cor de mensagem inválida" });
+      return;
+    }
+    
+    const existing = await db.select().from(chatUserCustomization).where(eq(chatUserCustomization.userId, req.user!.id));
+    
+    if (existing.length > 0) {
+      await db.update(chatUserCustomization)
+        .set({ 
+          nameColor: nameColor || null, 
+          nameEffect: nameEffect || null, 
+          messageColor: messageColor || null,
+          updatedAt: new Date()
+        })
+        .where(eq(chatUserCustomization.userId, req.user!.id));
+    } else {
+      await db.insert(chatUserCustomization).values({
+        userId: req.user!.id,
+        nameColor: nameColor || null,
+        nameEffect: nameEffect || null,
+        messageColor: messageColor || null,
+      });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[CHAT] Error saving customization:", error);
+    res.status(500).json({ error: "Erro ao salvar personalização" });
   }
 });
 
@@ -405,6 +458,128 @@ router.patch("/admin/rooms/:id", authMiddleware, adminCheck, async (req: Request
   } catch (error) {
     console.error("[CHAT ADMIN] Error updating room:", error);
     res.status(500).json({ error: "Erro ao atualizar sala" });
+  }
+});
+
+router.post("/admin/ban-from-casino", authMiddleware, adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { userId, reason, permanent, days } = req.body;
+
+    if (!userId || typeof userId !== "string") {
+      res.status(400).json({ error: "ID do utilizador obrigatório" });
+      return;
+    }
+
+    if (!reason || typeof reason !== "string" || reason.length < 5) {
+      res.status(400).json({ error: "Motivo obrigatório (mínimo 5 caracteres)" });
+      return;
+    }
+
+    const isPermanent = permanent === true;
+    const banDays = typeof days === "number" ? days : 0;
+
+    if (!isPermanent && (banDays < 1 || banDays > 365)) {
+      res.status(400).json({ error: "Escolha banimento permanente ou especifique duração (1-365 dias)" });
+      return;
+    }
+
+    const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+    if (!targetUser) {
+      res.status(404).json({ error: "Utilizador não encontrado" });
+      return;
+    }
+
+    if (targetUser.isAdmin) {
+      res.status(403).json({ error: "Não é possível banir um administrador" });
+      return;
+    }
+
+    const blockedAt = new Date();
+    
+    await db.update(users)
+      .set({
+        isBlocked: true,
+        blockReason: reason,
+        blockedAt,
+        blockedBy: req.user!.id,
+      })
+      .where(eq(users.id, userId));
+
+    await db.insert(chatPenalties).values({
+      userId,
+      penaltyType: "BAN",
+      violationType: "MANUAL",
+      reason: `Banido do casino: ${reason}`,
+      isActive: true,
+      issuedBy: req.user!.id,
+      expiresAt: isPermanent ? null : new Date(Date.now() + banDays * 24 * 60 * 60 * 1000),
+    });
+
+    console.log(`[CHAT ADMIN] User ${userId} banned from casino by ${req.user!.id}. Reason: ${reason}. Permanent: ${isPermanent}`);
+
+    res.json({ 
+      success: true, 
+      message: isPermanent ? "Utilizador banido permanentemente do casino" : `Utilizador banido por ${banDays} dia(s)` 
+    });
+  } catch (error) {
+    console.error("[CHAT ADMIN] Error banning from casino:", error);
+    res.status(500).json({ error: "Erro ao banir do casino" });
+  }
+});
+
+router.post("/admin/set-moderator-role", authMiddleware, adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { userId, role } = req.body;
+
+    if (!userId) {
+      res.status(400).json({ error: "ID do utilizador obrigatório" });
+      return;
+    }
+
+    const validRoles = ["NONE", "HELPER", "CHAT_MODERATOR", "SUPPORT", "ADMIN"];
+    if (!validRoles.includes(role)) {
+      res.status(400).json({ error: "Role inválido" });
+      return;
+    }
+
+    const [targetUser] = await db.select().from(users).where(eq(users.id, userId));
+    if (!targetUser) {
+      res.status(404).json({ error: "Utilizador não encontrado" });
+      return;
+    }
+
+    await db.update(users)
+      .set({ chatModeratorRole: role })
+      .where(eq(users.id, userId));
+
+    res.json({ success: true, message: `Role atualizado para ${role}` });
+  } catch (error) {
+    console.error("[CHAT ADMIN] Error setting moderator role:", error);
+    res.status(500).json({ error: "Erro ao definir role" });
+  }
+});
+
+router.get("/admin/chat-moderators", authMiddleware, adminCheck, async (req: Request, res: Response) => {
+  try {
+    const moderators = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        chatModeratorRole: users.chatModeratorRole,
+        level: users.level,
+        vipLevel: users.vipLevel,
+      })
+      .from(users)
+      .where(
+        sql`${users.chatModeratorRole} IS NOT NULL AND ${users.chatModeratorRole} != 'NONE'`
+      )
+      .orderBy(users.chatModeratorRole);
+
+    res.json(moderators);
+  } catch (error) {
+    console.error("[CHAT ADMIN] Error fetching moderators:", error);
+    res.status(500).json({ error: "Erro ao buscar moderadores" });
   }
 });
 

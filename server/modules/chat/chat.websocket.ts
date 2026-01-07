@@ -6,11 +6,13 @@ import {
   updateUserOnlineStatus, 
   getRoomMessages, 
   getChatRooms,
-  ChatMessageWithUser 
+  ChatMessageWithUser,
+  getUserCustomization,
+  getBlockedUsers 
 } from "./chat.service";
 import { db } from "../../db";
-import { users } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { users, chatUserCustomization, chatUserBlocks } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 
 interface JWTPayload {
   userId: string;
@@ -36,7 +38,13 @@ interface ChatClient {
   userName: string;
   userVipLevel: string;
   userLevel: number;
+  userRole: string;
+  isAdmin: boolean;
   currentRoomId: string | null;
+  customization: { nameColor?: string; nameEffect?: string; messageColor?: string } | null;
+  blockedUsers: string[];
+  isTyping: boolean;
+  typingTimeout: NodeJS.Timeout | null;
 }
 
 const clients = new Map<string, ChatClient>();
@@ -77,6 +85,9 @@ export function setupChatWebSocket(server: Server) {
               return;
             }
 
+            const customization = await getUserCustomization(user.id);
+            const blockedUsers = await getBlockedUsers(user.id);
+
             clientId = user.id;
             clients.set(clientId, {
               ws,
@@ -84,7 +95,13 @@ export function setupChatWebSocket(server: Server) {
               userName: user.name,
               userVipLevel: user.vipLevel || "bronze",
               userLevel: user.level,
+              userRole: user.chatModeratorRole || "NONE",
+              isAdmin: user.isAdmin || false,
               currentRoomId: null,
+              customization,
+              blockedUsers,
+              isTyping: false,
+              typingTimeout: null,
             });
 
             await updateUserOnlineStatus(user.id, true);
@@ -93,6 +110,10 @@ export function setupChatWebSocket(server: Server) {
             ws.send(JSON.stringify({ 
               type: "authenticated", 
               userId: user.id,
+              userRole: user.chatModeratorRole || "NONE",
+              isAdmin: user.isAdmin || false,
+              level: user.level,
+              customization,
               rooms 
             }));
             
@@ -115,6 +136,7 @@ export function setupChatWebSocket(server: Server) {
               const oldRoomSubs = roomSubscriptions.get(client.currentRoomId);
               if (oldRoomSubs) {
                 oldRoomSubs.delete(clientId);
+                broadcastRoomOnlineCount(client.currentRoomId);
               }
             }
 
@@ -128,10 +150,13 @@ export function setupChatWebSocket(server: Server) {
             await updateUserOnlineStatus(clientId, true, roomId);
 
             const messages = await getRoomMessages(roomId, 100);
+            const roomOnlineCount = roomSubscriptions.get(roomId)?.size || 0;
+            
             ws.send(JSON.stringify({ 
               type: "room_joined", 
               roomId,
-              messages 
+              messages,
+              onlineCount: roomOnlineCount
             }));
 
             broadcastToRoom(roomId, {
@@ -139,8 +164,11 @@ export function setupChatWebSocket(server: Server) {
               userId: client.userId,
               userName: client.userName,
               vipLevel: client.userVipLevel,
+              level: client.userLevel,
+              role: client.userRole,
             }, clientId);
             
+            broadcastRoomOnlineCount(roomId);
             break;
           }
 
@@ -156,13 +184,24 @@ export function setupChatWebSocket(server: Server) {
               return;
             }
 
+            if (client.isTyping) {
+              client.isTyping = false;
+              if (client.typingTimeout) {
+                clearTimeout(client.typingTimeout);
+                client.typingTimeout = null;
+              }
+              broadcastTypingStatus(client.currentRoomId, clientId, false);
+            }
+
             const result = await sendMessage(
               client.userId,
               client.currentRoomId,
               message.message,
               client.userName,
               client.userVipLevel,
-              client.userLevel
+              client.userLevel,
+              client.userRole,
+              client.customization
             );
 
             if (!result.success) {
@@ -180,6 +219,84 @@ export function setupChatWebSocket(server: Server) {
                 message: result.message,
               });
             }
+            break;
+          }
+
+          case "typing": {
+            if (!clientId) return;
+
+            const client = clients.get(clientId);
+            if (!client || !client.currentRoomId) return;
+
+            if (!client.isTyping) {
+              client.isTyping = true;
+              broadcastTypingStatus(client.currentRoomId, clientId, true, client.userName);
+            }
+
+            if (client.typingTimeout) {
+              clearTimeout(client.typingTimeout);
+            }
+
+            client.typingTimeout = setTimeout(() => {
+              if (client.isTyping) {
+                client.isTyping = false;
+                broadcastTypingStatus(client.currentRoomId!, clientId!, false);
+              }
+            }, 3000);
+            break;
+          }
+
+          case "stop_typing": {
+            if (!clientId) return;
+
+            const client = clients.get(clientId);
+            if (!client || !client.currentRoomId) return;
+
+            if (client.isTyping) {
+              client.isTyping = false;
+              if (client.typingTimeout) {
+                clearTimeout(client.typingTimeout);
+                client.typingTimeout = null;
+              }
+              broadcastTypingStatus(client.currentRoomId, clientId, false);
+            }
+            break;
+          }
+
+          case "block_user": {
+            if (!clientId) return;
+            
+            const client = clients.get(clientId);
+            if (!client) return;
+
+            const targetUserId = message.userId;
+            if (!client.blockedUsers.includes(targetUserId)) {
+              await db.insert(chatUserBlocks).values({
+                blockerId: clientId,
+                blockedId: targetUserId,
+              }).onConflictDoNothing();
+              
+              client.blockedUsers.push(targetUserId);
+              ws.send(JSON.stringify({ type: "user_blocked", userId: targetUserId }));
+            }
+            break;
+          }
+
+          case "unblock_user": {
+            if (!clientId) return;
+            
+            const client = clients.get(clientId);
+            if (!client) return;
+
+            const targetUserId = message.userId;
+            await db.delete(chatUserBlocks)
+              .where(and(
+                eq(chatUserBlocks.blockerId, clientId),
+                eq(chatUserBlocks.blockedId, targetUserId)
+              ));
+            
+            client.blockedUsers = client.blockedUsers.filter(id => id !== targetUserId);
+            ws.send(JSON.stringify({ type: "user_unblocked", userId: targetUserId }));
             break;
           }
 
@@ -203,6 +320,7 @@ export function setupChatWebSocket(server: Server) {
 
             client.currentRoomId = null;
             await updateUserOnlineStatus(clientId, true, undefined);
+            broadcastRoomOnlineCount(roomId);
             break;
           }
 
@@ -220,16 +338,23 @@ export function setupChatWebSocket(server: Server) {
     ws.on("close", async () => {
       if (clientId) {
         const client = clients.get(clientId);
-        if (client && client.currentRoomId) {
-          const roomSubs = roomSubscriptions.get(client.currentRoomId);
-          if (roomSubs) {
-            roomSubs.delete(clientId);
+        if (client) {
+          if (client.typingTimeout) {
+            clearTimeout(client.typingTimeout);
           }
-          broadcastToRoom(client.currentRoomId, {
-            type: "user_left",
-            userId: client.userId,
-            userName: client.userName,
-          });
+          
+          if (client.currentRoomId) {
+            const roomSubs = roomSubscriptions.get(client.currentRoomId);
+            if (roomSubs) {
+              roomSubs.delete(clientId);
+            }
+            broadcastToRoom(client.currentRoomId, {
+              type: "user_left",
+              userId: client.userId,
+              userName: client.userName,
+            });
+            broadcastRoomOnlineCount(client.currentRoomId);
+          }
         }
         
         await updateUserOnlineStatus(clientId, false);
@@ -277,6 +402,26 @@ function broadcastOnlineCount() {
   }
 }
 
+function broadcastRoomOnlineCount(roomId: string) {
+  const roomSubs = roomSubscriptions.get(roomId);
+  const count = roomSubs?.size || 0;
+  
+  broadcastToRoom(roomId, {
+    type: "room_online_count",
+    roomId,
+    count,
+  });
+}
+
+function broadcastTypingStatus(roomId: string, clientId: string, isTyping: boolean, userName?: string) {
+  broadcastToRoom(roomId, {
+    type: "typing_status",
+    userId: clientId,
+    userName,
+    isTyping,
+  }, clientId);
+}
+
 export function broadcastSystemMessage(roomId: string, message: string) {
   broadcastToRoom(roomId, {
     type: "system_message",
@@ -294,4 +439,8 @@ export function deleteMessageFromClients(roomId: string, messageId: string) {
 
 export function getOnlineCount(): number {
   return clients.size;
+}
+
+export function getRoomOnlineCount(roomId: string): number {
+  return roomSubscriptions.get(roomId)?.size || 0;
 }

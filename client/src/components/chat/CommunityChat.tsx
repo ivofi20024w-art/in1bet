@@ -1,12 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  MessageCircle, X, Send, Users, Crown, Shield,
-  AlertTriangle, Flag, Smile, ChevronDown, Hash
+  MessageCircle, X, Send, Users, Crown, Shield, ShieldCheck, Headphones, HelpCircle,
+  AlertTriangle, Flag, Smile, ChevronDown, Hash, Ban, UserX, Settings, Palette
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 import { getStoredAuth } from "@/lib/auth";
 
@@ -19,11 +20,19 @@ interface ChatRoom {
   minVipLevel: string | null;
 }
 
+interface ChatUserCustomization {
+  nameColor?: string;
+  nameEffect?: string;
+  messageColor?: string;
+}
+
 interface ChatUser {
   id: string;
   name: string;
   vipLevel: string;
   level: number;
+  role?: string;
+  customization?: ChatUserCustomization | null;
 }
 
 interface ChatMessage {
@@ -31,6 +40,11 @@ interface ChatMessage {
   message: string;
   createdAt: string;
   user: ChatUser;
+}
+
+interface TypingUser {
+  userId: string;
+  userName: string;
 }
 
 const VIP_COLORS: Record<string, string> = {
@@ -49,6 +63,82 @@ const VIP_BADGES: Record<string, string> = {
   diamond: "👑",
 };
 
+const ROLE_BADGES: Record<string, { icon: React.ReactNode; label: string; color: string }> = {
+  ADMIN: { icon: <ShieldCheck className="h-3 w-3" />, label: "Admin", color: "text-red-400 bg-red-900/30" },
+  SUPPORT: { icon: <Headphones className="h-3 w-3" />, label: "Suporte", color: "text-blue-400 bg-blue-900/30" },
+  CHAT_MODERATOR: { icon: <Shield className="h-3 w-3" />, label: "Moderador", color: "text-green-400 bg-green-900/30" },
+  HELPER: { icon: <HelpCircle className="h-3 w-3" />, label: "Helper", color: "text-yellow-400 bg-yellow-900/30" },
+};
+
+const NAME_EFFECTS: Record<string, string> = {
+  glow: "animate-pulse drop-shadow-[0_0_8px_currentColor]",
+  rainbow: "bg-gradient-to-r from-red-400 via-yellow-400 to-blue-400 bg-clip-text text-transparent animate-gradient",
+  shake: "animate-bounce",
+  italic: "italic",
+  bold: "font-black",
+};
+
+const COLOR_OPTIONS = [
+  { value: "red", label: "Vermelho", class: "text-red-400" },
+  { value: "orange", label: "Laranja", class: "text-orange-400" },
+  { value: "yellow", label: "Amarelo", class: "text-yellow-400" },
+  { value: "green", label: "Verde", class: "text-green-400" },
+  { value: "cyan", label: "Ciano", class: "text-cyan-400" },
+  { value: "blue", label: "Azul", class: "text-blue-400" },
+  { value: "purple", label: "Roxo", class: "text-purple-400" },
+  { value: "pink", label: "Rosa", class: "text-pink-400" },
+  { value: "white", label: "Branco", class: "text-white" },
+];
+
+const EFFECT_OPTIONS = [
+  { value: "", label: "Nenhum" },
+  { value: "glow", label: "Brilho" },
+  { value: "rainbow", label: "Arco-íris" },
+  { value: "bold", label: "Negrito" },
+  { value: "italic", label: "Itálico" },
+];
+
+const EMOJI_CATEGORIES = [
+  { name: "Sorrisos", emojis: ["😀", "😃", "😄", "😁", "😆", "😅", "🤣", "😂", "🙂", "😊", "😇", "🥰", "😍", "🤩", "😘", "😗", "😚", "😋", "😛", "😜", "🤪", "😝", "🤑", "🤗", "🤭", "🤫", "🤔", "🤐", "🤨", "😐", "😑", "😶", "😏", "😒", "🙄", "😬", "🤥"] },
+  { name: "Gestos", emojis: ["👍", "👎", "👊", "✊", "🤛", "🤜", "🤞", "✌️", "🤟", "🤘", "👌", "🤌", "🤏", "👈", "👉", "👆", "👇", "☝️", "✋", "🤚", "🖐️", "🖖", "👋", "🤙", "💪", "🦾", "🙏", "🤝", "👏", "🙌"] },
+  { name: "Jogos", emojis: ["🎰", "🎲", "🃏", "♠️", "♥️", "♦️", "♣️", "🎯", "🎮", "🕹️", "🎳", "⚽", "🏀", "🏈", "⚾", "🎾", "🏐", "🏉", "🥊", "⛳", "🏆", "🥇", "🥈", "🥉", "🏅", "💰", "💵", "💸", "💳", "🤑"] },
+  { name: "Celebração", emojis: ["🎉", "🎊", "🎈", "🎁", "🎀", "🎆", "🎇", "✨", "🌟", "⭐", "💥", "🔥", "💫", "🎵", "🎶", "🎤", "🎧", "🥂", "🍾", "🍻", "🍺", "🥃", "🍷", "🍸", "🍹"] },
+  { name: "Animais", emojis: ["🐶", "🐱", "🐭", "🐹", "🐰", "🦊", "🐻", "🐼", "🐨", "🐯", "🦁", "🐮", "🐷", "🐸", "🐵", "🐔", "🐧", "🐦", "🐤", "🦄", "🐴", "🦋", "🐙", "🦈", "🐬", "🐳", "🦅", "🦆", "🦢", "🦚"] },
+  { name: "Corações", emojis: ["❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔", "❣️", "💕", "💞", "💓", "💗", "💖", "💝", "💘", "💌"] },
+];
+
+function getNameColorClass(color?: string): string {
+  if (!color) return "";
+  const colorMap: Record<string, string> = {
+    red: "text-red-400",
+    orange: "text-orange-400",
+    yellow: "text-yellow-400",
+    green: "text-green-400",
+    cyan: "text-cyan-400",
+    blue: "text-blue-400",
+    purple: "text-purple-400",
+    pink: "text-pink-400",
+    white: "text-white",
+  };
+  return colorMap[color] || "";
+}
+
+function getMessageColorClass(color?: string): string {
+  if (!color) return "text-gray-200";
+  const colorMap: Record<string, string> = {
+    red: "text-red-300",
+    orange: "text-orange-300",
+    yellow: "text-yellow-300",
+    green: "text-green-300",
+    cyan: "text-cyan-300",
+    blue: "text-blue-300",
+    purple: "text-purple-300",
+    pink: "text-pink-300",
+    white: "text-white",
+  };
+  return colorMap[color] || "text-gray-200";
+}
+
 export default function CommunityChat() {
   const [isOpen, setIsOpen] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
@@ -57,11 +147,22 @@ export default function CommunityChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [onlineCount, setOnlineCount] = useState(0);
+  const [roomOnlineCount, setRoomOnlineCount] = useState(0);
   const [showRooms, setShowRooms] = useState(false);
+  const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
+  const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
+  const [myRole, setMyRole] = useState<string>("NONE");
+  const [myLevel, setMyLevel] = useState<number>(1);
+  const [myCustomization, setMyCustomization] = useState<ChatUserCustomization | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectedEmojiCategory, setSelectedEmojiCategory] = useState(0);
   
   const wsRef = useRef<WebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastTypingSentRef = useRef<number>(0);
   
   const auth = getStoredAuth();
 
@@ -72,6 +173,16 @@ export default function CommunityChat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
+
+  const sendTypingStatus = useCallback(() => {
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+    
+    const now = Date.now();
+    if (now - lastTypingSentRef.current < 2000) return;
+    
+    lastTypingSentRef.current = now;
+    wsRef.current.send(JSON.stringify({ type: "typing" }));
+  }, []);
 
   const connect = useCallback(() => {
     if (!auth.accessToken || wsRef.current?.readyState === WebSocket.OPEN) return;
@@ -91,6 +202,9 @@ export default function CommunityChat() {
         case "authenticated":
           setIsConnected(true);
           setRooms(data.rooms);
+          setMyRole(data.userRole || "NONE");
+          setMyLevel(data.level || 1);
+          setMyCustomization(data.customization);
           if (data.rooms.length > 0 && !currentRoom) {
             ws.send(JSON.stringify({ type: "join_room", roomId: data.rooms[0].id }));
           }
@@ -100,21 +214,51 @@ export default function CommunityChat() {
           const room = rooms.find(r => r.id === data.roomId);
           if (room) setCurrentRoom(room);
           setMessages(data.messages || []);
+          setRoomOnlineCount(data.onlineCount || 0);
+          setTypingUsers([]);
           setShowRooms(false);
           break;
 
         case "new_message":
-          setMessages(prev => [...prev.slice(-99), data.message]);
+          if (!blockedUsers.includes(data.message.user.id)) {
+            setMessages(prev => [...prev.slice(-99), data.message]);
+          }
           break;
 
         case "user_joined":
           break;
 
         case "user_left":
+          setTypingUsers(prev => prev.filter(u => u.userId !== data.userId));
           break;
 
         case "online_count":
           setOnlineCount(data.count);
+          break;
+
+        case "room_online_count":
+          setRoomOnlineCount(data.count);
+          break;
+
+        case "typing_status":
+          if (data.isTyping) {
+            setTypingUsers(prev => {
+              if (prev.find(u => u.userId === data.userId)) return prev;
+              return [...prev, { userId: data.userId, userName: data.userName }];
+            });
+          } else {
+            setTypingUsers(prev => prev.filter(u => u.userId !== data.userId));
+          }
+          break;
+
+        case "user_blocked":
+          setBlockedUsers(prev => [...prev, data.userId]);
+          toast.success("Utilizador bloqueado");
+          break;
+
+        case "user_unblocked":
+          setBlockedUsers(prev => prev.filter(id => id !== data.userId));
+          toast.success("Utilizador desbloqueado");
           break;
 
         case "message_deleted":
@@ -158,7 +302,7 @@ export default function CommunityChat() {
     ws.onerror = () => {
       ws.close();
     };
-  }, [auth.accessToken, currentRoom, isOpen, rooms]);
+  }, [auth.accessToken, currentRoom, isOpen, rooms, blockedUsers]);
 
   useEffect(() => {
     if (isOpen && auth.accessToken) {
@@ -183,11 +327,27 @@ export default function CommunityChat() {
       message: inputMessage.trim(),
     }));
     setInputMessage("");
+    
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputMessage(e.target.value);
+    if (e.target.value.length > 0) {
+      sendTypingStatus();
+    }
   };
 
   const joinRoom = (room: ChatRoom) => {
     if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
     wsRef.current.send(JSON.stringify({ type: "join_room", roomId: room.id }));
+  };
+
+  const blockUser = (userId: string) => {
+    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+    wsRef.current.send(JSON.stringify({ type: "block_user", userId }));
   };
 
   const reportMessage = async (messageId: string) => {
@@ -213,6 +373,86 @@ export default function CommunityChat() {
     } catch {
       toast.error("Erro ao enviar denúncia");
     }
+  };
+
+  const saveCustomization = async (nameColor?: string, nameEffect?: string, messageColor?: string) => {
+    try {
+      const res = await fetch("/api/chat/customization", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+        body: JSON.stringify({ nameColor, nameEffect, messageColor }),
+      });
+
+      if (res.ok) {
+        setMyCustomization({ nameColor, nameEffect, messageColor });
+        toast.success("Personalização salva!");
+        setShowSettings(false);
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Erro ao salvar");
+      }
+    } catch {
+      toast.error("Erro ao salvar personalização");
+    }
+  };
+
+  const insertEmoji = (emoji: string) => {
+    setInputMessage(prev => prev + emoji);
+    setShowEmojiPicker(false);
+  };
+
+  const renderTypingIndicator = () => {
+    if (typingUsers.length === 0) return null;
+    
+    const names = typingUsers.slice(0, 3).map(u => u.userName);
+    let text = "";
+    
+    if (names.length === 1) {
+      text = `${names[0]} está a escrever...`;
+    } else if (names.length === 2) {
+      text = `${names[0]} e ${names[1]} estão a escrever...`;
+    } else {
+      text = `${names[0]}, ${names[1]} e outros estão a escrever...`;
+    }
+
+    return (
+      <div className="px-4 py-1 text-xs text-gray-400 italic flex items-center gap-2">
+        <span className="flex gap-0.5">
+          <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+          <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+          <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+        </span>
+        {text}
+      </div>
+    );
+  };
+
+  const renderRoleBadge = (role?: string) => {
+    if (!role || role === "NONE") return null;
+    const badge = ROLE_BADGES[role];
+    if (!badge) return null;
+    
+    return (
+      <span className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[10px] font-medium ${badge.color}`}>
+        {badge.icon}
+        {badge.label}
+      </span>
+    );
+  };
+
+  const renderUserName = (user: ChatUser) => {
+    const customColor = user.customization?.nameColor ? getNameColorClass(user.customization.nameColor) : "";
+    const effectClass = user.customization?.nameEffect ? NAME_EFFECTS[user.customization.nameEffect] || "" : "";
+    const defaultColor = VIP_COLORS[user.vipLevel] || "text-gray-300";
+    
+    return (
+      <span className={`font-medium text-sm truncate ${customColor || defaultColor} ${effectClass}`}>
+        {user.name}
+      </span>
+    );
   };
 
   if (!auth.accessToken) return null;
@@ -252,15 +492,99 @@ export default function CommunityChat() {
                   </div>
                 </div>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsOpen(false)}
-                data-testid="button-close-chat"
-              >
-                <X className="h-5 w-5" />
-              </Button>
+              <div className="flex items-center gap-1">
+                {myLevel >= 50 && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowSettings(!showSettings)}
+                    data-testid="button-chat-settings"
+                    className="h-8 w-8"
+                  >
+                    <Palette className="h-4 w-4" />
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsOpen(false)}
+                  data-testid="button-close-chat"
+                  className="h-8 w-8"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
             </div>
+
+            <AnimatePresence>
+              {showSettings && myLevel >= 50 && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="bg-[#111] border-b border-gray-800 p-4 overflow-hidden"
+                >
+                  <h4 className="text-sm font-medium text-white mb-3">Personalizar Chat (Lv.50+)</h4>
+                  
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">Cor do Nome</label>
+                      <div className="flex flex-wrap gap-1">
+                        {COLOR_OPTIONS.map(c => (
+                          <button
+                            key={c.value}
+                            onClick={() => setMyCustomization(prev => ({ ...prev, nameColor: c.value }))}
+                            className={`w-6 h-6 rounded ${c.class} border ${myCustomization?.nameColor === c.value ? "border-white" : "border-gray-700"}`}
+                            title={c.label}
+                          >
+                            ●
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">Efeito do Nome</label>
+                      <div className="flex flex-wrap gap-1">
+                        {EFFECT_OPTIONS.map(e => (
+                          <button
+                            key={e.value}
+                            onClick={() => setMyCustomization(prev => ({ ...prev, nameEffect: e.value }))}
+                            className={`px-2 py-1 text-xs rounded ${myCustomization?.nameEffect === e.value ? "bg-green-600" : "bg-gray-800"} text-white`}
+                          >
+                            {e.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="text-xs text-gray-400 mb-1 block">Cor da Mensagem</label>
+                      <div className="flex flex-wrap gap-1">
+                        {COLOR_OPTIONS.map(c => (
+                          <button
+                            key={c.value}
+                            onClick={() => setMyCustomization(prev => ({ ...prev, messageColor: c.value }))}
+                            className={`w-6 h-6 rounded ${c.class} border ${myCustomization?.messageColor === c.value ? "border-white" : "border-gray-700"}`}
+                            title={c.label}
+                          >
+                            ●
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <Button
+                      onClick={() => saveCustomization(myCustomization?.nameColor, myCustomization?.nameEffect, myCustomization?.messageColor)}
+                      className="w-full bg-green-600 hover:bg-green-500"
+                      size="sm"
+                    >
+                      Salvar
+                    </Button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {currentRoom && (
               <button
@@ -272,6 +596,10 @@ export default function CommunityChat() {
                   <Hash className="h-4 w-4 text-gray-400" />
                   <span className="text-sm font-medium text-white">{currentRoom.displayName}</span>
                   {currentRoom.type === "VIP" && <Crown className="h-4 w-4 text-yellow-400" />}
+                  <span className="text-xs text-gray-500 flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    {roomOnlineCount}
+                  </span>
                 </div>
                 <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${showRooms ? "rotate-180" : ""}`} />
               </button>
@@ -312,32 +640,43 @@ export default function CommunityChat() {
                         <span className="text-xs text-gray-500">
                           {VIP_BADGES[msg.user.vipLevel] || ""}
                         </span>
-                        <span className={`font-medium text-sm truncate ${VIP_COLORS[msg.user.vipLevel] || "text-gray-300"}`}>
-                          {msg.user.name}
-                        </span>
+                        {renderRoleBadge(msg.user.role)}
+                        {renderUserName(msg.user)}
                         <span className="text-[10px] px-1 py-0.5 rounded bg-gray-800 text-gray-500">
                           Lv.{msg.user.level}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-200 break-words mt-0.5">
+                      <p className={`text-sm break-words mt-0.5 ${msg.user.customization?.messageColor ? getMessageColorClass(msg.user.customization.messageColor) : "text-gray-200"}`}>
                         {msg.message}
                       </p>
                     </div>
                     {msg.user.id !== "system" && (
-                      <button
-                        onClick={() => reportMessage(msg.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 transition-all"
-                        title="Denunciar"
-                        data-testid={`button-report-${msg.id}`}
-                      >
-                        <Flag className="h-3 w-3" />
-                      </button>
+                      <div className="opacity-0 group-hover:opacity-100 flex gap-1">
+                        <button
+                          onClick={() => blockUser(msg.user.id)}
+                          className="p-1 text-gray-500 hover:text-orange-400 transition-all"
+                          title="Bloquear"
+                          data-testid={`button-block-${msg.id}`}
+                        >
+                          <UserX className="h-3 w-3" />
+                        </button>
+                        <button
+                          onClick={() => reportMessage(msg.id)}
+                          className="p-1 text-gray-500 hover:text-red-400 transition-all"
+                          title="Denunciar"
+                          data-testid={`button-report-${msg.id}`}
+                        >
+                          <Flag className="h-3 w-3" />
+                        </button>
+                      </div>
                     )}
                   </div>
                 ))}
                 <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
+
+            {renderTypingIndicator()}
 
             <div className="p-4 border-t border-gray-800 bg-[#0d0d0d]">
               <form
@@ -347,9 +686,46 @@ export default function CommunityChat() {
                 }}
                 className="flex gap-2"
               >
+                <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-10 w-10 shrink-0"
+                      data-testid="button-emoji-picker"
+                    >
+                      <Smile className="h-5 w-5 text-gray-400" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-2 bg-[#1a1a1a] border-gray-700" side="top" align="start">
+                    <div className="flex gap-1 mb-2 overflow-x-auto pb-1">
+                      {EMOJI_CATEGORIES.map((cat, i) => (
+                        <button
+                          key={cat.name}
+                          onClick={() => setSelectedEmojiCategory(i)}
+                          className={`px-2 py-1 text-xs rounded whitespace-nowrap ${selectedEmojiCategory === i ? "bg-green-600 text-white" : "bg-gray-800 text-gray-300"}`}
+                        >
+                          {cat.name}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-8 gap-1 max-h-40 overflow-y-auto">
+                      {EMOJI_CATEGORIES[selectedEmojiCategory].emojis.map((emoji, i) => (
+                        <button
+                          key={i}
+                          onClick={() => insertEmoji(emoji)}
+                          className="text-xl p-1 hover:bg-gray-700 rounded"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                </Popover>
                 <Input
                   value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
+                  onChange={handleInputChange}
                   placeholder="Digite sua mensagem..."
                   maxLength={500}
                   className="flex-1 bg-[#1a1a1a] border-gray-700 focus:border-green-500"

@@ -1,11 +1,17 @@
 import { db } from "../../db";
 import { 
   chatRooms, chatMessages, chatPenalties, chatReports, 
-  chatBadWords, chatSettings, chatUserStatus, users,
+  chatBadWords, chatSettings, chatUserStatus, chatUserCustomization, chatUserBlocks, users,
   ChatRoom, ChatMessage, InsertChatRoom, InsertChatMessage
 } from "@shared/schema";
 import { eq, desc, and, gt, sql, asc } from "drizzle-orm";
 import { moderateMessage, checkUserPenalty, applyPenalty, checkSpam, ChatViolationType } from "./chat.moderation";
+
+export interface ChatUserCustomizationData {
+  nameColor?: string;
+  nameEffect?: string;
+  messageColor?: string;
+}
 
 export interface ChatMessageWithUser {
   id: string;
@@ -17,7 +23,33 @@ export interface ChatMessageWithUser {
     name: string;
     vipLevel: string;
     level: number;
+    role?: string;
+    customization?: ChatUserCustomizationData | null;
   };
+}
+
+export async function getUserCustomization(userId: string): Promise<ChatUserCustomizationData | null> {
+  const [customization] = await db
+    .select()
+    .from(chatUserCustomization)
+    .where(eq(chatUserCustomization.userId, userId));
+  
+  if (!customization) return null;
+  
+  return {
+    nameColor: customization.nameColor || undefined,
+    nameEffect: customization.nameEffect || undefined,
+    messageColor: customization.messageColor || undefined,
+  };
+}
+
+export async function getBlockedUsers(userId: string): Promise<string[]> {
+  const blocks = await db
+    .select({ blockedId: chatUserBlocks.blockedId })
+    .from(chatUserBlocks)
+    .where(eq(chatUserBlocks.blockerId, userId));
+  
+  return blocks.map(b => b.blockedId);
 }
 
 export async function initializeChatRooms() {
@@ -112,7 +144,9 @@ export async function sendMessage(
   messageText: string,
   userName: string,
   userVipLevel: string,
-  userLevel: number
+  userLevel: number,
+  userRole?: string,
+  customization?: ChatUserCustomizationData | null
 ): Promise<SendMessageResult> {
   const penaltyStatus = await checkUserPenalty(userId, roomId);
   
@@ -180,6 +214,8 @@ export async function sendMessage(
         name: userName,
         vipLevel: userVipLevel,
         level: userLevel,
+        role: userRole,
+        customization,
       },
     },
   };

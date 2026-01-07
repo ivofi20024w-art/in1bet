@@ -91,6 +91,12 @@ Preferred communication style: Simple, everyday language.
   - Multiple chat rooms (Global, per-game, VIP-exclusive)
   - WebSocket-based real-time messaging
   - VIP badges and level indicators next to usernames
+  - **Chat Moderator Roles**: HELPER, CHAT_MODERATOR, SUPPORT, ADMIN with visible badges
+  - **Chat Customization** (Level 50+): Custom name colors, effects (glow, rainbow, bold, italic), message colors
+  - **Emoji Picker**: iPhone-style picker with categories (Sorrisos, Gestos, Jogos, Celebração, Animais, Corações)
+  - **Typing Indicators**: Real-time "user is typing..." display with auto-timeout
+  - **Online Count Per Room**: Live user count displayed for each chat room
+  - **User Blocking**: Users can block other users to hide their messages
   - Automatic moderation filters:
     - Link/URL blocking (domains, IPs, shortened URLs)
     - Phone/WhatsApp number detection
@@ -98,8 +104,9 @@ Preferred communication style: Simple, everyday language.
     - Profanity filter with customizable word list
     - Anti-spam/flood protection (rate limiting)
   - Progressive penalty system: Warning → 5min Mute → 1hr Mute → Ban
+  - **Casino-wide bans**: Admin can ban users from entire platform (temporary or permanent)
   - User report system with admin review queue
-  - Admin panel for chat management (reports, penalties, bad words)
+  - Admin panel for chat management (reports, penalties, bad words, moderator roles)
   - Online user count and presence tracking
 
 ### Security
