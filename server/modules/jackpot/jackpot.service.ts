@@ -1,6 +1,10 @@
 import { db } from "../../db";
 import { jackpotConfig, jackpotWins, jackpotContributions, users, wallets, transactions } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
+import { cache, CACHE_KEYS, CACHE_TTL } from "../../utils/cache";
+import { createLogger } from "../../utils/logger";
+
+const logger = createLogger("jackpot");
 
 const JACKPOT_MINIMUM = 1000;
 const CONTRIBUTION_RATE = 0.002;
@@ -26,6 +30,11 @@ async function getOrCreateJackpot() {
 }
 
 export async function getJackpotInfo() {
+  const cached = cache.get<any>(CACHE_KEYS.JACKPOT_INFO);
+  if (cached) {
+    return cached;
+  }
+
   const jackpot = await getOrCreateJackpot();
   
   const recentWins = await db.select({
@@ -39,7 +48,7 @@ export async function getJackpotInfo() {
   .orderBy(desc(jackpotWins.createdAt))
   .limit(10);
   
-  return {
+  const result = {
     currentAmount: parseFloat(jackpot.currentAmount),
     minimumAmount: parseFloat(jackpot.minimumAmount),
     contributionRate: parseFloat(jackpot.contributionRate),
@@ -50,6 +59,13 @@ export async function getJackpotInfo() {
     totalPaidOut: parseFloat(jackpot.totalPaidOut),
     recentWins,
   };
+
+  cache.set(CACHE_KEYS.JACKPOT_INFO, result, CACHE_TTL.SHORT);
+  return result;
+}
+
+export function invalidateJackpotCache() {
+  cache.delete(CACHE_KEYS.JACKPOT_INFO);
 }
 
 export async function contributeToJackpot(
@@ -88,9 +104,11 @@ export async function contributeToJackpot(
   
   if (roll < cappedChance) {
     const wonAmount = await triggerJackpotWin(userId, gameType, betAmount, betId);
+    invalidateJackpotCache();
     return { contributed: contribution, won: true, wonAmount };
   }
   
+  invalidateJackpotCache();
   return { contributed: contribution, won: false };
 }
 
@@ -146,7 +164,10 @@ async function triggerJackpotWin(
     })
     .where(eq(jackpotConfig.id, jackpot.id));
   
-  console.log(`[JACKPOT] User ${userName} won R$${wonAmount.toFixed(2)} on ${gameType}!`);
+  logger.info("Jackpot win triggered", {
+    userId,
+    data: { userName, wonAmount, gameType, betAmount },
+  });
   
   return wonAmount;
 }
