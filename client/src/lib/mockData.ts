@@ -1,4 +1,4 @@
-import { Trophy, Flame, Play, LayoutGrid, CircleDollarSign, Gamepad2, Search, Menu, User, Bell, ChevronDown, Wallet, LogOut, Settings, History, MonitorPlay, Gift, Crown, HelpCircle, ShieldCheck, Dice5, TowerControl, TrendingUp, Clock, Dna, Rocket, Swords, Ticket, Lock, FileCheck, Users, Share2, BarChart3, Banknote, Target, MousePointerClick } from "lucide-react";
+import { Trophy, Flame, Play, LayoutGrid, CircleDollarSign, Gamepad2, Search, Menu, User, Bell, ChevronDown, Wallet, LogOut, Settings, History, MonitorPlay, Gift, Crown, HelpCircle, ShieldCheck, Dice5, TowerControl, TrendingUp, Clock, Dna, Rocket, Swords, Ticket, Lock, FileCheck, Users, Share2, BarChart3, Banknote, Target, MousePointerClick, Percent, Star } from "lucide-react";
 
 export const USER = {
   name: "João Silva",
@@ -34,7 +34,10 @@ export const SPORTS_MENU = [
 
 export const PROFILE_MENU_ITEMS = [
   { icon: User, label: "Minha Conta", path: "/profile" },
-  { icon: Wallet, label: "Carteira", path: "/wallet" }, // Triggers modal usually
+  { icon: Wallet, label: "Carteira", path: "/wallet" },
+  { icon: Star, label: "Níveis", path: "/levels" },
+  { icon: Target, label: "Missões", path: "/perfil/missoes" },
+  { icon: Percent, label: "Rakeback", path: "/perfil/rakeback" },
   { icon: Users, label: "Afiliados", path: "/affiliates" },
   { icon: History, label: "Histórico", path: "/history" },
   { icon: Settings, label: "Preferências", path: "/profile/settings" },

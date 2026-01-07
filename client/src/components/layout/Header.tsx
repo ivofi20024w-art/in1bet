@@ -1,4 +1,5 @@
-import { Bell, Search, Wallet, ChevronDown, User as UserIcon, LogOut, LogIn } from "lucide-react";
+import { Search, Wallet, ChevronDown, User as UserIcon, LogOut, LogIn } from "lucide-react";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { PROFILE_MENU_ITEMS } from "@/lib/mockData";
 import {
@@ -104,28 +105,7 @@ export function Header() {
             </div>
         ) : (
             <>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white hover:bg-white/5 relative">
-                        <Bell className="w-5 h-5" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    {/* Notification content same as before... */}
-                    <DropdownMenuContent align="end" className="w-80 bg-card border-white/10 text-foreground p-0">
-                        <div className="p-4 border-b border-white/5">
-                            <h4 className="font-bold text-sm">Notificações</h4>
-                        </div>
-                        <div className="max-h-64 overflow-y-auto">
-                            <div className="p-4 hover:bg-white/5 cursor-pointer transition-colors border-b border-white/5">
-                                <p className="text-sm font-bold text-white mb-1">Bônus Creditado!</p>
-                                <p className="text-xs text-muted-foreground">Seu bônus de depósito de R$ 50,00 foi creditado.</p>
-                            </div>
-                        </div>
-                         <div className="p-2 text-center">
-                            <Button variant="ghost" size="sm" className="text-xs text-primary w-full">Marcar como lidas</Button>
-                        </div>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <NotificationBell />
 
                 <div className="h-6 w-px bg-white/10 mx-1" />
 

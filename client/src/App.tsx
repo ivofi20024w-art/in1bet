@@ -27,6 +27,9 @@ import Security from "@/pages/profile/Security";
 import Verification from "@/pages/profile/Verification";
 import Affiliates from "@/pages/profile/Affiliates";
 import Levels from "@/pages/profile/Levels";
+import Rakeback from "@/pages/profile/Rakeback";
+import Missions from "@/pages/profile/Missions";
+import NotificationsPage from "@/pages/profile/Notifications";
 import ResponsibleGamingSettings from "@/pages/profile/ResponsibleGaming";
 import Originals from "@/pages/Originals";
 import WalletPage from "@/pages/Wallet";
@@ -153,6 +156,12 @@ function Router() {
         <Route path="/affiliates" component={Affiliates} />
         <Route path="/levels" component={Levels} />
         <Route path="/profile/levels" component={Levels} />
+        <Route path="/profile/rakeback" component={Rakeback} />
+        <Route path="/perfil/rakeback" component={Rakeback} />
+        <Route path="/profile/missions" component={Missions} />
+        <Route path="/perfil/missoes" component={Missions} />
+        <Route path="/profile/notifications" component={NotificationsPage} />
+        <Route path="/perfil/notificacoes" component={NotificationsPage} />
         <Route path="/profile/responsible-gaming" component={ResponsibleGamingSettings} />
         <Route path="/originals" component={Originals} />
         <Route path="/wallet" component={WalletPage} />
