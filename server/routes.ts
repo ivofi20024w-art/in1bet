@@ -27,6 +27,7 @@ import notificationRoutes from "./modules/notifications/notification.routes";
 import missionRoutes from "./modules/missions/mission.routes";
 import { initializeRakebackSettings } from "./modules/rakeback/rakeback.service";
 import { initializeMissionTemplates } from "./modules/missions/mission.service";
+import { sportsRouter, seedSportsData } from "./modules/sports";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -75,6 +76,7 @@ export async function registerRoutes(
   app.use("/api/rakeback", rakebackRoutes);
   app.use("/api/notifications", notificationRoutes);
   app.use("/api/missions", missionRoutes);
+  app.use("/api/sports", sportsRouter);
 
   // Initialize default settings
   initializeDefaultSettings().catch(err => {
@@ -96,6 +98,11 @@ export async function registerRoutes(
   });
   initializeMissionTemplates().catch(err => {
     console.error("Failed to initialize mission templates:", err);
+  });
+
+  // Initialize sports data
+  seedSportsData().catch(err => {
+    console.error("Failed to seed sports data:", err);
   });
 
   // Health check endpoint

@@ -1885,6 +1885,218 @@ export const MissionRequirementType = {
   LOGIN_STREAK: "LOGIN_STREAK",
 } as const;
 
+// ==========================================
+// SPORTS BETTING SCHEMA
+// ==========================================
+
+export const SportType = {
+  FOOTBALL: "FOOTBALL",
+  BASKETBALL: "BASKETBALL",
+  TENNIS: "TENNIS",
+  VOLLEYBALL: "VOLLEYBALL",
+  ESPORTS: "ESPORTS",
+  MMA: "MMA",
+  BOXING: "BOXING",
+  BASEBALL: "BASEBALL",
+  HOCKEY: "HOCKEY",
+  AMERICAN_FOOTBALL: "AMERICAN_FOOTBALL",
+} as const;
+
+export const MatchStatus = {
+  SCHEDULED: "SCHEDULED",
+  LIVE: "LIVE",
+  FINISHED: "FINISHED",
+  CANCELLED: "CANCELLED",
+  POSTPONED: "POSTPONED",
+} as const;
+
+export const SportBetStatus = {
+  PENDING: "PENDING",
+  WON: "WON",
+  LOST: "LOST",
+  VOID: "VOID",
+  CASHOUT: "CASHOUT",
+} as const;
+
+export const BetType = {
+  SINGLE: "SINGLE",
+  MULTIPLE: "MULTIPLE",
+  SYSTEM: "SYSTEM",
+} as const;
+
+export const MarketType = {
+  MATCH_WINNER: "MATCH_WINNER",
+  DOUBLE_CHANCE: "DOUBLE_CHANCE",
+  OVER_UNDER: "OVER_UNDER",
+  BOTH_TEAMS_SCORE: "BOTH_TEAMS_SCORE",
+  CORRECT_SCORE: "CORRECT_SCORE",
+  HALF_TIME_RESULT: "HALF_TIME_RESULT",
+  HANDICAP: "HANDICAP",
+  FIRST_GOAL: "FIRST_GOAL",
+  TOTAL_GOALS: "TOTAL_GOALS",
+  PLAYER_PROPS: "PLAYER_PROPS",
+} as const;
+
+export const sportsLeagues = pgTable("sports_leagues", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 200 }).notNull(),
+  country: varchar("country", { length: 100 }),
+  countryCode: varchar("country_code", { length: 3 }),
+  sport: varchar("sport", { length: 30 }).notNull(),
+  logo: text("logo"),
+  isPopular: boolean("is_popular").default(false).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const sportsTeams = pgTable("sports_teams", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 200 }).notNull(),
+  shortName: varchar("short_name", { length: 50 }),
+  logo: text("logo"),
+  country: varchar("country", { length: 100 }),
+  sport: varchar("sport", { length: 30 }).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const sportsMatches = pgTable("sports_matches", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  leagueId: varchar("league_id").notNull().references(() => sportsLeagues.id),
+  homeTeamId: varchar("home_team_id").notNull().references(() => sportsTeams.id),
+  awayTeamId: varchar("away_team_id").notNull().references(() => sportsTeams.id),
+  sport: varchar("sport", { length: 30 }).notNull(),
+  startsAt: timestamp("starts_at").notNull(),
+  status: varchar("status", { length: 20 }).default("SCHEDULED").notNull(),
+  homeScore: integer("home_score"),
+  awayScore: integer("away_score"),
+  period: varchar("period", { length: 50 }),
+  minute: integer("minute"),
+  isLive: boolean("is_live").default(false).notNull(),
+  isFeatured: boolean("is_featured").default(false).notNull(),
+  streamUrl: text("stream_url"),
+  result: varchar("result", { length: 10 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const sportsOdds = pgTable("sports_odds", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  matchId: varchar("match_id").notNull().references(() => sportsMatches.id),
+  marketType: varchar("market_type", { length: 50 }).notNull(),
+  selection: varchar("selection", { length: 100 }).notNull(),
+  selectionName: varchar("selection_name", { length: 200 }).notNull(),
+  odds: numeric("odds", { precision: 10, scale: 2 }).notNull(),
+  line: numeric("line", { precision: 10, scale: 2 }),
+  isActive: boolean("is_active").default(true).notNull(),
+  isSuspended: boolean("is_suspended").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const sportsBetSlips = pgTable("sports_bet_slips", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  betNumber: varchar("bet_number", { length: 20 }).notNull().unique(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  betType: varchar("bet_type", { length: 20 }).notNull(),
+  totalOdds: numeric("total_odds", { precision: 15, scale: 2 }).notNull(),
+  stake: numeric("stake", { precision: 15, scale: 2 }).notNull(),
+  potentialWin: numeric("potential_win", { precision: 15, scale: 2 }).notNull(),
+  actualWin: numeric("actual_win", { precision: 15, scale: 2 }),
+  status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+  usedBonus: boolean("used_bonus").default(false).notNull(),
+  settledAt: timestamp("settled_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const sportsBetSelections = pgTable("sports_bet_selections", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  betSlipId: varchar("bet_slip_id").notNull().references(() => sportsBetSlips.id),
+  matchId: varchar("match_id").notNull().references(() => sportsMatches.id),
+  oddId: varchar("odd_id").notNull().references(() => sportsOdds.id),
+  marketType: varchar("market_type", { length: 50 }).notNull(),
+  selection: varchar("selection", { length: 100 }).notNull(),
+  selectionName: varchar("selection_name", { length: 200 }).notNull(),
+  odds: numeric("odds", { precision: 10, scale: 2 }).notNull(),
+  status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+  result: varchar("result", { length: 20 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Sports Types
+export type SportsLeague = typeof sportsLeagues.$inferSelect;
+export type InsertSportsLeague = typeof sportsLeagues.$inferInsert;
+export type SportsTeam = typeof sportsTeams.$inferSelect;
+export type InsertSportsTeam = typeof sportsTeams.$inferInsert;
+export type SportsMatch = typeof sportsMatches.$inferSelect;
+export type InsertSportsMatch = typeof sportsMatches.$inferInsert;
+export type SportsOdd = typeof sportsOdds.$inferSelect;
+export type InsertSportsOdd = typeof sportsOdds.$inferInsert;
+export type SportsBetSlip = typeof sportsBetSlips.$inferSelect;
+export type InsertSportsBetSlip = typeof sportsBetSlips.$inferInsert;
+export type SportsBetSelection = typeof sportsBetSelections.$inferSelect;
+export type InsertSportsBetSelection = typeof sportsBetSelections.$inferInsert;
+
+// Sports Validation Schemas
+export const createSportsLeagueSchema = z.object({
+  name: z.string().min(1).max(200),
+  country: z.string().max(100).optional(),
+  countryCode: z.string().max(3).optional(),
+  sport: z.string().min(1).max(30),
+  logo: z.string().url().optional(),
+  isPopular: z.boolean().optional(),
+  sortOrder: z.number().int().optional(),
+});
+
+export const createSportsTeamSchema = z.object({
+  name: z.string().min(1).max(200),
+  shortName: z.string().max(50).optional(),
+  logo: z.string().url().optional(),
+  country: z.string().max(100).optional(),
+  sport: z.string().min(1).max(30),
+});
+
+export const createSportsMatchSchema = z.object({
+  leagueId: z.string().uuid(),
+  homeTeamId: z.string().uuid(),
+  awayTeamId: z.string().uuid(),
+  sport: z.string().min(1).max(30),
+  startsAt: z.string().datetime(),
+  isFeatured: z.boolean().optional(),
+});
+
+export const createSportsOddSchema = z.object({
+  matchId: z.string().uuid(),
+  marketType: z.string().min(1).max(50),
+  selection: z.string().min(1).max(100),
+  selectionName: z.string().min(1).max(200),
+  odds: z.number().positive(),
+  line: z.number().optional(),
+});
+
+export const updateMatchStatusSchema = z.object({
+  status: z.enum(["SCHEDULED", "LIVE", "FINISHED", "CANCELLED", "POSTPONED"]),
+  homeScore: z.number().int().min(0).optional(),
+  awayScore: z.number().int().min(0).optional(),
+  period: z.string().max(50).optional(),
+  minute: z.number().int().min(0).optional(),
+  result: z.enum(["HOME", "AWAY", "DRAW"]).optional(),
+});
+
+export const placeSportsBetSchema = z.object({
+  selections: z.array(z.object({
+    matchId: z.string().uuid(),
+    oddId: z.string().uuid(),
+    odds: z.number().positive(),
+  })).min(1).max(20),
+  stake: z.number().positive().min(1),
+  betType: z.enum(["SINGLE", "MULTIPLE"]).default("SINGLE"),
+  useBonus: z.boolean().optional(),
+});
+
 export const MissionRewardType = {
   XP: "XP",
   BONUS_CASH: "BONUS_CASH",
