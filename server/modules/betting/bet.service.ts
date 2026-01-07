@@ -15,6 +15,7 @@ type GameTypeValue = (typeof GameType)[keyof typeof GameType];
 import { eq, and, sql, desc } from "drizzle-orm";
 import { createHash, randomBytes, randomUUID } from "crypto";
 import { logOperational } from "../../utils/operationalLog";
+import { contributeToJackpot } from "../jackpot/jackpot.service";
 
 export interface PlaceBetRequest {
   userId: string;
@@ -194,6 +195,15 @@ export async function placeBet(request: PlaceBetRequest): Promise<BetResult> {
       userId,
       metadata: { gameType, betAmount },
     });
+
+    try {
+      const jackpotResult = await contributeToJackpot(userId, betAmount, gameType, result.id);
+      if (jackpotResult.won) {
+        console.log(`[JACKPOT] User ${userId} won R$${jackpotResult.wonAmount} on ${gameType}!`);
+      }
+    } catch (jackpotError) {
+      console.error("[JACKPOT] Error contributing to jackpot:", jackpotError);
+    }
 
     return { success: true, bet: result };
   } catch (error: any) {

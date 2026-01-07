@@ -2440,6 +2440,51 @@ export const chatUserBlocks = pgTable("chat_user_blocks", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Progressive Jackpot - Global Casino Jackpot
+export const jackpotConfig = pgTable("jackpot_config", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 50 }).notNull().default("Global Jackpot"),
+  currentAmount: numeric("current_amount", { precision: 15, scale: 2 }).default("1000.00").notNull(),
+  minimumAmount: numeric("minimum_amount", { precision: 15, scale: 2 }).default("1000.00").notNull(),
+  contributionRate: numeric("contribution_rate", { precision: 5, scale: 4 }).default("0.0020").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  lastWonAt: timestamp("last_won_at"),
+  lastWonBy: varchar("last_won_by"),
+  lastWonAmount: numeric("last_won_amount", { precision: 15, scale: 2 }),
+  totalPaidOut: numeric("total_paid_out", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const jackpotWins = pgTable("jackpot_wins", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  userName: varchar("user_name", { length: 100 }),
+  amount: numeric("amount", { precision: 15, scale: 2 }).notNull(),
+  gameType: varchar("game_type", { length: 50 }).notNull(),
+  gameId: varchar("game_id"),
+  betAmount: numeric("bet_amount", { precision: 15, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const jackpotContributions = pgTable("jackpot_contributions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  betId: varchar("bet_id"),
+  gameType: varchar("game_type", { length: 50 }).notNull(),
+  betAmount: numeric("bet_amount", { precision: 15, scale: 2 }).notNull(),
+  contribution: numeric("contribution", { precision: 15, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Jackpot Types
+export type JackpotConfig = typeof jackpotConfig.$inferSelect;
+export type InsertJackpotConfig = typeof jackpotConfig.$inferInsert;
+export type JackpotWin = typeof jackpotWins.$inferSelect;
+export type InsertJackpotWin = typeof jackpotWins.$inferInsert;
+export type JackpotContribution = typeof jackpotContributions.$inferSelect;
+export type InsertJackpotContribution = typeof jackpotContributions.$inferInsert;
+
 // Chat Moderator Roles
 export const ChatModeratorRole = {
   NONE: "NONE",

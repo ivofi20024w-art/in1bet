@@ -30,6 +30,7 @@ import { initializeMissionTemplates } from "./modules/missions/mission.service";
 import { sportsRouter, seedSportsData } from "./modules/sports";
 import { chatRoutes, initializeChatRooms } from "./modules/chat/chat.routes";
 import { setupChatWebSocket } from "./modules/chat/chat.websocket";
+import jackpotRoutes from "./modules/jackpot/jackpot.routes";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -80,6 +81,7 @@ export async function registerRoutes(
   app.use("/api/missions", missionRoutes);
   app.use("/api/sports", sportsRouter);
   app.use("/api/chat", chatRoutes);
+  app.use("/api/jackpot", jackpotRoutes);
 
   // Setup Chat WebSocket
   setupChatWebSocket(httpServer);
