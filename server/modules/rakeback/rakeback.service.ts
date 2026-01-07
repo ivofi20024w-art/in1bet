@@ -87,23 +87,35 @@ export async function getUserRakebackSummary(userId: string) {
     potentialRakeback = Math.min(potentialRakeback, maxAmount);
   }
   
+  const pendingPayoutsFormatted = pendingPeriods.map(p => ({
+    id: p.id,
+    grossAmount: parseFloat(p.rakebackAmount),
+    netAmount: parseFloat(p.rakebackAmount),
+    rolloverRequired: parseFloat(p.rolloverRequired || "0"),
+    rolloverProgress: parseFloat(p.rolloverProgress || "0"),
+    canWithdraw: parseFloat(p.rolloverProgress || "0") >= parseFloat(p.rolloverRequired || "0"),
+    createdAt: p.calculatedAt || p.periodEnd,
+    expiresAt: null,
+  }));
+  
   return {
-    vipTier,
-    rakebackPercent: setting ? parseFloat(setting.percentLoss) : 5,
-    minLossThreshold: setting ? parseFloat(setting.minLossThreshold) : 100,
-    rolloverMultiple: setting?.rolloverMultiple || 3,
-    currentWeek: {
+    vipLevel: vipTier,
+    currentPercentage: setting ? parseFloat(setting.percentLoss) : 5,
+    currentPeriod: {
       periodStart: startOfWeek,
       periodEnd: endOfWeek,
       totalWagered: weeklyStats.totalWagered,
-      totalWins: weeklyStats.totalWins,
-      netLoss: weeklyStats.netLoss,
+      totalLosses: weeklyStats.netLoss,
       potentialRakeback,
-      qualifiesForRakeback: weeklyStats.netLoss >= (setting ? parseFloat(setting.minLossThreshold) : 100),
+      percentage: setting ? parseFloat(setting.percentLoss) : 5,
+      daysRemaining: Math.ceil((endOfWeek.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)),
     },
-    pendingRakeback: pendingAmount,
-    totalPaidAllTime: parseFloat(totalPaid[0]?.total || "0"),
-    recentPayouts: paidPayouts,
+    pendingPayouts: pendingPayoutsFormatted,
+    totals: {
+      totalEarned: pendingAmount + parseFloat(totalPaid[0]?.total || "0"),
+      totalClaimed: parseFloat(totalPaid[0]?.total || "0"),
+      totalPending: pendingAmount,
+    },
   };
 }
 
@@ -116,16 +128,32 @@ export async function getUserRakebackHistory(userId: string, limit = 20) {
   return periods;
 }
 
-export async function claimPendingRakeback(userId: string): Promise<{
+export async function claimPendingRakeback(userId: string, periodId?: string): Promise<{
   success: boolean;
   amount?: number;
   error?: string;
 }> {
-  const pendingPeriods = await db.select().from(rakebackPeriods)
-    .where(and(
-      eq(rakebackPeriods.userId, userId),
-      eq(rakebackPeriods.status, RakebackStatus.CALCULATED)
-    ));
+  let pendingPeriods;
+  
+  if (periodId) {
+    const [period] = await db.select().from(rakebackPeriods)
+      .where(and(
+        eq(rakebackPeriods.id, periodId),
+        eq(rakebackPeriods.userId, userId),
+        eq(rakebackPeriods.status, RakebackStatus.CALCULATED)
+      ));
+    
+    if (!period) {
+      return { success: false, error: "Período de rakeback não encontrado ou já resgatado" };
+    }
+    pendingPeriods = [period];
+  } else {
+    pendingPeriods = await db.select().from(rakebackPeriods)
+      .where(and(
+        eq(rakebackPeriods.userId, userId),
+        eq(rakebackPeriods.status, RakebackStatus.CALCULATED)
+      ));
+  }
   
   if (pendingPeriods.length === 0) {
     return { success: false, error: "Nenhum rakeback pendente para resgatar" };

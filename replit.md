@@ -24,13 +24,13 @@ Preferred communication style: Simple, everyday language.
 - **Authentication**: JWT-based (access/refresh tokens)
 - **Password Security**: bcrypt
 - **API Structure**: RESTful endpoints
-- **Modular Design**: Separate modules for `auth`, `users`, `wallet`, `payments`, `withdrawals`, `kyc`, `admin`, `betting`, `games`, `history`, `affiliate`, `playfivers`, and `support`.
+- **Modular Design**: Separate modules for `auth`, `users`, `wallet`, `payments`, `withdrawals`, `kyc`, `admin`, `betting`, `games`, `history`, `affiliate`, `playfivers`, `support`, `levels`, `rakeback`, `notifications`, and `missions`.
 
 ### Data Storage
 - **Database**: PostgreSQL
 - **ORM**: Drizzle ORM with drizzle-kit for migrations
 - **Schema**: `shared/schema.ts` (shared between frontend/backend)
-- **Key Tables**: `users`, `wallets`, `refreshTokens`, `pixDeposits`, `pixWithdrawals`, `transactions`, `bets`, `minesGames`, `bonuses`, `user_bonuses`, `welcome_bonus_claims`, `affiliates`, `affiliate_links`, `affiliate_conversions`, `affiliate_payouts`, `affiliate_clicks`, `playfivers_providers`, `playfivers_games`, `playfivers_sessions`, `playfivers_transactions`, `support_departments`, `admin_departments`, `support_chats`, `support_chat_messages`, `support_chat_transfers`, `support_tickets`, `support_ticket_messages`, `support_ticket_escalations`, `support_canned_responses`, `support_sla_rules`, `support_audit_logs`, `support_triage_rules`.
+- **Key Tables**: `users`, `wallets`, `refreshTokens`, `pixDeposits`, `pixWithdrawals`, `transactions`, `bets`, `minesGames`, `bonuses`, `user_bonuses`, `welcome_bonus_claims`, `affiliates`, `affiliate_links`, `affiliate_conversions`, `affiliate_payouts`, `affiliate_clicks`, `playfivers_providers`, `playfivers_games`, `playfivers_sessions`, `playfivers_transactions`, `support_departments`, `admin_departments`, `support_chats`, `support_chat_messages`, `support_chat_transfers`, `support_tickets`, `support_ticket_messages`, `support_ticket_escalations`, `support_canned_responses`, `support_sla_rules`, `support_audit_logs`, `support_triage_rules`, `level_history`, `daily_box_claims`, `rakeback_settings`, `rakeback_periods`, `rakeback_payouts`, `notifications`, `user_notifications`, `notification_preferences`, `push_subscriptions`, `mission_templates`, `mission_instances`, `mission_assignments`, `mission_progress_logs`.
 
 ### Authentication
 - User registration with CPF validation.
@@ -70,6 +70,23 @@ Preferred communication style: Simple, everyday language.
     - Ticket filtering (status, priority, department, SLA-breached)
     - Grouped "open" status support (OPEN, WAITING_USER, WAITING_INTERNAL)
     - Management actions: assign, reply, escalate, resolve with internal notes
+- **Rakeback System**: Weekly cashback on losses with VIP-tier based percentages:
+  - Bronze: 5%, Silver: 7.5%, Gold: 10%, Platinum: 12.5%, Diamond: 15%
+  - Minimum loss threshold for eligibility
+  - Rollover requirements (2-3x) before withdrawal
+  - Admin controls for calculation and stats
+- **Notifications System**: Real-time user notification system:
+  - In-app notification inbox with read/unread status
+  - Push notification support with Web Push subscriptions
+  - User preference controls per category (promotions, bets, levels, missions, security)
+  - Bell icon with unread badge counter in header
+  - Admin broadcast notifications
+- **Missions System**: Daily/weekly challenge system:
+  - Template-based mission creation (BET_COUNT, BET_AMOUNT, WIN_COUNT, etc.)
+  - VIP-adjusted rewards (XP or bonus cash)
+  - Automatic daily/weekly instance creation
+  - Progress tracking with hooks into betting system
+  - Mission dashboard with tabs for daily/weekly missions
 
 ### Security
 - **Rate Limiting**: Applied to general API access, authentication, registration, PIX creation, withdrawals, and webhooks.

@@ -2011,6 +2011,14 @@ export const claimMissionSchema = z.object({
   assignmentId: z.string().uuid(),
 });
 
+export const claimRakebackSchema = z.object({
+  payoutId: z.string().uuid().optional(),
+});
+
+export const markNotificationsReadSchema = z.object({
+  notificationIds: z.array(z.string().uuid()),
+});
+
 export const createMissionTemplateSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().min(1),

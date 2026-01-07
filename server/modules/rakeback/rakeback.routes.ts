@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { authMiddleware } from "../auth/auth.middleware";
 import { db } from "../../db";
-import { users } from "@shared/schema";
+import { users, claimRakebackSchema } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import {
   getUserRakebackSummary,
@@ -56,7 +56,13 @@ router.get("/history", authMiddleware, async (req: Request, res: Response) => {
 router.post("/claim", authMiddleware, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
-    const result = await claimPendingRakeback(userId);
+    const validation = claimRakebackSchema.safeParse(req.body);
+    
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error.errors[0]?.message || "Dados inválidos" });
+    }
+    
+    const result = await claimPendingRakeback(userId, validation.data.payoutId);
     
     if (!result.success) {
       return res.status(400).json({ error: result.error });

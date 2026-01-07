@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { authMiddleware } from "../auth/auth.middleware";
 import { db } from "../../db";
-import { users, updateNotificationPreferencesSchema, pushSubscriptionSchema } from "@shared/schema";
+import { users, updateNotificationPreferencesSchema, pushSubscriptionSchema, markNotificationsReadSchema } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import {
   getUserNotifications,
@@ -65,13 +65,13 @@ router.get("/count", authMiddleware, async (req: Request, res: Response) => {
 router.post("/read", authMiddleware, async (req: Request, res: Response) => {
   try {
     const userId = req.user!.id;
-    const { notificationIds } = req.body;
+    const validation = markNotificationsReadSchema.safeParse(req.body);
     
-    if (!Array.isArray(notificationIds)) {
-      return res.status(400).json({ error: "notificationIds deve ser um array" });
+    if (!validation.success) {
+      return res.status(400).json({ error: validation.error.errors[0]?.message || "Dados inválidos" });
     }
     
-    await markAsRead(userId, notificationIds);
+    await markAsRead(userId, validation.data.notificationIds);
     res.json({ success: true });
   } catch (error: any) {
     console.error("Mark read error:", error);
