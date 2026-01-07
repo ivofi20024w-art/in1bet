@@ -9,6 +9,101 @@ import {
   users,
 } from "@shared/schema";
 import { eq, sql, and, desc, isNull } from "drizzle-orm";
+import webpush from "web-push";
+
+const VAPID_PUBLIC_KEY = process.env.VAPID_PUBLIC_KEY;
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
+const VAPID_SUBJECT = process.env.VAPID_SUBJECT || "mailto:contato@in1bet.com";
+
+let vapidConfigured = false;
+
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+  try {
+    webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+    vapidConfigured = true;
+    console.log("[WebPush] VAPID keys configured successfully");
+  } catch (error) {
+    console.error("[WebPush] Failed to configure VAPID keys:", error);
+  }
+} else {
+  console.log("[WebPush] VAPID keys not configured - push notifications disabled");
+}
+
+export function getVapidPublicKey(): string | null {
+  return VAPID_PUBLIC_KEY || null;
+}
+
+export function isWebPushEnabled(): boolean {
+  return vapidConfigured;
+}
+
+export async function sendPushNotification(userId: string, payload: {
+  title: string;
+  body: string;
+  icon?: string;
+  badge?: string;
+  url?: string;
+  tag?: string;
+}) {
+  if (!vapidConfigured) {
+    return { sent: 0, failed: 0, reason: "VAPID not configured" };
+  }
+  
+  const subs = await db.select().from(pushSubscriptions)
+    .where(and(
+      eq(pushSubscriptions.userId, userId),
+      eq(pushSubscriptions.isActive, true)
+    ));
+  
+  if (subs.length === 0) {
+    return { sent: 0, failed: 0, reason: "No active subscriptions" };
+  }
+  
+  let sent = 0;
+  let failed = 0;
+  
+  for (const sub of subs) {
+    try {
+      await webpush.sendNotification(
+        {
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth,
+          },
+        },
+        JSON.stringify({
+          title: payload.title,
+          body: payload.body,
+          icon: payload.icon || "/icon-192.png",
+          badge: payload.badge || "/badge-72.png",
+          data: {
+            url: payload.url || "/",
+          },
+          tag: payload.tag,
+        })
+      );
+      
+      await db.update(pushSubscriptions).set({
+        lastUsedAt: new Date(),
+      }).where(eq(pushSubscriptions.id, sub.id));
+      
+      sent++;
+    } catch (error: any) {
+      console.error(`[WebPush] Failed to send to ${sub.id}:`, error.message);
+      
+      if (error.statusCode === 404 || error.statusCode === 410) {
+        await db.update(pushSubscriptions).set({
+          isActive: false,
+        }).where(eq(pushSubscriptions.id, sub.id));
+      }
+      
+      failed++;
+    }
+  }
+  
+  return { sent, failed };
+}
 
 export async function createNotification(data: {
   type: string;
@@ -69,6 +164,17 @@ export async function sendNotificationToUser(
     actionUrl: data.actionUrl,
     priority: data.priority || NotificationPriority.NORMAL,
   }).returning();
+  
+  const shouldPush = shouldSendByChannel(prefs, category, "push");
+  if (shouldPush && vapidConfigured) {
+    sendPushNotification(userId, {
+      title: data.title,
+      body: data.message,
+      icon: data.icon,
+      url: data.actionUrl,
+      tag: data.type,
+    }).catch(err => console.error("[Push] Error sending push to user", userId, err));
+  }
   
   return userNotification;
 }

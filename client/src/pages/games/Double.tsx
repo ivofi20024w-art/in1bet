@@ -80,7 +80,7 @@ export default function Double() {
     };
 
     const hasUserBet = activeBets.length > 0;
-    const spinOffset = gameStatus === "SPINNING" && result !== null 
+    const spinOffset = gameStatus === "SPINNING" && result !== null && result !== undefined
         ? -2000 - (result * 80) + 400
         : -100;
 

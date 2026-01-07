@@ -15,9 +15,18 @@ import {
   removePushSubscription,
   createNotification,
   sendBroadcastNotification,
+  getVapidPublicKey,
+  isWebPushEnabled,
+  sendPushNotification,
 } from "./notification.service";
 
 const router = Router();
+
+router.get("/push/vapid-public-key", (req: Request, res: Response) => {
+  const publicKey = getVapidPublicKey();
+  const enabled = isWebPushEnabled();
+  res.json({ publicKey, enabled });
+});
 
 const adminCheck = async (req: Request, res: Response, next: NextFunction) => {
   if (!req.user) {
