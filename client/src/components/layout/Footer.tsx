@@ -53,12 +53,11 @@ export function Footer() {
           <div>
             <h4 className="font-bold text-white mb-4">Pagamentos</h4>
             <div className="bg-white/5 p-4 rounded-xl border border-white/5 inline-block">
-                <div className="flex items-center gap-2 mb-2">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg" alt="PIX" className="h-6 opacity-80" />
-                    <span className="text-xs font-bold text-gray-400 ml-2">Pagamento Instantâneo</span>
+                <div className="flex items-center gap-3 mb-3">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg" alt="PIX" className="h-8" />
                 </div>
                 <p className="text-[10px] text-gray-500 leading-tight">
-                    Processamento seguro via OndaPay.<br/>Depósitos e saques 24/7.
+                    Depósitos e saques instantâneos.<br/>Disponível 24 horas, 7 dias por semana.
                 </p>
             </div>
           </div>
