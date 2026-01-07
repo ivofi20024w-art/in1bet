@@ -65,13 +65,50 @@ import AdminChat from "@/pages/admin/Chat";
 import CommunityChat from "@/components/chat/CommunityChat";
 import { useEffect, useState } from "react";
 import { Loader } from "@/components/ui/Loader";
+import { useAuth } from "@/hooks/useAuth";
 
-// Mock Auth Context for Prototype
-function AuthGuard({ children }: { children: React.ReactNode }) {
-    const [location, setLocation] = useLocation();
-    // Simulate auth state - for prototype we default to true, 
-    // but specific actions might check this
-    const isAuthenticated = localStorage.getItem("in1bet_auth") === "true";
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+    const [, setLocation] = useLocation();
+    const { isAuthenticated, isLoading } = useAuth();
+
+    useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            setLocation("/login");
+        }
+    }, [isAuthenticated, isLoading, setLocation]);
+
+    if (isLoading) {
+        return null;
+    }
+
+    if (!isAuthenticated) {
+        return null;
+    }
+
+    return <>{children}</>;
+}
+
+function AdminRoute({ children }: { children: React.ReactNode }) {
+    const [, setLocation] = useLocation();
+    const { isAuthenticated, isLoading, user } = useAuth();
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (!isAuthenticated) {
+                setLocation("/login");
+            } else if (!user?.isAdmin) {
+                setLocation("/");
+            }
+        }
+    }, [isAuthenticated, isLoading, user, setLocation]);
+
+    if (isLoading) {
+        return null;
+    }
+
+    if (!isAuthenticated || !user?.isAdmin) {
+        return null;
+    }
 
     return <>{children}</>;
 }
@@ -127,13 +164,13 @@ function Router() {
         <Route path="/casino" component={Casino} />
         <Route path="/sports" component={Sports} />
         <Route path="/sports/match/:id" component={MatchDetail} />
-        <Route path="/sports/my-bets" component={MyBets} />
+        <Route path="/sports/my-bets">{() => <ProtectedRoute><MyBets /></ProtectedRoute>}</Route>
         <Route path="/sports/results" component={SportsResults} />
         <Route path="/sports/prematch" component={Prematch} />
         <Route path="/live-betting" component={LiveBetting} />
         <Route path="/live-casino" component={LiveCasino} />
         <Route path="/promotions" component={Promotions} />
-        <Route path="/vip" component={VIP} />
+        <Route path="/vip">{() => <ProtectedRoute><VIP /></ProtectedRoute>}</Route>
         <Route path="/responsible-gaming" component={ResponsibleGaming} />
         <Route path="/terms" component={Terms} />
         <Route path="/privacy" component={Privacy} />
@@ -145,47 +182,49 @@ function Router() {
         <Route path="/games/mines" component={Mines} />
         <Route path="/games/plinko" component={Plinko} />
         
-        {/* Account Routes */}
-        <Route path="/history" component={History} />
+        {/* Account Routes - Protected */}
+        <Route path="/history">{() => <ProtectedRoute><History /></ProtectedRoute>}</Route>
         <Route path="/support" component={Support} />
-        <Route path="/support/tickets" component={TicketHistory} />
-        <Route path="/support/tickets/new" component={CreateTicket} />
-        <Route path="/support/tickets/:id" component={TicketDetail} />
-        <Route path="/profile" component={Profile} />
-        <Route path="/profile/settings" component={Settings} />
-        <Route path="/profile/security" component={Security} />
-        <Route path="/profile/verification" component={Verification} />
-        <Route path="/affiliates" component={Affiliates} />
-        <Route path="/levels" component={Levels} />
-        <Route path="/profile/levels" component={Levels} />
-        <Route path="/profile/rakeback" component={Rakeback} />
-        <Route path="/perfil/rakeback" component={Rakeback} />
-        <Route path="/profile/missions" component={Missions} />
-        <Route path="/perfil/missoes" component={Missions} />
-        <Route path="/profile/notifications" component={NotificationsPage} />
-        <Route path="/perfil/notificacoes" component={NotificationsPage} />
-        <Route path="/profile/responsible-gaming" component={ResponsibleGamingSettings} />
+        <Route path="/support/tickets">{() => <ProtectedRoute><TicketHistory /></ProtectedRoute>}</Route>
+        <Route path="/support/tickets/new">{() => <ProtectedRoute><CreateTicket /></ProtectedRoute>}</Route>
+        <Route path="/support/tickets/:id">{() => <ProtectedRoute><TicketDetail /></ProtectedRoute>}</Route>
+        <Route path="/profile">{() => <ProtectedRoute><Profile /></ProtectedRoute>}</Route>
+        <Route path="/profile/settings">{() => <ProtectedRoute><Settings /></ProtectedRoute>}</Route>
+        <Route path="/profile/security">{() => <ProtectedRoute><Security /></ProtectedRoute>}</Route>
+        <Route path="/profile/verification">{() => <ProtectedRoute><Verification /></ProtectedRoute>}</Route>
+        <Route path="/affiliates">{() => <ProtectedRoute><Affiliates /></ProtectedRoute>}</Route>
+        <Route path="/levels">{() => <ProtectedRoute><Levels /></ProtectedRoute>}</Route>
+        <Route path="/profile/levels">{() => <ProtectedRoute><Levels /></ProtectedRoute>}</Route>
+        <Route path="/profile/rakeback">{() => <ProtectedRoute><Rakeback /></ProtectedRoute>}</Route>
+        <Route path="/perfil/rakeback">{() => <ProtectedRoute><Rakeback /></ProtectedRoute>}</Route>
+        <Route path="/profile/missions">{() => <ProtectedRoute><Missions /></ProtectedRoute>}</Route>
+        <Route path="/perfil/missoes">{() => <ProtectedRoute><Missions /></ProtectedRoute>}</Route>
+        <Route path="/profile/notifications">{() => <ProtectedRoute><NotificationsPage /></ProtectedRoute>}</Route>
+        <Route path="/perfil/notificacoes">{() => <ProtectedRoute><NotificationsPage /></ProtectedRoute>}</Route>
+        <Route path="/profile/responsible-gaming">{() => <ProtectedRoute><ResponsibleGamingSettings /></ProtectedRoute>}</Route>
         <Route path="/originals" component={Originals} />
-        <Route path="/wallet" component={WalletPage} />
+        <Route path="/wallet">{() => <ProtectedRoute><WalletPage /></ProtectedRoute>}</Route>
         <Route path="/casino/popular" component={Casino} />
         <Route path="/casino/recent" component={Casino} />
-        <Route path="/admin" component={AdminDashboard} />
-        <Route path="/admin/users" component={AdminUsers} />
-        <Route path="/admin/games" component={AdminGames} />
-        <Route path="/admin/deposits" component={AdminDeposits} />
-        <Route path="/admin/withdrawals" component={AdminWithdrawals} />
-        <Route path="/admin/transactions" component={AdminTransactions} />
-        <Route path="/admin/bonuses" component={AdminBonuses} />
-        <Route path="/admin/security" component={AdminSecurity} />
-        <Route path="/admin/settings" component={AdminSettings} />
-        <Route path="/admin/affiliates" component={AdminAffiliates} />
-        <Route path="/admin/audit" component={AdminAudit} />
-        <Route path="/admin/support" component={AdminSupport} />
-        <Route path="/admin/support/chats" component={AdminSupportChats} />
-        <Route path="/admin/support/tickets" component={AdminSupportTickets} />
-        <Route path="/admin/support/tickets/:id" component={AdminSupportTickets} />
-        <Route path="/admin/support/departments" component={AdminSupportDepartments} />
-        <Route path="/admin/chat" component={AdminChat} />
+        
+        {/* Admin Routes - Protected + Admin Only */}
+        <Route path="/admin">{() => <AdminRoute><AdminDashboard /></AdminRoute>}</Route>
+        <Route path="/admin/users">{() => <AdminRoute><AdminUsers /></AdminRoute>}</Route>
+        <Route path="/admin/games">{() => <AdminRoute><AdminGames /></AdminRoute>}</Route>
+        <Route path="/admin/deposits">{() => <AdminRoute><AdminDeposits /></AdminRoute>}</Route>
+        <Route path="/admin/withdrawals">{() => <AdminRoute><AdminWithdrawals /></AdminRoute>}</Route>
+        <Route path="/admin/transactions">{() => <AdminRoute><AdminTransactions /></AdminRoute>}</Route>
+        <Route path="/admin/bonuses">{() => <AdminRoute><AdminBonuses /></AdminRoute>}</Route>
+        <Route path="/admin/security">{() => <AdminRoute><AdminSecurity /></AdminRoute>}</Route>
+        <Route path="/admin/settings">{() => <AdminRoute><AdminSettings /></AdminRoute>}</Route>
+        <Route path="/admin/affiliates">{() => <AdminRoute><AdminAffiliates /></AdminRoute>}</Route>
+        <Route path="/admin/audit">{() => <AdminRoute><AdminAudit /></AdminRoute>}</Route>
+        <Route path="/admin/support">{() => <AdminRoute><AdminSupport /></AdminRoute>}</Route>
+        <Route path="/admin/support/chats">{() => <AdminRoute><AdminSupportChats /></AdminRoute>}</Route>
+        <Route path="/admin/support/tickets">{() => <AdminRoute><AdminSupportTickets /></AdminRoute>}</Route>
+        <Route path="/admin/support/tickets/:id">{() => <AdminRoute><AdminSupportTickets /></AdminRoute>}</Route>
+        <Route path="/admin/support/departments">{() => <AdminRoute><AdminSupportDepartments /></AdminRoute>}</Route>
+        <Route path="/admin/chat">{() => <AdminRoute><AdminChat /></AdminRoute>}</Route>
         
         <Route component={NotFound} />
       </Switch>

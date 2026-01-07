@@ -8,8 +8,12 @@ export interface User {
   phone: string | null;
   birthDate: string | null;
   isVerified: boolean;
+  isAdmin: boolean;
+  adminRole?: string;
   kycStatus: string;
   vipLevel: string;
+  level?: number;
+  xp?: number;
   createdAt: string;
   updatedAt: string;
 }
