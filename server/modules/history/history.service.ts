@@ -7,12 +7,13 @@ import {
   userBonuses,
   bonuses,
   TransactionType,
-  type Transaction,
-  type Bet,
-  type PixWithdrawal,
-  type PixDeposit,
 } from "@shared/schema";
 import { eq, desc, and, or, sql, gte, lte } from "drizzle-orm";
+
+type Transaction = typeof transactions.$inferSelect;
+type Bet = typeof bets.$inferSelect;
+type PixWithdrawal = typeof pixWithdrawals.$inferSelect;
+type PixDeposit = typeof pixDeposits.$inferSelect;
 
 export interface HistoryItem {
   id: string;
@@ -262,15 +263,43 @@ export async function getUnifiedHistory(
   };
 }
 
+interface BetFilters {
+  gameType?: string;
+  status?: string;
+  startDate?: Date;
+  endDate?: Date;
+  minAmount?: number;
+  maxAmount?: number;
+}
+
 export async function getBetHistory(
   userId: string,
   limit: number = 50,
   offset: number = 0,
-  gameType?: string
+  filters?: BetFilters
 ): Promise<PaginatedHistory> {
-  const whereClause = gameType
-    ? and(eq(bets.userId, userId), eq(bets.gameType, gameType))
-    : eq(bets.userId, userId);
+  const conditions: any[] = [eq(bets.userId, userId)];
+  
+  if (filters?.gameType) {
+    conditions.push(eq(bets.gameType, filters.gameType));
+  }
+  if (filters?.status) {
+    conditions.push(eq(bets.status, filters.status));
+  }
+  if (filters?.startDate) {
+    conditions.push(gte(bets.createdAt, filters.startDate));
+  }
+  if (filters?.endDate) {
+    conditions.push(lte(bets.createdAt, filters.endDate));
+  }
+  if (filters?.minAmount !== undefined) {
+    conditions.push(sql`CAST(${bets.betAmount} AS NUMERIC) >= ${filters.minAmount}`);
+  }
+  if (filters?.maxAmount !== undefined) {
+    conditions.push(sql`CAST(${bets.betAmount} AS NUMERIC) <= ${filters.maxAmount}`);
+  }
+
+  const whereClause = and(...conditions);
 
   const [results, countResult] = await Promise.all([
     db

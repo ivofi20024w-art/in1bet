@@ -3,7 +3,7 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { CalendarRange, Filter, ArrowDownToLine, ChevronDown, Loader2, TrendingUp, TrendingDown, Wallet } from "lucide-react";
+import { CalendarRange, Filter, ChevronDown, Loader2, TrendingUp, TrendingDown, Wallet, X, Gamepad2, DollarSign, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,6 +11,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 
@@ -45,6 +48,14 @@ export default function History() {
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  
+  const [gameTypeFilter, setGameTypeFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [minAmount, setMinAmount] = useState<string>("");
+  const [maxAmount, setMaxAmount] = useState<string>("");
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem('accessToken');
@@ -68,8 +79,22 @@ export default function History() {
     }
 
     try {
-      const typeParam = filter !== "all" ? `&type=${filter}` : "";
-      const res = await fetch(`/api/history?limit=50&offset=${currentOffset}${typeParam}`, {
+      const params = new URLSearchParams();
+      params.append("limit", "50");
+      params.append("offset", String(currentOffset));
+      
+      if (filter !== "all") params.append("type", filter);
+      if (filter === "bets") {
+        if (gameTypeFilter) params.append("gameType", gameTypeFilter);
+        if (statusFilter) params.append("status", statusFilter);
+        if (startDate) params.append("startDate", startDate);
+        if (endDate) params.append("endDate", endDate);
+        if (minAmount) params.append("minAmount", minAmount);
+        if (maxAmount) params.append("maxAmount", maxAmount);
+      }
+
+      const endpoint = filter === "bets" ? `/api/history/bets?${params}` : `/api/history?${params}`;
+      const res = await fetch(endpoint, {
         headers: getAuthHeaders(),
       });
 
@@ -111,7 +136,37 @@ export default function History() {
   useEffect(() => {
     fetchHistory(true);
     fetchStats();
-  }, [isAuthenticated, filter]);
+  }, [isAuthenticated, filter, gameTypeFilter, statusFilter, startDate, endDate, minAmount, maxAmount]);
+
+  const clearAdvancedFilters = () => {
+    setGameTypeFilter("");
+    setStatusFilter("");
+    setStartDate("");
+    setEndDate("");
+    setMinAmount("");
+    setMaxAmount("");
+  };
+
+  const hasActiveFilters = gameTypeFilter || statusFilter || startDate || endDate || minAmount || maxAmount;
+
+  const gameTypes = [
+    { value: "", label: "Todos os Jogos" },
+    { value: "MINES", label: "Mines" },
+    { value: "CRASH", label: "Crash" },
+    { value: "DOUBLE", label: "Double" },
+    { value: "PLINKO", label: "Plinko" },
+    { value: "SLOTS", label: "Slots" },
+    { value: "SPORTS", label: "Esportes" },
+  ];
+
+  const statusOptions = [
+    { value: "", label: "Todos os Status" },
+    { value: "WON", label: "Ganho" },
+    { value: "LOST", label: "Perdido" },
+    { value: "ACTIVE", label: "Em Andamento" },
+    { value: "PENDING", label: "Pendente" },
+    { value: "CANCELLED", label: "Cancelado" },
+  ];
 
   const handleFilterChange = (newFilter: string) => {
     setFilter(newFilter);
@@ -190,11 +245,6 @@ export default function History() {
           <h1 className="text-3xl font-heading font-bold text-white mb-2" data-testid="text-history-title">Histórico</h1>
           <p className="text-gray-400">Consulte todas as suas atividades de jogo e transações.</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" className="border-white/10 text-muted-foreground hover:text-white" disabled>
-            <ArrowDownToLine className="w-4 h-4 mr-2" /> Exportar CSV
-          </Button>
-        </div>
       </div>
 
       {stats && (
@@ -232,8 +282,8 @@ export default function History() {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="flex gap-2">
+      <div className="flex flex-col gap-4 mb-6">
+        <div className="flex flex-wrap gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="border-white/10 bg-card" data-testid="dropdown-filter">
@@ -254,7 +304,145 @@ export default function History() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {filter === "bets" && (
+            <>
+              <Button 
+                variant={showAdvancedFilters ? "secondary" : "outline"}
+                className="border-white/10"
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                data-testid="toggle-advanced-filters"
+              >
+                <Filter className="w-4 h-4 mr-2" />
+                Filtros Avançados
+                {hasActiveFilters && (
+                  <Badge className="ml-2 bg-primary text-white">Ativo</Badge>
+                )}
+              </Button>
+
+              {hasActiveFilters && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={clearAdvancedFilters}
+                  className="text-red-400 hover:text-red-300"
+                  data-testid="clear-filters"
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Limpar
+                </Button>
+              )}
+            </>
+          )}
         </div>
+
+        {filter === "bets" && showAdvancedFilters && (
+          <Card className="bg-card/50 border-white/10 p-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground flex items-center gap-2">
+                  <Gamepad2 className="w-4 h-4" /> Tipo de Jogo
+                </Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between border-white/10" data-testid="dropdown-game-type">
+                      {gameTypes.find(g => g.value === gameTypeFilter)?.label || "Todos os Jogos"}
+                      <ChevronDown className="w-4 h-4 ml-2 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full">
+                    {gameTypes.map((type) => (
+                      <DropdownMenuItem
+                        key={type.value}
+                        onClick={() => setGameTypeFilter(type.value)}
+                        data-testid={`game-type-${type.value || 'all'}`}
+                      >
+                        {type.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4" /> Resultado
+                </Label>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="w-full justify-between border-white/10" data-testid="dropdown-status">
+                      {statusOptions.find(s => s.value === statusFilter)?.label || "Todos os Status"}
+                      <ChevronDown className="w-4 h-4 ml-2 opacity-50" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-full">
+                    {statusOptions.map((status) => (
+                      <DropdownMenuItem
+                        key={status.value}
+                        onClick={() => setStatusFilter(status.value)}
+                        data-testid={`status-${status.value || 'all'}`}
+                      >
+                        {status.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground flex items-center gap-2">
+                  <CalendarRange className="w-4 h-4" /> Período
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="bg-secondary/30 border-white/10"
+                    placeholder="Início"
+                    data-testid="input-start-date"
+                  />
+                  <Input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="bg-secondary/30 border-white/10"
+                    placeholder="Fim"
+                    data-testid="input-end-date"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-sm text-muted-foreground flex items-center gap-2">
+                  <DollarSign className="w-4 h-4" /> Valor da Aposta (R$)
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    value={minAmount}
+                    onChange={(e) => setMinAmount(e.target.value)}
+                    className="bg-secondary/30 border-white/10"
+                    placeholder="Mínimo"
+                    min="0"
+                    step="0.01"
+                    data-testid="input-min-amount"
+                  />
+                  <Input
+                    type="number"
+                    value={maxAmount}
+                    onChange={(e) => setMaxAmount(e.target.value)}
+                    className="bg-secondary/30 border-white/10"
+                    placeholder="Máximo"
+                    min="0"
+                    step="0.01"
+                    data-testid="input-max-amount"
+                  />
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
       </div>
 
       <div className="bg-card border border-white/5 rounded-xl overflow-hidden shadow-xl">

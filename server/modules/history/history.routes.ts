@@ -31,12 +31,17 @@ router.get("/bets", authMiddleware, async (req: Request, res: Response) => {
     const limit = Math.min(parseInt(req.query.limit as string) || 50, 100);
     const offset = parseInt(req.query.offset as string) || 0;
     const gameType = req.query.gameType as string | undefined;
+    const status = req.query.status as string | undefined;
+    const startDate = req.query.startDate ? new Date(req.query.startDate as string) : undefined;
+    const endDate = req.query.endDate ? new Date(req.query.endDate as string) : undefined;
+    const minAmount = req.query.minAmount ? parseFloat(req.query.minAmount as string) : undefined;
+    const maxAmount = req.query.maxAmount ? parseFloat(req.query.maxAmount as string) : undefined;
 
     const result = await HistoryService.getBetHistory(
       userId,
       limit,
       offset,
-      gameType
+      { gameType, status, startDate, endDate, minAmount, maxAmount }
     );
 
     res.json(result);
