@@ -22,6 +22,11 @@ import historyRoutes from "./modules/history/history.routes";
 import playfiversRoutes from "./modules/playfivers/playfivers.routes";
 import { supportRouter, initializeDefaultDepartments, initializeDefaultSlaRules, initializeDefaultTriageRules } from "./modules/support";
 import levelRoutes from "./modules/levels/level.routes";
+import rakebackRoutes from "./modules/rakeback/rakeback.routes";
+import notificationRoutes from "./modules/notifications/notification.routes";
+import missionRoutes from "./modules/missions/mission.routes";
+import { initializeRakebackSettings } from "./modules/rakeback/rakeback.service";
+import { initializeMissionTemplates } from "./modules/missions/mission.service";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -67,6 +72,9 @@ export async function registerRoutes(
   app.use("/api/playfivers", playfiversRoutes);
   app.use("/api/support", supportRouter);
   app.use("/api/levels", levelRoutes);
+  app.use("/api/rakeback", rakebackRoutes);
+  app.use("/api/notifications", notificationRoutes);
+  app.use("/api/missions", missionRoutes);
 
   // Initialize default settings
   initializeDefaultSettings().catch(err => {
@@ -80,6 +88,14 @@ export async function registerRoutes(
     initializeDefaultTriageRules(),
   ]).catch(err => {
     console.error("Failed to initialize support defaults:", err);
+  });
+
+  // Initialize rakeback and missions
+  initializeRakebackSettings().catch(err => {
+    console.error("Failed to initialize rakeback settings:", err);
+  });
+  initializeMissionTemplates().catch(err => {
+    console.error("Failed to initialize mission templates:", err);
   });
 
   // Health check endpoint
