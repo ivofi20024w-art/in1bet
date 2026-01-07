@@ -2313,3 +2313,162 @@ export const createStreakRewardSchema = z.object({
   rewardValue: z.number().positive(),
   isActive: z.boolean().optional(),
 });
+
+// ============================================
+// COMMUNITY CHAT SYSTEM
+// ============================================
+
+export const ChatRoomType = {
+  GLOBAL: "GLOBAL",
+  GAME: "GAME",
+  VIP: "VIP",
+} as const;
+
+export const ChatPenaltyType = {
+  WARNING: "WARNING",
+  MUTE_5MIN: "MUTE_5MIN",
+  MUTE_1HOUR: "MUTE_1HOUR",
+  BAN: "BAN",
+} as const;
+
+export const ChatViolationType = {
+  LINK: "LINK",
+  PROFANITY: "PROFANITY",
+  SPAM: "SPAM",
+  SCAM: "SCAM",
+  PHONE_NUMBER: "PHONE_NUMBER",
+  MANUAL: "MANUAL",
+} as const;
+
+// Chat Rooms
+export const chatRooms = pgTable("chat_rooms", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 50 }).notNull().unique(),
+  displayName: varchar("display_name", { length: 100 }).notNull(),
+  type: varchar("type", { length: 20 }).notNull().default("GLOBAL"),
+  gameType: varchar("game_type", { length: 30 }),
+  minVipLevel: varchar("min_vip_level", { length: 20 }),
+  isActive: boolean("is_active").default(true).notNull(),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Chat Messages
+export const chatMessages = pgTable("chat_messages", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  roomId: varchar("room_id").notNull().references(() => chatRooms.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  message: text("message").notNull(),
+  isDeleted: boolean("is_deleted").default(false).notNull(),
+  deletedBy: varchar("deleted_by"),
+  deletedReason: text("deleted_reason"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Chat Bans/Mutes
+export const chatPenalties = pgTable("chat_penalties", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  roomId: varchar("room_id").references(() => chatRooms.id),
+  penaltyType: varchar("penalty_type", { length: 20 }).notNull(),
+  violationType: varchar("violation_type", { length: 30 }).notNull(),
+  reason: text("reason"),
+  messageContent: text("message_content"),
+  expiresAt: timestamp("expires_at"),
+  isActive: boolean("is_active").default(true).notNull(),
+  issuedBy: varchar("issued_by"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Chat Reports
+export const chatReports = pgTable("chat_reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  messageId: varchar("message_id").notNull().references(() => chatMessages.id),
+  reporterId: varchar("reporter_id").notNull().references(() => users.id),
+  reason: text("reason").notNull(),
+  status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+  reviewedBy: varchar("reviewed_by"),
+  reviewedAt: timestamp("reviewed_at"),
+  actionTaken: text("action_taken"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Bad Words List
+export const chatBadWords = pgTable("chat_bad_words", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  word: varchar("word", { length: 100 }).notNull().unique(),
+  severity: integer("severity").default(1).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Chat Settings
+export const chatSettings = pgTable("chat_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  key: varchar("key", { length: 50 }).notNull().unique(),
+  value: text("value").notNull(),
+  description: text("description"),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// User Chat Status (online tracking)
+export const chatUserStatus = pgTable("chat_user_status", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id).unique(),
+  currentRoomId: varchar("current_room_id"),
+  isOnline: boolean("is_online").default(false).notNull(),
+  lastSeenAt: timestamp("last_seen_at").defaultNow().notNull(),
+});
+
+// Chat Types
+export type ChatRoom = typeof chatRooms.$inferSelect;
+export type InsertChatRoom = typeof chatRooms.$inferInsert;
+export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertChatMessage = typeof chatMessages.$inferInsert;
+export type ChatPenalty = typeof chatPenalties.$inferSelect;
+export type InsertChatPenalty = typeof chatPenalties.$inferInsert;
+export type ChatReport = typeof chatReports.$inferSelect;
+export type InsertChatReport = typeof chatReports.$inferInsert;
+export type ChatBadWord = typeof chatBadWords.$inferSelect;
+export type InsertChatBadWord = typeof chatBadWords.$inferInsert;
+export type ChatSetting = typeof chatSettings.$inferSelect;
+export type InsertChatSetting = typeof chatSettings.$inferInsert;
+export type ChatUserStatus = typeof chatUserStatus.$inferSelect;
+export type InsertChatUserStatus = typeof chatUserStatus.$inferInsert;
+
+// Chat Validation Schemas
+export const sendCommunityChatMessageSchema = z.object({
+  roomId: z.string().uuid(),
+  message: z.string().min(1).max(500),
+});
+
+export const reportMessageSchema = z.object({
+  messageId: z.string().uuid(),
+  reason: z.string().min(5).max(500),
+});
+
+export const createChatRoomSchema = z.object({
+  name: z.string().min(2).max(50),
+  displayName: z.string().min(2).max(100),
+  type: z.enum(["GLOBAL", "GAME", "VIP"]),
+  gameType: z.string().optional(),
+  minVipLevel: z.string().optional(),
+  sortOrder: z.number().int().optional(),
+});
+
+export const addBadWordSchema = z.object({
+  word: z.string().min(2).max(100),
+  severity: z.number().int().min(1).max(5).optional(),
+});
+
+export const issuePenaltySchema = z.object({
+  userId: z.string().uuid(),
+  roomId: z.string().uuid().optional(),
+  penaltyType: z.enum(["WARNING", "MUTE_5MIN", "MUTE_1HOUR", "BAN"]),
+  reason: z.string().min(5).max(500),
+});
+
+export const updateChatSettingSchema = z.object({
+  key: z.string(),
+  value: z.string(),
+});

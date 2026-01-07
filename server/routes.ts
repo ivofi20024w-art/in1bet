@@ -28,6 +28,8 @@ import missionRoutes from "./modules/missions/mission.routes";
 import { initializeRakebackSettings } from "./modules/rakeback/rakeback.service";
 import { initializeMissionTemplates } from "./modules/missions/mission.service";
 import { sportsRouter, seedSportsData } from "./modules/sports";
+import { chatRoutes, initializeChatRooms } from "./modules/chat/chat.routes";
+import { setupChatWebSocket } from "./modules/chat/chat.websocket";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -77,6 +79,15 @@ export async function registerRoutes(
   app.use("/api/notifications", notificationRoutes);
   app.use("/api/missions", missionRoutes);
   app.use("/api/sports", sportsRouter);
+  app.use("/api/chat", chatRoutes);
+
+  // Setup Chat WebSocket
+  setupChatWebSocket(httpServer);
+
+  // Initialize chat rooms
+  initializeChatRooms().catch(err => {
+    console.error("Failed to initialize chat rooms:", err);
+  });
 
   // Initialize default settings
   initializeDefaultSettings().catch(err => {

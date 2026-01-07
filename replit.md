@@ -87,6 +87,20 @@ Preferred communication style: Simple, everyday language.
   - Automatic daily/weekly instance creation
   - Progress tracking with hooks into betting system
   - Mission dashboard with tabs for daily/weekly missions
+- **Community Chat System**: Real-time chat with advanced moderation:
+  - Multiple chat rooms (Global, per-game, VIP-exclusive)
+  - WebSocket-based real-time messaging
+  - VIP badges and level indicators next to usernames
+  - Automatic moderation filters:
+    - Link/URL blocking (domains, IPs, shortened URLs)
+    - Phone/WhatsApp number detection
+    - Scam phrase detection (Portuguese patterns)
+    - Profanity filter with customizable word list
+    - Anti-spam/flood protection (rate limiting)
+  - Progressive penalty system: Warning → 5min Mute → 1hr Mute → Ban
+  - User report system with admin review queue
+  - Admin panel for chat management (reports, penalties, bad words)
+  - Online user count and presence tracking
 
 ### Security
 - **Rate Limiting**: Applied to general API access, authentication, registration, PIX creation, withdrawals, and webhooks.

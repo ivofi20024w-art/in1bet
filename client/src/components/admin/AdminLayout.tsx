@@ -20,6 +20,7 @@ import {
   TrendingUp,
   Gamepad2,
   Headphones,
+  MessageCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -39,6 +40,7 @@ const navItems = [
   { href: "/admin/bonuses", label: "Bônus", icon: Gift },
   { href: "/admin/affiliates", label: "Afiliados", icon: TrendingUp },
   { href: "/admin/support", label: "Suporte", icon: Headphones },
+  { href: "/admin/chat", label: "Chat", icon: MessageCircle },
   { href: "/admin/security", label: "Segurança", icon: Shield },
   { href: "/admin/settings", label: "Configurações", icon: Settings },
   { href: "/admin/audit", label: "Auditoria", icon: FileText },

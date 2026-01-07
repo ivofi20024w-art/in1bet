@@ -61,6 +61,8 @@ import AdminSupport from "@/pages/admin/Support";
 import AdminSupportChats from "@/pages/admin/SupportChats";
 import AdminSupportTickets from "@/pages/admin/SupportTickets";
 import AdminSupportDepartments from "@/pages/admin/SupportDepartments";
+import AdminChat from "@/pages/admin/Chat";
+import CommunityChat from "@/components/chat/CommunityChat";
 import { useEffect, useState } from "react";
 import { Loader } from "@/components/ui/Loader";
 
@@ -183,9 +185,11 @@ function Router() {
         <Route path="/admin/support/tickets" component={AdminSupportTickets} />
         <Route path="/admin/support/tickets/:id" component={AdminSupportTickets} />
         <Route path="/admin/support/departments" component={AdminSupportDepartments} />
+        <Route path="/admin/chat" component={AdminChat} />
         
         <Route component={NotFound} />
       </Switch>
+      <CommunityChat />
     </>
   );
 }
