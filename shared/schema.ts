@@ -1705,3 +1705,327 @@ export type SetDepositLimit = z.infer<typeof setDepositLimitSchema>;
 export type SetBetLimit = z.infer<typeof setBetLimitSchema>;
 export type SetSessionLimit = z.infer<typeof setSessionLimitSchema>;
 export type SelfExclude = z.infer<typeof selfExcludeSchema>;
+
+// =====================================================
+// RAKEBACK/CASHBACK SYSTEM
+// =====================================================
+
+export const RakebackStatus = {
+  PENDING: "PENDING",
+  CALCULATED: "CALCULATED",
+  PAID: "PAID",
+  SKIPPED: "SKIPPED",
+} as const;
+
+export const rakebackSettings = pgTable("rakeback_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  vipTier: varchar("vip_tier", { length: 20 }).notNull().unique(),
+  percentLoss: numeric("percent_loss", { precision: 5, scale: 2 }).notNull(),
+  minLossThreshold: numeric("min_loss_threshold", { precision: 15, scale: 2 }).notNull(),
+  maxRakebackPercent: numeric("max_rakeback_percent", { precision: 5, scale: 2 }).notNull(),
+  rolloverMultiple: integer("rollover_multiple").default(3).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const rakebackPeriods = pgTable("rakeback_periods", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  periodType: varchar("period_type", { length: 10 }).default("WEEKLY").notNull(),
+  vipTierAtCalculation: varchar("vip_tier_at_calculation", { length: 20 }).notNull(),
+  totalWagered: numeric("total_wagered", { precision: 15, scale: 2 }).notNull(),
+  totalWins: numeric("total_wins", { precision: 15, scale: 2 }).notNull(),
+  netLoss: numeric("net_loss", { precision: 15, scale: 2 }).notNull(),
+  rakebackPercent: numeric("rakeback_percent", { precision: 5, scale: 2 }).notNull(),
+  rakebackAmount: numeric("rakeback_amount", { precision: 15, scale: 2 }).notNull(),
+  status: varchar("status", { length: 20 }).default("PENDING").notNull(),
+  processedAt: timestamp("processed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const rakebackPayouts = pgTable("rakeback_payouts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  periodId: varchar("period_id").notNull().references(() => rakebackPeriods.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  amount: numeric("amount", { precision: 15, scale: 2 }).notNull(),
+  transactionId: varchar("transaction_id").references(() => transactions.id),
+  rolloverRequired: numeric("rollover_required", { precision: 15, scale: 2 }).notNull(),
+  rolloverCompleted: numeric("rollover_completed", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  rolloverStatus: varchar("rollover_status", { length: 20 }).default("PENDING").notNull(),
+  paidAt: timestamp("paid_at").defaultNow().notNull(),
+});
+
+// =====================================================
+// NOTIFICATIONS SYSTEM
+// =====================================================
+
+export const NotificationType = {
+  PROMOTION: "PROMOTION",
+  BET_RESULT: "BET_RESULT",
+  LEVEL_UP: "LEVEL_UP",
+  DAILY_BOX: "DAILY_BOX",
+  RAKEBACK: "RAKEBACK",
+  DEPOSIT: "DEPOSIT",
+  WITHDRAWAL: "WITHDRAWAL",
+  SECURITY: "SECURITY",
+  MISSION: "MISSION",
+  SYSTEM: "SYSTEM",
+} as const;
+
+export const NotificationPriority = {
+  LOW: "LOW",
+  NORMAL: "NORMAL",
+  HIGH: "HIGH",
+  URGENT: "URGENT",
+} as const;
+
+export const notifications = pgTable("notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  type: varchar("type", { length: 30 }).notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  message: text("message").notNull(),
+  icon: varchar("icon", { length: 50 }),
+  actionUrl: varchar("action_url", { length: 500 }),
+  imageUrl: varchar("image_url", { length: 500 }),
+  priority: varchar("priority", { length: 10 }).default("NORMAL").notNull(),
+  targetAudience: varchar("target_audience", { length: 30 }).default("ALL"),
+  targetVipTiers: text("target_vip_tiers"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userNotifications = pgTable("user_notifications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  notificationId: varchar("notification_id").references(() => notifications.id),
+  type: varchar("type", { length: 30 }).notNull(),
+  title: varchar("title", { length: 200 }).notNull(),
+  message: text("message").notNull(),
+  icon: varchar("icon", { length: 50 }),
+  actionUrl: varchar("action_url", { length: 500 }),
+  priority: varchar("priority", { length: 10 }).default("NORMAL").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  readAt: timestamp("read_at"),
+  deliveredViaPush: boolean("delivered_via_push").default(false),
+  deliveredViaEmail: boolean("delivered_via_email").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const notificationPreferences = pgTable("notification_preferences", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id).unique(),
+  promotionsInApp: boolean("promotions_in_app").default(true).notNull(),
+  promotionsPush: boolean("promotions_push").default(true).notNull(),
+  promotionsEmail: boolean("promotions_email").default(false).notNull(),
+  betResultsInApp: boolean("bet_results_in_app").default(true).notNull(),
+  betResultsPush: boolean("bet_results_push").default(true).notNull(),
+  levelUpInApp: boolean("level_up_in_app").default(true).notNull(),
+  levelUpPush: boolean("level_up_push").default(true).notNull(),
+  dailyBoxInApp: boolean("daily_box_in_app").default(true).notNull(),
+  dailyBoxPush: boolean("daily_box_push").default(true).notNull(),
+  rakebackInApp: boolean("rakeback_in_app").default(true).notNull(),
+  rakebackPush: boolean("rakeback_push").default(true).notNull(),
+  depositsInApp: boolean("deposits_in_app").default(true).notNull(),
+  depositsPush: boolean("deposits_push").default(true).notNull(),
+  withdrawalsInApp: boolean("withdrawals_in_app").default(true).notNull(),
+  withdrawalsPush: boolean("withdrawals_push").default(true).notNull(),
+  securityInApp: boolean("security_in_app").default(true).notNull(),
+  securityPush: boolean("security_push").default(true).notNull(),
+  securityEmail: boolean("security_email").default(true).notNull(),
+  missionsInApp: boolean("missions_in_app").default(true).notNull(),
+  missionsPush: boolean("missions_push").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const pushSubscriptions = pgTable("push_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  endpoint: text("endpoint").notNull(),
+  p256dh: text("p256dh").notNull(),
+  auth: text("auth").notNull(),
+  userAgent: text("user_agent"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  lastUsedAt: timestamp("last_used_at"),
+});
+
+// =====================================================
+// MISSIONS/CHALLENGES SYSTEM
+// =====================================================
+
+export const MissionCadence = {
+  DAILY: "DAILY",
+  WEEKLY: "WEEKLY",
+  EVENT: "EVENT",
+} as const;
+
+export const MissionStatus = {
+  ACTIVE: "ACTIVE",
+  COMPLETED: "COMPLETED",
+  CLAIMED: "CLAIMED",
+  EXPIRED: "EXPIRED",
+} as const;
+
+export const MissionRequirementType = {
+  BET_COUNT: "BET_COUNT",
+  BET_AMOUNT: "BET_AMOUNT",
+  WIN_COUNT: "WIN_COUNT",
+  WIN_AMOUNT: "WIN_AMOUNT",
+  PLAY_GAME: "PLAY_GAME",
+  PLAY_GAME_TYPE: "PLAY_GAME_TYPE",
+  DEPOSIT: "DEPOSIT",
+  CLAIM_DAILY_BOX: "CLAIM_DAILY_BOX",
+  LEVEL_UP: "LEVEL_UP",
+  LOGIN_STREAK: "LOGIN_STREAK",
+} as const;
+
+export const MissionRewardType = {
+  XP: "XP",
+  BONUS_CASH: "BONUS_CASH",
+  FREE_SPINS: "FREE_SPINS",
+  DAILY_BOX_MULTIPLIER: "DAILY_BOX_MULTIPLIER",
+  RAKEBACK_BOOST: "RAKEBACK_BOOST",
+} as const;
+
+export const missionTemplates = pgTable("mission_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: varchar("name", { length: 100 }).notNull(),
+  description: text("description").notNull(),
+  icon: varchar("icon", { length: 50 }),
+  cadence: varchar("cadence", { length: 10 }).notNull(),
+  requirementType: varchar("requirement_type", { length: 30 }).notNull(),
+  requirementTarget: numeric("requirement_target", { precision: 15, scale: 2 }).notNull(),
+  requirementMetadata: text("requirement_metadata"),
+  rewardType: varchar("reward_type", { length: 30 }).notNull(),
+  rewardValue: numeric("reward_value", { precision: 15, scale: 2 }).notNull(),
+  rewardMetadata: text("reward_metadata"),
+  minVipLevel: varchar("min_vip_level", { length: 20 }).default("bronze"),
+  vipRewardMultiplier: numeric("vip_reward_multiplier", { precision: 5, scale: 2 }).default("1.00"),
+  sortOrder: integer("sort_order").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const missionInstances = pgTable("mission_instances", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  templateId: varchar("template_id").notNull().references(() => missionTemplates.id),
+  periodStart: timestamp("period_start").notNull(),
+  periodEnd: timestamp("period_end").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const missionAssignments = pgTable("mission_assignments", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  instanceId: varchar("instance_id").notNull().references(() => missionInstances.id),
+  progress: numeric("progress", { precision: 15, scale: 2 }).default("0").notNull(),
+  target: numeric("target", { precision: 15, scale: 2 }).notNull(),
+  status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
+  completedAt: timestamp("completed_at"),
+  claimedAt: timestamp("claimed_at"),
+  rewardType: varchar("reward_type", { length: 30 }).notNull(),
+  rewardValue: numeric("reward_value", { precision: 15, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const missionProgressLogs = pgTable("mission_progress_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  assignmentId: varchar("assignment_id").notNull().references(() => missionAssignments.id),
+  sourceEvent: varchar("source_event", { length: 50 }).notNull(),
+  sourceId: varchar("source_id", { length: 100 }),
+  progressDelta: numeric("progress_delta", { precision: 15, scale: 2 }).notNull(),
+  progressAfter: numeric("progress_after", { precision: 15, scale: 2 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Rakeback Types
+export type RakebackSetting = typeof rakebackSettings.$inferSelect;
+export type InsertRakebackSetting = typeof rakebackSettings.$inferInsert;
+export type RakebackPeriod = typeof rakebackPeriods.$inferSelect;
+export type InsertRakebackPeriod = typeof rakebackPeriods.$inferInsert;
+export type RakebackPayout = typeof rakebackPayouts.$inferSelect;
+export type InsertRakebackPayout = typeof rakebackPayouts.$inferInsert;
+
+// Notification Types
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
+export type UserNotification = typeof userNotifications.$inferSelect;
+export type InsertUserNotification = typeof userNotifications.$inferInsert;
+export type NotificationPreference = typeof notificationPreferences.$inferSelect;
+export type InsertNotificationPreference = typeof notificationPreferences.$inferInsert;
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type InsertPushSubscription = typeof pushSubscriptions.$inferInsert;
+
+// Mission Types
+export type MissionTemplate = typeof missionTemplates.$inferSelect;
+export type InsertMissionTemplate = typeof missionTemplates.$inferInsert;
+export type MissionInstance = typeof missionInstances.$inferSelect;
+export type InsertMissionInstance = typeof missionInstances.$inferInsert;
+export type MissionAssignment = typeof missionAssignments.$inferSelect;
+export type InsertMissionAssignment = typeof missionAssignments.$inferInsert;
+export type MissionProgressLog = typeof missionProgressLogs.$inferSelect;
+export type InsertMissionProgressLog = typeof missionProgressLogs.$inferInsert;
+
+// Validation Schemas
+export const updateNotificationPreferencesSchema = z.object({
+  promotionsInApp: z.boolean().optional(),
+  promotionsPush: z.boolean().optional(),
+  promotionsEmail: z.boolean().optional(),
+  betResultsInApp: z.boolean().optional(),
+  betResultsPush: z.boolean().optional(),
+  levelUpInApp: z.boolean().optional(),
+  levelUpPush: z.boolean().optional(),
+  dailyBoxInApp: z.boolean().optional(),
+  dailyBoxPush: z.boolean().optional(),
+  rakebackInApp: z.boolean().optional(),
+  rakebackPush: z.boolean().optional(),
+  depositsInApp: z.boolean().optional(),
+  depositsPush: z.boolean().optional(),
+  withdrawalsInApp: z.boolean().optional(),
+  withdrawalsPush: z.boolean().optional(),
+  securityInApp: z.boolean().optional(),
+  securityPush: z.boolean().optional(),
+  securityEmail: z.boolean().optional(),
+  missionsInApp: z.boolean().optional(),
+  missionsPush: z.boolean().optional(),
+});
+
+export const pushSubscriptionSchema = z.object({
+  endpoint: z.string().url(),
+  keys: z.object({
+    p256dh: z.string(),
+    auth: z.string(),
+  }),
+});
+
+export const claimMissionSchema = z.object({
+  assignmentId: z.string().uuid(),
+});
+
+export const createMissionTemplateSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().min(1),
+  icon: z.string().optional(),
+  cadence: z.enum(["DAILY", "WEEKLY", "EVENT"]),
+  requirementType: z.enum([
+    "BET_COUNT", "BET_AMOUNT", "WIN_COUNT", "WIN_AMOUNT",
+    "PLAY_GAME", "PLAY_GAME_TYPE", "DEPOSIT", "CLAIM_DAILY_BOX",
+    "LEVEL_UP", "LOGIN_STREAK"
+  ]),
+  requirementTarget: z.number().positive(),
+  requirementMetadata: z.string().optional(),
+  rewardType: z.enum(["XP", "BONUS_CASH", "FREE_SPINS", "DAILY_BOX_MULTIPLIER", "RAKEBACK_BOOST"]),
+  rewardValue: z.number().positive(),
+  rewardMetadata: z.string().optional(),
+  minVipLevel: z.string().optional(),
+  vipRewardMultiplier: z.number().min(1).optional(),
+  sortOrder: z.number().int().optional(),
+  isActive: z.boolean().optional(),
+});
