@@ -1,5 +1,5 @@
 import { sql, relations } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, numeric, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, numeric, boolean, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -51,6 +51,19 @@ export const users = pgTable("users", {
   affiliateId: varchar("affiliate_id"),
   referralCode: varchar("referral_code", { length: 50 }),
   registrationIp: varchar("registration_ip", { length: 45 }),
+  level: integer("level").default(1).notNull(),
+  xp: integer("xp").default(0).notNull(),
+  totalWagered: numeric("total_wagered", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  lastDailyBoxClaim: timestamp("last_daily_box_claim"),
+  dailyDepositLimit: numeric("daily_deposit_limit", { precision: 15, scale: 2 }),
+  weeklyDepositLimit: numeric("weekly_deposit_limit", { precision: 15, scale: 2 }),
+  monthlyDepositLimit: numeric("monthly_deposit_limit", { precision: 15, scale: 2 }),
+  maxBetLimit: numeric("max_bet_limit", { precision: 15, scale: 2 }),
+  sessionTimeLimit: integer("session_time_limit"),
+  selfExcludedUntil: timestamp("self_excluded_until"),
+  permanentSelfExcluded: boolean("permanent_self_excluded").default(false),
+  selfExclusionReason: text("self_exclusion_reason"),
+  lastSessionStart: timestamp("last_session_start"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -1587,3 +1600,108 @@ export type RateTicket = z.infer<typeof rateTicketSchema>;
 export type CreateCannedResponse = z.infer<typeof createCannedResponseSchema>;
 export type CreateSlaRule = z.infer<typeof createSlaRuleSchema>;
 export type CreateTriageRule = z.infer<typeof createTriageRuleSchema>;
+
+// ==================== LEVEL SYSTEM ====================
+
+export const LevelRewardType = {
+  BONUS: "BONUS",
+  FREE_SPINS: "FREE_SPINS",
+  CASHBACK: "CASHBACK",
+  MULTIPLIER: "MULTIPLIER",
+  VIP_UPGRADE: "VIP_UPGRADE",
+} as const;
+
+export const levelRewards = pgTable("level_rewards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  level: integer("level").notNull().unique(),
+  rewardType: varchar("reward_type", { length: 20 }).notNull(),
+  rewardValue: numeric("reward_value", { precision: 15, scale: 2 }).notNull(),
+  description: text("description"),
+  xpRequired: integer("xp_required").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const dailyBoxClaims = pgTable("daily_box_claims", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  level: integer("level").notNull(),
+  rewardType: varchar("reward_type", { length: 20 }).notNull(),
+  rewardValue: numeric("reward_value", { precision: 15, scale: 2 }).notNull(),
+  claimedAt: timestamp("claimed_at").defaultNow().notNull(),
+});
+
+export const levelUpHistory = pgTable("level_up_history", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  fromLevel: integer("from_level").notNull(),
+  toLevel: integer("to_level").notNull(),
+  xpGained: integer("xp_gained").notNull(),
+  rewardClaimed: boolean("reward_claimed").default(false),
+  rewardValue: numeric("reward_value", { precision: 15, scale: 2 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// ==================== RESPONSIBLE GAMING ====================
+
+export const ResponsibleGamingActionType = {
+  SET_DEPOSIT_LIMIT: "SET_DEPOSIT_LIMIT",
+  SET_BET_LIMIT: "SET_BET_LIMIT",
+  SET_SESSION_LIMIT: "SET_SESSION_LIMIT",
+  SELF_EXCLUDE_TEMP: "SELF_EXCLUDE_TEMP",
+  SELF_EXCLUDE_PERMANENT: "SELF_EXCLUDE_PERMANENT",
+  REMOVE_LIMIT: "REMOVE_LIMIT",
+  REACTIVATE: "REACTIVATE",
+} as const;
+
+export const responsibleGamingLogs = pgTable("responsible_gaming_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  actionType: varchar("action_type", { length: 30 }).notNull(),
+  previousValue: text("previous_value"),
+  newValue: text("new_value"),
+  reason: text("reason"),
+  effectiveAt: timestamp("effective_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const sessionAlerts = pgTable("session_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  alertType: varchar("alert_type", { length: 20 }).notNull(),
+  sessionDurationMinutes: integer("session_duration_minutes").notNull(),
+  acknowledged: boolean("acknowledged").default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Level System Schemas
+export const setDepositLimitSchema = z.object({
+  dailyLimit: z.number().min(0).optional(),
+  weeklyLimit: z.number().min(0).optional(),
+  monthlyLimit: z.number().min(0).optional(),
+});
+
+export const setBetLimitSchema = z.object({
+  maxBetLimit: z.number().min(0),
+});
+
+export const setSessionLimitSchema = z.object({
+  sessionTimeLimit: z.number().min(15).max(480),
+});
+
+export const selfExcludeSchema = z.object({
+  duration: z.enum(["24h", "7d", "30d", "permanent"]),
+  reason: z.string().optional(),
+});
+
+export const claimDailyBoxSchema = z.object({});
+
+// Level System Types
+export type LevelReward = typeof levelRewards.$inferSelect;
+export type DailyBoxClaim = typeof dailyBoxClaims.$inferSelect;
+export type LevelUpHistory = typeof levelUpHistory.$inferSelect;
+export type ResponsibleGamingLog = typeof responsibleGamingLogs.$inferSelect;
+export type SessionAlert = typeof sessionAlerts.$inferSelect;
+export type SetDepositLimit = z.infer<typeof setDepositLimitSchema>;
+export type SetBetLimit = z.infer<typeof setBetLimitSchema>;
+export type SetSessionLimit = z.infer<typeof setSessionLimitSchema>;
+export type SelfExclude = z.infer<typeof selfExcludeSchema>;

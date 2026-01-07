@@ -21,6 +21,7 @@ import { minesRouter, crashRouter, startCrashGameLoop, doubleRouter, startDouble
 import historyRoutes from "./modules/history/history.routes";
 import playfiversRoutes from "./modules/playfivers/playfivers.routes";
 import { supportRouter, initializeDefaultDepartments, initializeDefaultSlaRules, initializeDefaultTriageRules } from "./modules/support";
+import levelRoutes from "./modules/levels/level.routes";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -65,6 +66,7 @@ export async function registerRoutes(
   app.use("/api/history", historyRoutes);
   app.use("/api/playfivers", playfiversRoutes);
   app.use("/api/support", supportRouter);
+  app.use("/api/levels", levelRoutes);
 
   // Initialize default settings
   initializeDefaultSettings().catch(err => {

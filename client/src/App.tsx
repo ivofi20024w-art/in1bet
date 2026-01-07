@@ -26,6 +26,8 @@ import Settings from "@/pages/profile/Settings";
 import Security from "@/pages/profile/Security";
 import Verification from "@/pages/profile/Verification";
 import Affiliates from "@/pages/profile/Affiliates";
+import Levels from "@/pages/profile/Levels";
+import ResponsibleGamingSettings from "@/pages/profile/ResponsibleGaming";
 import Originals from "@/pages/Originals";
 import WalletPage from "@/pages/Wallet";
 import Game from "@/pages/Game";
@@ -149,6 +151,9 @@ function Router() {
         <Route path="/profile/security" component={Security} />
         <Route path="/profile/verification" component={Verification} />
         <Route path="/affiliates" component={Affiliates} />
+        <Route path="/levels" component={Levels} />
+        <Route path="/profile/levels" component={Levels} />
+        <Route path="/profile/responsible-gaming" component={ResponsibleGamingSettings} />
         <Route path="/originals" component={Originals} />
         <Route path="/wallet" component={WalletPage} />
         <Route path="/casino/popular" component={Casino} />
