@@ -1,7 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { authMiddleware } from "../auth/auth.middleware";
 import { db } from "../../db";
-import { users, claimMissionSchema, createMissionTemplateSchema } from "@shared/schema";
+import { users, claimMissionSchema, createMissionTemplateSchema, claimStreakRewardSchema } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import {
   getUserMissions,
@@ -12,6 +12,13 @@ import {
   updateMissionTemplate,
   initializeMissionTemplates,
 } from "./mission.service";
+import {
+  getUserStreak,
+  getStreakRewards,
+  claimStreakReward,
+  useStreakProtection,
+  initializeStreakRewards,
+} from "./streak.service";
 
 const router = Router();
 
@@ -115,10 +122,103 @@ router.put("/admin/templates/:id", authMiddleware, adminCheck, async (req: Reque
 router.post("/admin/initialize", authMiddleware, adminCheck, async (req: Request, res: Response) => {
   try {
     await initializeMissionTemplates();
+    await initializeStreakRewards();
     res.json({ success: true });
   } catch (error: any) {
     console.error("Admin initialize error:", error);
     res.status(500).json({ error: error.message || "Erro ao inicializar" });
+  }
+});
+
+// =============================================
+// STREAK ROUTES
+// =============================================
+
+router.get("/streak", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const streakData = await getUserStreak(userId);
+    res.json({
+      success: true,
+      data: {
+        currentStreak: streakData.streak.currentStreak,
+        longestStreak: streakData.streak.longestStreak,
+        lastCompletionDate: streakData.streak.lastCompletionDate,
+        streakProtections: streakData.streak.streakProtections,
+        totalMissionsCompleted: streakData.streak.totalMissionsCompleted,
+        availableRewards: streakData.availableRewards.map((r) => ({
+          streakDay: r.streakDay,
+          rewardType: r.rewardType,
+          rewardValue: parseFloat(r.rewardValue),
+        })),
+        claimedDays: streakData.claimedDays,
+      },
+    });
+  } catch (error: any) {
+    console.error("Get streak error:", error);
+    res.status(500).json({ success: false, error: error.message || "Erro ao buscar streak" });
+  }
+});
+
+router.get("/streak/rewards", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const rewards = await getStreakRewards();
+    res.json({
+      success: true,
+      data: rewards.map((r) => ({
+        streakDay: r.streakDay,
+        rewardType: r.rewardType,
+        rewardValue: parseFloat(r.rewardValue),
+        isActive: r.isActive,
+      })),
+    });
+  } catch (error: any) {
+    console.error("Get streak rewards error:", error);
+    res.status(500).json({ success: false, error: error.message || "Erro ao buscar recompensas" });
+  }
+});
+
+router.post("/streak/claim", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const validation = claimStreakRewardSchema.safeParse(req.body);
+
+    if (!validation.success) {
+      return res.status(400).json({ 
+        success: false, 
+        error: validation.error.errors[0]?.message || "Dados inválidos" 
+      });
+    }
+
+    const result = await claimStreakReward(userId, validation.data.streakDay);
+
+    if (!result.success) {
+      return res.status(400).json({ success: false, error: result.error });
+    }
+
+    res.json({ success: true, data: result.reward });
+  } catch (error: any) {
+    console.error("Claim streak reward error:", error);
+    res.status(500).json({ success: false, error: error.message || "Erro ao resgatar recompensa" });
+  }
+});
+
+router.post("/streak/protect", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const userId = req.user!.id;
+    const result = await useStreakProtection(userId);
+
+    if (!result.success) {
+      return res.status(400).json({ success: false, error: result.error });
+    }
+
+    res.json({
+      success: true,
+      data: { remainingProtections: result.remainingProtections },
+    });
+  } catch (error: any) {
+    console.error("Use streak protection error:", error);
+    res.status(500).json({ success: false, error: error.message || "Erro ao usar proteção" });
   }
 });
 

@@ -2159,6 +2159,48 @@ export const missionProgressLogs = pgTable("mission_progress_logs", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// =====================================================
+// STREAK SYSTEM
+// =====================================================
+
+export const StreakRewardType = {
+  XP: "XP",
+  BONUS_CASH: "BONUS_CASH",
+  STREAK_PROTECTION: "STREAK_PROTECTION",
+} as const;
+
+export const userStreaks = pgTable("user_streaks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id).unique(),
+  currentStreak: integer("current_streak").default(0).notNull(),
+  longestStreak: integer("longest_streak").default(0).notNull(),
+  lastCompletionDate: timestamp("last_completion_date"),
+  streakProtections: integer("streak_protections").default(0).notNull(),
+  totalMissionsCompleted: integer("total_missions_completed").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const streakRewards = pgTable("streak_rewards", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  streakDay: integer("streak_day").notNull().unique(),
+  rewardType: varchar("reward_type", { length: 30 }).notNull(),
+  rewardValue: numeric("reward_value", { precision: 15, scale: 2 }).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const streakRewardClaims = pgTable("streak_reward_claims", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  streakRewardId: varchar("streak_reward_id").notNull().references(() => streakRewards.id),
+  streakDay: integer("streak_day").notNull(),
+  rewardType: varchar("reward_type", { length: 30 }).notNull(),
+  rewardValue: numeric("reward_value", { precision: 15, scale: 2 }).notNull(),
+  claimedAt: timestamp("claimed_at").defaultNow().notNull(),
+});
+
 // Rakeback Types
 export type RakebackSetting = typeof rakebackSettings.$inferSelect;
 export type InsertRakebackSetting = typeof rakebackSettings.$inferInsert;
@@ -2249,5 +2291,25 @@ export const createMissionTemplateSchema = z.object({
   minVipLevel: z.string().optional(),
   vipRewardMultiplier: z.number().min(1).optional(),
   sortOrder: z.number().int().optional(),
+  isActive: z.boolean().optional(),
+});
+
+// Streak Types
+export type UserStreak = typeof userStreaks.$inferSelect;
+export type InsertUserStreak = typeof userStreaks.$inferInsert;
+export type StreakReward = typeof streakRewards.$inferSelect;
+export type InsertStreakReward = typeof streakRewards.$inferInsert;
+export type StreakRewardClaim = typeof streakRewardClaims.$inferSelect;
+export type InsertStreakRewardClaim = typeof streakRewardClaims.$inferInsert;
+
+// Streak Validation Schemas
+export const claimStreakRewardSchema = z.object({
+  streakDay: z.number().int().positive(),
+});
+
+export const createStreakRewardSchema = z.object({
+  streakDay: z.number().int().positive(),
+  rewardType: z.enum(["XP", "BONUS_CASH", "STREAK_PROTECTION"]),
+  rewardValue: z.number().positive(),
   isActive: z.boolean().optional(),
 });
