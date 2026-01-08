@@ -21,6 +21,42 @@ import { PlayfiversClient, PlayfiversApiError } from "./playfivers.client";
 
 const client = new PlayfiversClient();
 
+const DEMO_PROVIDERS: Omit<PlayfiversProvider, 'id' | 'createdAt' | 'updatedAt' | 'lastSyncedAt'>[] = [
+  { externalId: "pgsoft", name: "PG Soft", imageUrl: "https://i.imgur.com/7QKsJyL.png", walletName: null, status: "ACTIVE" },
+  { externalId: "pragmatic", name: "Pragmatic Play", imageUrl: "https://i.imgur.com/8QKsJyM.png", walletName: null, status: "ACTIVE" },
+  { externalId: "evolution", name: "Evolution", imageUrl: "https://i.imgur.com/9QKsJyN.png", walletName: null, status: "ACTIVE" },
+  { externalId: "spribe", name: "Spribe", imageUrl: "https://i.imgur.com/0QKsJyO.png", walletName: null, status: "ACTIVE" },
+  { externalId: "hacksaw", name: "Hacksaw Gaming", imageUrl: "https://i.imgur.com/1QKsJyP.png", walletName: null, status: "ACTIVE" },
+  { externalId: "nolimit", name: "NoLimit City", imageUrl: "https://i.imgur.com/2QKsJyQ.png", walletName: null, status: "ACTIVE" },
+];
+
+const DEMO_GAMES: Omit<PlayfiversGame, 'id' | 'createdAt' | 'updatedAt' | 'lastSyncedAt'>[] = [
+  { gameCode: "fortune-tiger", name: "Fortune Tiger", imageUrl: "https://i.imgur.com/cKXGJPa.png", providerId: null, providerName: "PG Soft", isOriginal: false, supportsFreeRounds: false, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "fortune-ox", name: "Fortune Ox", imageUrl: "https://i.imgur.com/dLYHKQb.png", providerId: null, providerName: "PG Soft", isOriginal: false, supportsFreeRounds: false, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "fortune-rabbit", name: "Fortune Rabbit", imageUrl: "https://i.imgur.com/eMZILRc.png", providerId: null, providerName: "PG Soft", isOriginal: false, supportsFreeRounds: false, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "fortune-mouse", name: "Fortune Mouse", imageUrl: "https://i.imgur.com/fNAJMSd.png", providerId: null, providerName: "PG Soft", isOriginal: false, supportsFreeRounds: false, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "fortune-dragon", name: "Fortune Dragon", imageUrl: "https://i.imgur.com/gOBKNTe.png", providerId: null, providerName: "PG Soft", isOriginal: false, supportsFreeRounds: false, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "ganesha-gold", name: "Ganesha Gold", imageUrl: "https://i.imgur.com/hPCLOUf.png", providerId: null, providerName: "PG Soft", isOriginal: false, supportsFreeRounds: false, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "gates-of-olympus", name: "Gates of Olympus", imageUrl: "https://i.imgur.com/iQDMPVg.png", providerId: null, providerName: "Pragmatic Play", isOriginal: false, supportsFreeRounds: true, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "sweet-bonanza", name: "Sweet Bonanza", imageUrl: "https://i.imgur.com/jRENQWh.png", providerId: null, providerName: "Pragmatic Play", isOriginal: false, supportsFreeRounds: true, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "sugar-rush", name: "Sugar Rush", imageUrl: "https://i.imgur.com/kSFORXi.png", providerId: null, providerName: "Pragmatic Play", isOriginal: false, supportsFreeRounds: true, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "big-bass-bonanza", name: "Big Bass Bonanza", imageUrl: "https://i.imgur.com/lTGPSYj.png", providerId: null, providerName: "Pragmatic Play", isOriginal: false, supportsFreeRounds: true, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "starlight-princess", name: "Starlight Princess", imageUrl: "https://i.imgur.com/mUHQTZk.png", providerId: null, providerName: "Pragmatic Play", isOriginal: false, supportsFreeRounds: true, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "aztec-gems", name: "Aztec Gems", imageUrl: "https://i.imgur.com/nVIRUAl.png", providerId: null, providerName: "Pragmatic Play", isOriginal: false, supportsFreeRounds: false, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "big-bass-splash", name: "Big Bass Splash", imageUrl: "https://i.imgur.com/oWJSVBm.png", providerId: null, providerName: "Pragmatic Play", isOriginal: false, supportsFreeRounds: true, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "jewels", name: "Jewels", imageUrl: "https://i.imgur.com/pXKTWCn.png", providerId: null, providerName: "Pragmatic Play", isOriginal: false, supportsFreeRounds: false, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "master-joker", name: "Master Joker", imageUrl: "https://i.imgur.com/qYLUXDo.png", providerId: null, providerName: "Pragmatic Play", isOriginal: false, supportsFreeRounds: false, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "aviator", name: "Aviator", imageUrl: "https://i.imgur.com/rZMVYEp.png", providerId: null, providerName: "Spribe", isOriginal: false, supportsFreeRounds: false, gameType: "crash", status: "ACTIVE" },
+  { gameCode: "spaceman", name: "Spaceman", imageUrl: "https://i.imgur.com/sANWZFq.png", providerId: null, providerName: "Pragmatic Play", isOriginal: false, supportsFreeRounds: false, gameType: "crash", status: "ACTIVE" },
+  { gameCode: "crazy-time", name: "Crazy Time", imageUrl: "https://i.imgur.com/tBOXAGr.png", providerId: null, providerName: "Evolution", isOriginal: false, supportsFreeRounds: false, gameType: "live", status: "ACTIVE" },
+  { gameCode: "lightning-roulette", name: "Lightning Roulette", imageUrl: "https://i.imgur.com/uCPYBHs.png", providerId: null, providerName: "Evolution", isOriginal: false, supportsFreeRounds: false, gameType: "live", status: "ACTIVE" },
+  { gameCode: "blackjack-vip", name: "Blackjack VIP", imageUrl: "https://i.imgur.com/vDQZCIt.png", providerId: null, providerName: "Evolution", isOriginal: false, supportsFreeRounds: false, gameType: "live", status: "ACTIVE" },
+  { gameCode: "wanted-dead-or-wild", name: "Wanted Dead or Wild", imageUrl: "https://i.imgur.com/wERADJu.png", providerId: null, providerName: "Hacksaw Gaming", isOriginal: false, supportsFreeRounds: true, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "mental", name: "Mental", imageUrl: "https://i.imgur.com/xFSBEKv.png", providerId: null, providerName: "NoLimit City", isOriginal: false, supportsFreeRounds: false, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "fire-in-the-hole", name: "Fire in the Hole", imageUrl: "https://i.imgur.com/yGTCFLw.png", providerId: null, providerName: "NoLimit City", isOriginal: false, supportsFreeRounds: true, gameType: "slot", status: "ACTIVE" },
+  { gameCode: "san-quentin", name: "San Quentin", imageUrl: "https://i.imgur.com/zHUDGMx.png", providerId: null, providerName: "NoLimit City", isOriginal: false, supportsFreeRounds: true, gameType: "slot", status: "ACTIVE" },
+];
+
 export class PlayfiversService {
   async syncProviders(): Promise<PlayfiversProvider[]> {
     if (!client.isConfigured()) {
@@ -63,7 +99,19 @@ export class PlayfiversService {
   }
 
   async getCachedProviders(): Promise<PlayfiversProvider[]> {
-    return db.select().from(playfiversProviders).where(eq(playfiversProviders.status, "ACTIVE"));
+    const providers = await db.select().from(playfiversProviders).where(eq(playfiversProviders.status, "ACTIVE"));
+    
+    if (providers.length === 0) {
+      return DEMO_PROVIDERS.map((p, i) => ({
+        ...p,
+        id: `demo-provider-${i}`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastSyncedAt: new Date(),
+      }));
+    }
+    
+    return providers;
   }
 
   async syncGames(providerId?: string): Promise<PlayfiversGame[]> {
@@ -122,16 +170,41 @@ export class PlayfiversService {
   }
 
   async getCachedGames(providerId?: string): Promise<PlayfiversGame[]> {
+    let games: PlayfiversGame[];
+    
     if (providerId) {
-      return db
+      games = await db
         .select()
         .from(playfiversGames)
         .where(and(
           eq(playfiversGames.providerId, providerId),
           eq(playfiversGames.status, "ACTIVE")
         ));
+    } else {
+      games = await db.select().from(playfiversGames).where(eq(playfiversGames.status, "ACTIVE"));
     }
-    return db.select().from(playfiversGames).where(eq(playfiversGames.status, "ACTIVE"));
+    
+    if (games.length === 0) {
+      const demoGames = DEMO_GAMES.map((g, i) => ({
+        ...g,
+        id: `demo-game-${i}`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastSyncedAt: new Date(),
+      })) as PlayfiversGame[];
+      
+      if (providerId) {
+        const demoProviders = await this.getCachedProviders();
+        const provider = demoProviders.find(p => p.id === providerId);
+        if (provider) {
+          return demoGames.filter(g => g.providerName === provider.name);
+        }
+      }
+      
+      return demoGames;
+    }
+    
+    return games;
   }
 
   async getGameByCode(gameCode: string): Promise<PlayfiversGame | null> {
