@@ -27,9 +27,11 @@ export function Sidebar({ className }: { className?: string }) {
   return (
     <aside className={cn("flex flex-col h-full w-[240px] bg-sidebar border-r border-white/5 py-6 px-3", className)}>
       <div className="mb-8 px-4">
-        <h1 className="text-2xl font-bold font-heading italic text-primary tracking-wide">
-          IN1<span className="text-white">BET</span>
-        </h1>
+        <Link href="/">
+          <h1 className="text-2xl font-bold font-heading italic text-primary tracking-wide cursor-pointer hover:opacity-80 transition-opacity">
+            IN1<span className="text-white">BET</span>
+          </h1>
+        </Link>
       </div>
 
       <div className="flex-1 overflow-y-auto hide-scrollbar space-y-6">
