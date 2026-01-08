@@ -1,0 +1,85 @@
+root@srv1189238:/var/www/in1bet# # Ver todos os processos rodando
+ps aux | grep -E "node|python|monitor|test|uptime"
+
+# Ver serviços ativos
+systemctl list-units --state=running | grep -v session
+
+# Ver PM2 processos
+pm2 list
+
+# Ver se tem Uptime Kuma ou similar
+docker ps 2>/dev/null || echo "Docker não instalado"
+root         879  0.0  0.4 429360 35428 ?        Ssl  02:39   0:07 /usr/bin/python3 /usr/bin/fail2ban-server -xf start
+root         902  0.0  0.2  32844 20608 ?        Ss   02:39   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+root        1056  0.0  0.2 110336 23040 ?        Ssl  02:39   0:00 /usr/bin/python3 /usr/share/unattended-upgrades/unattended-upgrade-shutdown --wait-for-signal
+root      225000  0.8  1.2 11803848 98036 ?      Ssl  04:40   0:06 node /var/www/in1bet/start.cjs
+root      225176  0.0  0.0   7004  2432 pts/5    S+   04:53   0:00 grep --color=auto -E node|python|monitor|test|uptime
+  UNIT                              LOAD   ACTIVE SUB     DESCRIPTION
+  proc-sys-fs-binfmt_misc.automount loaded active running Arbitrary Executable File Formats File System Automount Point
+  init.scope                        loaded active running System and Service Manager
+  chrony.service                    loaded active running chrony, an NTP client/server
+  clp-agent.service                 loaded active running clp-agent
+  clp-nginx.service                 loaded active running A high performance web server and a reverse proxy server
+  clp-php-fpm.service               loaded active running The CLP PHP 8.1 FastCGI Process Manager
+  cron.service                      loaded active running Regular background program processing daemon
+  dbus.service                      loaded active running D-Bus System Message Bus
+  fail2ban.service                  loaded active running Fail2Ban Service
+  fwupd.service                     loaded active running Firmware update daemon
+  getty@tty1.service                loaded active running Getty on tty1
+  memcached.service                 loaded active running memcached daemon
+  ModemManager.service              loaded active running Modem Manager
+  multipathd.service                loaded active running Device-Mapper Multipath Device Controller
+  mysql.service                     loaded active running Percona Server
+  networkd-dispatcher.service       loaded active running Dispatcher daemon for systemd-networkd
+  nginx.service                     loaded active running A high performance web server and a reverse proxy server
+  percona-telemetry-agent.service   loaded active running percona-telemetry-agent
+  php7.1-fpm.service                loaded active running The PHP 7.1 FastCGI Process Manager
+  php7.2-fpm.service                loaded active running The PHP 7.2 FastCGI Process Manager
+  php7.3-fpm.service                loaded active running The PHP 7.3 FastCGI Process Manager
+  php7.4-fpm.service                loaded active running The PHP 7.4 FastCGI Process Manager
+  php8.0-fpm.service                loaded active running The PHP 8.0 FastCGI Process Manager
+  php8.1-fpm.service                loaded active running The PHP 8.1 FastCGI Process Manager
+  php8.2-fpm.service                loaded active running The PHP 8.2 FastCGI Process Manager
+  php8.3-fpm.service                loaded active running The PHP 8.3 FastCGI Process Manager
+  php8.4-fpm.service                loaded active running The PHP 8.4 FastCGI Process Manager
+  php8.5-fpm.service                loaded active running The PHP 8.5 FastCGI Process Manager
+  polkit.service                    loaded active running Authorization Manager
+  postfix@-.service                 loaded active running Postfix Mail Transport Agent (instance -)
+  postgresql@16-main.service        loaded active running PostgreSQL Cluster 16-main
+  proftpd.service                   loaded active running ProFTPD FTP Server
+  qemu-guest-agent.service          loaded active running QEMU Guest Agent
+  redis-server.service              loaded active running Advanced key-value store
+  rsyslog.service                   loaded active running System Logging Service
+  serial-getty@ttyS0.service        loaded active running Serial Getty on ttyS0
+  ssh.service                       loaded active running OpenBSD Secure Shell server
+  systemd-journald.service          loaded active running Journal Service
+  systemd-logind.service            loaded active running User Login Management
+  systemd-networkd.service          loaded active running Network Configuration
+  systemd-resolved.service          loaded active running Network Name Resolution
+  systemd-udevd.service             loaded active running Rule-based Manager for Device Events and Files
+  udisks2.service                   loaded active running Disk Manager
+  unattended-upgrades.service       loaded active running Unattended Upgrades Shutdown
+  user@0.service                    loaded active running User Manager for UID 0
+  varnish.service                   loaded active running Varnish Cache, a high-performance HTTP accelerator
+  dbus.socket                       loaded active running D-Bus System Message Bus Socket
+  multipathd.socket                 loaded active running multipathd control socket
+  ssh.socket                        loaded active running OpenBSD Secure Shell server socket
+  syslog.socket                     loaded active running Syslog Socket
+  systemd-journald-dev-log.socket   loaded active running Journal Socket (/dev/log)
+  systemd-journald.socket           loaded active running Journal Socket
+  systemd-networkd.socket           loaded active running Network Service Netlink Socket
+  systemd-udevd-control.socket      loaded active running udev Control Socket
+  systemd-udevd-kernel.socket       loaded active running udev Kernel Socket
+
+Legend: LOAD   → Reflects whether the unit definition was properly loaded.
+        ACTIVE → The high-level unit activation state, i.e. generalization of SUB.
+        SUB    → The low-level unit activation state, values depend on unit type.
+
+61 loaded units listed.
+┌────┬───────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name      │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼───────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ in1bet    │ default     │ 1.0.0   │ fork    │ 225000   │ 13m    │ 2    │ online    │ 0%       │ 95.7mb   │ root     │ disabled │
+└────┴───────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+Docker não instalado
+root@srv1189238:/var/www/in1bet#
