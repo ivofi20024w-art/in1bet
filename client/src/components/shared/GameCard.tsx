@@ -1,7 +1,8 @@
-import { Play } from "lucide-react";
+import { Play, Gamepad2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
 
 interface GameCardProps {
   id: number;
@@ -14,6 +15,9 @@ interface GameCardProps {
 }
 
 export function GameCard({ id, title, provider, image, hot, className, loading }: GameCardProps) {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+
   if (loading) {
       return (
           <div className={cn("aspect-[3/4] rounded-xl overflow-hidden", className)}>
@@ -25,11 +29,30 @@ export function GameCard({ id, title, provider, image, hot, className, loading }
   return (
     <Link href={`/game/${id}`}>
       <div className={cn("group relative rounded-xl overflow-hidden aspect-[3/4] bg-card border border-white/5 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_20px_-5px_rgba(249,115,22,0.3)] hover:-translate-y-1 cursor-pointer", className)}>
-        <img 
-          src={image} 
-          alt={title} 
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-        />
+        {imageLoading && !imageError && (
+          <div className="absolute inset-0 bg-secondary/30 animate-pulse" />
+        )}
+        
+        {imageError ? (
+          <div className="w-full h-full bg-gradient-to-br from-secondary to-secondary/50 flex items-center justify-center">
+            <Gamepad2 className="w-12 h-12 text-muted-foreground/50" />
+          </div>
+        ) : (
+          <img 
+            src={image} 
+            alt={title} 
+            className={cn(
+              "w-full h-full object-cover transition-transform duration-500 group-hover:scale-110",
+              imageLoading && "opacity-0"
+            )}
+            loading="lazy"
+            onLoad={() => setImageLoading(false)}
+            onError={() => {
+              setImageError(true);
+              setImageLoading(false);
+            }}
+          />
+        )}
         
         {/* Overlay Gradient */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
