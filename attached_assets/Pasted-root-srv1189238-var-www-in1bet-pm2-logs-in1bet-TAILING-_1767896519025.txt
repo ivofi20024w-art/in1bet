@@ -1,0 +1,41 @@
+root@srv1189238:/var/www/in1bet# pm2 logs in1bet
+[TAILING] Tailing last 15 lines for [in1bet] process (change the value with --li                                                                             nes option)
+/root/.pm2/logs/in1bet-error.log last 15 lines:
+0|in1bet   | zt: The 'X-Forwarded-For' header is set but the Express 'trust prox                                                                             y' setting is false (default). This could indicate a misconfiguration which woul                                                                             d prevent express-rate-limit from accurately identifying users. See https://expr                                                                             ess-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/ for more informatio                                                                             n.
+0|in1bet   |     at Object.xForwardedForHeader (/var/www/in1bet/dist/index.cjs:8                                                                             0:4173)
+0|in1bet   |     at CK.r.<computed> [as xForwardedForHeader] (/var/www/in1bet/di                                                                             st/index.cjs:80:9167)
+0|in1bet   |     at Object.keyGenerator (/var/www/in1bet/dist/index.cjs:80:10659                                                                             )
+0|in1bet   |     at /var/www/in1bet/dist/index.cjs:80:11802
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/tas                                                                             k_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/dist/index.cjs:80:11516 {
+0|in1bet   |   code: 'ERR_ERL_UNEXPECTED_X_FORWARDED_FOR',
+0|in1bet   |   help: 'https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_                                                                             FORWARDED_FOR/'
+0|in1bet   | }
+0|in1bet   | Error creating PIX deposit: Error: ONDAPAY_CLIENT_ID and ONDAPAY_CL                                                                             IENT_SECRET are required
+0|in1bet   |     at Die (/var/www/in1bet/dist/index.cjs:80:46849)
+0|in1bet   |     at Tj (/var/www/in1bet/dist/index.cjs:80:47519)
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/tas                                                                             k_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/dist/index.cjs:80:50612
+
+/root/.pm2/logs/in1bet-out.log last 15 lines:
+0|in1bet   | [DOUBLE] Game da4382b5fa919302 spinning, result: 6 (BLACK)
+0|in1bet   | [DOUBLE] Game da4382b5fa919302 finished at BLACK
+0|in1bet   | [CRASH] Game 51b0f981a69b9c83 crashed at 3.35x
+0|in1bet   | [dotenv@17.2.3] injecting env (16) from ../var/www/in1bet/.env -- t                                                                             ip: 📡 add observability to secrets: https://dotenvx.com/ops
+0|in1bet   | [DB] Connecting to local (internal) database...
+0|in1bet   | [WebPush] VAPID keys configured successfully
+0|in1bet   | [CRASH] New game 68494ddd217ec73c created, crash point: 1.03x
+0|in1bet   | [CRASH] Game loop started
+0|in1bet   | [DOUBLE] Game loop started
+0|in1bet   | [CHAT] WebSocket server initialized at /ws/chat
+0|in1bet   | 6:21:37 PM [express] serving on port 3000
+0|in1bet   | [SPORTS] Data already seeded
+0|in1bet   | [SUPPORT] Default SLA rules initialized
+0|in1bet   | [SUPPORT] Default triage rules initialized
+0|in1bet   | [SUPPORT] Default departments initialized
+
+0|in1bet  | [CRASH] Game 68494ddd217ec73c started
+0|in1bet  | [CRASH] Game 68494ddd217ec73c crashed at 1.03x
+0|in1bet  | [DOUBLE] Game 9153de2b38419ed3 spinning, result: 7 (RED)
+0|in1bet  | [CRASH] New game c4b5b0a16ebe646f created, crash point: 1x
+
