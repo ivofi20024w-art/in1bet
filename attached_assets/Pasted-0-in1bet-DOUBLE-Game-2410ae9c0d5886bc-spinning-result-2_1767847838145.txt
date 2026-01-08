@@ -1,0 +1,105 @@
+0|in1bet  | [DOUBLE] Game 2410ae9c0d5886bc spinning, result: 2 (BLACK)
+0|in1bet  | [CRASH] New game 454da4b29c93b7fd created, crash point: 3.41x
+0|in1bet  | [DOUBLE] Game 2410ae9c0d5886bc finished at BLACK
+0|in1bet  | [CRASH] Game 454da4b29c93b7fd started
+0|in1bet  | [DOUBLE] New game 878c1ab5b2ab5efa created
+0|in1bet  | [DOUBLE] Game 878c1ab5b2ab5efa spinning, result: 6 (BLACK)
+0|in1bet  | [CRASH] Game 454da4b29c93b7fd crashed at 3.41x
+0|in1bet  | [DOUBLE] Game 878c1ab5b2ab5efa finished at BLACK
+0|in1bet  | [CRASH] New game 503b7a096ec0691a created, crash point: 1x
+0|in1bet  | [DOUBLE] New game 0dc8d1e44e98ea87 created
+0|in1bet  | [CRASH] Game 503b7a096ec0691a started
+0|in1bet  | [CRASH] Game 503b7a096ec0691a crashed at 1x
+0|in1bet  | [CRASH] New game 2dc8e37bc5fc67ad created, crash point: 2.06x
+0|in1bet  | [DOUBLE] Game 0dc8d1e44e98ea87 spinning, result: 4 (BLACK)
+0|in1bet  | [CRASH] Game 2dc8e37bc5fc67ad started
+0|in1bet  | [DOUBLE] Game 0dc8d1e44e98ea87 finished at BLACK
+0|in1bet  | [DOUBLE] New game a96572cfe8350531 created
+0|in1bet  | [CRASH] Game 2dc8e37bc5fc67ad crashed at 2.06x
+0|in1bet  | [CRASH] New game 844a3972e7345fb9 created, crash point: 1.13x
+0|in1bet  | [DOUBLE] Game a96572cfe8350531 spinning, result: 10 (BLACK)
+0|in1bet  | [CRASH] Game 844a3972e7345fb9 started
+0|in1bet  | [CRASH] Game 844a3972e7345fb9 crashed at 1.13x
+0|in1bet  | [DOUBLE] Game a96572cfe8350531 finished at BLACK
+0|in1bet  | [CRASH] New game 6edc2008633f390d created, crash point: 1.09x
+0|in1bet  | [DOUBLE] New game f34dd28056c9042d created
+0|in1bet  | [CRASH] Game 6edc2008633f390d started
+0|in1bet  | [CRASH] Game 6edc2008633f390d crashed at 1.09x
+0|in1bet  | [DOUBLE] Game f34dd28056c9042d spinning, result: 3 (RED)
+0|in1bet  | [CRASH] New game 22041c25b25db36d created, crash point: 7.95x
+0|in1bet  | [DOUBLE] Game f34dd28056c9042d finished at RED
+0|in1bet  | [CRASH] Game 22041c25b25db36d started
+0|in1bet  | [DOUBLE] New game e820f9241f797088 created
+0|in1bet  | [DOUBLE] Game e820f9241f797088 spinning, result: 7 (RED)
+0|in1bet  | [DOUBLE] Game e820f9241f797088 finished at RED
+0|in1bet  | [DOUBLE] New game 89a3cb5cf497a195 created
+0|in1bet  | [CRASH] Game 22041c25b25db36d crashed at 7.95x
+0|in1bet  | [CRASH] New game 6dcb09244c85bea7 created, crash point: 4.65x
+0|in1bet  | [DOUBLE] Game 89a3cb5cf497a195 spinning, result: 6 (BLACK)
+0|in1bet  | [CRASH] Game 6dcb09244c85bea7 started
+0|in1bet  | [DOUBLE] Game 89a3cb5cf497a195 finished at BLACK
+0|in1bet  | [DOUBLE] New game 944634750aecbb6f created
+0|in1bet  | [DOUBLE] Game 944634750aecbb6f spinning, result: 10 (BLACK)
+0|in1bet  | [CRASH] Game 6dcb09244c85bea7 crashed at 4.65x
+0|in1bet  | [CRASH] New game 43dbd9233ce24002 created, crash point: 15.14x
+0|in1bet  | [DOUBLE] Game 944634750aecbb6f finished at BLACK
+0|in1bet  | [DOUBLE] New game 3eaf4851f65efa1f created
+0|in1bet  | [CRASH] Game 43dbd9233ce24002 started
+0|in1bet  | [DOUBLE] Game 3eaf4851f65efa1f spinning, result: 13 (RED)
+0|in1bet  | [DOUBLE] Game 3eaf4851f65efa1f finished at RED
+0|in1bet  | [DOUBLE] New game 50ba428863f4a7ed created
+0|in1bet  | [DOUBLE] Game 50ba428863f4a7ed spinning, result: 10 (BLACK)
+0|in1bet  | [CRASH] Game 43dbd9233ce24002 crashed at 15.14x
+0|in1bet  | [DOUBLE] Game 50ba428863f4a7ed finished at BLACK
+0|in1bet  | [CRASH] New game 4ae4e103f4b32f2e created, crash point: 5.04x
+0|in1bet  | [DOUBLE] New game 29a8cb4f8d7f2194 created
+0|in1bet  | [CRASH] Game 4ae4e103f4b32f2e started
+0|in1bet  | [DOUBLE] Game 29a8cb4f8d7f2194 spinning, result: 8 (BLACK)
+0|in1bet  | [DOUBLE] Game 29a8cb4f8d7f2194 finished at BLACK
+0|in1bet  | [DOUBLE] New game 9878daf51f10bc0b created
+0|in1bet  | [CRASH] Game 4ae4e103f4b32f2e crashed at 5.04x
+0|in1bet  | [CRASH] New game 31504a0f099e1c1b created, crash point: 1.01x
+0|in1bet  | [DOUBLE] Game 9878daf51f10bc0b spinning, result: 7 (RED)
+0|in1bet  | [CRASH] Game 31504a0f099e1c1b started
+0|in1bet  | [CRASH] Game 31504a0f099e1c1b crashed at 1.01x
+0|in1bet  | [DOUBLE] Game 9878daf51f10bc0b finished at RED
+0|in1bet  | [CRASH] New game 17718a1611b46a18 created, crash point: 1x
+0|in1bet  | [DOUBLE] New game 290c7d415b1373f7 created
+0|in1bet  | [CRASH] Game 17718a1611b46a18 started
+0|in1bet  | [CRASH] Game 17718a1611b46a18 crashed at 1x
+0|in1bet  | [CRASH] New game 68e6f44d50efcdf6 created, crash point: 2.87x
+0|in1bet  | [DOUBLE] Game 290c7d415b1373f7 spinning, result: 3 (RED)
+0|in1bet  | [CRASH] Game 68e6f44d50efcdf6 started
+0|in1bet  | [DOUBLE] Game 290c7d415b1373f7 finished at RED
+0|in1bet  | [DOUBLE] New game 7177a64043dcb275 created
+0|in1bet  | [CRASH] Game 68e6f44d50efcdf6 crashed at 2.87x
+0|in1bet  | [DOUBLE] Game 7177a64043dcb275 spinning, result: 2 (BLACK)
+0|in1bet  | [CRASH] New game bc6fbe12e76bc28f created, crash point: 1.05x
+0|in1bet  | [DOUBLE] Game 7177a64043dcb275 finished at BLACK
+0|in1bet  | [CRASH] Game bc6fbe12e76bc28f started
+0|in1bet  | [DOUBLE] New game c62957b4c36d2949 created
+0|in1bet  | [CRASH] Game bc6fbe12e76bc28f crashed at 1.05x
+0|in1bet  | [CRASH] New game 2b22843d7d98c018 created, crash point: 1.98x
+0|in1bet  | [DOUBLE] Game c62957b4c36d2949 spinning, result: 12 (BLACK)
+0|in1bet  | [CRASH] Game 2b22843d7d98c018 started
+0|in1bet  | [DOUBLE] Game c62957b4c36d2949 finished at BLACK
+0|in1bet  | [CRASH] Game 2b22843d7d98c018 crashed at 1.98x
+0|in1bet  | [DOUBLE] New game 6f021e07fb7c0d71 created
+0|in1bet  | [CRASH] New game 6cce899656c62102 created, crash point: 2.91x
+0|in1bet  | [CRASH] Game 6cce899656c62102 started
+0|in1bet  | [DOUBLE] Game 6f021e07fb7c0d71 spinning, result: 8 (BLACK)
+0|in1bet  | [DOUBLE] Game 6f021e07fb7c0d71 finished at BLACK
+0|in1bet  | [DOUBLE] New game fa9485d1890842e3 created
+0|in1bet  | [CRASH] Game 6cce899656c62102 crashed at 2.91x
+0|in1bet  | [CRASH] New game d8a09c6e679e94b9 created, crash point: 6.12x
+0|in1bet  | [DOUBLE] Game fa9485d1890842e3 spinning, result: 12 (BLACK)
+0|in1bet  | [CRASH] Game d8a09c6e679e94b9 started
+0|in1bet  | [DOUBLE] Game fa9485d1890842e3 finished at BLACK
+0|in1bet  | [DOUBLE] New game 61dd27cc5211494d created
+0|in1bet  | [DOUBLE] Game 61dd27cc5211494d spinning, result: 10 (BLACK)
+0|in1bet  | [CRASH] Game d8a09c6e679e94b9 crashed at 6.12x
+0|in1bet  | [DOUBLE] Game 61dd27cc5211494d finished at BLACK
+0|in1bet  | [CRASH] New game 62a552d91917a5f0 created, crash point: 1x
+0|in1bet  | [DOUBLE] New game d0bf8fcf5c379ddd created
+0|in1bet  | [CRASH] Game 62a552d91917a5f0 started
+0|in1bet  | [CRASH] Game 62a552d91917a5f0 crashed at 1x
