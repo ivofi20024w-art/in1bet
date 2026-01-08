@@ -91,8 +91,8 @@ export class PlayfiversClient {
 
   constructor(config?: Partial<PlayfiversConfig>) {
     this.config = {
-      agentToken: config?.agentToken || process.env.PLAYFIVERS_AGENT_TOKEN || "",
-      secretKey: config?.secretKey || process.env.PLAYFIVERS_SECRET_KEY || "",
+      agentToken: config?.agentToken || process.env.PLAYFIVER_TOKEN || "",
+      secretKey: config?.secretKey || process.env.PLAYFIVER_SECRET || "",
       baseUrl: config?.baseUrl || PLAYFIVERS_BASE_URL,
     };
   }
