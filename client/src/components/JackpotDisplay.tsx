@@ -78,18 +78,18 @@ export function JackpotDisplay() {
       className="relative overflow-hidden rounded-xl bg-gradient-to-r from-card via-card/95 to-card border border-primary/20"
       data-testid="jackpot-display"
     >
-      {/* Subtle animated glow on border */}
+      {/* Animated glow on border */}
       <motion.div
         className="absolute inset-0 rounded-xl pointer-events-none"
         animate={{
           boxShadow: [
             "inset 0 0 0 1px rgba(249, 115, 22, 0.1), 0 0 20px rgba(249, 115, 22, 0.05)",
-            "inset 0 0 0 1px rgba(249, 115, 22, 0.3), 0 0 30px rgba(249, 115, 22, 0.15)",
+            "inset 0 0 0 1px rgba(249, 115, 22, 0.4), 0 0 40px rgba(249, 115, 22, 0.2)",
             "inset 0 0 0 1px rgba(249, 115, 22, 0.1), 0 0 20px rgba(249, 115, 22, 0.05)",
           ],
         }}
         transition={{
-          duration: 3,
+          duration: 2.5,
           repeat: Infinity,
           ease: "easeInOut",
         }}
@@ -97,15 +97,15 @@ export function JackpotDisplay() {
 
       {/* Shimmer effect */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent pointer-events-none"
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent pointer-events-none"
         animate={{
           x: ["-100%", "200%"],
         }}
         transition={{
-          duration: 4,
+          duration: 3,
           repeat: Infinity,
           ease: "easeInOut",
-          repeatDelay: 3,
+          repeatDelay: 2,
         }}
         style={{ width: "50%" }}
       />
@@ -113,27 +113,58 @@ export function JackpotDisplay() {
       {/* Content */}
       <div className="relative flex items-center justify-between px-5 py-4">
         <div className="flex items-center gap-4">
-          {/* Trophy icon with subtle animation */}
+          {/* Trophy with spinning rings - loader style */}
           <div className="relative">
+            {/* Outer spinning ring */}
             <motion.div
-              className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20"
-              animate={{
-                scale: isAnimating ? [1, 1.05, 1] : 1,
+              className="absolute inset-[-8px] border-2 border-transparent border-t-primary border-r-primary/30 rounded-full"
+              animate={{ rotate: 360 }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                ease: "linear",
               }}
-              transition={{ duration: 0.3 }}
+            />
+            
+            {/* Inner spinning ring - reverse */}
+            <motion.div
+              className="absolute inset-[-4px] border border-transparent border-b-primary/50 border-l-primary/20 rounded-full"
+              animate={{ rotate: -360 }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+            />
+            
+            {/* Trophy container with glow */}
+            <motion.div
+              className="relative w-12 h-12 rounded-full bg-card flex items-center justify-center border border-primary/30"
+              animate={{
+                boxShadow: [
+                  "0 0 15px rgba(249, 115, 22, 0.2)",
+                  "0 0 30px rgba(249, 115, 22, 0.4)",
+                  "0 0 15px rgba(249, 115, 22, 0.2)",
+                ],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
             >
               <Trophy className="w-6 h-6 text-primary" />
             </motion.div>
             
-            {/* Pulse indicator when growing */}
+            {/* Pulse effect when animating */}
             <AnimatePresence>
               {isAnimating && (
                 <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1.2, opacity: 0 }}
+                  initial={{ scale: 0.8, opacity: 0.8 }}
+                  animate={{ scale: 1.5, opacity: 0 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 1, repeat: Infinity }}
-                  className="absolute inset-0 rounded-xl border-2 border-primary"
+                  transition={{ duration: 0.8, repeat: Infinity }}
+                  className="absolute inset-0 rounded-full border-2 border-primary"
                 />
               )}
             </AnimatePresence>
@@ -144,7 +175,10 @@ export function JackpotDisplay() {
             <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wider font-medium mb-0.5">
               <span>Jackpot Progressivo</span>
               <motion.div
-                animate={{ y: [0, -2, 0] }}
+                animate={{ 
+                  y: [0, -3, 0],
+                  scale: [1, 1.2, 1],
+                }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               >
                 <TrendingUp className="w-3 h-3 text-primary" />
@@ -156,10 +190,44 @@ export function JackpotDisplay() {
               animate={{ scale: isAnimating ? [1, 1.02, 1] : 1 }}
               transition={{ duration: 0.3 }}
             >
-              <span className="text-2xl md:text-3xl font-bold text-white tabular-nums" data-testid="jackpot-amount">
+              <motion.span 
+                className="text-2xl md:text-3xl font-bold text-white tabular-nums" 
+                data-testid="jackpot-amount"
+                animate={{
+                  textShadow: [
+                    "0 0 10px rgba(249, 115, 22, 0)",
+                    "0 0 20px rgba(249, 115, 22, 0.3)",
+                    "0 0 10px rgba(249, 115, 22, 0)",
+                  ],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
                 {formatCurrency(displayAmount)}
-              </span>
+              </motion.span>
             </motion.div>
+            
+            {/* Animated dots - loader style */}
+            <div className="flex gap-1 mt-1">
+              <motion.span 
+                className="w-1 h-1 bg-primary rounded-full"
+                animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+              />
+              <motion.span 
+                className="w-1 h-1 bg-white/50 rounded-full"
+                animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+              />
+              <motion.span 
+                className="w-1 h-1 bg-primary rounded-full"
+                animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+              />
+            </div>
           </div>
         </div>
 
@@ -169,19 +237,34 @@ export function JackpotDisplay() {
             <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Último ganhador</div>
             <div className="text-sm font-medium text-white">{jackpot.lastWonBy}</div>
             {jackpot.lastWonAmount && (
-              <div className="text-xs font-bold text-green-500">
+              <motion.div 
+                className="text-xs font-bold text-green-500"
+                animate={{
+                  textShadow: [
+                    "0 0 5px rgba(34, 197, 94, 0)",
+                    "0 0 10px rgba(34, 197, 94, 0.5)",
+                    "0 0 5px rgba(34, 197, 94, 0)",
+                  ],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
                 {formatCurrency(jackpot.lastWonAmount)}
-              </div>
+              </motion.div>
             )}
           </div>
         )}
       </div>
 
-      {/* Subtle bottom accent line */}
+      {/* Animated bottom accent line */}
       <motion.div
-        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"
+        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-primary to-transparent"
         animate={{
-          opacity: [0.3, 0.6, 0.3],
+          opacity: [0.3, 0.8, 0.3],
+          scaleX: [0.7, 1, 0.7],
         }}
         transition={{
           duration: 2,
@@ -232,18 +315,32 @@ export function JackpotWinNotification({
           style={{ width: "50%" }}
         />
         
-        <motion.div
-          animate={{ 
-            scale: [1, 1.1, 1],
-            rotate: [0, 5, -5, 0],
-          }}
-          transition={{ duration: 0.6, repeat: 2 }}
-          className="relative"
-        >
-          <div className="w-20 h-20 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-4 border border-primary/30">
-            <Trophy className="w-10 h-10 text-primary" />
-          </div>
-        </motion.div>
+        {/* Trophy with spinning rings */}
+        <div className="relative w-24 h-24 mx-auto mb-4">
+          <motion.div
+            className="absolute inset-[-12px] border-[3px] border-transparent border-t-primary border-r-primary/30 rounded-full"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.div
+            className="absolute inset-[-6px] border-2 border-transparent border-b-primary/50 border-l-primary/20 rounded-full"
+            animate={{ rotate: -360 }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+          />
+          
+          <motion.div
+            animate={{ 
+              scale: [1, 1.1, 1],
+              rotate: [0, 5, -5, 0],
+            }}
+            transition={{ duration: 0.6, repeat: 2 }}
+            className="relative w-full h-full"
+          >
+            <div className="w-full h-full rounded-full bg-card flex items-center justify-center border border-primary/30 shadow-[0_0_30px_rgba(249,115,22,0.3)]">
+              <Trophy className="w-12 h-12 text-primary" />
+            </div>
+          </motion.div>
+        </div>
         
         <h2 className="text-3xl font-bold text-primary mb-2 relative">JACKPOT!</h2>
         <p className="text-muted-foreground mb-4 relative">
@@ -251,7 +348,14 @@ export function JackpotWinNotification({
         </p>
         <motion.div
           className="text-4xl font-bold text-white mb-6 relative"
-          animate={{ scale: [1, 1.05, 1] }}
+          animate={{ 
+            scale: [1, 1.05, 1],
+            textShadow: [
+              "0 0 20px rgba(249, 115, 22, 0.3)",
+              "0 0 40px rgba(249, 115, 22, 0.6)",
+              "0 0 20px rgba(249, 115, 22, 0.3)",
+            ],
+          }}
           transition={{ duration: 1, repeat: Infinity }}
         >
           {new Intl.NumberFormat("pt-BR", {
@@ -259,6 +363,25 @@ export function JackpotWinNotification({
             currency: "BRL",
           }).format(amount)}
         </motion.div>
+        
+        {/* Animated dots */}
+        <div className="flex justify-center gap-2 mb-4">
+          <motion.span 
+            className="w-2 h-2 bg-primary rounded-full"
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 0.6, repeat: Infinity, delay: 0 }}
+          />
+          <motion.span 
+            className="w-2 h-2 bg-white/50 rounded-full"
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 0.6, repeat: Infinity, delay: 0.15 }}
+          />
+          <motion.span 
+            className="w-2 h-2 bg-primary rounded-full"
+            animate={{ y: [0, -8, 0] }}
+            transition={{ duration: 0.6, repeat: Infinity, delay: 0.3 }}
+          />
+        </div>
         
         <button
           onClick={onClose}
