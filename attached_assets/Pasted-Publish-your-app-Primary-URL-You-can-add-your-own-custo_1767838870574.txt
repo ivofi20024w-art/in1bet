@@ -1,0 +1,63 @@
+Publish your app
+Primary URL
+You can add your own custom domain after publishing your app.
+in-1-be-tcom--ardisfieldmere
+.replit.app
+Available
+Published App access
+Limit published app access to team members who have viewer access. Learn more
+
+Advanced settings
+Manually configure machine settings, secrets, build commands, ports, and more.
+Deployment type
+Technology used to publish your app. Learn more
+
+Reserved VM
+Ensures high uptime, minimizing disruptions for apps requiring persistent session data.
+Machine configuration
+The power of the servers running your app
+
+Dedicated 1 vCPU / 4 GiB RAM
+$40
+per month
+($0.055/hour)
+Build command
+Optional
+Compiles your app before it deploys
+npm run build
+Run command
+Starts your app after it deploys
+node ./dist/index.cjs
+Deployment forwarding to External Port :80. Open the 
+Deployment expects:
+Host
+External Port
+0.0.0.0
+:80
+ 
+ 
+Your External Port configuration(s):
+Host
+External Port
+0.0.0.0
+:80
+0.0.0.0
+:3001
+0.0.0.0
+:3002
+App type
+Configure your app based on whether it needs to serve traffic from the web.
+
+Security scan before publishing
+Beta
+We always run a security scan before publishing. This setting controls whether publishing is blocked when critical vulnerabilities are found. Some high-risk issues may still block publishing. Learn more
+Configure how your production database is created and populated when you publish. Learn more
+Create production database
+A production database will only be created if you have data in your development database.
+Set up your production database with your current development data
+This will initialize your production database with the data and schemas from your development database.
+What does publishing do?
+Publishing your app makes it available for anyone to use
+Your friends and users around the world can visit your app through your primary URL.
+Costs are included in Core subscriptions
+Costs vary depending on the type of technology used to publish your app.
