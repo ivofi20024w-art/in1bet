@@ -1,0 +1,96 @@
+########################################################
+###            Welcome to CloudPanel                 ###
+########################################################
+
+* Website:         https://www.cloudpanel.io
+* Documentation:   https://www.cloudpanel.io/docs/v2/
+* Best Practices:  https://www.cloudpanel.io/docs/v2/best-practices/
+* CloudPanel:      https://69.62.95.236:8443
+* CloudPanel CLI:  clpctl
+
+You have mail.
+Last login: Thu Jan  8 22:22:40 2026 from 177.138.130.19
+root@srv1189238:~# cd /var/www/in1bet
+root@srv1189238:/var/www/in1bet# git pull origin main
+remote: Enumerating objects: 17, done.
+remote: Counting objects: 100% (17/17), done.
+remote: Compressing objects: 100% (3/3), done.
+remote: Total 11 (delta 8), reused 11 (delta 8), pack-reused 0 (from 0)
+Unpacking objects: 100% (11/11), 119.62 KiB | 7.97 MiB/s, done.
+From https://github.com/ivofi20024w-art/in1bet
+ * branch            main       -> FETCH_HEAD
+   ee6e86b..ecb44cf  main       -> origin/main
+Updating 97d6f2e..ecb44cf
+error: Your local changes to the following files would be overwritten by merge:
+        package-lock.json
+        package.json
+Please commit your changes or stash them before you merge.
+Aborting
+root@srv1189238:/var/www/in1bet# npm install
+npm run build
+
+up to date, audited 552 packages in 2s
+
+49 packages are looking for funding
+  run `npm fund` for details
+
+9 vulnerabilities (2 low, 4 moderate, 3 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+> rest-express@1.0.0 build
+> tsx script/build.ts
+
+building client...
+vite v7.1.12 building for production...
+✓ 3853 modules transformed.
+rendering chunks (1)...[meta-images] no Replit deployment domain found, skipping meta tag updates
+../dist/public/index.html                                                                                1.75 kB │ gzip:   0.75 kB
+../dist/public/assets/vip_program_luxury_gold_and_black_card-DZGYVF9b.png                              978.86 kB
+../dist/public/assets/elegant_background_for_double_casino_game-CnbVPme-.png                           997.51 kB
+../dist/public/assets/affiliate_dashboard_header_with_3d_coins_and_network_connections-BRUt2H1t.png  1,130.70 kB
+../dist/public/assets/weekly_cashback_promo_banner-op2QBMmx.png                                      1,206.30 kB
+../dist/public/assets/casino_welcome_bonus_banner_with_neon_lights-BjKBecun.png                      1,312.11 kB
+../dist/public/assets/neon_plinko_game_background_with_pyramid_structure-Bw9HMUyl.png                1,376.16 kB
+../dist/public/assets/futuristic_neon_cityscape_background_for_crash_game-B3cFTbTU.png               1,380.43 kB
+../dist/public/assets/premium_3d_casino_chips_and_cards_with_neon_orange_lighting-BAcjLfd5.png       1,405.92 kB
+../dist/public/assets/drops_and_wins_tournament_banner-wbmiW2mQ.png                                  1,460.90 kB
+../dist/public/assets/mysterious_background_for_mines_casino_game-BDeluLii.png                       1,465.13 kB
+../dist/public/assets/professional_soccer_stadium_night_scene_with_floodlights-BrB7wTwV.png          1,495.62 kB
+../dist/public/assets/live_sports_stadium_atmosphere-Dd3mSQdE.png                                    1,577.63 kB
+../dist/public/assets/casino_lobby_luxurious_background-Ss3U7Yk0.png                                 1,770.77 kB
+../dist/public/assets/index-Bl_-fBOJ.css                                                               207.22 kB │ gzip:  27.55 kB
+../dist/public/assets/index-BWv7DGe7.js                                                              1,782.54 kB │ gzip: 470.58 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 10.89s
+building server...
+▲ [WARNING] Import "cashoutMines" will always be undefined because there is no matching export in "server/modules/games/mines.service.ts" [import-is-undefined]
+
+    server/modules/games/mines.routes.ts:88:38:
+      88 │     const result = await MinesService.cashoutMines({
+         ╵                                       ~~~~~~~~~~~~
+
+1 warning
+
+  dist/index.cjs  1.5mb ⚠️
+
+⚡ Done in 234ms
+root@srv1189238:/var/www/in1bet# pm2 restart in1bet --update-env
+[PM2] Applying action restartProcessId on app [in1bet](ids: [ 0 ])
+[PM2] [in1bet](0) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ in1bet             │ fork     │ 11   │ online    │ 0%       │ 22.6mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+root@srv1189238:/var/www/in1bet#
