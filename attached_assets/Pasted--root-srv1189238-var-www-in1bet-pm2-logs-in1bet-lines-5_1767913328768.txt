@@ -1,0 +1,75 @@
+
+root@srv1189238:/var/www/in1bet# pm2 logs in1bet --lines 50
+[TAILING] Tailing last 50 lines for [in1bet] process (change the value with --lines option)
+/root/.pm2/logs/in1bet-out.log last 50 lines:
+0|in1bet   | 8615737 created, crash point: 1x
+0|in1bet   | [DOUBLE] Game 7fe70d74f144f7cc spinning, result: 14 (BLACK)
+0|in1bet   | [CRASH] Game a5e620bb48615737 started
+0|in1bet   | [CRASH] Game a5e620bb48615737 crashed at 1x
+0|in1bet   | 10:59:42 PM [express] GET /api/support/chats/active 401 in 2ms :: {"error":"Token de acesso não fornecido"}
+0|in1bet   | 10:59:43 PM [express] GET /api/support/chats/active 401 in 0ms :: {"error":"Token de acesso não fornecido"}
+0|in1bet   | 10:59:43 PM [express] GET /api/support/departments 401 in 1ms :: {"error":"Token de acesso não fornecido"}
+0|in1bet   | 10:59:43 PM [express] GET /api/playfivers/games 200 in 834ms :: {"success":true,"data":[{"gameCode":"fortune-tiger","name":"Fortune Tiger","imageUrl":"https://www.pgsoft.com/images/games/110/image.webp","providerId":null,"providerName":"PG Soft","isOriginal":false,"supportsFreeRounds":false,"gameType":"slot","status":"ACTIVE","id":"demo-game-0","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"fortune-ox","name":"Fortune Ox","imageUrl":"https://www.pgsoft.com/images/games/98/image.webp","providerId":null,"providerName":"PG Soft","isOriginal":false,"supportsFreeRounds":false,"gameType":"slot","status":"ACTIVE","id":"demo-game-1","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"fortune-rabbit","name":"Fortune Rabbit","imageUrl":"https://www.pgsoft.com/images/games/1543462/image.webp","providerId":null,"providerName":"PG Soft","isOriginal":false,"supportsFreeRounds":false,"gameType":"slot","status":"ACTIVE","id":"demo-game-2","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"fortune-mouse","name":"Fortune Mouse","imageUrl":"https://www.pgsoft.com/images/games/89/image.webp","providerId":null,"providerName":"PG Soft","isOriginal":false,"supportsFreeRounds":false,"gameType":"slot","status":"ACTIVE","id":"demo-game-3","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"fortune-dragon","name":"Fortune Dragon","imageUrl":"https://www.pgsoft.com/images/games/1695365/image.webp","providerId":null,"providerName":"PG Soft","isOriginal":false,"supportsFreeRounds":false,"gameType":"slot","status":"ACTIVE","id":"demo-game-4","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"ganesha-gold","name":"Ganesha Gold","imageUrl":"https://www.pgsoft.com/images/games/75/image.webp","providerId":null,"providerName":"PG Soft","isOriginal":false,"supportsFreeRounds":false,"gameType":"slot","status":"ACTIVE","id":"demo-game-5","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"gates-of-olympus","name":"Gates of Olympus","imageUrl":"https://cdn.softswiss.net/i/s3/pragmaticexternal/vs20olympgate.png","providerId":null,"providerName":"Pragmatic Play","isOriginal":false,"supportsFreeRounds":true,"gameType":"slot","status":"ACTIVE","id":"demo-game-6","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"sweet-bonanza","name":"Sweet Bonanza","imageUrl":"https://cdn.softswiss.net/i/s3/pragmaticexternal/vs20fruitsw.png","providerId":null,"providerName":"Pragmatic Play","isOriginal":false,"supportsFreeRounds":true,"gameType":"slot","status":"ACTIVE","id":"demo-game-7","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"sugar-rush","name":"Sugar Rush","imageUrl":"https://cdn.softswiss.net/i/s3/pragmaticexternal/vs20sugarrush.png","providerId":null,"providerName":"Pragmatic Play","isOriginal":false,"supportsFreeRounds":true,"gameType":"slot","status":"ACTIVE","id":"demo-game-8","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"big-bass-bonanza","name":"Big Bass Bonanza","imageUrl":"https://cdn.softswiss.net/i/s3/pragmaticexternal/vs10bbbonanza.png","providerId":null,"providerName":"Pragmatic Play","isOriginal":false,"supportsFreeRounds":true,"gameType":"slot","status":"ACTIVE","id":"demo-game-9","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"starlight-princess","name":"Starlight Princess","imageUrl":"https://cdn.softswiss.net/i/s3/pragmaticexternal/vs20starlight.png","providerId":null,"providerName":"Pragmatic Play","isOriginal":false,"supportsFreeRounds":true,"gameType":"slot","status":"ACTIVE","id":"demo-game-10","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"aztec-gems","name":"Aztec Gems","imageUrl":"https://cdn.softswiss.net/i/s3/pragmaticexternal/vs5aztecgems.png","providerId":null,"providerName":"Pragmatic Play","isOriginal":false,"supportsFreeRounds":false,"gameType":"slot","status":"ACTIVE","id":"demo-game-11","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"big-bass-splash","name":"Big Bass Splash","imageUrl":"https://cdn.softswiss.net/i/s3/pragmaticexternal/vs12bbbsplash.png","providerId":null,"providerName":"Pragmatic Play","isOriginal":false,"supportsFreeRounds":true,"gameType":"slot","status":"ACTIVE","id":"demo-game-12","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"the-dog-house","name":"The Dog House","imageUrl":"https://cdn.softswiss.net/i/s3/pragmaticexternal/vs20doghouse.png","providerId":null,"providerName":"Pragmatic Play","isOriginal":false,"supportsFreeRounds":true,"gameType":"slot","status":"ACTIVE","id":"demo-game-13","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"fruit-party","name":"Fruit Party","imageUrl":"https://cdn.softswiss.net/i/s3/pragmaticexternal/vs20fruitparty.png","providerId":null,"providerName":"Pragmatic Play","isOriginal":false,"supportsFreeRounds":true,"gameType":"slot","status":"ACTIVE","id":"demo-game-14","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"aviator","name":"Aviator","imageUrl":"https://cdn.softswiss.net/i/s3/spribe/aviator.png","providerId":null,"providerName":"Spribe","isOriginal":false,"supportsFreeRounds":false,"gameType":"crash","status":"ACTIVE","id":"demo-game-15","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"spaceman","name":"Spaceman","imageUrl":"https://cdn.softswiss.net/i/s3/pragmaticexternal/spaceman.png","providerId":null,"providerName":"Pragmatic Play","isOriginal":false,"supportsFreeRounds":false,"gameType":"crash","status":"ACTIVE","id":"demo-game-16","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"crazy-time","name":"Crazy Time","imageUrl":"https://cdn.softswiss.net/i/s3/evolution/crazytime.png","providerId":null,"providerName":"Evolution","isOriginal":false,"supportsFreeRounds":false,"gameType":"live","status":"ACTIVE","id":"demo-game-17","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"lightning-roulette","name":"Lightning Roulette","imageUrl":"https://cdn.softswiss.net/i/s3/evolution/lightningroulette.png","providerId":null,"providerName":"Evolution","isOriginal":false,"supportsFreeRounds":false,"gameType":"live","status":"ACTIVE","id":"demo-game-18","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"},{"gameCode":"blackjack-vip","name":"Blackjack VIP","imageUrl":"https://cdn.softswiss.net/i/s3/evolution/blackjackvip.png","providerId":null,"providerName":"Evolution","isOriginal":false,"supportsFreeRounds":false,"gameType":"live","status":"ACTIVE","id":"demo-game-19","createdAt":"2026-01-08T22:59:43.954Z","updatedAt":"2026-01-08T22:59:43.954Z","lastSyncedAt":"2026-01-08T22:59:43.954Z"}],"total":24,"hasMore":true,"limit":20,"offset":0}
+0|in1bet   | 10:59:44 PM [express] GET /api/jackpot/info 200 in 950ms :: {"success":true,"data":{"currentAmount":1000,"minimumAmount":1000,"contributionRate":0.002,"isActive":true,"lastWonAt":null,"lastWonBy":null,"lastWonAmount":null,"totalPaidOut":0,"recentWins":[]}}
+0|in1bet   | [CRASH] New game b38f69f325b1e340 created, crash point: 4.13x
+0|in1bet   | [DOUBLE] Game 7fe70d74f144f7cc finished at BLACK
+0|in1bet   | 10:59:47 PM [express] GET /api/jackpot/info 304 in 1ms :: {"success":true,"data":{"currentAmount":1000,"minimumAmount":1000,"contributionRate":0.002,"isActive":true,"lastWonAt":null,"lastWonBy":null,"lastWonAmount":null,"totalPaidOut":0,"recentWins":[]}}
+0|in1bet   | 10:59:48 PM [express] GET /api/support/chats/active 401 in 1ms :: {"error":"Token de acesso não fornecido"}
+0|in1bet   | [DOUBLE] New game 0b3f85859306d1a5 created
+0|in1bet   | [CRASH] Game b38f69f325b1e340 started
+0|in1bet   | [DOUBLE] Game 0b3f85859306d1a5 spinning, result: 10 (BLACK)
+0|in1bet   | [DOUBLE] Game 0b3f85859306d1a5 finished at BLACK
+0|in1bet   | [CRASH] Game b38f69f325b1e340 crashed at 4.13x
+0|in1bet   | [DOUBLE] New game f92ab04817e637f2 created
+0|in1bet   | [CRASH] New game fa1a70254afd8973 created, crash point: 4.12x
+0|in1bet   | [CRASH] Game fa1a70254afd8973 started
+0|in1bet   | [DOUBLE] Game f92ab04817e637f2 spinning, result: 4 (BLACK)
+0|in1bet   | [DOUBLE] Game f92ab04817e637f2 finished at BLACK
+0|in1bet   | [DOUBLE] New game 0e3ac9f35a4ddcca created
+0|in1bet   | [CRASH] Game fa1a70254afd8973 crashed at 4.12x
+0|in1bet   | [DOUBLE] Game 0e3ac9f35a4ddcca spinning, result: 13 (RED)
+0|in1bet   | [CRASH] New game ac62fb6dcd899759 created, crash point: 2.21x
+0|in1bet   | [DOUBLE] Game 0e3ac9f35a4ddcca finished at RED
+0|in1bet   | [CRASH] Game ac62fb6dcd899759 started
+
+/root/.pm2/logs/in1bet-error.log last 50 lines:
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/dist/public/index.html'
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/dist/public/index.html'
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/dist/public/index.html'
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/dist/public/index.html'
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/dist/public/index.html'
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/dist/public/index.html'
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/dist/public/index.html'
+0|in1bet   | Error: Cannot find module 'dotenv'
+0|in1bet   | Require stack:
+0|in1bet   | - /var/www/in1bet/start.cjs
+0|in1bet   |     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+0|in1bet   |     at Hook._require.Module.require (/usr/lib/node_modules/pm2/node_modules/require-in-the-middle/index.js:81:25)
+0|in1bet   |     at require (node:internal/modules/helpers:182:18)
+0|in1bet   |     at Object.<anonymous> (/var/www/in1bet/start.cjs:1:1)
+0|in1bet   |     at Module._compile (node:internal/modules/cjs/loader:1521:14)
+0|in1bet   |     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+0|in1bet   |     at Module.load (node:internal/modules/cjs/loader:1266:32)
+0|in1bet   |     at Module._load (node:internal/modules/cjs/loader:1091:12)
+0|in1bet   |     at cjsLoader (node:internal/modules/esm/translators:298:15)
+0|in1bet   |     at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:240:7) {
+0|in1bet   |   code: 'MODULE_NOT_FOUND',
+0|in1bet   |   requireStack: [ '/var/www/in1bet/start.cjs' ]
+0|in1bet   | }
+0|in1bet   | Error: Cannot find module 'dotenv'
+0|in1bet   | Require stack:
+0|in1bet   | - /var/www/in1bet/start.cjs
+0|in1bet   |     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+0|in1bet   |     at Hook._require.Module.require (/usr/lib/node_modules/pm2/node_modules/require-in-the-middle/index.js:81:25)
+0|in1bet   |     at require (node:internal/modules/helpers:182:18)
+0|in1bet   |     at Object.<anonymous> (/var/www/in1bet/start.cjs:1:1)
+0|in1bet   |     at Module._compile (node:internal/modules/cjs/loader:1521:14)
+0|in1bet   |     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+0|in1bet   |     at Module.load (node:internal/modules/cjs/loader:1266:32)
+0|in1bet   |     at Module._load (node:internal/modules/cjs/loader:1091:12)
+0|in1bet   |     at cjsLoader (node:internal/modules/esm/translators:298:15)
+0|in1bet   |     at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:240:7) {
+0|in1bet   |   code: 'MODULE_NOT_FOUND',
+0|in1bet   |   requireStack: [ '/var/www/in1bet/start.cjs' ]
+0|in1bet   | }
+
