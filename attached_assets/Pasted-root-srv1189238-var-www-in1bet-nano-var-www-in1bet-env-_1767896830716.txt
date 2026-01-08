@@ -1,0 +1,70 @@
+root@srv1189238:/var/www/in1bet# nano /var/www/in1bet/.env
+root@srv1189238:/var/www/in1bet# pm2 restart in1bet
+pm2 logs in1bet --lines 20
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [in1bet](ids: [ 0 ])
+[PM2] [in1bet](0) ✓
+┌────┬───────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name      │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼───────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ in1bet    │ default     │ 1.0.0   │ fork    │ 237275   │ 0s     │ 3    │ online    │ 0%       │ 18.4mb   │ root     │ disabled │
+└────┴───────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+[TAILING] Tailing last 20 lines for [in1bet] process (change the value with --lines option)
+/root/.pm2/logs/in1bet-error.log last 20 lines:
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/dist/index.cjs:80:11516 {
+0|in1bet   |   code: 'ERR_ERL_UNEXPECTED_X_FORWARDED_FOR',
+0|in1bet   |   help: 'https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/'
+0|in1bet   | }
+0|in1bet   | zt: The 'X-Forwarded-For' header is set but the Express 'trust proxy' setting is false (default). This could indicate a misconfiguration which would prevent express-rate-limit from accurately identifying users. See https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/ for more information.
+0|in1bet   |     at Object.xForwardedForHeader (/var/www/in1bet/dist/index.cjs:80:4173)
+0|in1bet   |     at CK.r.<computed> [as xForwardedForHeader] (/var/www/in1bet/dist/index.cjs:80:9167)
+0|in1bet   |     at Object.keyGenerator (/var/www/in1bet/dist/index.cjs:80:10659)
+0|in1bet   |     at /var/www/in1bet/dist/index.cjs:80:11802
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/dist/index.cjs:80:11516 {
+0|in1bet   |   code: 'ERR_ERL_UNEXPECTED_X_FORWARDED_FOR',
+0|in1bet   |   help: 'https://express-rate-limit.github.io/ERR_ERL_UNEXPECTED_X_FORWARDED_FOR/'
+0|in1bet   | }
+0|in1bet   | Error creating PIX deposit: Error: ONDAPAY_CLIENT_ID and ONDAPAY_CLIENT_SECRET are required
+0|in1bet   |     at Die (/var/www/in1bet/dist/index.cjs:80:46849)
+0|in1bet   |     at Tj (/var/www/in1bet/dist/index.cjs:80:47519)
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/dist/index.cjs:80:50612
+
+/root/.pm2/logs/in1bet-out.log last 20 lines:
+0|in1bet   | [DOUBLE] Game e010c1f1d9cee60c finished at RED
+0|in1bet   | [CRASH] Game 4dc6ae97027d1c8a started
+0|in1bet   | [DOUBLE] New game c424a80c3263d344 created
+0|in1bet   | [DOUBLE] Game c424a80c3263d344 spinning, result: 0 (WHITE)
+0|in1bet   | [DOUBLE] Game c424a80c3263d344 finished at WHITE
+0|in1bet   | [DOUBLE] New game 0ddc03c47b5b2a91 created
+0|in1bet   | [CRASH] Game 4dc6ae97027d1c8a crashed at 10.76x
+0|in1bet   | [CRASH] New game 5a22262286ea7fd1 created, crash point: 1.81x
+0|in1bet   | [DOUBLE] Game 0ddc03c47b5b2a91 spinning, result: 6 (BLACK)
+0|in1bet   | [DOUBLE] Game 0ddc03c47b5b2a91 finished at BLACK
+0|in1bet   | [CRASH] Game 5a22262286ea7fd1 started
+0|in1bet   | [DOUBLE] New game f8255b5257d3d170 created
+0|in1bet   | [CRASH] Game 5a22262286ea7fd1 crashed at 1.81x
+0|in1bet   | [CRASH] New game 10be0321c21831de created, crash point: 1.28x
+0|in1bet   | [DOUBLE] Game f8255b5257d3d170 spinning, result: 0 (WHITE)
+0|in1bet   | [CRASH] Game 10be0321c21831de started
+0|in1bet   | [DOUBLE] Game f8255b5257d3d170 finished at WHITE
+0|in1bet   | [CRASH] Game 10be0321c21831de crashed at 1.28x
+0|in1bet   | [DOUBLE] New game 9ddf6391e9ad815b created
+0|in1bet   | [dotenv@17.2.3] injecting env (16) from ../var/www/in1bet/.env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+0|in1bet  | [DB] Connecting to local (internal) database...
+0|in1bet  | [WebPush] VAPID keys configured successfully
+0|in1bet  | [CRASH] New game c89a782131070ac7 created, crash point: 3.78x
+0|in1bet  | [CRASH] Game loop started
+0|in1bet  | [DOUBLE] Game loop started
+0|in1bet  | [CHAT] WebSocket server initialized at /ws/chat
+0|in1bet  | 6:26:47 PM [express] serving on port 3000
+0|in1bet  | [SPORTS] Data already seeded
+0|in1bet  | [SUPPORT] Default SLA rules initialized
+0|in1bet  | [SUPPORT] Default departments initialized
+0|in1bet  | [SUPPORT] Default triage rules initialized
+0|in1bet  | [CRASH] Game c89a782131070ac7 started
+^C
+root@srv1189238:/var/www/in1bet#
