@@ -175,7 +175,7 @@ export default function Casino() {
       case 'slots':
         return { gameType: 'slot' };
       case 'live':
-        return { gameType: 'live' };
+        return { namePatterns: ['live', 'evolution', 'ezugi', 'live88', 'winfinity', 'pragmatic live'] };
       case 'crash':
         return { gameType: 'crash' };
       case 'roulette':
