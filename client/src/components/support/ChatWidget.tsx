@@ -160,10 +160,10 @@ export function ChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-green-600 to-green-500 shadow-lg shadow-green-500/30 flex items-center justify-center hover:scale-110 transition-transform"
-          data-testid="button-open-chat"
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-green-600 to-emerald-500 shadow-lg shadow-green-500/30 flex items-center justify-center hover:scale-110 transition-transform"
+          data-testid="button-open-support-chat"
         >
-          <MessageCircle className="w-6 h-6 text-white" />
+          <Headphones className="w-6 h-6 text-white" />
           {activeChat && activeChat.status !== "CLOSED" && (
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-pulse" />
           )}
