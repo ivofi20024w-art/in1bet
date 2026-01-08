@@ -45,8 +45,8 @@ export async function registerRoutes(
     next(err);
   });
 
-  // Rate limiter desativado
-  // app.use("/api", generalLimiter);
+  // Apply general rate limiting to all API routes
+  app.use("/api", generalLimiter);
 
   // Webhook endpoint (no auth required - comes from OndaPay)
   app.use("/api", ondapayRoutes);
