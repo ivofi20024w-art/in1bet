@@ -16,7 +16,7 @@ import {
   type PlayfiversSession,
   type PlayfiversTransaction,
 } from "@shared/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { eq, desc, and, or, sql } from "drizzle-orm";
 import { PlayfiversClient, PlayfiversApiError } from "./playfivers.client";
 
 const client = new PlayfiversClient();
@@ -205,6 +205,96 @@ export class PlayfiversService {
     }
     
     return games;
+  }
+
+  async getPaginatedGames(options: {
+    providerId?: string;
+    providerName?: string;
+    gameType?: string;
+    search?: string;
+    namePatterns?: string[];
+    includeGameTypeInPatterns?: boolean;
+    limit?: number;
+    offset?: number;
+  }): Promise<{ games: PlayfiversGame[]; total: number; hasMore: boolean }> {
+    const { providerId, providerName, gameType, search, namePatterns, includeGameTypeInPatterns, limit = 20, offset = 0 } = options;
+    
+    const conditions = [eq(playfiversGames.status, "ACTIVE")];
+    
+    if (providerId) {
+      conditions.push(eq(playfiversGames.providerId, providerId));
+    }
+    if (providerName) {
+      conditions.push(eq(playfiversGames.providerName, providerName));
+    }
+    if (search) {
+      conditions.push(sql`LOWER(${playfiversGames.name}) LIKE LOWER(${'%' + search + '%'})`);
+    }
+    
+    if (gameType && namePatterns && namePatterns.length > 0 && includeGameTypeInPatterns) {
+      const patternConditions = namePatterns.map(pattern => 
+        sql`LOWER(${playfiversGames.name}) LIKE LOWER(${'%' + pattern + '%'})`
+      );
+      const gameTypeCondition = eq(playfiversGames.gameType, gameType);
+      conditions.push(or(gameTypeCondition, ...patternConditions)!);
+    } else if (gameType) {
+      conditions.push(eq(playfiversGames.gameType, gameType));
+    } else if (namePatterns && namePatterns.length > 0) {
+      const patternConditions = namePatterns.map(pattern => 
+        sql`LOWER(${playfiversGames.name}) LIKE LOWER(${'%' + pattern + '%'})`
+      );
+      conditions.push(or(...patternConditions)!);
+    }
+
+    const whereClause = conditions.length > 1 ? and(...conditions) : conditions[0];
+
+    const [countResult] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(playfiversGames)
+      .where(whereClause);
+    
+    const total = Number(countResult?.count || 0);
+
+    const hasFilters = providerId || providerName || gameType || search || (namePatterns && namePatterns.length > 0);
+    
+    if (total === 0 && !hasFilters) {
+      let demoGames = DEMO_GAMES.map((g, i) => ({
+        ...g,
+        id: `demo-game-${i}`,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        lastSyncedAt: new Date(),
+      })) as PlayfiversGame[];
+      
+      const paginatedDemo = demoGames.slice(offset, offset + limit);
+      return {
+        games: paginatedDemo,
+        total: demoGames.length,
+        hasMore: offset + limit < demoGames.length,
+      };
+    }
+    
+    if (total === 0) {
+      return {
+        games: [],
+        total: 0,
+        hasMore: false,
+      };
+    }
+
+    const games = await db
+      .select()
+      .from(playfiversGames)
+      .where(whereClause)
+      .orderBy(playfiversGames.name)
+      .limit(limit)
+      .offset(offset);
+
+    return {
+      games,
+      total,
+      hasMore: offset + limit < total,
+    };
   }
 
   async getGameByCode(gameCode: string): Promise<PlayfiversGame | null> {

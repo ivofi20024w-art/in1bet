@@ -63,15 +63,39 @@ router.get("/providers", async (req: Request, res: Response) => {
 router.get("/games", async (req: Request, res: Response) => {
   try {
     const providerId = req.query.providerId as string | undefined;
+    const providerName = req.query.provider as string | undefined;
+    const gameType = req.query.type as string | undefined;
+    const search = req.query.search as string | undefined;
+    const namePatterns = req.query.namePatterns 
+      ? (req.query.namePatterns as string).split(',').filter(Boolean)
+      : undefined;
+    const includeGameTypeInPatterns = req.query.includeGameType === "true";
+    const limit = parseInt(req.query.limit as string) || 20;
+    const offset = parseInt(req.query.offset as string) || 0;
     const sync = req.query.sync === "true";
 
-    const games = sync
-      ? await playfiversService.syncGames(providerId)
-      : await playfiversService.getCachedGames(providerId);
+    if (sync) {
+      await playfiversService.syncGames(providerId);
+    }
+
+    const result = await playfiversService.getPaginatedGames({
+      providerId,
+      providerName,
+      gameType,
+      search,
+      namePatterns,
+      includeGameTypeInPatterns,
+      limit,
+      offset,
+    });
 
     res.json({
       success: true,
-      data: games,
+      data: result.games,
+      total: result.total,
+      hasMore: result.hasMore,
+      limit,
+      offset,
     });
   } catch (error) {
     console.error("[PlayFivers] Error fetching games:", error);

@@ -85,12 +85,47 @@ async function fetchProviders(): Promise<PlayfiversProvider[]> {
   return data.data;
 }
 
-async function fetchGames(providerId?: string): Promise<PlayfiversGame[]> {
-  const url = providerId ? `/api/playfivers/games?providerId=${providerId}` : '/api/playfivers/games';
+interface GamesResponse {
+  games: PlayfiversGame[];
+  total: number;
+  hasMore: boolean;
+  limit: number;
+  offset: number;
+}
+
+async function fetchGames(params: {
+  providerId?: string;
+  providerName?: string;
+  gameType?: string;
+  search?: string;
+  namePatterns?: string[];
+  includeGameType?: boolean;
+  limit?: number;
+  offset?: number;
+}): Promise<GamesResponse> {
+  const queryParams = new URLSearchParams();
+  if (params.providerId) queryParams.set('providerId', params.providerId);
+  if (params.providerName) queryParams.set('provider', params.providerName);
+  if (params.gameType) queryParams.set('type', params.gameType);
+  if (params.search) queryParams.set('search', params.search);
+  if (params.namePatterns && params.namePatterns.length > 0) {
+    queryParams.set('namePatterns', params.namePatterns.join(','));
+  }
+  if (params.includeGameType) queryParams.set('includeGameType', 'true');
+  if (params.limit) queryParams.set('limit', params.limit.toString());
+  if (params.offset) queryParams.set('offset', params.offset.toString());
+  
+  const url = `/api/playfivers/games?${queryParams.toString()}`;
   const res = await fetch(url);
   const data = await res.json();
   if (!data.success) throw new Error(data.error);
-  return data.data;
+  return {
+    games: data.data,
+    total: data.total,
+    hasMore: data.hasMore,
+    limit: data.limit,
+    offset: data.offset,
+  };
 }
 
 async function launchGame(params: { gameCode: string; providerName: string; isOriginal: boolean }): Promise<{ launchUrl: string; sessionId: string }> {
@@ -105,14 +140,29 @@ async function launchGame(params: { gameCode: string; providerName: string; isOr
   return data.data;
 }
 
+const GAMES_PER_PAGE = 20;
+
 export default function Casino() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState("all");
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(true);
   const [isProvidersOpen, setIsProvidersOpen] = useState(true);
+  const [games, setGames] = useState<PlayfiversGame[]>([]);
+  const [totalGames, setTotalGames] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const { data: providers = [], isLoading: loadingProviders } = useQuery({
     queryKey: ['playfivers-providers'],
@@ -120,11 +170,69 @@ export default function Casino() {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: games = [], isLoading: loadingGames } = useQuery({
-    queryKey: ['playfivers-games', selectedProvider],
-    queryFn: () => fetchGames(selectedProvider || undefined),
+  const getCategoryFilters = (category: string): { gameType?: string; namePatterns?: string[]; includeGameType?: boolean } => {
+    switch (category) {
+      case 'slots':
+        return { gameType: 'slot' };
+      case 'live':
+        return { gameType: 'live' };
+      case 'crash':
+        return { gameType: 'crash' };
+      case 'roulette':
+        return { namePatterns: ['roleta', 'roulette'] };
+      case 'blackjack':
+        return { namePatterns: ['blackjack', '21'] };
+      case 'table':
+        return { gameType: 'table', namePatterns: ['poker', 'baccarat', 'bacara', 'craps', 'sic bo'], includeGameType: true };
+      default:
+        return {};
+    }
+  };
+
+  const categoryFilters = getCategoryFilters(activeCategory);
+
+  const { isLoading: loadingGames, refetch } = useQuery({
+    queryKey: ['playfivers-games', selectedProvider, activeCategory, debouncedSearch],
+    queryFn: async () => {
+      const result = await fetchGames({
+        providerId: selectedProvider || undefined,
+        gameType: categoryFilters.gameType,
+        namePatterns: categoryFilters.namePatterns,
+        includeGameType: categoryFilters.includeGameType,
+        search: debouncedSearch || undefined,
+        limit: GAMES_PER_PAGE,
+        offset: 0,
+      });
+      setGames(result.games);
+      setTotalGames(result.total);
+      setHasMore(result.hasMore);
+      setOffset(GAMES_PER_PAGE);
+      return result;
+    },
     staleTime: 5 * 60 * 1000,
   });
+
+  const loadMoreGames = async () => {
+    setIsLoadingMore(true);
+    try {
+      const result = await fetchGames({
+        providerId: selectedProvider || undefined,
+        gameType: categoryFilters.gameType,
+        namePatterns: categoryFilters.namePatterns,
+        includeGameType: categoryFilters.includeGameType,
+        search: debouncedSearch || undefined,
+        limit: GAMES_PER_PAGE,
+        offset,
+      });
+      setGames(prev => [...prev, ...result.games]);
+      setHasMore(result.hasMore);
+      setOffset(prev => prev + GAMES_PER_PAGE);
+    } catch (error) {
+      console.error('Failed to load more games:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
 
   const launchMutation = useMutation({
     mutationFn: launchGame,
@@ -158,20 +266,6 @@ export default function Casino() {
   };
 
   const loading = loadingProviders || loadingGames;
-
-  const filteredGames = games.filter(game => {
-      const matchesSearch = game.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                            game.providerName.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      let matchesCategory = true;
-      if (activeCategory === 'slots') matchesCategory = game.gameType === 'slot' || !game.gameType;
-      else if (activeCategory === 'live') matchesCategory = game.gameType === 'live';
-      else if (activeCategory === 'crash') matchesCategory = game.gameType === 'crash';
-      else if (activeCategory === 'roulette') matchesCategory = game.name.toLowerCase().includes('roleta') || game.name.toLowerCase().includes('roulette');
-      else if (activeCategory === 'blackjack') matchesCategory = game.name.toLowerCase().includes('blackjack');
-      
-      return matchesSearch && matchesCategory;
-  });
 
   const convertToGameCard = (game: PlayfiversGame, index: number) => ({
     id: index,
@@ -404,7 +498,7 @@ export default function Casino() {
                     </div>
                  </div>
                  <span className="text-sm text-muted-foreground font-medium bg-secondary/30 px-3 py-1 rounded-full border border-white/5 whitespace-nowrap" data-testid="text-games-count">
-                     {filteredGames.length} jogos disponíveis
+                     {games.length} de {totalGames} jogos
                  </span>
              </div>
 
@@ -414,10 +508,10 @@ export default function Casino() {
                      <Loader2 className="w-12 h-12 animate-spin text-primary mb-4" />
                      <p className="text-muted-foreground">Carregando jogos...</p>
                    </div>
-                 ) : filteredGames.length > 0 ? (
+                 ) : games.length > 0 ? (
                     <>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                          {filteredGames.slice(0, 15).map((game, index) => (
+                          {games.map((game, index) => (
                               <div 
                                 key={game.id} 
                                 onClick={() => handlePlayGame(game)}
@@ -429,32 +523,26 @@ export default function Casino() {
                           ))}
                       </div>
 
-                      {!searchQuery && !selectedProvider && activeCategory === 'all' && (
-                         <div className="relative h-40 rounded-xl overflow-hidden my-4 border border-white/10 group cursor-pointer shadow-lg">
-                            <img src={slotsTournamentBanner} alt="Tournament" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                            <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
-                                <div className="max-w-md">
-                                    <Badge className="mb-2 bg-yellow-500 text-black border-none font-bold">TORNEIO DE SLOTS</Badge>
-                                    <h3 className="text-2xl font-heading font-black text-white italic mb-1">PRÊMIO DE R$ 50.000</h3>
-                                    <p className="text-gray-300 text-sm mb-4">Jogue os slots selecionados e suba no ranking.</p>
-                                    <Button size="sm" className="rounded-full font-bold">Ver Ranking</Button>
-                                </div>
-                            </div>
-                         </div>
-                      )}
-
-                      {filteredGames.length > 15 && (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                            {filteredGames.slice(15).map((game, index) => (
-                                <div 
-                                  key={game.id} 
-                                  onClick={() => handlePlayGame(game)}
-                                  className="cursor-pointer"
-                                  data-testid={`card-game-${game.gameCode}`}
-                                >
-                                  <GameCard {...convertToGameCard(game, index + 15)} loading={false} />
-                                </div>
-                            ))}
+                      {hasMore && (
+                        <div className="flex justify-center pt-4">
+                          <Button
+                            onClick={loadMoreGames}
+                            disabled={isLoadingMore}
+                            size="lg"
+                            className="rounded-full font-bold px-8 bg-primary hover:bg-primary/90"
+                            data-testid="button-load-more"
+                          >
+                            {isLoadingMore ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Carregando...
+                              </>
+                            ) : (
+                              <>
+                                Carregar mais jogos
+                              </>
+                            )}
+                          </Button>
                         </div>
                       )}
                     </>
@@ -463,11 +551,11 @@ export default function Casino() {
                         <Search className="w-16 h-16 text-muted-foreground mb-4 opacity-30" />
                         <h3 className="text-xl font-bold text-white mb-2">Nenhum jogo encontrado</h3>
                         <p className="text-muted-foreground max-w-xs text-center">
-                          {games.length === 0 
+                          {totalGames === 0 
                             ? "Os jogos ainda não foram sincronizados. Aguarde a configuração da API."
                             : "Não encontramos jogos com os filtros selecionados. Tente buscar por outro termo."}
                         </p>
-                        {games.length > 0 && (
+                        {totalGames > 0 && (
                           <Button 
                               variant="link" 
                               className="mt-4 text-primary"
@@ -481,11 +569,14 @@ export default function Casino() {
                  )}
              </div>
              
-             {filteredGames.length > 0 && (
+             {games.length > 0 && (
                  <div className="mt-12 text-center pb-8">
-                     <p className="text-muted-foreground text-xs mb-4">Exibindo {filteredGames.length} jogos</p>
+                     <p className="text-muted-foreground text-xs mb-4">Exibindo {games.length} de {totalGames} jogos</p>
                      <div className="w-full max-w-xs mx-auto h-1 bg-secondary rounded-full overflow-hidden mb-6">
-                         <div className="h-full bg-primary w-full rounded-full" />
+                         <div 
+                           className="h-full bg-primary rounded-full transition-all duration-300" 
+                           style={{ width: `${Math.min((games.length / totalGames) * 100, 100)}%` }}
+                         />
                      </div>
                  </div>
              )}
