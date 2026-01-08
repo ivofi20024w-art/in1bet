@@ -143,17 +143,17 @@ export function Header() {
                         if (item.label === 'Carteira') {
                             return (
                                 <WalletModal key={item.path}>
-                                    <div className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors focus:bg-white/5 focus:text-primary hover:bg-white/5 hover:text-primary w-full">
-                                        <item.icon className="mr-2 h-4 w-4" />
+                                    <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-primary" onSelect={(e) => e.preventDefault()}>
+                                        <item.icon className="h-4 w-4" />
                                         <span>{item.label}</span>
-                                    </div>
+                                    </DropdownMenuItem>
                                 </WalletModal>
                             )
                         }
                         return (
                             <Link key={item.path} href={item.path}>
                                 <DropdownMenuItem className="cursor-pointer focus:bg-white/5 focus:text-primary">
-                                    <item.icon className="mr-2 h-4 w-4" />
+                                    <item.icon className="h-4 w-4" />
                                     <span>{item.label}</span>
                                 </DropdownMenuItem>
                             </Link>
@@ -162,7 +162,7 @@ export function Header() {
                     
                     <DropdownMenuSeparator className="bg-white/10" />
                     <DropdownMenuItem className="cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive" onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
+                    <LogOut className="h-4 w-4" />
                     Sair
                     </DropdownMenuItem>
                 </DropdownMenuContent>
