@@ -48,6 +48,21 @@ async function fetchPopularGames(): Promise<SlotsgatewayGame[]> {
   return data.data || [];
 }
 
+const PROVIDER_IDS: Record<string, string> = {
+  pragmaticslots: '6c841f79-cd1b-4af4-ba5b-f3b9a6888410',
+  pgsoft: 'f05c6248-d8b6-4d4b-bfb8-b9a44df6238a',
+  hacksaw: 'f3a3e603-a7b4-4897-b67d-d8a32197dce0',
+};
+
+async function fetchProviderGames(providerSlug: string): Promise<SlotsgatewayGame[]> {
+  const providerId = PROVIDER_IDS[providerSlug];
+  if (!providerId) return [];
+  const res = await fetch(`/api/slotsgateway/games?providerId=${providerId}&type=video-slots&limit=10`, { credentials: 'include' });
+  const data = await res.json();
+  if (!data.success) return [];
+  return data.data || [];
+}
+
 async function launchGame(params: { idHash: string }): Promise<{ launchUrl: string }> {
   const token = localStorage.getItem('accessToken');
   const res = await fetch('/api/slotsgateway/launch', {
@@ -98,6 +113,24 @@ export default function Home() {
   const { data: popularGames = [], isLoading } = useQuery({
     queryKey: ['slotsgateway-popular-games'],
     queryFn: fetchPopularGames,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: pragmaticGames = [], isLoading: loadingPragmatic } = useQuery({
+    queryKey: ['slotsgateway-pragmatic-games'],
+    queryFn: () => fetchProviderGames('pragmaticslots'),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: pgsoftGames = [], isLoading: loadingPgsoft } = useQuery({
+    queryKey: ['slotsgateway-pgsoft-games'],
+    queryFn: () => fetchProviderGames('pgsoft'),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const { data: hacksawGames = [], isLoading: loadingHacksaw } = useQuery({
+    queryKey: ['slotsgateway-hacksaw-games'],
+    queryFn: () => fetchProviderGames('hacksaw'),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -259,32 +292,76 @@ export default function Home() {
         )}
       </section>
 
-       <section className="mb-12">
-        <Link href="/live-casino">
-          <div className="relative h-56 md:h-64 rounded-2xl overflow-hidden bg-gradient-to-r from-card via-card/95 to-card border border-primary/20 shadow-2xl group cursor-pointer hover:border-primary/40 transition-all">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/5 opacity-50" />
-              <div className="absolute inset-0 flex items-center justify-between p-8 md:p-12 z-10">
-                  <div className="max-w-lg space-y-4">
-                      <div className="flex items-center gap-2 mb-2">
-                          <span className="flex h-3 w-3 relative">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                          </span>
-                          <span className="text-xs font-bold text-red-400 uppercase tracking-widest bg-red-500/10 px-2 py-0.5 rounded">Ao Vivo Agora</span>
-                      </div>
-                      <h3 className="text-3xl md:text-5xl font-heading font-black text-white italic leading-none">CASINO <span className="text-primary">AO VIVO</span></h3>
-                      <p className="text-muted-foreground max-w-sm text-sm md:text-base font-medium">Sinta a emoção de Las Vegas na palma da sua mão com dealers reais 24/7.</p>
-                      <Button className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-8 h-12 shadow-[0_0_20px_rgba(249,115,22,0.3)] group-hover:shadow-[0_0_30px_rgba(249,115,22,0.5)] transition-all">
-                          <Play className="w-5 h-5 mr-2 fill-white" /> JOGAR AGORA
-                      </Button>
-                  </div>
-                  
-                  <div className="hidden lg:block">
-                      <div className="w-48 h-48 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 opacity-50 blur-3xl absolute right-20 top-1/2 -translate-y-1/2" />
-                  </div>
-              </div>
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-red-500/20 rounded-lg">
+              <Flame className="w-6 h-6 text-red-500" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-heading font-bold text-white leading-none">Pragmatic Play</h2>
+              <p className="text-xs text-muted-foreground">Os melhores slots do mundo</p>
+            </div>
           </div>
-        </Link>
+          <Link href="/casino?provider=pragmaticslots" className="text-sm font-bold text-primary hover:text-white transition-colors">Ver todos</Link>
+        </div>
+        {loadingPragmatic ? (
+          <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
+        ) : pragmaticGames.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {pragmaticGames.map(game => (
+              <GameCard key={game.id} game={game} onPlay={() => handlePlayGame(game)} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-purple-500/20 rounded-lg">
+              <Gamepad2 className="w-6 h-6 text-purple-500" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-heading font-bold text-white leading-none">PG Soft</h2>
+              <p className="text-xs text-muted-foreground">Jogos inovadores e divertidos</p>
+            </div>
+          </div>
+          <Link href="/casino?provider=pgsoft" className="text-sm font-bold text-primary hover:text-white transition-colors">Ver todos</Link>
+        </div>
+        {loadingPgsoft ? (
+          <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
+        ) : pgsoftGames.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {pgsoftGames.map(game => (
+              <GameCard key={game.id} game={game} onPlay={() => handlePlayGame(game)} />
+            ))}
+          </div>
+        )}
+      </section>
+
+      <section className="mb-12">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2">
+            <div className="p-2 bg-green-500/20 rounded-lg">
+              <Zap className="w-6 h-6 text-green-500" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-heading font-bold text-white leading-none">Hacksaw Gaming</h2>
+              <p className="text-xs text-muted-foreground">Alta volatilidade e grandes prêmios</p>
+            </div>
+          </div>
+          <Link href="/casino?provider=hacksaw" className="text-sm font-bold text-primary hover:text-white transition-colors">Ver todos</Link>
+        </div>
+        {loadingHacksaw ? (
+          <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
+        ) : hacksawGames.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {hacksawGames.map(game => (
+              <GameCard key={game.id} game={game} onPlay={() => handlePlayGame(game)} />
+            ))}
+          </div>
+        )}
       </section>
     </MainLayout>
   );
