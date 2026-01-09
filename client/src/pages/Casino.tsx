@@ -142,8 +142,8 @@ export default function Casino() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState("all");
-  const [isCategoriesOpen, setIsCategoriesOpen] = useState(true);
-  const [isProvidersOpen, setIsProvidersOpen] = useState(true);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [isProvidersOpen, setIsProvidersOpen] = useState(false);
   const [games, setGames] = useState<SlotsgatewayGame[]>([]);
   const [totalGames, setTotalGames] = useState(0);
   const [hasMore, setHasMore] = useState(false);
@@ -265,34 +265,54 @@ export default function Casino() {
 
   return (
     <MainLayout>
-      <div className="relative h-[120px] md:h-[140px] rounded-xl overflow-hidden mb-4 group shadow-lg">
+      <div className="relative h-[140px] md:h-[160px] rounded-xl overflow-hidden mb-4 group shadow-lg">
           <Carousel className="w-full h-full" opts={{ loop: true }} plugins={[Autoplay({ delay: 5000 })]}>
               <CarouselContent>
                   <CarouselItem>
-                      <div className="relative h-[120px] md:h-[140px]">
-                        <img src={casinoHero} alt="Casino Lobby" className="absolute inset-0 w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
-                        <div className="absolute inset-0 flex items-center px-6 md:px-10">
+                      <div className="relative h-[140px] md:h-[160px] bg-gradient-to-r from-yellow-900 via-amber-800 to-yellow-700">
+                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?q=80&w=1200')] bg-cover bg-center opacity-20" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+                        <div className="absolute inset-0 flex items-center justify-between px-6 md:px-10">
                           <div>
-                            <Badge className="w-fit mb-2 bg-yellow-500 text-black hover:bg-yellow-400 font-bold px-2 py-0.5 text-[10px]">JACKPOT</Badge>
-                            <h1 className="text-xl md:text-2xl font-heading font-black text-white leading-tight drop-shadow-lg">
-                              R$ 150.000 <span className="text-primary italic">EM PRÊMIOS</span>
+                            <Badge className="w-fit mb-2 bg-gradient-to-r from-yellow-400 to-amber-500 text-black font-bold px-3 py-1 text-[10px] animate-pulse shadow-lg">
+                              <Trophy className="w-3 h-3 inline mr-1" />
+                              JACKPOT PROGRESSIVO
+                            </Badge>
+                            <h1 className="text-xl md:text-3xl font-heading font-black text-white leading-tight drop-shadow-lg">
+                              Acumule e <span className="text-yellow-400 italic">GANHE GRANDE!</span>
                             </h1>
+                            <p className="text-gray-300 text-xs mt-1 hidden md:block">Quanto mais você joga, maior o prêmio</p>
+                          </div>
+                          <div className="text-right hidden sm:block">
+                            <div className="text-yellow-400 text-2xl md:text-4xl font-black animate-pulse">R$ 47.832</div>
+                            <div className="text-gray-400 text-[10px] uppercase tracking-wider">Prêmio Atual</div>
                           </div>
                         </div>
                       </div>
                   </CarouselItem>
                   <CarouselItem>
-                      <div className="relative h-[120px] md:h-[140px] bg-[#0f0f15]">
-                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1596838132731-3301c3fd4317?q=80&w=1200')] bg-cover bg-center opacity-40" />
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-900/90 to-transparent" />
-                        <div className="absolute inset-0 flex items-center px-6 md:px-10">
+                      <div className="relative h-[140px] md:h-[160px] bg-gradient-to-r from-purple-900 via-violet-800 to-purple-700">
+                        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1596838132731-3301c3fd4317?q=80&w=1200')] bg-cover bg-center opacity-30" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
+                        <div className="absolute inset-0 flex items-center justify-between px-6 md:px-10">
                           <div>
-                            <Badge className="w-fit mb-2 bg-purple-500 text-white font-bold px-2 py-0.5 text-[10px]">NOVIDADE</Badge>
-                            <h1 className="text-xl md:text-2xl font-heading font-black text-white leading-tight drop-shadow-lg">
+                            <Badge className="w-fit mb-2 bg-purple-500 text-white font-bold px-3 py-1 text-[10px]">
+                              <Zap className="w-3 h-3 inline mr-1" />
+                              DESTAQUE
+                            </Badge>
+                            <h1 className="text-xl md:text-3xl font-heading font-black text-white leading-tight drop-shadow-lg">
                               GATES OF <span className="text-purple-400 italic">OLYMPUS 1000</span>
                             </h1>
+                            <p className="text-gray-300 text-xs mt-1 hidden md:block">Multiplicador máximo de 15.000x</p>
                           </div>
+                          <Button 
+                            size="sm" 
+                            className="rounded-full font-bold bg-purple-500 hover:bg-purple-400 shadow-lg shadow-purple-500/30 px-6"
+                            onClick={() => launchMutation.mutate({ idHash: 'pragmaticnx/GatesofOlympus1000' })}
+                          >
+                            <Play className="w-4 h-4 mr-1 fill-white" />
+                            Jogar Agora
+                          </Button>
                         </div>
                       </div>
                   </CarouselItem>
@@ -306,22 +326,40 @@ export default function Casino() {
           100% { transform: translateX(-50%); }
         }
       `}</style>
-      <div className="bg-white/5 border-y border-white/5 -mx-4 md:-mx-8 py-2 mb-6 overflow-hidden relative">
-          <div className="flex items-center gap-6 whitespace-nowrap px-4" style={{ animation: 'marquee 30s linear infinite' }}>
-              {[...Array(20)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-2 bg-black/20 rounded-full px-3 py-1 border border-white/5 flex-shrink-0">
-                      <div className="relative">
-                          <img src={`https://i.pravatar.cc/150?u=${i % 10}`} alt="Winner" className="w-5 h-5 rounded-full border border-white/10" />
-                          <div className="absolute -bottom-0.5 -right-0.5 bg-yellow-500 text-[6px] text-black font-bold px-0.5 rounded-full">VIP</div>
-                      </div>
-                      <span className="text-gray-300 text-[10px] font-medium">user***{i % 10}9</span>
-                      <span className="text-green-400 font-bold text-xs">R$ {((i * 137 + 100) % 2000 + 100).toFixed(2)}</span>
-                      <span className="text-gray-500 text-[9px] uppercase">{['Fortune Tiger', 'Mines', 'Aviator', 'Roleta'][i % 4]}</span>
-                  </div>
-              ))}
+      <div className="bg-gradient-to-r from-green-900/20 via-emerald-900/10 to-green-900/20 border-y border-green-500/20 -mx-4 md:-mx-8 py-3 mb-6 overflow-hidden relative">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex items-center gap-2 bg-green-500/20 backdrop-blur-sm rounded-full px-3 py-1 border border-green-500/30">
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+            <span className="text-green-400 text-[10px] font-bold uppercase tracking-wider">Ao Vivo</span>
           </div>
-          <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-background to-transparent z-10" />
-          <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent z-10" />
+          <div className="flex items-center gap-6 whitespace-nowrap px-4 ml-24" style={{ animation: 'marquee 40s linear infinite' }}>
+              {[...Array(20)].map((_, i) => {
+                const level = [5, 12, 23, 8, 45, 67, 15, 32, 19, 55][i % 10];
+                const levelColor = level >= 50 ? 'from-yellow-500 to-amber-600' : 
+                                   level >= 30 ? 'from-purple-500 to-violet-600' : 
+                                   level >= 15 ? 'from-blue-500 to-cyan-600' : 
+                                   'from-gray-500 to-gray-600';
+                return (
+                  <div key={i} className="flex items-center gap-3 bg-black/40 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/10 flex-shrink-0 hover:border-green-500/30 transition-colors">
+                      <div className="relative">
+                          <img src={`https://i.pravatar.cc/150?u=${i % 10}`} alt="Winner" className="w-7 h-7 rounded-full border-2 border-green-500/50 shadow-lg shadow-green-500/20" />
+                          <div className={`absolute -bottom-1 -right-1 bg-gradient-to-r ${levelColor} text-[7px] text-white font-bold px-1.5 py-0.5 rounded-full shadow-md`}>
+                            {level}
+                          </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-white text-[11px] font-semibold">user***{i % 10}9</span>
+                        <span className="text-gray-500 text-[9px]">{['Fortune Tiger', 'Mines', 'Aviator', 'Roleta', 'Gates', 'Crash', 'Double', 'Plinko'][i % 8]}</span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-green-400 font-bold text-sm">+R$ {((i * 137 + 100) % 2000 + 100).toFixed(2)}</span>
+                        <span className="text-gray-600 text-[8px]">agora</span>
+                      </div>
+                  </div>
+                );
+              })}
+          </div>
+          <div className="absolute inset-y-0 left-0 w-28 bg-gradient-to-r from-background via-background/80 to-transparent z-10" />
+          <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
       </div>
 
       <div className="flex gap-4 mb-10 overflow-x-auto pb-4 scrollbar-none snap-x px-1">
