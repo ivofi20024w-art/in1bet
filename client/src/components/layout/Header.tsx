@@ -21,7 +21,7 @@ import { useAuthModal } from "@/stores/authModalStore";
 
 interface SearchGame {
   id: string;
-  gameCode: string;
+  idHash: string;
   name: string;
   imageUrl: string | null;
   providerName: string;
@@ -41,7 +41,7 @@ export function Header() {
     queryKey: ['search-games', searchQuery],
     queryFn: async () => {
       if (!searchQuery.trim() || searchQuery.length < 2) return [];
-      const res = await fetch(`/api/playfivers/games?search=${encodeURIComponent(searchQuery)}&limit=10`, { 
+      const res = await fetch(`/api/slotsgateway/games?search=${encodeURIComponent(searchQuery)}&limit=10`, { 
         credentials: 'include' 
       });
       const data = await res.json();
@@ -147,14 +147,16 @@ export function Header() {
     setSearchQuery("");
     
     try {
-      const res = await fetch('/api/playfivers/launch', {
+      const token = localStorage.getItem('accessToken');
+      const res = await fetch('/api/slotsgateway/launch', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
         credentials: 'include',
         body: JSON.stringify({
-          gameCode: game.gameCode,
-          providerName: game.providerName,
-          isOriginal: false,
+          idHash: game.idHash,
         }),
       });
       const data = await res.json();
@@ -223,7 +225,7 @@ export function Header() {
                       key={game.id}
                       onClick={() => handleGameClick(game)}
                       className="w-full flex items-center gap-3 px-3 py-2 hover:bg-white/5 transition-colors text-left"
-                      data-testid={`search-result-${game.gameCode}`}
+                      data-testid={`search-result-${game.idHash}`}
                     >
                       <div className="w-12 h-12 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
                         {game.imageUrl ? (

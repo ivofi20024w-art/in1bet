@@ -24,13 +24,13 @@ Preferred communication style: Simple, everyday language.
 - **Authentication**: JWT-based (access/refresh tokens)
 - **Password Security**: bcrypt
 - **API Structure**: RESTful endpoints
-- **Modular Design**: Separate modules for `auth`, `users`, `wallet`, `payments`, `withdrawals`, `kyc`, `admin`, `betting`, `games`, `history`, `affiliate`, `playfivers`, `support`, `levels`, `rakeback`, `notifications`, and `missions`.
+- **Modular Design**: Separate modules for `auth`, `users`, `wallet`, `payments`, `withdrawals`, `kyc`, `admin`, `betting`, `games`, `history`, `affiliate`, `slotsgateway`, `support`, `levels`, `rakeback`, `notifications`, and `missions`.
 
 ### Data Storage
 - **Database**: PostgreSQL
 - **ORM**: Drizzle ORM with drizzle-kit for migrations
 - **Schema**: `shared/schema.ts` (shared between frontend/backend)
-- **Key Tables**: `users`, `wallets`, `refreshTokens`, `pixDeposits`, `pixWithdrawals`, `transactions`, `bets`, `minesGames`, `bonuses`, `user_bonuses`, `welcome_bonus_claims`, `affiliates`, `affiliate_links`, `affiliate_conversions`, `affiliate_payouts`, `affiliate_clicks`, `playfivers_providers`, `playfivers_games`, `playfivers_sessions`, `playfivers_transactions`, `support_departments`, `admin_departments`, `support_chats`, `support_chat_messages`, `support_chat_transfers`, `support_tickets`, `support_ticket_messages`, `support_ticket_escalations`, `support_canned_responses`, `support_sla_rules`, `support_audit_logs`, `support_triage_rules`, `level_history`, `daily_box_claims`, `rakeback_settings`, `rakeback_periods`, `rakeback_payouts`, `notifications`, `user_notifications`, `notification_preferences`, `push_subscriptions`, `mission_templates`, `mission_instances`, `mission_assignments`, `mission_progress_logs`.
+- **Key Tables**: `users`, `wallets`, `refreshTokens`, `pixDeposits`, `pixWithdrawals`, `transactions`, `bets`, `minesGames`, `bonuses`, `user_bonuses`, `welcome_bonus_claims`, `affiliates`, `affiliate_links`, `affiliate_conversions`, `affiliate_payouts`, `affiliate_clicks`, `slotsgateway_providers`, `slotsgateway_games`, `slotsgateway_sessions`, `slotsgateway_transactions`, `support_departments`, `admin_departments`, `support_chats`, `support_chat_messages`, `support_chat_transfers`, `support_tickets`, `support_ticket_messages`, `support_ticket_escalations`, `support_canned_responses`, `support_sla_rules`, `support_audit_logs`, `support_triage_rules`, `level_history`, `daily_box_claims`, `rakeback_settings`, `rakeback_periods`, `rakeback_payouts`, `notifications`, `user_notifications`, `notification_preferences`, `push_subscriptions`, `mission_templates`, `mission_instances`, `mission_assignments`, `mission_progress_logs`.
 
 ### Authentication
 - User registration with CPF validation.
@@ -112,7 +112,7 @@ Preferred communication style: Simple, everyday language.
 ### Security
 - **Rate Limiting**: Applied to general API access, authentication, registration, PIX creation, withdrawals, and webhooks.
 - **Webhook Security**: HMAC-SHA256 signature verification for OndaPay webhooks (required in production).
-- **PlayFivers Webhook Security**: Agent credentials validation (agent_code/agent_secret), timestamp verification (5-minute tolerance), duplicate transaction prevention via idempotency keys.
+- **SlotsGateway Callback Security**: API login/password validation, timestamp verification, duplicate transaction prevention via idempotency keys.
 
 ## External Dependencies
 
@@ -121,13 +121,15 @@ Preferred communication style: Simple, everyday language.
 
 ### Third-Party Integrations
 - **OndaPay PIX**: For real PIX payment deposits and webhooks.
-- **PlayFivers API**: Gaming provider integration for slots and live casino games. Features:
-  - Providers/games synchronization and caching
-  - Game launch with session tracking
-  - Webhook handlers for balance queries and transactions (Bet/WinBet)
+- **SlotsGateway API**: Gaming provider integration for slots and live casino games. Features:
+  - Game list synchronization with 4500+ games available
+  - Game launch with id_hash identification
+  - Callback handlers for balance/bet/win transactions
   - Idempotent transaction processing with atomic DB operations
-  - Timestamp validation for webhook security
-  - Required secrets: `PLAYFIVERS_AGENT_TOKEN`, `PLAYFIVERS_SECRET_KEY`, `PLAYFIVERS_AGENT_CODE`, `PLAYFIVERS_AGENT_SECRET`
+  - Player creation with pattern `in1bet_{userId}`
+  - Currency: BRL (Brazilian Real), balance in cents
+  - Required secrets: `SLOTSGATEWAY_API_LOGIN`, `SLOTSGATEWAY_API_PASSWORD`
+  - Environment variable: `SLOTSGATEWAY_BASE_URL` (https://api-eu-1.slotsgateway.com/api/system/operator)
 - **JivoChat**: Live chat widget (placeholder).
 
 ### Key NPM Packages

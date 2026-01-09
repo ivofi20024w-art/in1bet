@@ -13,14 +13,14 @@ import welcomeBanner from "@assets/welcome_banner_panoramic.png";
 import cashbackBanner from "@assets/cashback_banner.png";
 import dropsBanner from "@assets/drops_banner.png";
 
-interface PlayfiversGame {
+interface SlotsgatewayGame {
   id: string;
-  gameCode: string;
+  idHash: string;
   name: string;
   imageUrl: string | null;
   providerName: string;
-  isOriginal: boolean;
   gameType: string | null;
+  isNew: boolean;
 }
 
 const BANNERS = [
@@ -44,31 +44,35 @@ const CATEGORIES = [
   { id: "favorites", label: "Favoritos", icon: Star, link: "/casino" },
 ];
 
-async function fetchPopularGames(): Promise<PlayfiversGame[]> {
-  const res = await fetch('/api/playfivers/games', { credentials: 'include' });
+async function fetchPopularGames(): Promise<SlotsgatewayGame[]> {
+  const res = await fetch('/api/slotsgateway/games?limit=12', { credentials: 'include' });
   const data = await res.json();
   if (!data.success) return [];
-  return (data.data || []).slice(0, 12);
+  return data.data || [];
 }
 
-async function launchGame(params: { gameCode: string; providerName: string; isOriginal: boolean }): Promise<{ launchUrl: string }> {
-  const res = await fetch('/api/playfivers/launch', {
+async function launchGame(params: { idHash: string }): Promise<{ launchUrl: string }> {
+  const token = localStorage.getItem('accessToken');
+  const res = await fetch('/api/slotsgateway/launch', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
     credentials: 'include',
-    body: JSON.stringify(params),
+    body: JSON.stringify({ idHash: params.idHash }),
   });
   const data = await res.json();
   if (!data.success) throw new Error(data.error || "Erro ao iniciar jogo");
   return data.data;
 }
 
-function GameCard({ game, onPlay }: { game: PlayfiversGame; onPlay: () => void }) {
+function GameCard({ game, onPlay }: { game: SlotsgatewayGame; onPlay: () => void }) {
   return (
     <div 
       onClick={onPlay}
       className="group relative rounded-xl overflow-hidden bg-card border border-white/5 hover:border-primary/50 transition-all cursor-pointer shadow-lg hover:shadow-primary/20 hover:-translate-y-1 duration-300"
-      data-testid={`game-card-${game.gameCode}`}
+      data-testid={`game-card-${game.idHash}`}
     >
       <div className="aspect-[4/3] relative">
         <img 
@@ -95,7 +99,7 @@ export default function Home() {
   const [, setLocation] = useLocation();
 
   const { data: popularGames = [], isLoading } = useQuery({
-    queryKey: ['playfivers-popular-games'],
+    queryKey: ['slotsgateway-popular-games'],
     queryFn: fetchPopularGames,
     staleTime: 5 * 60 * 1000,
   });
@@ -115,11 +119,9 @@ export default function Home() {
     },
   });
 
-  const handlePlayGame = (game: PlayfiversGame) => {
+  const handlePlayGame = (game: SlotsgatewayGame) => {
     launchMutation.mutate({
-      gameCode: game.gameCode,
-      providerName: game.providerName,
-      isOriginal: game.isOriginal,
+      idHash: game.idHash,
     });
   };
 
@@ -251,7 +253,7 @@ export default function Home() {
           </div>
         ) : popularGames.length === 0 ? (
           <div className="text-center py-12 text-muted-foreground">
-            <p>Jogos serão exibidos quando a integração PlayFivers estiver configurada.</p>
+            <p>Jogos serão exibidos quando a integração SlotsGateway estiver configurada.</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">

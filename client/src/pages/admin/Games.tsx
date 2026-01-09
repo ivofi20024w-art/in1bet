@@ -34,29 +34,29 @@ interface Provider {
 interface Game {
   id: string;
   name: string;
-  gameCode: string;
+  idHash: string;
   providerName: string;
   gameType: string | null;
-  isActive: boolean;
+  status: string;
   imageUrl: string | null;
-  isOriginal: boolean;
+  isNew: boolean;
 }
 
 async function fetchProviders(): Promise<Provider[]> {
   const auth = getStoredAuth();
-  const response = await fetch("/api/playfivers/providers", {
+  const response = await fetch("/api/slotsgateway/providers", {
     headers: auth.accessToken ? { Authorization: `Bearer ${auth.accessToken}` } : {},
   });
   if (!response.ok) throw new Error("Failed to fetch providers");
   const data = await response.json();
-  return data.success ? data.data : [];
+  return data.providers || [];
 }
 
 async function fetchGames(providerName?: string): Promise<Game[]> {
   const auth = getStoredAuth();
   const params = new URLSearchParams();
   if (providerName) params.set("providerId", providerName);
-  const response = await fetch(`/api/playfivers/games?${params}`, {
+  const response = await fetch(`/api/slotsgateway/games?${params}`, {
     headers: auth.accessToken ? { Authorization: `Bearer ${auth.accessToken}` } : {},
   });
   if (!response.ok) throw new Error("Failed to fetch games");
@@ -64,22 +64,10 @@ async function fetchGames(providerName?: string): Promise<Game[]> {
   return data.success ? data.data : [];
 }
 
-async function syncProviders(): Promise<{ count: number }> {
+async function syncAllGames(): Promise<{ count: number }> {
   const auth = getStoredAuth();
-  const response = await fetch("/api/playfivers/providers?sync=true", {
-    headers: auth.accessToken ? { Authorization: `Bearer ${auth.accessToken}` } : {},
-  });
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: "Failed to sync" }));
-    throw new Error(error.error || "Failed to sync providers");
-  }
-  const data = await response.json();
-  return { count: data.success ? data.data.length : 0 };
-}
-
-async function syncGames(providerName: string): Promise<{ count: number }> {
-  const auth = getStoredAuth();
-  const response = await fetch(`/api/playfivers/games?providerId=${providerName}&sync=true`, {
+  const response = await fetch("/api/slotsgateway/sync", {
+    method: "POST",
     headers: auth.accessToken ? { Authorization: `Bearer ${auth.accessToken}` } : {},
   });
   if (!response.ok) {
@@ -87,7 +75,7 @@ async function syncGames(providerName: string): Promise<{ count: number }> {
     throw new Error(error.error || "Failed to sync games");
   }
   const data = await response.json();
-  return { count: data.success ? data.data.length : 0 };
+  return { count: data.count || 0 };
 }
 
 export default function AdminGames() {
@@ -96,31 +84,21 @@ export default function AdminGames() {
   const queryClient = useQueryClient();
 
   const { data: providers = [], isLoading: loadingProviders } = useQuery({
-    queryKey: ["admin-playfivers-providers"],
+    queryKey: ["admin-slotsgateway-providers"],
     queryFn: fetchProviders,
   });
 
   const { data: games = [], isLoading: loadingGames } = useQuery({
-    queryKey: ["admin-playfivers-games", selectedProvider],
+    queryKey: ["admin-slotsgateway-games", selectedProvider],
     queryFn: () => fetchGames(selectedProvider || undefined),
   });
 
-  const syncProvidersMutation = useMutation({
-    mutationFn: syncProviders,
-    onSuccess: (data) => {
-      toast.success(`${data.count} provedores sincronizados`);
-      queryClient.invalidateQueries({ queryKey: ["admin-playfivers-providers"] });
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || "Erro ao sincronizar provedores");
-    },
-  });
-
   const syncGamesMutation = useMutation({
-    mutationFn: syncGames,
+    mutationFn: syncAllGames,
     onSuccess: (data) => {
       toast.success(`${data.count} jogos sincronizados`);
-      queryClient.invalidateQueries({ queryKey: ["admin-playfivers-games"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-slotsgateway-providers"] });
+      queryClient.invalidateQueries({ queryKey: ["admin-slotsgateway-games"] });
     },
     onError: (error: Error) => {
       toast.error(error.message || "Erro ao sincronizar jogos");
@@ -129,12 +107,12 @@ export default function AdminGames() {
 
   const filteredGames = games.filter((game) =>
     game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    game.gameCode.toLowerCase().includes(searchQuery.toLowerCase())
+    game.idHash.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const activeProviders = providers.filter((p) => p.isActive).length;
+  const activeProviders = providers.length;
   const totalGames = games.length;
-  const activeGames = games.filter((g) => g.isActive).length;
+  const activeGames = games.filter((g) => g.status === "ACTIVE").length;
 
   return (
     <AdminLayout title="Gerenciamento de Jogos">
@@ -202,20 +180,20 @@ export default function AdminGames() {
                 <div>
                   <CardTitle>Provedores de Jogos</CardTitle>
                   <CardDescription>
-                    Gerencie os provedores de jogos da PlayFivers
+                    Gerencie os provedores de jogos do SlotsGateway
                   </CardDescription>
                 </div>
                 <Button
-                  onClick={() => syncProvidersMutation.mutate()}
-                  disabled={syncProvidersMutation.isPending}
+                  onClick={() => syncGamesMutation.mutate()}
+                  disabled={syncGamesMutation.isPending}
                   className="bg-emerald-600 hover:bg-emerald-700"
                 >
-                  {syncProvidersMutation.isPending ? (
+                  {syncGamesMutation.isPending ? (
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
                   ) : (
                     <RefreshCw className="h-4 w-4 mr-2" />
                   )}
-                  Sincronizar Provedores
+                  Sincronizar Jogos
                 </Button>
               </CardHeader>
               <CardContent>
@@ -228,7 +206,7 @@ export default function AdminGames() {
                     <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p className="mb-2">Nenhum provedor sincronizado</p>
                     <p className="text-sm">
-                      Configure as credenciais PLAYFIVERS_AGENT_TOKEN e PLAYFIVERS_SECRET_KEY para sincronizar.
+                      Configure as credenciais SLOTSGATEWAY_API_LOGIN e SLOTSGATEWAY_API_PASSWORD para sincronizar.
                     </p>
                   </div>
                 ) : (
@@ -283,7 +261,7 @@ export default function AdminGames() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => syncGamesMutation.mutate(provider.name)}
+                                onClick={() => syncGamesMutation.mutate()}
                                 disabled={syncGamesMutation.isPending}
                                 className="border-gray-700"
                               >
@@ -354,11 +332,11 @@ export default function AdminGames() {
                         <TableRow className="border-gray-800">
                           <TableHead>Imagem</TableHead>
                           <TableHead>Nome</TableHead>
-                          <TableHead>Código</TableHead>
+                          <TableHead>ID Hash</TableHead>
                           <TableHead>Provedor</TableHead>
                           <TableHead>Tipo</TableHead>
                           <TableHead className="text-center">Status</TableHead>
-                          <TableHead className="text-center">Original</TableHead>
+                          <TableHead className="text-center">Novo</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -378,8 +356,8 @@ export default function AdminGames() {
                               )}
                             </TableCell>
                             <TableCell className="font-medium">{game.name}</TableCell>
-                            <TableCell className="text-gray-400 text-xs font-mono">
-                              {game.gameCode}
+                            <TableCell className="text-gray-400 text-xs font-mono max-w-[150px] truncate">
+                              {game.idHash}
                             </TableCell>
                             <TableCell>{game.providerName}</TableCell>
                             <TableCell>
@@ -388,16 +366,16 @@ export default function AdminGames() {
                               </Badge>
                             </TableCell>
                             <TableCell className="text-center">
-                              {game.isActive ? (
+                              {game.status === "ACTIVE" ? (
                                 <CheckCircle className="h-5 w-5 text-emerald-500 mx-auto" />
                               ) : (
                                 <XCircle className="h-5 w-5 text-red-500 mx-auto" />
                               )}
                             </TableCell>
                             <TableCell className="text-center">
-                              {game.isOriginal ? (
+                              {game.isNew ? (
                                 <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
-                                  Original
+                                  Novo
                                 </Badge>
                               ) : (
                                 <span className="text-gray-500">-</span>

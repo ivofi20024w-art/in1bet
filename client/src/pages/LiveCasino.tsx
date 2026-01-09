@@ -292,7 +292,7 @@ export default function LiveCasino() {
                 ) : filteredGames.length === 0 ? (
                   <div className="text-center py-20">
                     <p className="text-muted-foreground">Nenhum jogo ao vivo encontrado</p>
-                    <p className="text-sm text-muted-foreground mt-2">Os jogos ao vivo serão carregados quando a integração PlayFivers estiver configurada.</p>
+                    <p className="text-sm text-muted-foreground mt-2">Os jogos ao vivo serão carregados quando a integração SlotsGateway estiver configurada.</p>
                   </div>
                 ) : (
                   <>
