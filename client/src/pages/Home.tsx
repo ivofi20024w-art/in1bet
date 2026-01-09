@@ -37,15 +37,15 @@ const ORIGINALS = [
 ];
 
 const CATEGORIES = [
-  { id: "lobby", label: "Lobby", icon: Gamepad2, link: "/" },
-  { id: "slots", label: "Slots", icon: Flame, link: "/casino" },
+  { id: "lobby", label: "Lobby", icon: Gamepad2, link: "/#originals" },
+  { id: "slots", label: "Slots", icon: Flame, link: "/casino?category=slots" },
   { id: "live", label: "Ao Vivo", icon: Play, link: "/live-casino" },
-  { id: "originals", label: "Originais", icon: Rocket, link: "/originals" },
-  { id: "favorites", label: "Favoritos", icon: Star, link: "/casino" },
+  { id: "originals", label: "Originais", icon: Rocket, link: "/#originals" },
+  { id: "favorites", label: "Favoritos", icon: Star, link: "/casino?category=favorites" },
 ];
 
 async function fetchPopularGames(): Promise<SlotsgatewayGame[]> {
-  const res = await fetch('/api/slotsgateway/games?limit=12', { credentials: 'include' });
+  const res = await fetch('/api/slotsgateway/games?type=video-slots&limit=12', { credentials: 'include' });
   const data = await res.json();
   if (!data.success) return [];
   return data.data || [];
@@ -175,7 +175,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="mb-12">
+      <section id="originals" className="mb-12 scroll-mt-24">
         <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
                 <div className="p-2 bg-primary/20 rounded-lg">
@@ -186,7 +186,6 @@ export default function Home() {
                     <p className="text-xs text-muted-foreground">Jogos exclusivos com RTP de 99%</p>
                 </div>
             </div>
-            <Link href="/originals" className="text-sm font-bold text-primary hover:text-white transition-colors">Ver todos</Link>
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

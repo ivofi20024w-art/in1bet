@@ -157,31 +157,31 @@ export default function AuthModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-[480px] p-0 gap-0 bg-gradient-to-br from-[#0a0a0f] via-[#0d0d14] to-[#0a0a0f] border-white/10 overflow-hidden" aria-describedby={undefined}>
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto p-0 gap-0 bg-gradient-to-br from-[#0a0a0f] via-[#0d0d14] to-[#0a0a0f] border-white/10" aria-describedby={undefined}>
         <VisuallyHidden>
           <DialogTitle>Autenticação</DialogTitle>
         </VisuallyHidden>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent pointer-events-none" />
         
-        <div className="relative z-10 p-6">
-          <div className="text-center mb-4">
-            <h1 className="text-2xl sm:text-3xl font-heading font-bold italic text-primary tracking-wide">
+        <div className="relative z-10 p-4 sm:p-5">
+          <div className="text-center mb-3">
+            <h1 className="text-xl sm:text-2xl font-heading font-bold italic text-primary tracking-wide">
               IN1<span className="text-white">BET</span>
             </h1>
           </div>
 
           <Tabs value={activeTab} onValueChange={(v) => setTab(v as 'login' | 'register')} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-secondary/50 p-0.5 rounded-lg mb-4 h-9">
+            <TabsList className="grid w-full grid-cols-2 bg-secondary/50 p-0.5 rounded-lg mb-3 h-8">
               <TabsTrigger 
                 value="login" 
-                className="rounded-md text-xs sm:text-sm h-8 data-[state=active]:bg-primary data-[state=active]:text-white font-semibold"
+                className="rounded-md text-xs h-7 data-[state=active]:bg-primary data-[state=active]:text-white font-semibold"
                 data-testid="tab-login"
               >
                 Entrar
               </TabsTrigger>
               <TabsTrigger 
                 value="register" 
-                className="rounded-md text-xs sm:text-sm h-8 data-[state=active]:bg-primary data-[state=active]:text-white font-semibold"
+                className="rounded-md text-xs h-7 data-[state=active]:bg-primary data-[state=active]:text-white font-semibold"
                 data-testid="tab-register"
               >
                 Cadastrar
@@ -189,28 +189,28 @@ export default function AuthModal() {
             </TabsList>
 
             <TabsContent value="login" className="mt-0">
-              <form onSubmit={handleLogin} className="space-y-4">
+              <form onSubmit={handleLogin} className="space-y-3">
                 {loginError && (
                   <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg">
                     {loginError}
                   </div>
                 )}
                 
-                <div className="space-y-2">
-                  <Label>CPF ou Email</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">CPF ou Email</Label>
                   <Input 
                     placeholder="Digite seu CPF ou email" 
                     value={loginIdentifier}
                     onChange={(e) => setLoginIdentifier(e.target.value)}
-                    className="h-11 bg-background/50 border-white/10"
+                    className="h-9 bg-background/50 border-white/10 text-sm"
                     data-testid="modal-input-identifier"
                   />
                 </div>
                 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <div className="flex justify-between items-center">
-                    <Label>Senha</Label>
-                    <button type="button" className="text-xs text-primary hover:underline">
+                    <Label className="text-xs">Senha</Label>
+                    <button type="button" className="text-[10px] text-primary hover:underline">
                       Esqueceu a senha?
                     </button>
                   </div>
@@ -219,7 +219,7 @@ export default function AuthModal() {
                     placeholder="••••••••" 
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
-                    className="h-11 bg-background/50 border-white/10"
+                    className="h-9 bg-background/50 border-white/10 text-sm"
                     data-testid="modal-input-password"
                   />
                 </div>
@@ -227,174 +227,174 @@ export default function AuthModal() {
                 <Button 
                   type="submit" 
                   disabled={loginLoading}
-                  className="w-full h-12 text-lg font-bold shadow-[0_0_20px_-5px_rgba(242,102,49,0.5)]"
+                  className="w-full h-10 text-sm font-bold shadow-[0_0_20px_-5px_rgba(242,102,49,0.5)]"
                   data-testid="modal-button-login"
                 >
                   {loginLoading ? "Entrando..." : "Entrar"}
-                  {!loginLoading && <LogIn className="w-5 h-5 ml-2" />}
+                  {!loginLoading && <LogIn className="w-4 h-4 ml-2" />}
                 </Button>
               </form>
             </TabsContent>
 
             <TabsContent value="register" className="mt-0">
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {registerApiError && (
                   <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm p-3 rounded-lg">
                     {registerApiError}
                   </div>
                 )}
 
-                <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center justify-between mb-1">
                   {registerStep > 1 ? (
-                    <Button variant="ghost" size="icon" onClick={() => setRegisterStep(registerStep - 1)} className="h-8 w-8">
-                      <ChevronLeft className="w-4 h-4" />
+                    <Button variant="ghost" size="icon" onClick={() => setRegisterStep(registerStep - 1)} className="h-6 w-6">
+                      <ChevronLeft className="w-3 h-3" />
                     </Button>
-                  ) : <div className="w-8" />}
-                  <div className="flex gap-2">
+                  ) : <div className="w-6" />}
+                  <div className="flex gap-1.5">
                     {[1, 2, 3].map(i => (
-                      <div key={i} className={`h-1.5 w-8 rounded-full transition-colors ${registerStep >= i ? 'bg-primary' : 'bg-white/10'}`} />
+                      <div key={i} className={`h-1 w-6 rounded-full transition-colors ${registerStep >= i ? 'bg-primary' : 'bg-white/10'}`} />
                     ))}
                   </div>
-                  <div className="w-8" />
+                  <div className="w-6" />
                 </div>
 
-                <h3 className="text-lg font-bold text-center text-white mb-4">
+                <h3 className="text-sm font-bold text-center text-white mb-2">
                   {registerStep === 1 && "Dados de Acesso"}
                   {registerStep === 2 && "Dados Pessoais"}
                   {registerStep === 3 && "Contato e Bônus"}
                 </h3>
 
                 {registerStep === 1 && (
-                  <div className="space-y-4 animate-in slide-in-from-right duration-300">
-                    <div className="space-y-2">
-                      <Label>E-mail</Label>
+                  <div className="space-y-2.5 animate-in slide-in-from-right duration-300">
+                    <div className="space-y-1">
+                      <Label className="text-xs">E-mail</Label>
                       <Input 
                         type="email" 
                         placeholder="seu@email.com" 
                         value={registerFormData.email}
                         onChange={e => setRegisterFormData({...registerFormData, email: e.target.value})}
-                        className={`h-11 bg-background/50 border-white/10 ${registerErrors.email ? "border-red-500" : ""}`}
+                        className={`h-9 bg-background/50 border-white/10 text-sm ${registerErrors.email ? "border-red-500" : ""}`}
                         data-testid="modal-input-email"
                       />
-                      {registerErrors.email && <span className="text-xs text-red-500">{registerErrors.email}</span>}
+                      {registerErrors.email && <span className="text-[10px] text-red-500">{registerErrors.email}</span>}
                     </div>
-                    <div className="space-y-2">
-                      <Label>Senha</Label>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Senha</Label>
                       <Input 
                         type="password" 
                         placeholder="••••••••" 
                         value={registerFormData.password}
                         onChange={e => setRegisterFormData({...registerFormData, password: e.target.value})}
-                        className={`h-11 bg-background/50 border-white/10 ${registerErrors.password ? "border-red-500" : ""}`}
+                        className={`h-9 bg-background/50 border-white/10 text-sm ${registerErrors.password ? "border-red-500" : ""}`}
                         data-testid="modal-input-reg-password"
                       />
-                      {registerErrors.password && <span className="text-xs text-red-500">{registerErrors.password}</span>}
+                      {registerErrors.password && <span className="text-[10px] text-red-500">{registerErrors.password}</span>}
                     </div>
-                    <div className="space-y-2">
-                      <Label>Confirmar Senha</Label>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Confirmar Senha</Label>
                       <Input 
                         type="password" 
                         placeholder="••••••••" 
                         value={registerFormData.confirmPassword}
                         onChange={e => setRegisterFormData({...registerFormData, confirmPassword: e.target.value})}
-                        className={`h-11 bg-background/50 border-white/10 ${registerErrors.confirmPassword ? "border-red-500" : ""}`}
+                        className={`h-9 bg-background/50 border-white/10 text-sm ${registerErrors.confirmPassword ? "border-red-500" : ""}`}
                         data-testid="modal-input-confirm-password"
                       />
-                      {registerErrors.confirmPassword && <span className="text-xs text-red-500">{registerErrors.confirmPassword}</span>}
+                      {registerErrors.confirmPassword && <span className="text-[10px] text-red-500">{registerErrors.confirmPassword}</span>}
                     </div>
-                    <label className="flex items-start gap-3 p-3 rounded-lg border border-white/5 bg-secondary/20 cursor-pointer hover:bg-secondary/40 transition-colors">
+                    <label className="flex items-start gap-2 p-2 rounded-lg border border-white/5 bg-secondary/20 cursor-pointer hover:bg-secondary/40 transition-colors">
                       <input 
                         type="checkbox" 
-                        className="mt-1 rounded border-white/20 bg-transparent text-primary focus:ring-primary"
+                        className="mt-0.5 rounded border-white/20 bg-transparent text-primary focus:ring-primary h-3.5 w-3.5"
                         checked={registerFormData.terms}
                         onChange={e => setRegisterFormData({...registerFormData, terms: e.target.checked})}
                         data-testid="modal-checkbox-terms"
                       />
-                      <div className="text-xs text-muted-foreground leading-relaxed">
+                      <div className="text-[10px] text-muted-foreground leading-relaxed">
                         Li e concordo com os <span className="text-primary underline">Termos e Condições</span>. Confirmo que tenho mais de 18 anos.
                       </div>
                     </label>
-                    {registerErrors.terms && <span className="text-xs text-red-500 block text-center">{registerErrors.terms}</span>}
+                    {registerErrors.terms && <span className="text-[10px] text-red-500 block text-center">{registerErrors.terms}</span>}
                   </div>
                 )}
 
                 {registerStep === 2 && (
-                  <div className="space-y-4 animate-in slide-in-from-right duration-300">
-                    <div className="bg-yellow-500/10 border border-yellow-500/20 p-3 rounded-lg flex gap-3 items-start">
-                      <AlertTriangle className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
-                      <p className="text-xs text-yellow-200/80">O CPF deve ser do titular da conta para garantir saques rápidos via PIX.</p>
+                  <div className="space-y-2.5 animate-in slide-in-from-right duration-300">
+                    <div className="bg-yellow-500/10 border border-yellow-500/20 p-2 rounded-lg flex gap-2 items-start">
+                      <AlertTriangle className="w-3 h-3 text-yellow-500 shrink-0 mt-0.5" />
+                      <p className="text-[10px] text-yellow-200/80">O CPF deve ser do titular da conta para garantir saques rápidos via PIX.</p>
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Nome Completo</Label>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Nome Completo</Label>
                       <Input 
                         placeholder="Como no documento" 
                         value={registerFormData.name}
                         onChange={e => setRegisterFormData({...registerFormData, name: e.target.value})}
-                        className={`h-11 bg-background/50 border-white/10 ${registerErrors.name ? "border-red-500" : ""}`}
+                        className={`h-9 bg-background/50 border-white/10 text-sm ${registerErrors.name ? "border-red-500" : ""}`}
                         data-testid="modal-input-name"
                       />
-                      {registerErrors.name && <span className="text-xs text-red-500">{registerErrors.name}</span>}
+                      {registerErrors.name && <span className="text-[10px] text-red-500">{registerErrors.name}</span>}
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>CPF</Label>
+                    <div className="space-y-1">
+                      <Label className="text-xs">CPF</Label>
                       <IMaskInput
                         mask="000.000.000-00"
                         value={registerFormData.cpf}
                         onAccept={(value) => setRegisterFormData({...registerFormData, cpf: value})}
-                        className={`flex h-11 w-full rounded-lg border border-input bg-background/50 px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 md:text-sm transition-all duration-300 hover:border-white/20 ${registerErrors.cpf ? "border-red-500" : "border-white/10"}`}
+                        className={`flex h-9 w-full rounded-lg border border-input bg-background/50 px-3 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:border-white/20 ${registerErrors.cpf ? "border-red-500" : "border-white/10"}`}
                         placeholder="000.000.000-00"
                         data-testid="modal-input-cpf"
                       />
-                      {registerErrors.cpf && <span className="text-xs text-red-500">{registerErrors.cpf}</span>}
+                      {registerErrors.cpf && <span className="text-[10px] text-red-500">{registerErrors.cpf}</span>}
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Data de Nascimento</Label>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Data de Nascimento</Label>
                       <Input 
                         type="date"
                         value={registerFormData.birthDate}
                         onChange={e => setRegisterFormData({...registerFormData, birthDate: e.target.value})}
-                        className={`h-11 bg-background/50 border-white/10 ${registerErrors.birthDate ? "border-red-500" : ""}`}
+                        className={`h-9 bg-background/50 border-white/10 text-sm ${registerErrors.birthDate ? "border-red-500" : ""}`}
                         data-testid="modal-input-birthdate"
                       />
-                      {registerErrors.birthDate && <span className="text-xs text-red-500">{registerErrors.birthDate}</span>}
+                      {registerErrors.birthDate && <span className="text-[10px] text-red-500">{registerErrors.birthDate}</span>}
                     </div>
                   </div>
                 )}
 
                 {registerStep === 3 && (
-                  <div className="space-y-4 animate-in slide-in-from-right duration-300">
-                    <div className="space-y-2">
-                      <Label>Celular</Label>
+                  <div className="space-y-2.5 animate-in slide-in-from-right duration-300">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Celular</Label>
                       <IMaskInput
                         mask="(00) 00000-0000"
                         value={registerFormData.phone}
                         onAccept={(value) => setRegisterFormData({...registerFormData, phone: value})}
-                        className="flex h-11 w-full rounded-lg border border-white/10 bg-background/50 px-3 py-2 text-base ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 md:text-sm transition-all duration-300 hover:border-white/20"
+                        className="flex h-9 w-full rounded-lg border border-white/10 bg-background/50 px-3 py-1.5 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-300 hover:border-white/20"
                         placeholder="(11) 99999-9999"
                         data-testid="modal-input-phone"
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <Label>Código Promocional (Opcional)</Label>
+                    <div className="space-y-1">
+                      <Label className="text-xs">Código Promocional (Opcional)</Label>
                       <Input 
                         placeholder="Ex: BONUS100" 
                         value={registerFormData.promoCode}
                         onChange={e => setRegisterFormData({...registerFormData, promoCode: e.target.value.toUpperCase()})}
-                        className="h-11 bg-background/50 border-white/10"
+                        className="h-9 bg-background/50 border-white/10 text-sm"
                         data-testid="modal-input-promo"
                       />
                     </div>
 
-                    <div className="bg-green-500/10 border border-green-500/20 p-4 rounded-xl">
-                      <div className="flex items-center gap-2 mb-2">
-                        <CheckCircle2 className="w-5 h-5 text-green-500" />
-                        <h3 className="font-bold text-white text-sm">Bônus de Boas-vindas</h3>
+                    <div className="bg-green-500/10 border border-green-500/20 p-2 rounded-lg">
+                      <div className="flex items-center gap-1.5 mb-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-green-500" />
+                        <h3 className="font-bold text-white text-xs">Bônus de Boas-vindas</h3>
                       </div>
-                      <p className="text-xs text-gray-400">Ao criar sua conta, você está elegível para receber 100% de bônus até R$ 500 no primeiro depósito.</p>
+                      <p className="text-[10px] text-gray-400">100% de bônus até R$ 500 no primeiro depósito.</p>
                     </div>
                   </div>
                 )}
@@ -402,20 +402,20 @@ export default function AuthModal() {
                 <Button 
                   onClick={handleRegisterNext} 
                   disabled={registerLoading}
-                  className="w-full h-12 text-lg font-bold shadow-[0_0_20px_-5px_rgba(242,102,49,0.5)]"
+                  className="w-full h-10 text-sm font-bold shadow-[0_0_20px_-5px_rgba(242,102,49,0.5)]"
                   data-testid="modal-button-next"
                 >
                   {registerLoading ? "Criando conta..." : registerStep === 3 ? "Finalizar Cadastro" : "Continuar"}
-                  {!registerLoading && registerStep < 3 && <ArrowRight className="w-5 h-5 ml-2" />}
+                  {!registerLoading && registerStep < 3 && <ArrowRight className="w-4 h-4 ml-2" />}
                 </Button>
               </div>
             </TabsContent>
           </Tabs>
 
-          <div className="flex justify-center gap-6 mt-6 opacity-50">
-            <ShieldCheck className="w-5 h-5 text-gray-500" />
-            <div className="border border-gray-600 rounded px-2 py-0.5 text-xs text-gray-400 font-bold">18+</div>
-            <div className="border border-gray-600 rounded px-2 py-0.5 text-xs text-gray-400 font-bold">SSL</div>
+          <div className="flex justify-center gap-4 mt-4 opacity-50">
+            <ShieldCheck className="w-4 h-4 text-gray-500" />
+            <div className="border border-gray-600 rounded px-1.5 py-0.5 text-[10px] text-gray-400 font-bold">18+</div>
+            <div className="border border-gray-600 rounded px-1.5 py-0.5 text-[10px] text-gray-400 font-bold">SSL</div>
           </div>
         </div>
       </DialogContent>

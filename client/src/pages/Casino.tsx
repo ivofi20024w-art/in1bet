@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { cn } from "@/lib/utils";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
@@ -138,10 +138,14 @@ async function launchGame(params: { idHash: string }): Promise<{ launchUrl: stri
 const GAMES_PER_PAGE = 20;
 
 export default function Casino() {
+  const searchString = useSearch();
+  const urlParams = new URLSearchParams(searchString);
+  const initialCategory = urlParams.get('category') || 'all';
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isProvidersOpen, setIsProvidersOpen] = useState(false);
   const [games, setGames] = useState<SlotsgatewayGame[]>([]);
@@ -151,6 +155,13 @@ export default function Casino() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  
+  useEffect(() => {
+    const newCategory = urlParams.get('category') || 'all';
+    if (newCategory !== activeCategory) {
+      setActiveCategory(newCategory);
+    }
+  }, [searchString]);
 
   useEffect(() => {
     const timer = setTimeout(() => {

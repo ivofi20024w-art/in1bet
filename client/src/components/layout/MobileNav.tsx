@@ -13,8 +13,8 @@ export function MobileNav() {
 
   const navItems = [
     { label: "Home", icon: Home, path: "/" },
-    { label: "Ao Vivo", icon: PlayCircle, path: "/live-betting" },
-    { label: "Boletim", icon: FileText, path: "/betslip", special: true }, // Mock path
+    { label: "Esportes", icon: PlayCircle, path: "/sports" },
+    { label: "Boletim", icon: FileText, path: "/betslip", special: true },
     { label: "Casino", icon: Gamepad2, path: "/casino" },
   ];
 
