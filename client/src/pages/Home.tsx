@@ -11,7 +11,6 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 import mainBanner from "@assets/main1_1767994256496.png";
-import tigreBanner from "@assets/tigre1_1767994256497.jpeg";
 
 interface SlotsgatewayGame {
   id: string;
@@ -25,7 +24,6 @@ interface SlotsgatewayGame {
 
 const BANNERS = [
   { id: 1, img: mainBanner, link: "/casino" },
-  { id: 2, img: tigreBanner, link: "/casino" },
 ];
 
 const ORIGINALS = [
