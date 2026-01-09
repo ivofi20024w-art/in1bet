@@ -17,11 +17,12 @@ router.get("/providers", async (req: Request, res: Response) => {
 
 router.get("/games", async (req: Request, res: Response) => {
   try {
-    const { providerId, gameType, search, limit, offset } = req.query;
+    const { providerId, gameType, type, search, limit, offset } = req.query;
+    const effectiveGameType = (gameType || type) as string | undefined;
     
     const result = await slotsGatewayService.getCachedGames(
       providerId as string | undefined,
-      gameType as string | undefined,
+      effectiveGameType,
       search as string | undefined,
       limit ? parseInt(limit as string) : undefined,
       offset ? parseInt(offset as string) : undefined

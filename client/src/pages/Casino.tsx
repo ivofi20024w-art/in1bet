@@ -168,7 +168,7 @@ export default function Casino() {
   const getCategoryFilters = (category: string): { gameType?: string } => {
     switch (category) {
       case 'slots':
-        return { gameType: 'slot' };
+        return { gameType: 'video-slots' };
       case 'live':
         return { gameType: 'live' };
       case 'crash':
@@ -265,47 +265,34 @@ export default function Casino() {
 
   return (
     <MainLayout>
-      <div className="relative h-[300px] md:h-[400px] rounded-2xl overflow-hidden mb-6 group shadow-2xl">
+      <div className="relative h-[120px] md:h-[140px] rounded-xl overflow-hidden mb-4 group shadow-lg">
           <Carousel className="w-full h-full" opts={{ loop: true }} plugins={[Autoplay({ delay: 5000 })]}>
               <CarouselContent>
                   <CarouselItem>
-                      <div className="relative h-[300px] md:h-[400px]">
-                        <img src={casinoHero} alt="Casino Lobby" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700" />
+                      <div className="relative h-[120px] md:h-[140px]">
+                        <img src={casinoHero} alt="Casino Lobby" className="absolute inset-0 w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
-                        
-                        <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 max-w-2xl">
-                        <Badge className="w-fit mb-4 bg-yellow-500 text-black hover:bg-yellow-400 font-bold px-3 py-1 animate-pulse">JACKPOT DIÁRIO</Badge>
-                        <h1 className="text-4xl md:text-7xl font-heading font-black text-white mb-4 leading-tight drop-shadow-lg">
-                            R$ 150.000 <br/> <span className="text-primary italic">EM PRÊMIOS</span>
-                        </h1>
-                        <p className="text-gray-200 text-lg mb-8 max-w-md drop-shadow-md">
-                            Participe do torneio Drops & Wins e concorra a prêmios em dinheiro todos os dias.
-                        </p>
-                        <div className="flex gap-4">
-                            <Button size="lg" className="rounded-full font-bold text-lg bg-primary hover:bg-primary/90 shadow-[0_0_20px_rgba(249,115,22,0.4)] px-8">
-                                Participar Agora
-                            </Button>
-                        </div>
+                        <div className="absolute inset-0 flex items-center px-6 md:px-10">
+                          <div>
+                            <Badge className="w-fit mb-2 bg-yellow-500 text-black hover:bg-yellow-400 font-bold px-2 py-0.5 text-[10px]">JACKPOT</Badge>
+                            <h1 className="text-xl md:text-2xl font-heading font-black text-white leading-tight drop-shadow-lg">
+                              R$ 150.000 <span className="text-primary italic">EM PRÊMIOS</span>
+                            </h1>
+                          </div>
                         </div>
                       </div>
                   </CarouselItem>
                   <CarouselItem>
-                      <div className="relative h-[300px] md:h-[400px] bg-[#0f0f15]">
+                      <div className="relative h-[120px] md:h-[140px] bg-[#0f0f15]">
                         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1596838132731-3301c3fd4317?q=80&w=1200')] bg-cover bg-center opacity-40" />
                         <div className="absolute inset-0 bg-gradient-to-r from-purple-900/90 to-transparent" />
-                         <div className="absolute inset-0 flex flex-col justify-center px-8 md:px-16 max-w-2xl">
-                            <Badge className="w-fit mb-4 bg-purple-500 text-white font-bold px-3 py-1">NOVIDADE</Badge>
-                            <h1 className="text-4xl md:text-7xl font-heading font-black text-white mb-4 leading-tight drop-shadow-lg">
-                                GATES OF <br/> <span className="text-purple-400 italic">OLYMPUS 1000</span>
+                        <div className="absolute inset-0 flex items-center px-6 md:px-10">
+                          <div>
+                            <Badge className="w-fit mb-2 bg-purple-500 text-white font-bold px-2 py-0.5 text-[10px]">NOVIDADE</Badge>
+                            <h1 className="text-xl md:text-2xl font-heading font-black text-white leading-tight drop-shadow-lg">
+                              GATES OF <span className="text-purple-400 italic">OLYMPUS 1000</span>
                             </h1>
-                            <p className="text-gray-200 text-lg mb-8 max-w-md drop-shadow-md">
-                                O multiplicador máximo aumentou! Jogue agora e busque o 15.000x.
-                            </p>
-                            <div className="flex gap-4">
-                                <Button size="lg" className="rounded-full font-bold text-lg bg-white text-purple-900 hover:bg-gray-100 shadow-[0_0_20px_rgba(255,255,255,0.2)] px-8">
-                                    Jogar Agora
-                                </Button>
-                            </div>
+                          </div>
                         </div>
                       </div>
                   </CarouselItem>
@@ -313,22 +300,28 @@ export default function Casino() {
           </Carousel>
       </div>
 
-      <div className="bg-white/5 border-y border-white/5 -mx-4 md:-mx-8 py-2 mb-8 overflow-hidden relative">
-          <div className="flex items-center gap-8 animate-marquee whitespace-nowrap px-4">
-              {[...Array(10)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-3 bg-black/20 rounded-full px-4 py-1.5 border border-white/5">
+      <style>{`
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+      `}</style>
+      <div className="bg-white/5 border-y border-white/5 -mx-4 md:-mx-8 py-2 mb-6 overflow-hidden relative">
+          <div className="flex items-center gap-6 whitespace-nowrap px-4" style={{ animation: 'marquee 30s linear infinite' }}>
+              {[...Array(20)].map((_, i) => (
+                  <div key={i} className="flex items-center gap-2 bg-black/20 rounded-full px-3 py-1 border border-white/5 flex-shrink-0">
                       <div className="relative">
-                          <img src={`https://i.pravatar.cc/150?u=${i}`} alt="Winner" className="w-6 h-6 rounded-full border border-white/10" />
-                          <div className="absolute -bottom-1 -right-1 bg-yellow-500 text-[8px] text-black font-bold px-1 rounded-full">VIP</div>
+                          <img src={`https://i.pravatar.cc/150?u=${i % 10}`} alt="Winner" className="w-5 h-5 rounded-full border border-white/10" />
+                          <div className="absolute -bottom-0.5 -right-0.5 bg-yellow-500 text-[6px] text-black font-bold px-0.5 rounded-full">VIP</div>
                       </div>
-                      <span className="text-gray-300 text-xs font-medium">user***{i}9</span>
-                      <span className="text-green-400 font-bold text-sm">R$ {(Math.random() * 2000 + 100).toFixed(2)}</span>
-                      <span className="text-gray-500 text-[10px] uppercase">{['Fortune Tiger', 'Mines', 'Aviator', 'Roleta'][i % 4]}</span>
+                      <span className="text-gray-300 text-[10px] font-medium">user***{i % 10}9</span>
+                      <span className="text-green-400 font-bold text-xs">R$ {((i * 137 + 100) % 2000 + 100).toFixed(2)}</span>
+                      <span className="text-gray-500 text-[9px] uppercase">{['Fortune Tiger', 'Mines', 'Aviator', 'Roleta'][i % 4]}</span>
                   </div>
               ))}
           </div>
-          <div className="absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-background to-transparent z-10" />
-          <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
+          <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-background to-transparent z-10" />
+          <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-background to-transparent z-10" />
       </div>
 
       <div className="flex gap-4 mb-10 overflow-x-auto pb-4 scrollbar-none snap-x px-1">

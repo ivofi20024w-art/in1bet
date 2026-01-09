@@ -20,7 +20,7 @@ export function GameCard({ id, title, provider, image, hot, className, loading }
 
   if (loading) {
       return (
-          <div className={cn("aspect-[3/4] rounded-xl overflow-hidden", className)}>
+          <div className={cn("aspect-[4/3] rounded-lg overflow-hidden", className)}>
               <Skeleton className="w-full h-full bg-secondary/30" />
           </div>
       )
@@ -28,7 +28,7 @@ export function GameCard({ id, title, provider, image, hot, className, loading }
 
   return (
     <Link href={`/game/${id}`}>
-      <div className={cn("group relative rounded-xl overflow-hidden aspect-[3/4] bg-card border border-white/5 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_20px_-5px_rgba(249,115,22,0.3)] hover:-translate-y-1 cursor-pointer", className)}>
+      <div className={cn("group relative rounded-lg overflow-hidden aspect-[4/3] bg-card border border-white/5 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_15px_-5px_rgba(249,115,22,0.3)] hover:-translate-y-0.5 cursor-pointer", className)}>
         {imageLoading && !imageError && (
           <div className="absolute inset-0 bg-secondary/30 animate-pulse" />
         )}
@@ -66,15 +66,15 @@ export function GameCard({ id, title, provider, image, hot, className, loading }
 
         {/* Play Button Overlay */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
-          <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center shadow-lg transform scale-50 group-hover:scale-100 transition-transform duration-300">
-            <Play className="w-6 h-6 text-white fill-white ml-1" />
+          <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center shadow-lg transform scale-50 group-hover:scale-100 transition-transform duration-300">
+            <Play className="w-4 h-4 text-white fill-white ml-0.5" />
           </div>
         </div>
 
         {/* Info */}
-        <div className="absolute bottom-0 left-0 right-0 p-3 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-          <p className="text-white font-bold truncate text-sm">{title}</p>
-          <p className="text-muted-foreground text-xs truncate group-hover:text-primary transition-colors">{provider}</p>
+        <div className="absolute bottom-0 left-0 right-0 p-2 transform translate-y-1 group-hover:translate-y-0 transition-transform duration-300">
+          <p className="text-white font-bold truncate text-xs">{title}</p>
+          <p className="text-muted-foreground text-[10px] truncate group-hover:text-primary transition-colors capitalize">{provider}</p>
         </div>
       </div>
     </Link>
