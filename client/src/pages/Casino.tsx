@@ -1,5 +1,6 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { GameCard } from "@/components/shared/GameCard";
+import { PromotionalDepositBanner } from "@/components/shared/PromotionalDepositBanner";
 import { ORIGINALS_GAMES } from "@/lib/mockData";
 import casinoHero from "@assets/generated_images/casino_lobby_luxurious_background.png";
 import slotsTournamentBanner from "@assets/generated_images/promotional_banner_for_slots_tournament.png";
@@ -355,6 +356,10 @@ export default function Casino() {
               </CarouselContent>
           </Carousel>
       </div>
+
+      <section className="mb-6">
+        <PromotionalDepositBanner />
+      </section>
 
       <style>{`
         @keyframes marquee {
