@@ -244,7 +244,8 @@ export default function Home() {
 
        <section className="mb-12">
         <Link href="/live-casino">
-          <div className="relative h-56 md:h-64 rounded-2xl overflow-hidden bg-gradient-to-r from-purple-900 to-indigo-900 border border-white/10 shadow-2xl group cursor-pointer">
+          <div className="relative h-56 md:h-64 rounded-2xl overflow-hidden bg-gradient-to-r from-card via-card/95 to-card border border-primary/20 shadow-2xl group cursor-pointer hover:border-primary/40 transition-all">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-primary/5 opacity-50" />
               <div className="absolute inset-0 flex items-center justify-between p-8 md:p-12 z-10">
                   <div className="max-w-lg space-y-4">
                       <div className="flex items-center gap-2 mb-2">
@@ -254,15 +255,15 @@ export default function Home() {
                           </span>
                           <span className="text-xs font-bold text-red-400 uppercase tracking-widest bg-red-500/10 px-2 py-0.5 rounded">Ao Vivo Agora</span>
                       </div>
-                      <h3 className="text-3xl md:text-5xl font-heading font-black text-white italic leading-none">CASINO <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">AO VIVO</span></h3>
-                      <p className="text-gray-300 max-w-sm text-sm md:text-base font-medium">Sinta a emoção de Las Vegas na palma da sua mão com dealers reais 24/7.</p>
-                      <Button className="bg-white text-purple-900 hover:bg-gray-100 rounded-full font-bold px-8 h-12 shadow-lg group-hover:shadow-purple-500/30 transition-all">
-                          <Play className="w-5 h-5 mr-2 fill-purple-900" /> JOGAR AGORA
+                      <h3 className="text-3xl md:text-5xl font-heading font-black text-white italic leading-none">CASINO <span className="text-primary">AO VIVO</span></h3>
+                      <p className="text-muted-foreground max-w-sm text-sm md:text-base font-medium">Sinta a emoção de Las Vegas na palma da sua mão com dealers reais 24/7.</p>
+                      <Button className="bg-primary hover:bg-primary/90 text-white rounded-full font-bold px-8 h-12 shadow-[0_0_20px_rgba(249,115,22,0.3)] group-hover:shadow-[0_0_30px_rgba(249,115,22,0.5)] transition-all">
+                          <Play className="w-5 h-5 mr-2 fill-white" /> JOGAR AGORA
                       </Button>
                   </div>
                   
                   <div className="hidden lg:block">
-                      <div className="w-48 h-48 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 opacity-20 blur-3xl absolute right-20 top-1/2 -translate-y-1/2" />
+                      <div className="w-48 h-48 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 opacity-50 blur-3xl absolute right-20 top-1/2 -translate-y-1/2" />
                   </div>
               </div>
           </div>

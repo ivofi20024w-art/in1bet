@@ -1,4 +1,4 @@
-import { Search, Wallet, ChevronDown, User as UserIcon, LogOut, LogIn } from "lucide-react";
+import { Search, Wallet, ChevronDown, User as UserIcon, LogOut, LogIn, X, Gamepad2, Loader2 } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { PROFILE_MENU_ITEMS } from "@/lib/mockData";
@@ -13,14 +13,52 @@ import {
 import { Input } from "@/components/ui/input";
 import { WalletModal } from "@/components/wallet/WalletModal";
 import { Link, useLocation } from "wouter";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getStoredAuth, logout as authLogout, getWallet, type User } from "@/lib/auth";
+import { useQuery } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+
+interface SearchGame {
+  id: string;
+  gameCode: string;
+  name: string;
+  imageUrl: string | null;
+  providerName: string;
+}
 
 export function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [walletBalance, setWalletBalance] = useState(0);
   const [, setLocation] = useLocation();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  const { data: searchResults = [], isLoading: isSearching } = useQuery<SearchGame[]>({
+    queryKey: ['search-games', searchQuery],
+    queryFn: async () => {
+      if (!searchQuery.trim() || searchQuery.length < 2) return [];
+      const res = await fetch(`/api/playfivers/games?search=${encodeURIComponent(searchQuery)}&limit=10`, { 
+        credentials: 'include' 
+      });
+      const data = await res.json();
+      if (!data.success) return [];
+      return data.data || [];
+    },
+    enabled: searchQuery.length >= 2,
+    staleTime: 30000,
+  });
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
+        setShowResults(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -77,15 +115,100 @@ export function Header() {
       setLocation("/login");
   };
 
+  const handleGameClick = async (game: SearchGame) => {
+    setShowResults(false);
+    setSearchQuery("");
+    
+    try {
+      const res = await fetch('/api/playfivers/launch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({
+          gameCode: game.gameCode,
+          providerName: game.providerName,
+          isOriginal: false,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.open(data.data.launchUrl, '_blank');
+      } else if (data.error?.includes('Authentication')) {
+        setLocation('/login');
+      }
+    } catch (error) {
+      console.error('Failed to launch game:', error);
+    }
+  };
+
   return (
     <header className="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-background/80 backdrop-blur-md sticky top-0 z-50">
       <div className="flex items-center gap-4 flex-1 max-w-xl">
-        <div className="relative w-full max-w-md hidden md:block">
+        <div ref={searchRef} className="relative w-full max-w-md hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
-            placeholder="Buscar jogos, provedores, eventos..." 
-            className="pl-9 bg-secondary/30 border-white/5 focus-visible:ring-primary/50 h-10 rounded-xl text-sm w-full transition-all focus:bg-secondary/50"
+            placeholder="Buscar jogos, provedores..." 
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setShowResults(true);
+            }}
+            onFocus={() => setShowResults(true)}
+            className="pl-9 pr-9 bg-secondary/30 border-white/5 focus-visible:ring-primary/50 h-10 rounded-xl text-sm w-full transition-all focus:bg-secondary/50"
+            data-testid="search-input"
           />
+          {searchQuery && (
+            <button 
+              onClick={() => { setSearchQuery(""); setShowResults(false); }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-white"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+          
+          {showResults && searchQuery.length >= 2 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-card border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 max-h-[400px] overflow-y-auto">
+              {isSearching ? (
+                <div className="p-6 flex items-center justify-center">
+                  <Loader2 className="w-5 h-5 animate-spin text-primary" />
+                  <span className="ml-2 text-sm text-muted-foreground">Buscando...</span>
+                </div>
+              ) : searchResults.length === 0 ? (
+                <div className="p-6 text-center text-muted-foreground">
+                  <Gamepad2 className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                  <p className="text-sm">Nenhum jogo encontrado para "{searchQuery}"</p>
+                </div>
+              ) : (
+                <div className="py-2">
+                  <div className="px-3 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                    {searchResults.length} resultado{searchResults.length !== 1 ? 's' : ''}
+                  </div>
+                  {searchResults.map((game) => (
+                    <button
+                      key={game.id}
+                      onClick={() => handleGameClick(game)}
+                      className="w-full flex items-center gap-3 px-3 py-2 hover:bg-white/5 transition-colors text-left"
+                      data-testid={`search-result-${game.gameCode}`}
+                    >
+                      <div className="w-12 h-12 rounded-lg overflow-hidden bg-secondary flex-shrink-0">
+                        {game.imageUrl ? (
+                          <img src={game.imageUrl} alt={game.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <Gamepad2 className="w-5 h-5 text-muted-foreground" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-white truncate">{game.name}</p>
+                        <p className="text-xs text-muted-foreground truncate">{game.providerName}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

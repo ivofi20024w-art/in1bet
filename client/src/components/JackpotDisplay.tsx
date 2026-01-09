@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, TrendingUp } from "lucide-react";
+import { Trophy, TrendingUp, Calendar, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 interface JackpotInfo {
   currentAmount: number;
@@ -69,6 +71,15 @@ export function JackpotDisplay() {
     }).format(value);
   };
 
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return format(date, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR });
+    } catch {
+      return dateString;
+    }
+  };
+
   if (!jackpot?.isActive) return null;
 
   return (
@@ -111,10 +122,10 @@ export function JackpotDisplay() {
       />
 
       {/* Content */}
-      <div className="relative flex items-center justify-between px-5 py-4">
+      <div className="relative flex flex-col md:flex-row md:items-center md:justify-between px-5 py-4 gap-4">
         <div className="flex items-center gap-4">
           {/* Trophy with spinning rings - loader style */}
-          <div className="relative">
+          <div className="relative flex-shrink-0">
             {/* Outer spinning ring */}
             <motion.div
               className="absolute inset-[-8px] border-2 border-transparent border-t-primary border-r-primary/30 rounded-full"
@@ -210,53 +221,80 @@ export function JackpotDisplay() {
               </motion.span>
             </motion.div>
             
-            {/* Animated dots - loader style */}
-            <div className="flex gap-1 mt-1">
-              <motion.span 
-                className="w-1 h-1 bg-primary rounded-full"
-                animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 1, repeat: Infinity, delay: 0 }}
-              />
-              <motion.span 
-                className="w-1 h-1 bg-white/50 rounded-full"
-                animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
-              />
-              <motion.span 
-                className="w-1 h-1 bg-primary rounded-full"
-                animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
-              />
-            </div>
+            {/* Explanation message */}
+            <p className="text-[11px] text-muted-foreground mt-1 max-w-xs">
+              O Jackpot cresce automaticamente conforme as apostas são realizadas.
+            </p>
           </div>
         </div>
 
-        {/* Last winner - compact */}
-        {jackpot.lastWonBy && (
-          <div className="text-right hidden sm:block">
-            <div className="text-[10px] text-muted-foreground uppercase tracking-wider">Último ganhador</div>
-            <div className="text-sm font-medium text-white">{jackpot.lastWonBy}</div>
-            {jackpot.lastWonAmount && (
-              <motion.div 
-                className="text-xs font-bold text-green-500"
-                animate={{
-                  textShadow: [
-                    "0 0 5px rgba(34, 197, 94, 0)",
-                    "0 0 10px rgba(34, 197, 94, 0.5)",
-                    "0 0 5px rgba(34, 197, 94, 0)",
-                  ],
-                }}
-                transition={{
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              >
-                {formatCurrency(jackpot.lastWonAmount)}
-              </motion.div>
-            )}
+        {/* Last winner section */}
+        <div className="flex items-center gap-4 md:gap-6">
+          {jackpot.lastWonBy ? (
+            <div className="flex flex-col items-start md:items-end bg-white/5 rounded-lg px-4 py-2 border border-white/5">
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-1">
+                Último Ganhador
+              </div>
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium text-white">{jackpot.lastWonBy}</span>
+              </div>
+              {jackpot.lastWonAmount && (
+                <motion.div 
+                  className="text-sm font-bold text-green-500"
+                  animate={{
+                    textShadow: [
+                      "0 0 5px rgba(34, 197, 94, 0)",
+                      "0 0 10px rgba(34, 197, 94, 0.5)",
+                      "0 0 5px rgba(34, 197, 94, 0)",
+                    ],
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  {formatCurrency(jackpot.lastWonAmount)}
+                </motion.div>
+              )}
+              {jackpot.lastWonAt && (
+                <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
+                  <Calendar className="w-3 h-3" />
+                  <span>{formatDate(jackpot.lastWonAt)}</span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-start md:items-end bg-white/5 rounded-lg px-4 py-2 border border-white/5">
+              <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-1">
+                Último Ganhador
+              </div>
+              <div className="text-xs text-muted-foreground italic">
+                Seja o primeiro a ganhar!
+              </div>
+            </div>
+          )}
+          
+          {/* Animated dots - loader style */}
+          <div className="hidden md:flex flex-col gap-1">
+            <motion.span 
+              className="w-1.5 h-1.5 bg-primary rounded-full"
+              animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+            />
+            <motion.span 
+              className="w-1.5 h-1.5 bg-white/50 rounded-full"
+              animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+            />
+            <motion.span 
+              className="w-1.5 h-1.5 bg-primary rounded-full"
+              animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+            />
           </div>
-        )}
+        </div>
       </div>
 
       {/* Animated bottom accent line */}

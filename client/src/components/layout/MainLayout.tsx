@@ -7,6 +7,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
 
 import { MobileNav } from "./MobileNav";
 import { AgeVerificationModal } from "../shared/AgeVerificationModal";
@@ -28,9 +29,11 @@ export function MainLayout({ children }: { children: ReactNode }) {
         {/* Mobile Header / Nav */}
         <div className="lg:hidden flex items-center justify-between p-4 border-b border-white/5 bg-background/80 backdrop-blur-md sticky top-0 z-50">
           
-          <h1 className="text-xl font-bold font-heading italic text-primary tracking-wide">
-            IN1<span className="text-white">BET</span>
-          </h1>
+          <Link href="/">
+            <h1 className="text-xl font-bold font-heading italic text-primary tracking-wide cursor-pointer hover:opacity-80 transition-opacity">
+              IN1<span className="text-white">BET</span>
+            </h1>
+          </Link>
 
           <div className="w-10" /> {/* Spacer for balance */}
         </div>
