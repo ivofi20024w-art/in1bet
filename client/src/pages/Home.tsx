@@ -9,9 +9,9 @@ import Autoplay from "embla-carousel-autoplay";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
-import welcomeBanner from "@assets/generated_images/casino_welcome_bonus_banner_with_neon_lights.png";
-import cashbackBanner from "@assets/generated_images/weekly_cashback_promo_banner.png";
-import dropsBanner from "@assets/generated_images/drops_and_wins_tournament_banner.png";
+import welcomeBanner from "@assets/ChatGPT_Image_9_01_2026,_00_04_04_1767917091901.png";
+import cashbackBanner from "@assets/ChatGPT_Image_9_01_2026,_00_05_38_1767917230006.png";
+import dropsBanner from "@assets/ChatGPT_Image_9_01_2026,_00_06_58_1767917234350.png";
 
 interface PlayfiversGame {
   id: string;
@@ -130,27 +130,20 @@ export default function Home() {
           <CarouselContent>
             {BANNERS.map((banner) => (
               <CarouselItem key={banner.id}>
-                <div className="relative h-[250px] md:h-[400px] w-full rounded-2xl overflow-hidden group shadow-2xl">
-                  <img 
-                    src={banner.img} 
-                    alt={banner.title} 
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/40 to-transparent p-6 md:p-12 flex flex-col justify-center items-start">
-                    <Badge className="bg-primary text-white mb-4 animate-pulse px-3 py-1 font-bold tracking-wider">NOVIDADE</Badge>
-                    <h2 className="text-3xl md:text-6xl font-heading font-black text-white mb-2 leading-tight drop-shadow-lg max-w-lg italic">
-                      {banner.title}
-                    </h2>
-                    <p className="text-gray-200 mb-8 max-w-md text-sm md:text-xl font-medium drop-shadow-md">
-                      {banner.subtitle}
-                    </p>
-                    <Button asChild className="bg-white text-black hover:bg-gray-200 rounded-full px-8 h-12 md:h-14 font-bold text-lg shadow-[0_0_30px_rgba(255,255,255,0.2)] transition-all hover:scale-105">
-                      <Link href={banner.link}>
+                <Link href={banner.link}>
+                  <div className="relative h-[250px] md:h-[400px] w-full rounded-2xl overflow-hidden group shadow-2xl cursor-pointer">
+                    <img 
+                      src={banner.img} 
+                      alt={banner.title} 
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                    />
+                    <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10">
+                      <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-8 h-12 md:h-14 font-bold text-lg shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all hover:scale-105">
                         {banner.cta}
-                      </Link>
-                    </Button>
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                </Link>
               </CarouselItem>
             ))}
           </CarouselContent>
