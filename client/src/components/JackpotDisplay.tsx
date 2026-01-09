@@ -122,13 +122,14 @@ export function JackpotDisplay() {
       />
 
       {/* Content */}
-      <div className="relative flex flex-col md:flex-row md:items-center md:justify-between px-5 py-4 gap-4">
-        <div className="flex items-center gap-4">
+      <div className="relative flex items-center justify-between px-3 py-2.5 md:px-5 md:py-4 gap-2 md:gap-4">
+        {/* Left side: Trophy + Text */}
+        <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
           {/* Trophy with spinning rings - loader style */}
           <div className="relative flex-shrink-0">
             {/* Outer spinning ring */}
             <motion.div
-              className="absolute inset-[-8px] border-2 border-transparent border-t-primary border-r-primary/30 rounded-full"
+              className="absolute inset-[-6px] md:inset-[-8px] border-2 border-transparent border-t-primary border-r-primary/30 rounded-full"
               animate={{ rotate: 360 }}
               transition={{
                 duration: 3,
@@ -139,7 +140,7 @@ export function JackpotDisplay() {
             
             {/* Inner spinning ring - reverse */}
             <motion.div
-              className="absolute inset-[-4px] border border-transparent border-b-primary/50 border-l-primary/20 rounded-full"
+              className="absolute inset-[-3px] md:inset-[-4px] border border-transparent border-b-primary/50 border-l-primary/20 rounded-full"
               animate={{ rotate: -360 }}
               transition={{
                 duration: 2,
@@ -150,7 +151,7 @@ export function JackpotDisplay() {
             
             {/* Trophy container with glow */}
             <motion.div
-              className="relative w-12 h-12 rounded-full bg-card flex items-center justify-center border border-primary/30"
+              className="relative w-9 h-9 md:w-12 md:h-12 rounded-full bg-card flex items-center justify-center border border-primary/30"
               animate={{
                 boxShadow: [
                   "0 0 15px rgba(249, 115, 22, 0.2)",
@@ -164,7 +165,7 @@ export function JackpotDisplay() {
                 ease: "easeInOut",
               }}
             >
-              <Trophy className="w-6 h-6 text-primary" />
+              <Trophy className="w-4 h-4 md:w-6 md:h-6 text-primary" />
             </motion.div>
             
             {/* Pulse effect when animating */}
@@ -182,8 +183,8 @@ export function JackpotDisplay() {
           </div>
           
           {/* Text */}
-          <div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-wider font-medium mb-0.5">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider font-medium mb-0.5">
               <span>Jackpot Progressivo</span>
               <motion.div
                 animate={{ 
@@ -192,7 +193,7 @@ export function JackpotDisplay() {
                 }}
                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
               >
-                <TrendingUp className="w-3 h-3 text-primary" />
+                <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3 text-primary" />
               </motion.div>
             </div>
             
@@ -202,7 +203,7 @@ export function JackpotDisplay() {
               transition={{ duration: 0.3 }}
             >
               <motion.span 
-                className="text-2xl md:text-3xl font-bold text-white tabular-nums" 
+                className="text-lg md:text-3xl font-bold text-white tabular-nums" 
                 data-testid="jackpot-amount"
                 animate={{
                   textShadow: [
@@ -221,27 +222,28 @@ export function JackpotDisplay() {
               </motion.span>
             </motion.div>
             
-            {/* Explanation message */}
-            <p className="text-[11px] text-muted-foreground mt-1 max-w-xs">
-              O Jackpot cresce automaticamente conforme as apostas são realizadas.
+            {/* Explanation message - split in two lines on mobile */}
+            <p className="text-[9px] md:text-[11px] text-muted-foreground mt-0.5 md:mt-1 leading-tight">
+              <span className="md:hidden">O Jackpot cresce automaticamente<br/>conforme as apostas são realizadas.</span>
+              <span className="hidden md:inline">O Jackpot cresce automaticamente conforme as apostas são realizadas.</span>
             </p>
           </div>
         </div>
 
-        {/* Last winner section */}
-        <div className="flex items-center gap-4 md:gap-6">
+        {/* Right side: Last winner section */}
+        <div className="flex items-center gap-2 md:gap-6 flex-shrink-0">
           {jackpot.lastWonBy ? (
-            <div className="flex flex-col items-start md:items-end bg-white/5 rounded-lg px-4 py-2 border border-white/5">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-1">
+            <div className="flex flex-col items-end bg-white/5 rounded-lg px-2 py-1.5 md:px-4 md:py-2 border border-white/5">
+              <div className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-0.5 md:mb-1">
                 Último Ganhador
               </div>
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-primary" />
-                <span className="text-sm font-medium text-white">{jackpot.lastWonBy}</span>
+              <div className="flex items-center gap-1 md:gap-2">
+                <User className="w-3 h-3 md:w-4 md:h-4 text-primary" />
+                <span className="text-[11px] md:text-sm font-medium text-white">{jackpot.lastWonBy}</span>
               </div>
               {jackpot.lastWonAmount && (
                 <motion.div 
-                  className="text-sm font-bold text-green-500"
+                  className="text-[11px] md:text-sm font-bold text-green-500"
                   animate={{
                     textShadow: [
                       "0 0 5px rgba(34, 197, 94, 0)",
@@ -259,19 +261,19 @@ export function JackpotDisplay() {
                 </motion.div>
               )}
               {jackpot.lastWonAt && (
-                <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
+                <div className="hidden md:flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
                   <Calendar className="w-3 h-3" />
                   <span>{formatDate(jackpot.lastWonAt)}</span>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex flex-col items-start md:items-end bg-white/5 rounded-lg px-4 py-2 border border-white/5">
-              <div className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-1">
+            <div className="flex flex-col items-end bg-white/5 rounded-lg px-2 py-1.5 md:px-4 md:py-2 border border-white/5">
+              <div className="text-[8px] md:text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-0.5 md:mb-1">
                 Último Ganhador
               </div>
-              <div className="text-xs text-muted-foreground italic">
-                Seja o primeiro a ganhar!
+              <div className="text-[10px] md:text-xs text-primary italic whitespace-nowrap">
+                Seja o primeiro!
               </div>
             </div>
           )}
