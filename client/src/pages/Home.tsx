@@ -156,8 +156,8 @@ export default function Home() {
 
       <JackpotDisplay />
 
-      <section className="mb-10 overflow-x-auto pb-2 scrollbar-none">
-        <div className="flex gap-3 min-w-max">
+      <section className="mb-10 overflow-x-auto pb-2 scrollbar-none md:overflow-visible">
+        <div className="flex gap-3 min-w-max md:min-w-0 md:w-full md:justify-center">
           {CATEGORIES.map((cat) => (
             <Link key={cat.id} href={cat.link}>
               <Button 
