@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 
 import welcomeBanner from "@assets/welcome_banner_panoramic.png";
 import cashbackBanner from "@assets/cashback_banner.png";
+import dropsBanner from "@assets/drops_banner.png";
 
 interface PlayfiversGame {
   id: string;
@@ -25,6 +26,7 @@ interface PlayfiversGame {
 const BANNERS = [
   { id: 1, img: welcomeBanner, cta: "PEGAR BÔNUS", link: "/promotions" },
   { id: 2, img: cashbackBanner, cta: "SAIBA MAIS", link: "/promotions" },
+  { id: 3, img: dropsBanner, cta: "PARTICIPAR", link: "/casino" },
 ];
 
 const ORIGINALS = [
