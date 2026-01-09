@@ -131,14 +131,14 @@ export default function Home() {
             {BANNERS.map((banner) => (
               <CarouselItem key={banner.id}>
                 <Link href={banner.link}>
-                  <div className="relative h-[250px] md:h-[400px] w-full rounded-2xl overflow-hidden group shadow-2xl cursor-pointer">
+                  <div className="relative aspect-[3/2] w-full rounded-2xl overflow-hidden group shadow-2xl cursor-pointer">
                     <img 
                       src={banner.img} 
                       alt={banner.title} 
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                      className="absolute inset-0 w-full h-full object-contain transition-transform duration-700 group-hover:scale-105" 
                     />
-                    <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10">
-                      <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-8 h-12 md:h-14 font-bold text-lg shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all hover:scale-105">
+                    <div className="absolute bottom-4 left-4 md:bottom-8 md:left-8">
+                      <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-6 md:px-8 h-10 md:h-14 font-bold text-sm md:text-lg shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all hover:scale-105">
                         {banner.cta}
                       </Button>
                     </div>
