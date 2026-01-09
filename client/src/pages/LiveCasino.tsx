@@ -147,7 +147,7 @@ export default function LiveCasino() {
   return (
     <MainLayout>
       {/* Premium Hero Section */}
-      <div className="relative min-h-[280px] md:min-h-[320px] rounded-2xl overflow-hidden mb-8">
+      <div className="relative min-h-[180px] md:min-h-[220px] rounded-2xl overflow-hidden mb-8">
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-orange-950 via-[#1a0f0a] to-[#0f0f15]" />
         
@@ -175,7 +175,7 @@ export default function LiveCasino() {
         </div>
         
         {/* Content */}
-        <div className="relative z-10 px-6 py-10 md:px-12 md:py-16">
+        <div className="relative z-10 px-4 py-6 md:px-8 md:py-8">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
             {/* Left content */}
             <div className="flex-1">
@@ -188,16 +188,16 @@ export default function LiveCasino() {
                 <span className="text-xs font-bold text-red-300 uppercase tracking-widest">Ao Vivo Agora</span>
               </div>
               
-              <h1 className="text-3xl md:text-5xl font-heading font-black text-white mb-3 leading-tight">
+              <h1 className="text-2xl md:text-4xl font-heading font-black text-white mb-2 leading-tight">
                 CASINO <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-red-500">AO VIVO</span>
               </h1>
               
-              <p className="text-gray-300 text-sm md:text-base max-w-lg mb-6 leading-relaxed">
+              <p className="text-gray-300 text-xs md:text-sm max-w-lg mb-3 leading-relaxed">
                 Dealers profissionais, mesas 24/7 e a emoção de Las Vegas na palma da sua mão.
               </p>
               
               {/* Feature badges */}
-              <div className="flex flex-wrap gap-2 mb-6">
+              <div className="flex flex-wrap gap-2 mb-3">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
                   <Video className="w-3.5 h-3.5 text-orange-400" />
                   <span className="text-xs text-white font-medium">HD Streaming</span>
@@ -213,12 +213,12 @@ export default function LiveCasino() {
               </div>
               
               <Button 
-                className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold rounded-full px-8 h-12 shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all hover:shadow-[0_0_40px_rgba(249,115,22,0.6)] hover:scale-105"
+                className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold rounded-full px-6 h-9 text-sm shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all hover:shadow-[0_0_40px_rgba(249,115,22,0.6)] hover:scale-105"
                 onClick={() => popularGames[0] && handlePlayGame(popularGames[0])}
                 disabled={isLoading || !popularGames.length}
                 data-testid="button-play-featured"
               >
-                <Play className="w-5 h-5 mr-2 fill-white" /> Jogar Agora
+                <Play className="w-4 h-4 mr-1.5 fill-white" /> Jogar Agora
               </Button>
             </div>
             

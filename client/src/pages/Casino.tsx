@@ -3,7 +3,8 @@ import { GameCard } from "@/components/shared/GameCard";
 import { ORIGINALS_GAMES } from "@/lib/mockData";
 import casinoHero from "@assets/generated_images/casino_lobby_luxurious_background.png";
 import slotsTournamentBanner from "@assets/generated_images/promotional_banner_for_slots_tournament.png";
-import { Flame, Star, History, Rocket, Search, Filter, Play, Crown, Trophy, Users, Zap, Dice5, Timer, ChevronDown, Loader2 } from "lucide-react";
+import { Flame, Star, Heart, History, Rocket, Search, Filter, Play, Crown, Trophy, Users, Zap, Dice5, Timer, ChevronDown, Loader2 } from "lucide-react";
+import { useFavoritesStore } from "@/stores/favorites-store";
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -38,6 +39,7 @@ interface SlotsgatewayGame {
 
 const GAME_CATEGORIES = [
     { id: "all", label: "Todos", icon: Dice5 },
+    { id: "favorites", label: "Favoritos", icon: Heart },
     { id: "slots", label: "Slots", icon: Flame },
     { id: "live", label: "Ao Vivo", icon: Users },
     { id: "crash", label: "Crash", icon: Rocket },
@@ -155,6 +157,7 @@ export default function Casino() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { favorites } = useFavoritesStore();
   
   useEffect(() => {
     const newCategory = urlParams.get('category') || 'all';
@@ -198,8 +201,29 @@ export default function Casino() {
   const categoryFilters = getCategoryFilters(activeCategory);
 
   const { isLoading: loadingGames, refetch } = useQuery({
-    queryKey: ['slotsgateway-games', selectedProvider, activeCategory, debouncedSearch],
+    queryKey: ['slotsgateway-games', selectedProvider, activeCategory, debouncedSearch, favorites],
     queryFn: async () => {
+      if (activeCategory === 'favorites') {
+        if (favorites.length === 0) {
+          setGames([]);
+          setTotalGames(0);
+          setHasMore(false);
+          return { games: [], total: 0, hasMore: false, limit: 0, offset: 0 };
+        }
+        const result = await fetchGames({
+          providerId: selectedProvider || undefined,
+          search: debouncedSearch || undefined,
+          limit: 500,
+          offset: 0,
+        });
+        const favoriteGames = result.games.filter(g => favorites.includes(g.idHash));
+        setGames(favoriteGames);
+        setTotalGames(favoriteGames.length);
+        setHasMore(false);
+        setOffset(0);
+        return { ...result, games: favoriteGames, total: favoriteGames.length, hasMore: false };
+      }
+      
       const result = await fetchGames({
         providerId: selectedProvider || undefined,
         gameType: categoryFilters.gameType,
@@ -272,6 +296,7 @@ export default function Casino() {
     title: game.name,
     provider: game.providerSlug,
     image: game.imageUrl || 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=400',
+    idHash: game.idHash,
   });
 
   return (

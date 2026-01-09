@@ -1,8 +1,9 @@
-import { Play, Gamepad2 } from "lucide-react";
+import { Play, Gamepad2, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
+import { useFavoritesStore } from "@/stores/favorites-store";
 
 interface GameCardProps {
   id: number;
@@ -12,11 +13,22 @@ interface GameCardProps {
   hot?: boolean;
   className?: string;
   loading?: boolean;
+  idHash?: string;
 }
 
-export function GameCard({ id, title, provider, image, hot, className, loading }: GameCardProps) {
+export function GameCard({ id, title, provider, image, hot, className, loading, idHash }: GameCardProps) {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
+  const { toggleFavorite, isFavorite } = useFavoritesStore();
+  const isFav = idHash ? isFavorite(idHash) : false;
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (idHash) {
+      toggleFavorite(idHash);
+    }
+  };
 
   if (loading) {
       return (
@@ -62,6 +74,22 @@ export function GameCard({ id, title, provider, image, hot, className, loading }
           <div className="absolute top-2 left-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-lg uppercase tracking-wider">
             Hot
           </div>
+        )}
+        
+        {/* Favorite Button */}
+        {idHash && (
+          <button 
+            onClick={handleFavoriteClick}
+            className={cn(
+              "absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all z-20",
+              isFav 
+                ? "bg-red-500/90 text-white" 
+                : "bg-black/50 text-white/70 opacity-0 group-hover:opacity-100 hover:bg-black/70 hover:text-red-400"
+            )}
+            data-testid={`favorite-btn-${idHash}`}
+          >
+            <Heart className={cn("w-3.5 h-3.5", isFav && "fill-current")} />
+          </button>
         )}
 
         {/* Play Button Overlay */}
