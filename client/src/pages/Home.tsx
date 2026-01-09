@@ -1,7 +1,6 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { SectionHeader } from "@/components/shared/SectionHeader";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Rocket, Gamepad2, Trophy, Flame, Play, Star, Sparkles, TrendingUp, Zap, Loader2 } from "lucide-react";
 import { Link, useLocation } from "wouter";
@@ -30,10 +29,10 @@ const BANNERS = [
 ];
 
 const ORIGINALS = [
-  { id: "crash", name: "Crashmania", link: "/games/crash", color: "from-orange-500 to-orange-700", icon: Rocket },
-  { id: "double", name: "Double", link: "/games/double", color: "from-amber-600 to-amber-900", icon: Zap },
-  { id: "mines", name: "Mines", link: "/games/mines", color: "from-orange-600 to-red-800", icon: Star },
-  { id: "plinko", name: "Plinko", link: "/games/plinko", color: "from-yellow-600 to-orange-800", icon: Gamepad2 },
+  { id: "crash", name: "Crashmania", link: "/games/crash", gradient: "from-[#FF6B1A] via-[#FF4D00] to-[#CC3D00]", icon: Rocket },
+  { id: "double", name: "Double", link: "/games/double", gradient: "from-[#FF8C42] via-[#E06C20] to-[#B85518]", icon: Zap },
+  { id: "mines", name: "Mines", link: "/games/mines", gradient: "from-[#FFA234] via-[#E87A10] to-[#C55A00]", icon: Star },
+  { id: "plinko", name: "Plinko", link: "/games/plinko", gradient: "from-[#FFB347] via-[#FF8F00] to-[#D46A00]", icon: Gamepad2 },
 ];
 
 const CATEGORIES = [
@@ -188,20 +187,38 @@ export default function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {ORIGINALS.map((game) => (
             <Link key={game.id} href={game.link}>
-                <div className="group relative h-48 md:h-64 rounded-2xl overflow-hidden cursor-pointer border border-white/5 hover:border-primary/50 transition-all shadow-lg hover:shadow-primary/20 hover:-translate-y-1 duration-300" data-testid={`original-${game.id}`}>
-                    <div className={`absolute inset-0 bg-gradient-to-br ${game.color} transition-transform duration-500 opacity-80 group-hover:opacity-100`} />
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay" />
+                <div className="group relative h-48 md:h-64 rounded-2xl overflow-hidden cursor-pointer border border-white/10 hover:border-orange-400/50 transition-all shadow-lg hover:shadow-[0_8px_40px_rgba(249,115,22,0.4)] hover:-translate-y-2 duration-300" data-testid={`original-${game.id}`}>
+                    {/* Main gradient background */}
+                    <div className={`absolute inset-0 bg-gradient-to-br ${game.gradient} transition-all duration-500`} />
                     
-                    <game.icon className="absolute -bottom-8 -right-8 w-40 h-40 text-black/20 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-500" />
+                    {/* Animated shine effect */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     
+                    {/* Subtle pattern overlay */}
+                    <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '16px 16px' }} />
+                    
+                    {/* Dark vignette for depth */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                    
+                    {/* Large decorative icon */}
+                    <game.icon className="absolute -bottom-6 -right-6 w-36 h-36 text-white/10 group-hover:text-white/15 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500" />
+                    
+                    {/* Content */}
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center z-10">
-                        <div className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center mb-3 shadow-inner border border-white/20 group-hover:scale-110 transition-transform">
-                            <game.icon className="w-8 h-8 text-white" />
+                        {/* Icon container with glow */}
+                        <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3 shadow-lg border border-white/30 group-hover:scale-110 group-hover:bg-white/30 transition-all duration-300">
+                            <game.icon className="w-8 h-8 text-white drop-shadow-lg" />
                         </div>
-                        <h3 className="text-2xl font-heading font-black text-white italic drop-shadow-md mb-1">{game.name}</h3>
-                        <Badge variant="secondary" className="bg-black/30 backdrop-blur-md text-white border-none text-[10px]">99% RTP</Badge>
                         
-                        <Button size="sm" className="mt-4 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 bg-white text-black hover:bg-gray-100 font-bold rounded-full px-6">
+                        <h3 className="text-xl md:text-2xl font-heading font-black text-white italic drop-shadow-lg mb-2">{game.name}</h3>
+                        
+                        {/* RTP Badge */}
+                        <div className="px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/20">
+                            <span className="text-[11px] font-bold text-white/90">99% RTP</span>
+                        </div>
+                        
+                        {/* Hover button */}
+                        <Button size="sm" className="mt-4 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 bg-white text-orange-600 hover:bg-orange-50 font-bold rounded-full px-6 shadow-lg">
                             JOGAR
                         </Button>
                     </div>
