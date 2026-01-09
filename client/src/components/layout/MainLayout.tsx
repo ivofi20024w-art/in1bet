@@ -12,7 +12,6 @@ import { Link } from "wouter";
 import { MobileNav } from "./MobileNav";
 import { AgeVerificationModal } from "../shared/AgeVerificationModal";
 import { ChatWidget } from "../support/ChatWidget";
-import { JackpotDisplay } from "../JackpotDisplay";
 
 export function MainLayout({ children }: { children: ReactNode }) {
   const isMobile = useIsMobile();
@@ -30,7 +29,6 @@ export function MainLayout({ children }: { children: ReactNode }) {
 
         <main className="flex-1 overflow-y-auto scroll-smooth">
           <div className="p-4 md:p-6 lg:p-8 min-h-[calc(100vh-4rem)] max-w-7xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-24">
-            <JackpotDisplay />
             {children}
           </div>
           <Footer />

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, TrendingUp, Calendar, User } from "lucide-react";
+import { Trophy, Calendar, User } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -184,17 +184,8 @@ export function JackpotDisplay() {
           
           {/* Text */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5 md:gap-2 text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider font-medium mb-0.5">
-              <span>Jackpot Progressivo</span>
-              <motion.div
-                animate={{ 
-                  y: [0, -3, 0],
-                  scale: [1, 1.2, 1],
-                }}
-                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3 text-primary" />
-              </motion.div>
+            <div className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-wider font-medium mb-0.5">
+              <span>Jackpot IN1BET</span>
             </div>
             
             <motion.div
