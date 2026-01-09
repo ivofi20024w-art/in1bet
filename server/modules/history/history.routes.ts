@@ -121,4 +121,15 @@ router.get("/stats", authMiddleware, async (req: Request, res: Response) => {
   }
 });
 
+router.get("/winners", async (req: Request, res: Response) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit as string) || 20, 50);
+    const winners = await HistoryService.getRecentWinners(limit);
+    res.json({ success: true, data: winners });
+  } catch (error: any) {
+    console.error("Get winners error:", error);
+    res.status(500).json({ success: false, error: "Erro ao buscar ganhadores" });
+  }
+});
+
 export default router;

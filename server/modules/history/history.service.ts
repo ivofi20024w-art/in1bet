@@ -6,9 +6,10 @@ import {
   pixDeposits,
   userBonuses,
   bonuses,
+  users,
   TransactionType,
 } from "@shared/schema";
-import { eq, desc, and, or, sql, gte, lte } from "drizzle-orm";
+import { eq, desc, and, or, sql, gte, lte, gt } from "drizzle-orm";
 
 type Transaction = typeof transactions.$inferSelect;
 type Bet = typeof bets.$inferSelect;
@@ -464,4 +465,53 @@ export async function getUserStats(userId: string): Promise<{
     totalDeposits: depositStats?.total || 0,
     totalWithdrawals: withdrawalStats?.total || 0,
   };
+}
+
+export interface RecentWinner {
+  id: string;
+  username: string;
+  level: number;
+  amount: number;
+  gameName: string;
+  createdAt: Date;
+}
+
+export async function getRecentWinners(limit: number = 20): Promise<RecentWinner[]> {
+  const recentWins = await db
+    .select({
+      id: bets.id,
+      username: users.name,
+      level: users.level,
+      amount: sql<number>`${bets.winAmount}::float`,
+      gameType: bets.gameType,
+      createdAt: bets.updatedAt,
+    })
+    .from(bets)
+    .innerJoin(users, eq(bets.userId, users.id))
+    .where(
+      and(
+        eq(bets.status, 'WON'),
+        gt(sql`${bets.winAmount}::numeric`, 0)
+      )
+    )
+    .orderBy(desc(bets.updatedAt))
+    .limit(limit);
+
+  const gameTypeNames: Record<string, string> = {
+    MINES: 'Mines',
+    CRASH: 'Crash',
+    PLINKO: 'Plinko',
+    DOUBLE: 'Double',
+    SLOTS: 'Slots',
+    SPORTS: 'Esportes',
+  };
+
+  return recentWins.map(win => ({
+    id: win.id,
+    username: win.username,
+    level: win.level,
+    amount: win.amount,
+    gameName: gameTypeNames[win.gameType] || win.gameType,
+    createdAt: win.createdAt,
+  }));
 }
