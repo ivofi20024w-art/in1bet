@@ -24,9 +24,9 @@ interface PlayfiversGame {
 }
 
 const BANNERS = [
-  { id: 1, img: welcomeBanner, title: "BÔNUS DE BOAS-VINDAS", subtitle: "100% até R$ 500 no primeiro depósito", cta: "PEGAR BÔNUS", link: "/promotions" },
-  { id: 2, img: cashbackBanner, title: "CASHBACK SEMANAL", subtitle: "Receba até 10% das suas perdas de volta", cta: "SAIBA MAIS", link: "/promotions" },
-  { id: 3, img: dropsBanner, title: "DROPS & WINS", subtitle: "Prêmios diários e torneios semanais", cta: "PARTICIPAR", link: "/casino" },
+  { id: 1, img: welcomeBanner, title: "BÔNUS DE BOAS-VINDAS", subtitle: "100% até R$ 500 no primeiro depósito", cta: "PEGAR BÔNUS", link: "/promotions", variant: "panoramic" as const },
+  { id: 2, img: cashbackBanner, title: "CASHBACK SEMANAL", subtitle: "Receba até 10% das suas perdas de volta", cta: "SAIBA MAIS", link: "/promotions", variant: "standard" as const },
+  { id: 3, img: dropsBanner, title: "DROPS & WINS", subtitle: "Prêmios diários e torneios semanais", cta: "PARTICIPAR", link: "/casino", variant: "standard" as const },
 ];
 
 const ORIGINALS = [
@@ -131,14 +131,24 @@ export default function Home() {
             {BANNERS.map((banner) => (
               <CarouselItem key={banner.id}>
                 <Link href={banner.link}>
-                  <div className="relative flex items-center justify-center h-[180px] md:h-[280px] w-full rounded-2xl overflow-hidden group shadow-2xl cursor-pointer bg-card">
+                  <div 
+                    className="relative w-full overflow-hidden group cursor-pointer rounded-xl md:rounded-2xl"
+                    style={{ height: 'clamp(180px, 28vw, 320px)' }}
+                  >
+                    {banner.variant === "standard" && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#1a1a2e] via-[#16213e] to-[#1a1a2e]" />
+                    )}
                     <img 
                       src={banner.img} 
                       alt={banner.title} 
-                      className="w-auto h-full max-w-full object-contain transition-transform duration-700 group-hover:scale-105 rounded-2xl" 
+                      className={`absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-[1.02] ${
+                        banner.variant === "panoramic" 
+                          ? "object-cover object-center" 
+                          : "object-contain object-center"
+                      }`}
                     />
                     <div className="absolute bottom-3 left-3 md:bottom-6 md:left-6">
-                      <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-5 md:px-8 h-9 md:h-12 font-bold text-xs md:text-base shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all hover:scale-105">
+                      <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-4 md:px-8 h-8 md:h-11 font-bold text-xs md:text-sm shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all hover:scale-105">
                         {banner.cta}
                       </Button>
                     </div>
@@ -148,8 +158,8 @@ export default function Home() {
             ))}
           </CarouselContent>
           <div className="hidden md:block">
-            <CarouselPrevious className="left-4 bg-black/30 backdrop-blur border-none text-white hover:bg-primary h-12 w-12" />
-            <CarouselNext className="right-4 bg-black/30 backdrop-blur border-none text-white hover:bg-primary h-12 w-12" />
+            <CarouselPrevious className="left-4 bg-black/40 backdrop-blur-sm border-none text-white hover:bg-primary h-10 w-10" />
+            <CarouselNext className="right-4 bg-black/40 backdrop-blur-sm border-none text-white hover:bg-primary h-10 w-10" />
           </div>
         </Carousel>
       </section>
