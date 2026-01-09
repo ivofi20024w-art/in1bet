@@ -24,8 +24,8 @@ interface SlotsgatewayGame {
 }
 
 const BANNERS = [
-  { id: 1, img: mainBanner, cta: "JOGUE AGORA!", link: "/casino" },
-  { id: 2, img: tigreBanner, cta: "JOGUE AGORA", link: "/casino" },
+  { id: 1, img: mainBanner, link: "/casino" },
+  { id: 2, img: tigreBanner, link: "/casino" },
 ];
 
 const ORIGINALS = [
@@ -138,11 +138,6 @@ export default function Home() {
                       alt="Banner promocional"
                       className="w-full h-auto transition-transform duration-700 group-hover:scale-[1.02]"
                     />
-                    <div className="absolute bottom-3 left-3 md:bottom-6 md:left-6">
-                      <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-4 md:px-8 h-8 md:h-11 font-bold text-xs md:text-sm shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all hover:scale-105">
-                        {banner.cta}
-                      </Button>
-                    </div>
                   </div>
                 </Link>
               </CarouselItem>
