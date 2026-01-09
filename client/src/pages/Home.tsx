@@ -30,10 +30,10 @@ const BANNERS = [
 ];
 
 const ORIGINALS = [
-  { id: "crash", name: "Crashmania", link: "/games/crash", color: "from-orange-500 to-red-600", icon: Rocket },
-  { id: "double", name: "Double", link: "/games/double", color: "from-red-600 to-black", icon: Zap },
-  { id: "mines", name: "Mines", link: "/games/mines", color: "from-blue-500 to-indigo-600", icon: Star },
-  { id: "plinko", name: "Plinko", link: "/games/plinko", color: "from-green-500 to-green-700", icon: Gamepad2 },
+  { id: "crash", name: "Crashmania", link: "/games/crash", color: "from-orange-500 to-orange-700", icon: Rocket },
+  { id: "double", name: "Double", link: "/games/double", color: "from-amber-600 to-amber-900", icon: Zap },
+  { id: "mines", name: "Mines", link: "/games/mines", color: "from-orange-600 to-red-800", icon: Star },
+  { id: "plinko", name: "Plinko", link: "/games/plinko", color: "from-yellow-600 to-orange-800", icon: Gamepad2 },
 ];
 
 const CATEGORIES = [

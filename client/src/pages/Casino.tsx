@@ -347,10 +347,10 @@ export default function Casino() {
              <Link key={game.id} href={`/games/${game.id}`}>
                 <div className="min-w-[160px] h-24 rounded-xl relative overflow-hidden group cursor-pointer border border-white/5 hover:border-primary/50 transition-all snap-start shadow-lg hover:shadow-primary/20 hover:-translate-y-1 duration-300">
                     <div className={`absolute inset-0 bg-gradient-to-br ${
-                         game.id === 'mines' ? 'from-blue-600 to-blue-900' : 
-                         game.id === 'crash' ? 'from-red-600 to-red-900' : 
-                         game.id === 'double' ? 'from-purple-600 to-purple-900' :
-                         game.id === 'plinko' ? 'from-green-600 to-green-900' :
+                         game.id === 'mines' ? 'from-orange-600 to-red-800' : 
+                         game.id === 'crash' ? 'from-orange-500 to-orange-700' : 
+                         game.id === 'double' ? 'from-amber-600 to-amber-900' :
+                         game.id === 'plinko' ? 'from-yellow-600 to-orange-800' :
                          'from-gray-700 to-gray-900'
                     } transition-transform group-hover:scale-110 duration-500`} />
                     <div className="absolute inset-0 flex items-center justify-between p-4">
