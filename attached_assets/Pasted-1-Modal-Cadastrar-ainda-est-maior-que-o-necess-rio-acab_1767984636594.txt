@@ -1,0 +1,40 @@
+1. Modal Cadastrar ainda está maior que o necessário, acaba que fica para fora da tela tanto no desktop como no mobile. Diminuir a tela de cadastrar.
+O botão x nos modais de login e cadastro não funciona.
+
+
+-------------- HOME ------------------------
+
+2. Lobby deveria levar para IN1BET ORIGINALS na página home
+Slots deveria levar para casino com a opção de slots ativada de imediato.
+Ao vivo tá abrindo /live-casino correto
+Originais deveria abrir apenas os jogos Originais do nosso Casino.
+Favoritos deveria abrir a página do casino onde mostra apenas os jogos favoritos que a pessoa já favoritou com a opção de favoritos ativa..
+Cada uma dessas opções já deve fazer o que diz por si no nome.. favoritos.. abre casino com favoritos ativo.. só vai mostrar os favoritados.. e por ai vai nas restantes..
+
+
+
+3. Falta o favoritar em todo o tipo de jogos de casino e na home também.
+Para quando a pessoa clicar em favoritos abrir a lista de jogos que a pessoa já favoritou.
+
+4. Originais deve abrir apenas os jogos próprios do casino!
+
+5. Slots populares deveria ter os jogos mais populares de outros casinos.. Como sugar rush, tigrinho, etc.. e não esses ao vivo...
+
+
+--------------- live-casino ----------------
+6. Ao Vivo na home abre /live-casino mas a página Live-casino está meio feia.. Vamos lá melhorar a página, interface idêntica a do Casino normal. Pode permanecer
+HD Streaming
+Chat Ao Vivo
+Multiplayer
+
+Mas quero que deixa a parte de roleta, blackjack, game shows, etc bonito está bem torto tanto em mobile como desktop.
+
+7. Aquele carrousel na live-casino está feio e grande demais.. deveria ser um carrousel normal.. dizendo algo sobre live-casino depois faço o design..
+
+-------------- nav mobile -----------
+
+8. Em vez de Ao Vivo ao lado do boletim quero Esportes que abra /sports
+
+-------------- Boletim de apostas ------------
+
+9. O boletim de apostas é bonito mas está meio bugado, torto em várias coisas.. não mostra bem os jogos.. tem um scroll bar que fica bem pequeno aquela caixa de cima… rever o boletim de apostas mas não mudar muito o design….
