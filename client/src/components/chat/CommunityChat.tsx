@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   MessageCircle, X, Send, Users, Crown, Shield, ShieldCheck, Headphones, HelpCircle,
-  AlertTriangle, Flag, Smile, ChevronDown, Hash, Ban, UserX, Settings, Palette
+  AlertTriangle, Flag, Smile, ChevronDown, Hash, Ban, UserX, Settings, Palette, Zap, Sparkles, Gamepad2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -419,11 +419,11 @@ export default function CommunityChat() {
     }
 
     return (
-      <div className="px-4 py-1 text-xs text-gray-400 italic flex items-center gap-2">
+      <div className="px-4 py-2 text-xs text-primary/70 italic flex items-center gap-2 bg-primary/5 border-t border-primary/10">
         <span className="flex gap-0.5">
-          <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-          <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-          <span className="w-1 h-1 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+          <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+          <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+          <span className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
         </span>
         {text}
       </div>
@@ -436,7 +436,7 @@ export default function CommunityChat() {
     if (!badge) return null;
     
     return (
-      <span className={`inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[10px] font-medium ${badge.color}`}>
+      <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold ${badge.color}`}>
         {badge.icon}
         {badge.label}
       </span>
@@ -449,7 +449,7 @@ export default function CommunityChat() {
     const defaultColor = VIP_COLORS[user.vipLevel] || "text-gray-300";
     
     return (
-      <span className={`font-medium text-sm truncate ${customColor || defaultColor} ${effectClass}`}>
+      <span className={`font-semibold text-sm truncate ${customColor || defaultColor} ${effectClass}`}>
         {user.name}
       </span>
     );
@@ -459,291 +459,341 @@ export default function CommunityChat() {
 
   return (
     <>
-      <Button
+      <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 z-40 h-14 w-14 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-blue-500/30"
+        className="fixed bottom-6 left-6 z-40 group"
         data-testid="button-open-community-chat"
       >
-        <Users className="h-6 w-6" />
-        {onlineCount > 0 && (
-          <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-green-500 text-xs flex items-center justify-center font-bold">
-            {onlineCount > 99 ? "99+" : onlineCount}
-          </span>
-        )}
-      </Button>
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary to-orange-500 rounded-full blur-lg opacity-60 group-hover:opacity-100 transition-opacity animate-pulse" />
+          <div className="relative h-14 w-14 rounded-full bg-gradient-to-br from-primary via-orange-500 to-amber-500 flex items-center justify-center shadow-[0_0_30px_rgba(249,115,22,0.4)] group-hover:shadow-[0_0_40px_rgba(249,115,22,0.6)] transition-all group-hover:scale-110">
+            <MessageCircle className="h-6 w-6 text-white" />
+            <Sparkles className="absolute -top-1 -right-1 h-4 w-4 text-yellow-300 animate-pulse" />
+          </div>
+          {onlineCount > 0 && (
+            <span className="absolute -top-1 -left-1 h-6 w-6 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 text-[10px] flex items-center justify-center font-bold text-white shadow-lg border-2 border-background">
+              {onlineCount > 99 ? "99+" : onlineCount}
+            </span>
+          )}
+        </div>
+      </button>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, x: 400 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 400 }}
-            transition={{ type: "spring", damping: 25 }}
-            className="fixed right-0 top-0 h-full w-full sm:w-96 bg-[#0a0a0a] border-l border-gray-800 z-50 flex flex-col"
+            initial={{ opacity: 0, x: -400, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: -400, scale: 0.9 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            className="fixed left-0 top-0 h-full w-full sm:w-[420px] z-50 flex flex-col overflow-hidden"
           >
-            <div className="flex items-center justify-between p-4 border-b border-gray-800 bg-gradient-to-r from-green-900/30 to-emerald-900/30">
-              <div className="flex items-center gap-3">
-                <MessageCircle className="h-5 w-5 text-green-400" />
-                <div>
-                  <h3 className="font-bold text-white">Chat da Comunidade</h3>
-                  <div className="flex items-center gap-2 text-xs text-gray-400">
-                    <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500" : "bg-red-500"}`} />
-                    <span>{isConnected ? `${onlineCount} online` : "Desconectado"}</span>
+            <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0f] via-[#0d0d14] to-[#0a0a0f]" />
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAwIDEwIEwgNDAgMTAgTSAxMCAwIEwgMTAgNDAgTSAwIDIwIEwgNDAgMjAgTSAyMCAwIEwgMjAgNDAgTSAwIDMwIEwgNDAgMzAgTSAzMCAwIEwgMzAgNDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAyKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-50" />
+            <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
+            
+            <div className="relative flex flex-col h-full border-r border-primary/20">
+              <div className="relative flex items-center justify-between p-4 border-b border-primary/20 bg-gradient-to-r from-primary/10 via-orange-500/5 to-transparent backdrop-blur-sm">
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent" />
+                <div className="relative flex items-center gap-3">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-primary/30 rounded-xl blur-md" />
+                    <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-orange-600 flex items-center justify-center shadow-lg">
+                      <Gamepad2 className="h-5 w-5 text-white" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white flex items-center gap-2">
+                      Chat Global
+                      <Sparkles className="h-4 w-4 text-primary" />
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className={`w-2 h-2 rounded-full ${isConnected ? "bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-red-500"} animate-pulse`} />
+                      <span className={isConnected ? "text-green-400" : "text-red-400"}>
+                        {isConnected ? `${onlineCount} jogadores online` : "Conectando..."}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-1">
-                {myLevel >= 50 && (
+                <div className="relative flex items-center gap-1">
+                  {myLevel >= 50 && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowSettings(!showSettings)}
+                      data-testid="button-chat-settings"
+                      className="h-9 w-9 rounded-lg hover:bg-primary/20 text-primary"
+                    >
+                      <Palette className="h-4 w-4" />
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setShowSettings(!showSettings)}
-                    data-testid="button-chat-settings"
-                    className="h-8 w-8"
+                    onClick={() => setIsOpen(false)}
+                    data-testid="button-close-chat"
+                    className="h-9 w-9 rounded-lg hover:bg-white/10"
                   >
-                    <Palette className="h-4 w-4" />
+                    <X className="h-5 w-5" />
                   </Button>
-                )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsOpen(false)}
-                  data-testid="button-close-chat"
-                  className="h-8 w-8"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-            </div>
-
-            <AnimatePresence>
-              {showSettings && myLevel >= 50 && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="bg-[#111] border-b border-gray-800 p-4 overflow-hidden"
-                >
-                  <h4 className="text-sm font-medium text-white mb-3">Personalizar Chat (Lv.50+)</h4>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-xs text-gray-400 mb-1 block">Cor do Nome</label>
-                      <div className="flex flex-wrap gap-1">
-                        {COLOR_OPTIONS.map(c => (
-                          <button
-                            key={c.value}
-                            onClick={() => setMyCustomization(prev => ({ ...prev, nameColor: c.value }))}
-                            className={`w-6 h-6 rounded ${c.class} border ${myCustomization?.nameColor === c.value ? "border-white" : "border-gray-700"}`}
-                            title={c.label}
-                          >
-                            ●
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="text-xs text-gray-400 mb-1 block">Efeito do Nome</label>
-                      <div className="flex flex-wrap gap-1">
-                        {EFFECT_OPTIONS.map(e => (
-                          <button
-                            key={e.value}
-                            onClick={() => setMyCustomization(prev => ({ ...prev, nameEffect: e.value }))}
-                            className={`px-2 py-1 text-xs rounded ${myCustomization?.nameEffect === e.value ? "bg-green-600" : "bg-gray-800"} text-white`}
-                          >
-                            {e.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div>
-                      <label className="text-xs text-gray-400 mb-1 block">Cor da Mensagem</label>
-                      <div className="flex flex-wrap gap-1">
-                        {COLOR_OPTIONS.map(c => (
-                          <button
-                            key={c.value}
-                            onClick={() => setMyCustomization(prev => ({ ...prev, messageColor: c.value }))}
-                            className={`w-6 h-6 rounded ${c.class} border ${myCustomization?.messageColor === c.value ? "border-white" : "border-gray-700"}`}
-                            title={c.label}
-                          >
-                            ●
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <Button
-                      onClick={() => saveCustomization(myCustomization?.nameColor, myCustomization?.nameEffect, myCustomization?.messageColor)}
-                      className="w-full bg-green-600 hover:bg-green-500"
-                      size="sm"
-                    >
-                      Salvar
-                    </Button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {currentRoom && (
-              <button
-                onClick={() => setShowRooms(!showRooms)}
-                className="flex items-center justify-between px-4 py-2 bg-[#111] border-b border-gray-800 hover:bg-[#1a1a1a] transition-colors"
-                data-testid="button-select-room"
-              >
-                <div className="flex items-center gap-2">
-                  <Hash className="h-4 w-4 text-gray-400" />
-                  <span className="text-sm font-medium text-white">{currentRoom.displayName}</span>
-                  {currentRoom.type === "VIP" && <Crown className="h-4 w-4 text-yellow-400" />}
-                  <span className="text-xs text-gray-500 flex items-center gap-1">
-                    <Users className="h-3 w-3" />
-                    {roomOnlineCount}
-                  </span>
                 </div>
-                <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${showRooms ? "rotate-180" : ""}`} />
-              </button>
-            )}
-
-            <AnimatePresence>
-              {showRooms && (
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{ height: "auto", opacity: 1 }}
-                  exit={{ height: 0, opacity: 0 }}
-                  className="bg-[#0d0d0d] border-b border-gray-800 overflow-hidden"
-                >
-                  {rooms.map(room => (
-                    <button
-                      key={room.id}
-                      onClick={() => joinRoom(room)}
-                      className={`w-full flex items-center gap-2 px-4 py-2 hover:bg-[#1a1a1a] transition-colors ${
-                        currentRoom?.id === room.id ? "bg-green-900/20 border-l-2 border-green-500" : ""
-                      }`}
-                      data-testid={`button-room-${room.name}`}
-                    >
-                      <Hash className="h-4 w-4 text-gray-500" />
-                      <span className="text-sm text-gray-300">{room.displayName}</span>
-                      {room.type === "VIP" && <Crown className="h-3 w-3 text-yellow-400" />}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-3">
-                {messages.map((msg) => (
-                  <div key={msg.id} className="group flex items-start gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-xs text-gray-500">
-                          {VIP_BADGES[msg.user.vipLevel] || ""}
-                        </span>
-                        {renderRoleBadge(msg.user.role)}
-                        {renderUserName(msg.user)}
-                        <span className="text-[10px] px-1 py-0.5 rounded bg-gray-800 text-gray-500">
-                          Lv.{msg.user.level}
-                        </span>
-                      </div>
-                      <p className={`text-sm break-words mt-0.5 ${msg.user.customization?.messageColor ? getMessageColorClass(msg.user.customization.messageColor) : "text-gray-200"}`}>
-                        {msg.message}
-                      </p>
-                    </div>
-                    {msg.user.id !== "system" && (
-                      <div className="opacity-0 group-hover:opacity-100 flex gap-1">
-                        <button
-                          onClick={() => blockUser(msg.user.id)}
-                          className="p-1 text-gray-500 hover:text-orange-400 transition-all"
-                          title="Bloquear"
-                          data-testid={`button-block-${msg.id}`}
-                        >
-                          <UserX className="h-3 w-3" />
-                        </button>
-                        <button
-                          onClick={() => reportMessage(msg.id)}
-                          className="p-1 text-gray-500 hover:text-red-400 transition-all"
-                          title="Denunciar"
-                          data-testid={`button-report-${msg.id}`}
-                        >
-                          <Flag className="h-3 w-3" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
               </div>
-            </ScrollArea>
 
-            {renderTypingIndicator()}
+              <AnimatePresence>
+                {showSettings && myLevel >= 50 && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="relative bg-gradient-to-b from-primary/10 to-transparent border-b border-primary/20 p-4 overflow-hidden"
+                  >
+                    <h4 className="text-sm font-bold text-primary mb-3 flex items-center gap-2">
+                      <Zap className="h-4 w-4" />
+                      Personalizar Chat (Lv.50+)
+                    </h4>
+                    
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs text-gray-400 mb-1.5 block">Cor do Nome</label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {COLOR_OPTIONS.map(c => (
+                            <button
+                              key={c.value}
+                              onClick={() => setMyCustomization(prev => ({ ...prev, nameColor: c.value }))}
+                              className={`w-7 h-7 rounded-lg ${c.class} border-2 transition-all hover:scale-110 ${myCustomization?.nameColor === c.value ? "border-white shadow-lg" : "border-white/20"}`}
+                              title={c.label}
+                            >
+                              ●
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="text-xs text-gray-400 mb-1.5 block">Efeito do Nome</label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {EFFECT_OPTIONS.map(e => (
+                            <button
+                              key={e.value}
+                              onClick={() => setMyCustomization(prev => ({ ...prev, nameEffect: e.value }))}
+                              className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${myCustomization?.nameEffect === e.value ? "bg-primary text-white" : "bg-white/10 text-white hover:bg-white/20"}`}
+                            >
+                              {e.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <label className="text-xs text-gray-400 mb-1.5 block">Cor da Mensagem</label>
+                        <div className="flex flex-wrap gap-1.5">
+                          {COLOR_OPTIONS.map(c => (
+                            <button
+                              key={c.value}
+                              onClick={() => setMyCustomization(prev => ({ ...prev, messageColor: c.value }))}
+                              className={`w-7 h-7 rounded-lg ${c.class} border-2 transition-all hover:scale-110 ${myCustomization?.messageColor === c.value ? "border-white shadow-lg" : "border-white/20"}`}
+                              title={c.label}
+                            >
+                              ●
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <Button
+                        onClick={() => saveCustomization(myCustomization?.nameColor, myCustomization?.nameEffect, myCustomization?.messageColor)}
+                        className="w-full bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 text-white font-bold"
+                        size="sm"
+                      >
+                        <Sparkles className="h-4 w-4 mr-2" />
+                        Salvar Personalização
+                      </Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-            <div className="p-4 border-t border-gray-800 bg-[#0d0d0d]">
-              <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  sendMessage();
-                }}
-                className="flex gap-2"
-              >
-                <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-10 w-10 shrink-0"
-                      data-testid="button-emoji-picker"
-                    >
-                      <Smile className="h-5 w-5 text-gray-400" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-80 p-2 bg-[#1a1a1a] border-gray-700" side="top" align="start">
-                    <div className="flex gap-1 mb-2 overflow-x-auto pb-1">
-                      {EMOJI_CATEGORIES.map((cat, i) => (
-                        <button
-                          key={cat.name}
-                          onClick={() => setSelectedEmojiCategory(i)}
-                          className={`px-2 py-1 text-xs rounded whitespace-nowrap ${selectedEmojiCategory === i ? "bg-green-600 text-white" : "bg-gray-800 text-gray-300"}`}
-                        >
-                          {cat.name}
-                        </button>
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-8 gap-1 max-h-40 overflow-y-auto">
-                      {EMOJI_CATEGORIES[selectedEmojiCategory].emojis.map((emoji, i) => (
-                        <button
-                          key={i}
-                          onClick={() => insertEmoji(emoji)}
-                          className="text-xl p-1 hover:bg-gray-700 rounded"
-                        >
-                          {emoji}
-                        </button>
-                      ))}
-                    </div>
-                  </PopoverContent>
-                </Popover>
-                <Input
-                  value={inputMessage}
-                  onChange={handleInputChange}
-                  placeholder="Digite sua mensagem..."
-                  maxLength={500}
-                  className="flex-1 bg-[#1a1a1a] border-gray-700 focus:border-green-500"
-                  disabled={!isConnected}
-                  data-testid="input-chat-message"
-                />
-                <Button
-                  type="submit"
-                  disabled={!isConnected || !inputMessage.trim()}
-                  className="bg-green-600 hover:bg-green-500"
-                  data-testid="button-send-message"
+              {currentRoom && (
+                <button
+                  onClick={() => setShowRooms(!showRooms)}
+                  className="relative flex items-center justify-between px-4 py-3 bg-white/5 border-b border-white/10 hover:bg-white/10 transition-colors"
+                  data-testid="button-select-room"
                 >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </form>
-              <p className="text-[10px] text-gray-500 mt-2 text-center">
-                Links, contatos e linguagem inadequada são bloqueados
-              </p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-6 h-6 rounded-lg bg-primary/20 flex items-center justify-center">
+                      <Hash className="h-3 w-3 text-primary" />
+                    </div>
+                    <span className="text-sm font-medium text-white">{currentRoom.displayName}</span>
+                    {currentRoom.type === "VIP" && <Crown className="h-4 w-4 text-yellow-400" />}
+                    <span className="text-xs text-gray-500 flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full">
+                      <Users className="h-3 w-3" />
+                      {roomOnlineCount}
+                    </span>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 text-gray-400 transition-transform ${showRooms ? "rotate-180" : ""}`} />
+                </button>
+              )}
+
+              <AnimatePresence>
+                {showRooms && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    className="bg-black/50 border-b border-white/10 overflow-hidden"
+                  >
+                    {rooms.map(room => (
+                      <button
+                        key={room.id}
+                        onClick={() => joinRoom(room)}
+                        className={`w-full flex items-center gap-2 px-4 py-2.5 hover:bg-white/5 transition-colors ${
+                          currentRoom?.id === room.id ? "bg-primary/10 border-l-2 border-primary" : ""
+                        }`}
+                        data-testid={`button-room-${room.name}`}
+                      >
+                        <Hash className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-300">{room.displayName}</span>
+                        {room.type === "VIP" && <Crown className="h-3 w-3 text-yellow-400" />}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <ScrollArea className="flex-1 px-4 py-3">
+                <div className="space-y-3">
+                  {messages.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-orange-500/10 flex items-center justify-center mb-4">
+                        <MessageCircle className="h-8 w-8 text-primary/50" />
+                      </div>
+                      <p className="text-gray-500 text-sm">Nenhuma mensagem ainda</p>
+                      <p className="text-gray-600 text-xs mt-1">Seja o primeiro a enviar!</p>
+                    </div>
+                  ) : (
+                    messages.map((msg) => (
+                      <motion.div 
+                        key={msg.id} 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="group relative"
+                      >
+                        <div className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] transition-colors border border-transparent hover:border-white/5">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5 flex-wrap mb-1">
+                              <span className="text-sm">
+                                {VIP_BADGES[msg.user.vipLevel] || ""}
+                              </span>
+                              {renderRoleBadge(msg.user.role)}
+                              {renderUserName(msg.user)}
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-gradient-to-r from-primary/20 to-orange-500/10 text-primary font-bold">
+                                Lv.{msg.user.level}
+                              </span>
+                              <span className="text-[10px] text-gray-600">
+                                {new Date(msg.createdAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                              </span>
+                            </div>
+                            <p className={`text-sm break-words leading-relaxed ${msg.user.customization?.messageColor ? getMessageColorClass(msg.user.customization.messageColor) : "text-gray-300"}`}>
+                              {msg.message}
+                            </p>
+                          </div>
+                          {msg.user.id !== "system" && (
+                            <div className="opacity-0 group-hover:opacity-100 flex gap-1 transition-opacity">
+                              <button
+                                onClick={() => blockUser(msg.user.id)}
+                                className="p-1.5 text-gray-500 hover:text-orange-400 hover:bg-orange-400/10 rounded-lg transition-all"
+                                title="Bloquear"
+                                data-testid={`button-block-${msg.id}`}
+                              >
+                                <UserX className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                onClick={() => reportMessage(msg.id)}
+                                className="p-1.5 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all"
+                                title="Denunciar"
+                                data-testid={`button-report-${msg.id}`}
+                              >
+                                <Flag className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+              </ScrollArea>
+
+              {renderTypingIndicator()}
+
+              <div className="relative p-4 border-t border-primary/20 bg-gradient-to-t from-black/50 to-transparent">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    sendMessage();
+                  }}
+                  className="flex gap-2"
+                >
+                  <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-11 w-11 shrink-0 rounded-xl hover:bg-primary/20 text-gray-400 hover:text-primary"
+                        data-testid="button-emoji-picker"
+                      >
+                        <Smile className="h-5 w-5" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-80 p-3 bg-[#1a1a1f] border-white/10 rounded-2xl shadow-2xl" side="top" align="start">
+                      <div className="flex gap-1 mb-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-white/10">
+                        {EMOJI_CATEGORIES.map((cat, i) => (
+                          <button
+                            key={cat.name}
+                            onClick={() => setSelectedEmojiCategory(i)}
+                            className={`px-3 py-1.5 text-xs rounded-lg whitespace-nowrap font-medium transition-all ${selectedEmojiCategory === i ? "bg-gradient-to-r from-primary to-orange-500 text-white" : "bg-white/10 text-gray-300 hover:bg-white/20"}`}
+                          >
+                            {cat.name}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-8 gap-1 max-h-44 overflow-y-auto">
+                        {EMOJI_CATEGORIES[selectedEmojiCategory].emojis.map((emoji, i) => (
+                          <button
+                            key={i}
+                            onClick={() => insertEmoji(emoji)}
+                            className="text-xl p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                  <Input
+                    value={inputMessage}
+                    onChange={handleInputChange}
+                    placeholder="Digite sua mensagem..."
+                    maxLength={500}
+                    className="flex-1 h-11 bg-white/5 border-white/10 focus:border-primary/50 rounded-xl text-white placeholder:text-gray-500"
+                    disabled={!isConnected}
+                    data-testid="input-chat-message"
+                  />
+                  <Button
+                    type="submit"
+                    disabled={!isConnected || !inputMessage.trim()}
+                    className="h-11 w-11 rounded-xl bg-gradient-to-r from-primary to-orange-500 hover:from-primary/90 hover:to-orange-500/90 shadow-lg shadow-primary/30"
+                    data-testid="button-send-message"
+                  >
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </form>
+                <p className="text-[10px] text-gray-600 mt-2 text-center">
+                  Links, contatos e linguagem inadequada são bloqueados
+                </p>
+              </div>
             </div>
           </motion.div>
         )}
