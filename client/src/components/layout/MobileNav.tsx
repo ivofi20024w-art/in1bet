@@ -66,7 +66,7 @@ export function MobileNav() {
             </SheetTrigger>
             <SheetContent side="right" className="p-0 border-l border-white/10 bg-sidebar w-[280px]">
               <SheetTitle className="sr-only">Menu Principal</SheetTitle>
-              <Sidebar />
+              <Sidebar isMobile />
             </SheetContent>
           </Sheet>
         </div>

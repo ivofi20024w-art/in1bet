@@ -196,15 +196,22 @@ function CollapsibleSection({
   );
 }
 
-export function Sidebar({ className }: { className?: string }) {
+interface SidebarProps {
+  className?: string;
+  isMobile?: boolean;
+}
+
+export function Sidebar({ className, isMobile = false }: SidebarProps) {
   const [location] = useLocation();
   
   const [isCompact, setIsCompact] = useState(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined' && !isMobile) {
       return localStorage.getItem('sidebar-compact') === 'true';
     }
     return false;
   });
+  
+  const effectiveCompact = isMobile ? false : isCompact;
   
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
@@ -215,8 +222,10 @@ export function Sidebar({ className }: { className?: string }) {
   });
 
   useEffect(() => {
-    localStorage.setItem('sidebar-compact', String(isCompact));
-  }, [isCompact]);
+    if (!isMobile) {
+      localStorage.setItem('sidebar-compact', String(isCompact));
+    }
+  }, [isCompact, isMobile]);
 
   const toggleSection = (sectionId: string) => {
     setOpenSections(prev => ({
@@ -229,53 +238,68 @@ export function Sidebar({ className }: { className?: string }) {
     <TooltipProvider delayDuration={0}>
       <aside className={cn(
         "flex flex-col h-full bg-sidebar border-r border-white/5 py-4 transition-all duration-300 ease-in-out",
-        isCompact ? "w-[72px]" : "w-[260px]",
+        isMobile ? "w-full" : (effectiveCompact ? "w-[72px]" : "w-[260px]"),
         className
       )}>
-        {/* Logo */}
-        <div className={cn(
-          "mb-4 px-4 flex items-center",
-          isCompact ? "justify-center" : "justify-between"
-        )}>
-          <Link href="/">
-            {isCompact ? (
-              <span className="text-xl font-bold font-heading italic text-primary">
-                IN1
-              </span>
-            ) : (
+        {/* Logo - only show on mobile sidebar */}
+        {isMobile && (
+          <div className="mb-4 px-4">
+            <Link href="/">
               <h1 className="text-2xl font-bold font-heading italic text-primary tracking-wide cursor-pointer hover:opacity-80 transition-opacity">
                 IN1<span className="text-white">BET</span>
               </h1>
-            )}
-          </Link>
-        </div>
+            </Link>
+          </div>
+        )}
+        
+        {/* Desktop Logo */}
+        {!isMobile && (
+          <div className={cn(
+            "mb-4 px-4 flex items-center",
+            effectiveCompact ? "justify-center" : "justify-between"
+          )}>
+            <Link href="/">
+              {effectiveCompact ? (
+                <span className="text-xl font-bold font-heading italic text-primary">
+                  IN1
+                </span>
+              ) : (
+                <h1 className="text-2xl font-bold font-heading italic text-primary tracking-wide cursor-pointer hover:opacity-80 transition-opacity">
+                  IN1<span className="text-white">BET</span>
+                </h1>
+              )}
+            </Link>
+          </div>
+        )}
 
-        {/* Collapse Toggle Button */}
-        <div className={cn("px-2 mb-3")}>
-          {isCompact ? (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => setIsCompact(false)}
-                  className="w-full flex items-center justify-center py-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/5 transition-colors"
-                >
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="bg-card border-white/10">
-                Expandir menu
-              </TooltipContent>
-            </Tooltip>
-          ) : (
-            <button
-              onClick={() => setIsCompact(true)}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:text-white hover:bg-white/5 transition-colors"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Recolher menu</span>
-            </button>
-          )}
-        </div>
+        {/* Collapse Toggle Button - Desktop only */}
+        {!isMobile && (
+          <div className="px-2 mb-3">
+            {effectiveCompact ? (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setIsCompact(false)}
+                    className="w-full flex items-center justify-center py-2 rounded-lg text-muted-foreground hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="right" className="bg-card border-white/10">
+                  Expandir menu
+                </TooltipContent>
+              </Tooltip>
+            ) : (
+              <button
+                onClick={() => setIsCompact(true)}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:text-white hover:bg-white/5 transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+                <span>Recolher menu</span>
+              </button>
+            )}
+          </div>
+        )}
 
         {/* Main Menu Sections */}
         <div className="flex-1 overflow-y-auto hide-scrollbar px-2 space-y-1">
@@ -285,7 +309,7 @@ export function Sidebar({ className }: { className?: string }) {
               section={section}
               isOpen={openSections[section.id]}
               onToggle={() => toggleSection(section.id)}
-              isCompact={isCompact}
+              isCompact={effectiveCompact}
               location={location}
             />
           ))}
@@ -297,7 +321,7 @@ export function Sidebar({ className }: { className?: string }) {
             <SidebarItem 
               key={item.id} 
               item={item} 
-              isCompact={isCompact} 
+              isCompact={effectiveCompact} 
               isActive={location === item.path} 
             />
           ))}
