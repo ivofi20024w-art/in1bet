@@ -9,7 +9,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
-import welcomeBanner from "@assets/100%_1767969275284.png";
+import welcomeBanner from "@assets/welcome_banner_panoramic.png";
 import cashbackBanner from "@assets/ChatGPT_Image_9_01_2026,_00_05_38_1767917230006.png";
 import dropsBanner from "@assets/ChatGPT_Image_9_01_2026,_00_06_58_1767917234350.png";
 
