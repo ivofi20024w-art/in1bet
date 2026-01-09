@@ -1,6 +1,5 @@
 import { Play, Gamepad2, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Link } from "wouter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
 import { useFavoritesStore } from "@/stores/favorites-store";
@@ -14,9 +13,10 @@ interface GameCardProps {
   className?: string;
   loading?: boolean;
   idHash?: string;
+  onClick?: () => void;
 }
 
-export function GameCard({ id, title, provider, image, hot, className, loading, idHash }: GameCardProps) {
+export function GameCard({ id, title, provider, image, hot, className, loading, idHash, onClick }: GameCardProps) {
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
   const { toggleFavorite, isFavorite } = useFavoritesStore();
@@ -30,6 +30,12 @@ export function GameCard({ id, title, provider, image, hot, className, loading, 
     }
   };
 
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (onClick) {
+      onClick();
+    }
+  };
+
   if (loading) {
       return (
           <div className={cn("aspect-[4/3] rounded-lg overflow-hidden", className)}>
@@ -39,8 +45,9 @@ export function GameCard({ id, title, provider, image, hot, className, loading, 
   }
 
   return (
-    <Link href={`/game/${id}`}>
-      <div className={cn("group relative rounded-lg overflow-hidden aspect-[4/3] bg-card border border-white/5 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_15px_-5px_rgba(249,115,22,0.3)] hover:-translate-y-0.5 cursor-pointer", className)}>
+      <div 
+        onClick={handleCardClick}
+        className={cn("group relative rounded-lg overflow-hidden aspect-[4/3] bg-card border border-white/5 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_15px_-5px_rgba(249,115,22,0.3)] hover:-translate-y-0.5 cursor-pointer", className)}>
         {imageLoading && !imageError && (
           <div className="absolute inset-0 bg-secondary/30 animate-pulse" />
         )}
@@ -105,6 +112,5 @@ export function GameCard({ id, title, provider, image, hot, className, loading, 
           <p className="text-muted-foreground text-[10px] truncate group-hover:text-primary transition-colors capitalize">{provider}</p>
         </div>
       </div>
-    </Link>
   );
 }

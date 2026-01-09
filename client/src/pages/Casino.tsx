@@ -568,14 +568,13 @@ export default function Casino() {
                     <>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                           {games.map((game, index) => (
-                              <div 
+                              <GameCard 
                                 key={game.id} 
+                                {...convertToGameCard(game, index)} 
+                                loading={false} 
                                 onClick={() => handlePlayGame(game)}
-                                className="cursor-pointer"
                                 data-testid={`card-game-${game.idHash}`}
-                              >
-                                <GameCard {...convertToGameCard(game, index)} loading={false} />
-                              </div>
+                              />
                           ))}
                       </div>
 
