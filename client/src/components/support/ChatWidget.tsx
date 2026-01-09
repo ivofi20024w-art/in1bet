@@ -165,7 +165,7 @@ export function ChatWidget() {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 group"
+            className="fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-50 group"
             data-testid="button-open-support-chat"
           >
             <div className="relative">
@@ -192,8 +192,8 @@ export function ChatWidget() {
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className={cn(
-              "fixed bottom-6 right-6 z-50 overflow-hidden transition-all duration-300",
-              isMinimized ? "w-80 h-16" : "w-[400px] h-[600px] max-h-[80vh]"
+              "fixed bottom-20 lg:bottom-6 right-4 lg:right-6 z-50 overflow-hidden transition-all duration-300",
+              isMinimized ? "w-72 sm:w-80 h-16" : "w-[calc(100%-2rem)] sm:w-[400px] h-[70vh] sm:h-[600px] max-h-[80vh]"
             )}
             data-testid="chat-widget"
           >

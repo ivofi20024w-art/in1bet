@@ -245,7 +245,7 @@ export function Header() {
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1 sm:gap-3">
         {!isAuthenticated ? (
             <div className="flex items-center gap-3 animate-in fade-in duration-300">
                 <Link href="/login">
@@ -265,57 +265,52 @@ export function Header() {
 
                 {levelInfo && (
                   <Link href="/profile/levels" className="group">
-                    <div className="flex items-center gap-2 bg-gradient-to-r from-primary/20 to-orange-500/10 rounded-full pl-2 pr-3 py-1.5 border border-primary/20 hover:border-primary/40 transition-all cursor-pointer">
-                      <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-primary to-orange-600 shadow-[0_0_12px_rgba(249,115,22,0.4)] group-hover:shadow-[0_0_16px_rgba(249,115,22,0.6)] transition-shadow">
+                    <div className="flex items-center gap-2 bg-gradient-to-r from-primary/20 to-orange-500/10 rounded-full pl-2 pr-2 sm:pr-3 py-1.5 border border-primary/20 hover:border-primary/40 transition-all cursor-pointer">
+                      <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-primary to-orange-600 shadow-[0_0_12px_rgba(249,115,22,0.4)] group-hover:shadow-[0_0_16px_rgba(249,115,22,0.6)] transition-shadow flex-shrink-0">
                         <Star className="w-4 h-4 text-white fill-white" />
                         <span className="absolute -bottom-0.5 -right-0.5 bg-background text-[9px] font-bold text-primary rounded-full w-4 h-4 flex items-center justify-center border border-primary/30">
                           {levelInfo.level}
                         </span>
                       </div>
-                      <div className="flex flex-col gap-0.5 min-w-[60px]">
-                        <div className="flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Nível {levelInfo.level}</span>
-                        </div>
-                        <div className="relative h-1.5 bg-white/10 rounded-full overflow-hidden">
+                      <div className="hidden sm:flex flex-col gap-0.5 min-w-[60px]">
+                        <span className="text-[10px] font-bold text-primary uppercase tracking-wider whitespace-nowrap">Nível {levelInfo.level}</span>
+                        <div className="relative h-1.5 w-16 bg-white/10 rounded-full overflow-hidden">
                           <div 
                             className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-orange-400 rounded-full transition-all duration-500"
                             style={{ width: `${Math.min(levelInfo.progressPercent, 100)}%` }}
                           />
-                          <div 
-                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-white/30 to-transparent rounded-full animate-pulse"
-                            style={{ width: `${Math.min(levelInfo.progressPercent, 100)}%` }}
-                          />
                         </div>
-                        <span className="text-[9px] text-muted-foreground">
+                        <span className="text-[9px] text-muted-foreground whitespace-nowrap">
                           {Math.round(levelInfo.progressPercent)}% para nível {levelInfo.level + 1}
                         </span>
                       </div>
+                      <span className="sm:hidden text-[10px] font-bold text-primary">Lv.{levelInfo.level}</span>
                     </div>
                   </Link>
                 )}
 
-                <div className="h-6 w-px bg-white/10 mx-1" />
+                <div className="hidden sm:block h-6 w-px bg-white/10 mx-1" />
 
-                <div className="flex items-center gap-2 bg-secondary/50 rounded-full pl-4 pr-1 py-1 border border-white/5 hover:border-primary/30 transition-colors cursor-pointer group">
-                <div className="flex flex-col items-end leading-none mr-2">
-                    <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Saldo</span>
-                    <span className="text-sm font-bold text-primary tabular-nums group-hover:text-white transition-colors">
+                <div className="flex items-center gap-1 sm:gap-2 bg-secondary/50 rounded-full pl-2 sm:pl-4 pr-1 py-1 border border-white/5 hover:border-primary/30 transition-colors cursor-pointer group">
+                <div className="flex flex-col items-end leading-none mr-1 sm:mr-2">
+                    <span className="hidden sm:block text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Saldo</span>
+                    <span className="text-xs sm:text-sm font-bold text-primary tabular-nums group-hover:text-white transition-colors">
                     R$ {walletBalance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </span>
                 </div>
                 
                 <WalletModal>
-                    <Button size="sm" className="h-8 rounded-full px-4 bg-primary hover:bg-primary/90 text-white shadow-[0_0_15px_-3px_rgba(242,102,49,0.4)]">
-                    <Wallet className="w-4 h-4 mr-2" />
-                    Depósito
+                    <Button size="sm" className="h-7 sm:h-8 rounded-full px-2 sm:px-4 bg-primary hover:bg-primary/90 text-white shadow-[0_0_15px_-3px_rgba(242,102,49,0.4)]">
+                    <Wallet className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Depósito</span>
                     </Button>
                 </WalletModal>
                 </div>
 
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-10 w-10 rounded-full p-0 overflow-hidden border-2 border-transparent hover:border-primary/50 transition-all ml-2 bg-primary/20">
-                    <span className="text-primary font-bold text-sm">{getInitials()}</span>
+                    <Button variant="ghost" className="h-9 w-9 sm:h-10 sm:w-10 rounded-full p-0 overflow-hidden border-2 border-transparent hover:border-primary/50 transition-all ml-1 sm:ml-2 bg-primary/20 flex-shrink-0">
+                    <span className="text-primary font-bold text-xs sm:text-sm">{getInitials()}</span>
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-card border-white/10 text-foreground p-2">

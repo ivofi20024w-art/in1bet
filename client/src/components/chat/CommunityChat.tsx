@@ -461,7 +461,7 @@ export default function CommunityChat() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 z-40 group"
+        className="fixed bottom-20 lg:bottom-6 left-4 lg:left-6 z-40 group"
         data-testid="button-open-community-chat"
       >
         <div className="relative">
