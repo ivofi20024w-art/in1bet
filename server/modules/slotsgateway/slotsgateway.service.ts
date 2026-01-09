@@ -26,7 +26,8 @@ export class SlotsGatewayService {
   async syncGames(currency: string = "BRL"): Promise<SlotsgatewayGame[]> {
     if (!client.isConfigured()) {
       console.warn("[SlotsGateway] API not configured, using cached data");
-      return this.getCachedGames();
+      const result = await this.getCachedGames();
+      return result.games;
     }
 
     try {
@@ -107,10 +108,12 @@ export class SlotsGatewayService {
       }
 
       console.log(`[SlotsGateway] Synced ${apiGames.length} games`);
-      return this.getCachedGames();
+      const result = await this.getCachedGames();
+      return result.games;
     } catch (error) {
       console.error("[SlotsGateway] Failed to sync games:", error);
-      return this.getCachedGames();
+      const result = await this.getCachedGames();
+      return result.games;
     }
   }
 
@@ -135,8 +138,9 @@ export class SlotsGatewayService {
     providerId?: string,
     gameType?: string,
     search?: string,
-    limitCount?: number
-  ): Promise<SlotsgatewayGame[]> {
+    limitCount?: number,
+    offsetCount?: number
+  ): Promise<{ games: SlotsgatewayGame[]; total: number; hasMore: boolean }> {
     const conditions = [eq(slotsgatewayGames.status, "ACTIVE")];
 
     if (providerId) {
@@ -151,11 +155,23 @@ export class SlotsGatewayService {
       conditions.push(ilike(slotsgatewayGames.name, `%${search}%`));
     }
 
+    // Get total count first
+    const [countResult] = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(slotsgatewayGames)
+      .where(and(...conditions));
+    
+    const total = countResult?.count || 0;
+
     let query = db
       .select()
       .from(slotsgatewayGames)
       .where(and(...conditions))
       .orderBy(desc(slotsgatewayGames.isNew), slotsgatewayGames.name);
+
+    if (offsetCount) {
+      query = query.offset(offsetCount) as typeof query;
+    }
 
     if (limitCount) {
       query = query.limit(limitCount) as typeof query;
@@ -163,7 +179,11 @@ export class SlotsGatewayService {
 
     const games = await query;
     
-    return games;
+    const currentOffset = offsetCount || 0;
+    const currentLimit = limitCount || games.length;
+    const hasMore = currentOffset + currentLimit < total;
+    
+    return { games, total, hasMore };
   }
 
   async getGameByIdHash(idHash: string): Promise<SlotsgatewayGame | null> {

@@ -8,7 +8,7 @@ const router = Router();
 router.get("/providers", async (req: Request, res: Response) => {
   try {
     const providers = await slotsGatewayService.getCachedProviders();
-    res.json({ success: true, providers });
+    res.json({ success: true, data: providers });
   } catch (error: any) {
     console.error("[SlotsGateway] Error fetching providers:", error);
     res.status(500).json({ success: false, error: "Erro ao buscar provedores" });
@@ -17,16 +17,24 @@ router.get("/providers", async (req: Request, res: Response) => {
 
 router.get("/games", async (req: Request, res: Response) => {
   try {
-    const { providerId, gameType, search, limit } = req.query;
+    const { providerId, gameType, search, limit, offset } = req.query;
     
-    const games = await slotsGatewayService.getCachedGames(
+    const result = await slotsGatewayService.getCachedGames(
       providerId as string | undefined,
       gameType as string | undefined,
       search as string | undefined,
-      limit ? parseInt(limit as string) : undefined
+      limit ? parseInt(limit as string) : undefined,
+      offset ? parseInt(offset as string) : undefined
     );
     
-    res.json({ success: true, data: games });
+    res.json({ 
+      success: true, 
+      data: result.games,
+      total: result.total,
+      hasMore: result.hasMore,
+      limit: limit ? parseInt(limit as string) : result.games.length,
+      offset: offset ? parseInt(offset as string) : 0
+    });
   } catch (error: any) {
     console.error("[SlotsGateway] Error fetching games:", error);
     res.status(500).json({ success: false, error: "Erro ao buscar jogos" });
