@@ -10,8 +10,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 import welcomeBanner from "@assets/welcome_banner_panoramic.png";
-import cashbackBanner from "@assets/ChatGPT_Image_9_01_2026,_00_05_38_1767917230006.png";
-import dropsBanner from "@assets/ChatGPT_Image_9_01_2026,_00_06_58_1767917234350.png";
+import cashbackBanner from "@assets/cashback_banner.png";
 
 interface PlayfiversGame {
   id: string;
@@ -24,9 +23,8 @@ interface PlayfiversGame {
 }
 
 const BANNERS = [
-  { id: 1, img: welcomeBanner, title: "BÔNUS DE BOAS-VINDAS", subtitle: "100% até R$ 500 no primeiro depósito", cta: "PEGAR BÔNUS", link: "/promotions", variant: "panoramic" as const },
-  { id: 2, img: cashbackBanner, title: "CASHBACK SEMANAL", subtitle: "Receba até 10% das suas perdas de volta", cta: "SAIBA MAIS", link: "/promotions", variant: "standard" as const },
-  { id: 3, img: dropsBanner, title: "DROPS & WINS", subtitle: "Prêmios diários e torneios semanais", cta: "PARTICIPAR", link: "/casino", variant: "standard" as const },
+  { id: 1, img: welcomeBanner, cta: "PEGAR BÔNUS", link: "/promotions" },
+  { id: 2, img: cashbackBanner, cta: "SAIBA MAIS", link: "/promotions" },
 ];
 
 const ORIGINALS = [
@@ -131,21 +129,11 @@ export default function Home() {
             {BANNERS.map((banner) => (
               <CarouselItem key={banner.id}>
                 <Link href={banner.link}>
-                  <div 
-                    className="relative w-full overflow-hidden group cursor-pointer rounded-xl md:rounded-2xl"
-                    style={{ height: 'clamp(180px, 28vw, 320px)' }}
-                  >
-                    {banner.variant === "standard" && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#1a1a2e] via-[#16213e] to-[#1a1a2e]" />
-                    )}
+                  <div className="relative w-full overflow-hidden group cursor-pointer rounded-xl md:rounded-2xl bg-gradient-to-r from-[#1a0a00] via-[#2d1200] to-[#1a0a00]">
                     <img 
                       src={banner.img} 
-                      alt={banner.title} 
-                      className={`absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-[1.02] ${
-                        banner.variant === "panoramic" 
-                          ? "object-cover object-center" 
-                          : "object-contain object-center"
-                      }`}
+                      alt="Banner promocional"
+                      className="w-full h-auto transition-transform duration-700 group-hover:scale-[1.02]"
                     />
                     <div className="absolute bottom-3 left-3 md:bottom-6 md:left-6">
                       <Button className="bg-primary hover:bg-primary/90 text-white rounded-full px-4 md:px-8 h-8 md:h-11 font-bold text-xs md:text-sm shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all hover:scale-105">
