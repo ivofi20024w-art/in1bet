@@ -24,7 +24,7 @@ interface SearchGame {
   idHash: string;
   name: string;
   imageUrl: string | null;
-  providerName: string;
+  providerSlug: string;
 }
 
 export function Header() {
@@ -238,7 +238,7 @@ export function Header() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-white truncate">{game.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{game.providerName}</p>
+                        <p className="text-xs text-muted-foreground truncate capitalize">{game.providerSlug}</p>
                       </div>
                     </button>
                   ))}

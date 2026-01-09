@@ -30,7 +30,7 @@ interface SlotsgatewayGame {
   name: string;
   imageUrl: string | null;
   providerId: string | null;
-  providerName: string;
+  providerSlug: string;
   gameType: string | null;
   isNew: boolean;
   status: string;
@@ -259,7 +259,7 @@ export default function Casino() {
   const convertToGameCard = (game: SlotsgatewayGame, index: number) => ({
     id: index,
     title: game.name,
-    provider: game.providerName,
+    provider: game.providerSlug,
     image: game.imageUrl || 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=400',
   });
 

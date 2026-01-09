@@ -18,7 +18,7 @@ interface SlotsgatewayGame {
   idHash: string;
   name: string;
   imageUrl: string | null;
-  providerName: string;
+  providerSlug: string;
   gameType: string | null;
   isNew: boolean;
 }
@@ -88,7 +88,7 @@ function GameCard({ game, onPlay }: { game: SlotsgatewayGame; onPlay: () => void
       </div>
       <div className="p-3">
         <h3 className="font-bold text-white text-sm truncate">{game.name}</h3>
-        <p className="text-xs text-muted-foreground truncate">{game.providerName}</p>
+        <p className="text-xs text-muted-foreground truncate capitalize">{game.providerSlug}</p>
       </div>
     </div>
   );

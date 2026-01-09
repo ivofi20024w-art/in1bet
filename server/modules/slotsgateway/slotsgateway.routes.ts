@@ -8,10 +8,10 @@ const router = Router();
 router.get("/providers", async (req: Request, res: Response) => {
   try {
     const providers = await slotsGatewayService.getCachedProviders();
-    res.json({ providers });
+    res.json({ success: true, providers });
   } catch (error: any) {
     console.error("[SlotsGateway] Error fetching providers:", error);
-    res.status(500).json({ error: "Erro ao buscar provedores" });
+    res.status(500).json({ success: false, error: "Erro ao buscar provedores" });
   }
 });
 
@@ -26,10 +26,10 @@ router.get("/games", async (req: Request, res: Response) => {
       limit ? parseInt(limit as string) : undefined
     );
     
-    res.json({ games });
+    res.json({ success: true, data: games });
   } catch (error: any) {
     console.error("[SlotsGateway] Error fetching games:", error);
-    res.status(500).json({ error: "Erro ao buscar jogos" });
+    res.status(500).json({ success: false, error: "Erro ao buscar jogos" });
   }
 });
 
@@ -50,7 +50,7 @@ router.get("/games/:idHash", async (req: Request, res: Response) => {
 });
 
 const launchGameSchema = z.object({
-  gameIdHash: z.string().min(1, "ID do jogo é obrigatório"),
+  idHash: z.string().min(1, "ID do jogo é obrigatório"),
   homeUrl: z.string().url().optional(),
   cashierUrl: z.string().url().optional(),
 });
@@ -59,27 +59,27 @@ router.post("/launch", authMiddleware, async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
     if (!userId) {
-      return res.status(401).json({ error: "Não autenticado" });
+      return res.status(401).json({ success: false, error: "Não autenticado" });
     }
 
     const parsed = launchGameSchema.safeParse(req.body);
     if (!parsed.success) {
-      return res.status(400).json({ error: parsed.error.errors[0].message });
+      return res.status(400).json({ success: false, error: parsed.error.errors[0].message });
     }
 
-    const { gameIdHash, homeUrl, cashierUrl } = parsed.data;
+    const { idHash, homeUrl, cashierUrl } = parsed.data;
 
     const result = await slotsGatewayService.launchGame(
       userId,
-      gameIdHash,
+      idHash,
       homeUrl,
       cashierUrl
     );
 
-    res.json(result);
+    res.json({ success: true, data: result });
   } catch (error: any) {
     console.error("[SlotsGateway] Error launching game:", error);
-    res.status(500).json({ error: error.message || "Erro ao iniciar jogo" });
+    res.status(500).json({ success: false, error: error.message || "Erro ao iniciar jogo" });
   }
 });
 

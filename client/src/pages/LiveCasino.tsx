@@ -16,7 +16,7 @@ interface SlotsgatewayGame {
   name: string;
   imageUrl: string | null;
   providerId: string | null;
-  providerName: string;
+  providerSlug: string;
   gameType: string | null;
   isNew: boolean;
   status: string;
@@ -76,7 +76,7 @@ function GameCard({ game, onPlay, isLaunching }: { game: SlotsgatewayGame; onPla
       </div>
       <div className="p-3">
         <h3 className="font-bold text-white text-sm truncate">{game.name}</h3>
-        <p className="text-xs text-muted-foreground truncate">{game.providerName}</p>
+        <p className="text-xs text-muted-foreground truncate capitalize">{game.providerSlug}</p>
       </div>
     </div>
   );
@@ -129,7 +129,7 @@ export default function LiveCasino() {
 
   const filteredGames = liveGames.filter(game => {
     const matchesSearch = game.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          game.providerName.toLowerCase().includes(searchQuery.toLowerCase());
+                          game.providerSlug.toLowerCase().includes(searchQuery.toLowerCase());
     
     if (activeTab === "all") return matchesSearch;
     if (activeTab === "roulette") return matchesSearch && (game.name.toLowerCase().includes('roulette') || game.name.toLowerCase().includes('roleta'));
