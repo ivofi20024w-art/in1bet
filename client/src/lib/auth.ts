@@ -189,6 +189,7 @@ export async function refreshToken(): Promise<boolean> {
       ...auth,
       user: data.user,
       accessToken: data.accessToken,
+      refreshToken: data.refreshToken || auth.refreshToken,
     });
     
     return true;

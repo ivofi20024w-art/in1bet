@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, ArrowRight, CheckCircle2, ShieldCheck, LogIn, ChevronLeft, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, ShieldCheck, LogIn, ChevronLeft } from "lucide-react";
 import { IMaskInput } from "react-imask";
 import { cpf } from "cpf-cnpj-validator";
 import { useToast } from "@/hooks/use-toast";
@@ -156,32 +157,31 @@ export default function AuthModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="sm:max-w-[480px] p-0 gap-0 bg-gradient-to-br from-[#0a0a0f] via-[#0d0d14] to-[#0a0a0f] border-white/10 overflow-hidden">
+      <DialogContent className="sm:max-w-[480px] p-0 gap-0 bg-gradient-to-br from-[#0a0a0f] via-[#0d0d14] to-[#0a0a0f] border-white/10 overflow-hidden" aria-describedby={undefined}>
+        <VisuallyHidden>
+          <DialogTitle>Autenticação</DialogTitle>
+        </VisuallyHidden>
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent pointer-events-none" />
         
         <div className="relative z-10 p-6">
-          <div className="text-center mb-6">
-            <h1 className="text-3xl font-heading font-bold italic text-primary tracking-wide mb-1">
+          <div className="text-center mb-4">
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold italic text-primary tracking-wide">
               IN1<span className="text-white">BET</span>
             </h1>
-            <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span>A melhor experiência de apostas</span>
-            </div>
           </div>
 
           <Tabs value={activeTab} onValueChange={(v) => setTab(v as 'login' | 'register')} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 bg-secondary/50 p-1 rounded-xl mb-6">
+            <TabsList className="grid w-full grid-cols-2 bg-secondary/50 p-0.5 rounded-lg mb-4 h-9">
               <TabsTrigger 
                 value="login" 
-                className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white font-bold"
+                className="rounded-md text-xs sm:text-sm h-8 data-[state=active]:bg-primary data-[state=active]:text-white font-semibold"
                 data-testid="tab-login"
               >
                 Entrar
               </TabsTrigger>
               <TabsTrigger 
                 value="register" 
-                className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-white font-bold"
+                className="rounded-md text-xs sm:text-sm h-8 data-[state=active]:bg-primary data-[state=active]:text-white font-semibold"
                 data-testid="tab-register"
               >
                 Cadastrar

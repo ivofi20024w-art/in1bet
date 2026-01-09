@@ -34,8 +34,6 @@ import ResponsibleGamingSettings from "@/pages/profile/ResponsibleGaming";
 import Originals from "@/pages/Originals";
 import WalletPage from "@/pages/Wallet";
 import Game from "@/pages/Game";
-import Login from "@/pages/auth/Login";
-import Register from "@/pages/auth/Register";
 import ForgotPassword from "@/pages/auth/ForgotPassword";
 import ResetPassword from "@/pages/auth/ResetPassword";
 import Crash from "@/pages/games/Crash";
@@ -67,19 +65,30 @@ import AuthModal from "@/components/auth/AuthModal";
 import { useEffect, useState } from "react";
 import { Loader } from "@/components/ui/Loader";
 import { useAuth } from "@/hooks/useAuth";
+import { useAuthModal } from "@/stores/authModalStore";
+import { SessionProvider } from "@/contexts/SessionContext";
+import SessionTimeoutModal from "@/components/session/SessionTimeoutModal";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
     const [, setLocation] = useLocation();
     const { isAuthenticated, isLoading } = useAuth();
+    const { openLogin } = useAuthModal();
+    const [hasRedirected, setHasRedirected] = useState(false);
 
     useEffect(() => {
-        if (!isLoading && !isAuthenticated) {
-            setLocation("/login");
+        if (!isLoading && !isAuthenticated && !hasRedirected) {
+            setHasRedirected(true);
+            openLogin();
+            setLocation("/");
         }
-    }, [isAuthenticated, isLoading, setLocation]);
+    }, [isAuthenticated, isLoading, setLocation, openLogin, hasRedirected]);
 
     if (isLoading) {
-        return null;
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
     }
 
     if (!isAuthenticated) {
@@ -92,19 +101,28 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AdminRoute({ children }: { children: React.ReactNode }) {
     const [, setLocation] = useLocation();
     const { isAuthenticated, isLoading, user } = useAuth();
+    const { openLogin } = useAuthModal();
+    const [hasRedirected, setHasRedirected] = useState(false);
 
     useEffect(() => {
-        if (!isLoading) {
+        if (!isLoading && !hasRedirected) {
             if (!isAuthenticated) {
-                setLocation("/login");
+                setHasRedirected(true);
+                openLogin();
+                setLocation("/");
             } else if (!user?.isAdmin) {
+                setHasRedirected(true);
                 setLocation("/");
             }
         }
-    }, [isAuthenticated, isLoading, user, setLocation]);
+    }, [isAuthenticated, isLoading, user, setLocation, openLogin, hasRedirected]);
 
     if (isLoading) {
-        return null;
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+        );
     }
 
     if (!isAuthenticated || !user?.isAdmin) {
@@ -155,8 +173,6 @@ function Router() {
       <Loader isLoading={isLoading} type={loadType} />
       <Switch>
         {/* Public Routes */}
-        <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
         <Route path="/forgot-password" component={ForgotPassword} />
         <Route path="/reset-password" component={ResetPassword} />
 
@@ -238,9 +254,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Router />
-        <AuthModal />
+        <SessionProvider>
+          <Toaster />
+          <Router />
+          <AuthModal />
+          <SessionTimeoutModal />
+        </SessionProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
