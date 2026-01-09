@@ -1,4 +1,4 @@
-import { Search, Wallet, ChevronDown, User as UserIcon, LogOut, LogIn, X, Gamepad2, Loader2 } from "lucide-react";
+import { Search, Wallet, ChevronDown, User as UserIcon, LogOut, LogIn, X, Gamepad2, Loader2, Star, Zap } from "lucide-react";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { PROFILE_MENU_ITEMS } from "@/lib/mockData";
@@ -48,6 +48,31 @@ export function Header() {
     },
     enabled: searchQuery.length >= 2,
     staleTime: 30000,
+  });
+
+  interface LevelInfo {
+    level: number;
+    xp: number;
+    xpProgress: number;
+    xpNeeded: number;
+    progressPercent: number;
+  }
+
+  const { data: levelInfo } = useQuery<LevelInfo>({
+    queryKey: ['user-level'],
+    queryFn: async () => {
+      const auth = getStoredAuth();
+      if (!auth.accessToken) return null;
+      const res = await fetch('/api/levels/info', {
+        headers: { 'Authorization': `Bearer ${auth.accessToken}` },
+        credentials: 'include',
+      });
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: isAuthenticated,
+    staleTime: 60000,
+    refetchInterval: 30000,
   });
 
   useEffect(() => {
@@ -237,6 +262,37 @@ export function Header() {
         ) : (
             <>
                 <NotificationBell />
+
+                {levelInfo && (
+                  <Link href="/profile/levels" className="group">
+                    <div className="flex items-center gap-2 bg-gradient-to-r from-primary/20 to-orange-500/10 rounded-full pl-2 pr-3 py-1.5 border border-primary/20 hover:border-primary/40 transition-all cursor-pointer">
+                      <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-primary to-orange-600 shadow-[0_0_12px_rgba(249,115,22,0.4)] group-hover:shadow-[0_0_16px_rgba(249,115,22,0.6)] transition-shadow">
+                        <Star className="w-4 h-4 text-white fill-white" />
+                        <span className="absolute -bottom-0.5 -right-0.5 bg-background text-[9px] font-bold text-primary rounded-full w-4 h-4 flex items-center justify-center border border-primary/30">
+                          {levelInfo.level}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-0.5 min-w-[60px]">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Nível {levelInfo.level}</span>
+                        </div>
+                        <div className="relative h-1.5 bg-white/10 rounded-full overflow-hidden">
+                          <div 
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-orange-400 rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(levelInfo.progressPercent, 100)}%` }}
+                          />
+                          <div 
+                            className="absolute inset-y-0 left-0 bg-gradient-to-r from-white/30 to-transparent rounded-full animate-pulse"
+                            style={{ width: `${Math.min(levelInfo.progressPercent, 100)}%` }}
+                          />
+                        </div>
+                        <span className="text-[9px] text-muted-foreground">
+                          {Math.round(levelInfo.progressPercent)}% para nível {levelInfo.level + 1}
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                )}
 
                 <div className="h-6 w-px bg-white/10 mx-1" />
 
