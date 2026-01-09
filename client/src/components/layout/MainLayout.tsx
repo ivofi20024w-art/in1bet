@@ -26,18 +26,6 @@ export function MainLayout({ children }: { children: ReactNode }) {
       </div>
 
       <div className="flex-1 flex flex-col min-h-screen min-w-0 overflow-hidden">
-        {/* Mobile Header / Nav */}
-        <div className="lg:hidden flex items-center justify-between p-4 border-b border-white/5 bg-background/80 backdrop-blur-md sticky top-0 z-50">
-          
-          <Link href="/">
-            <h1 className="text-xl font-bold font-heading italic text-primary tracking-wide cursor-pointer hover:opacity-80 transition-opacity">
-              IN1<span className="text-white">BET</span>
-            </h1>
-          </Link>
-
-          <div className="w-10" /> {/* Spacer for balance */}
-        </div>
-
         <Header />
 
         <main className="flex-1 overflow-y-auto scroll-smooth">

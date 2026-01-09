@@ -142,8 +142,16 @@ export function Header() {
   };
 
   return (
-    <header className="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-background/80 backdrop-blur-md sticky top-0 z-50">
+    <header className="h-16 flex items-center justify-between px-4 lg:px-6 border-b border-white/5 bg-background/80 backdrop-blur-md sticky top-0 z-50">
       <div className="flex items-center gap-4 flex-1 max-w-xl">
+        {/* Mobile Logo - only on small screens */}
+        <Link href="/" className="md:hidden flex-shrink-0">
+          <h1 className="text-xl font-bold font-heading italic text-primary tracking-wide cursor-pointer hover:opacity-80 transition-opacity">
+            IN1<span className="text-white">BET</span>
+          </h1>
+        </Link>
+        
+        {/* Search - visible on md+ screens */}
         <div ref={searchRef} className="relative w-full max-w-md hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input 
