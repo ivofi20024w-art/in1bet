@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import loadingLogo from "@assets/IN1BET_loading_screen_1767991061894.png";
+import loadingLogo from "@assets/IN1BET_loading_screen_(1)_1767992129344.png";
 
 interface LoaderProps {
   isLoading: boolean;

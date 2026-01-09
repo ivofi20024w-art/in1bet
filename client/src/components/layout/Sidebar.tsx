@@ -1,7 +1,7 @@
 import { useState, useEffect, type ComponentType } from "react";
 import { Link, useLocation } from "wouter";
-import sidebarLogoOpen from "@assets/IN1BET_sidebar_aberto_1767991061897.png";
-import sidebarLogoCompact from "@assets/IN1BET_header_desktop_sidebar_fechado_1767991061899.png";
+import sidebarLogoOpen from "@assets/IN1BET_sidebar_aberto_(1)_1767992129342.png";
+import sidebarLogoCompact from "@assets/IN1BET_sidebar_fechado_1767992129341.png";
 import { cn } from "@/lib/utils";
 import { 
   ChevronDown, 

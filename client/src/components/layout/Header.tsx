@@ -1,7 +1,6 @@
 import { Search, Wallet, ChevronDown, User as UserIcon, LogOut, LogIn, X, Gamepad2, Loader2, Star, Zap } from "lucide-react";
-import headerLogoMobile from "@assets/IN1BET_header_mobile_1767991061898.png";
-import headerLogoDesktopOpen from "@assets/IN1BET_header_desktop_sidebar_aberto_1767991061900.png";
-import headerLogoDesktopClosed from "@assets/IN1BET_header_desktop_sidebar_fechado_1767991061899.png";
+import headerLogoMobile from "@assets/IN1BET_header_mobile_(1)_1767992129342.png";
+import headerLogoDesktopClosed from "@assets/IN1BET_header_desktop_sidebar_fechado_(1)_1767992129343.png";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { PROFILE_MENU_ITEMS } from "@/lib/mockData";
