@@ -10,9 +10,8 @@ import Autoplay from "embla-carousel-autoplay";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
-import welcomeBanner from "@assets/welcome_banner_panoramic.png";
-import cashbackBanner from "@assets/cashback_banner.png";
-import dropsBanner from "@assets/drops_banner.png";
+import mainBanner from "@assets/main1_1767994256496.png";
+import tigreBanner from "@assets/tigre1_1767994256497.jpeg";
 
 interface SlotsgatewayGame {
   id: string;
@@ -25,9 +24,8 @@ interface SlotsgatewayGame {
 }
 
 const BANNERS = [
-  { id: 1, img: welcomeBanner, cta: "PEGAR BÔNUS", link: "/promotions" },
-  { id: 2, img: cashbackBanner, cta: "SAIBA MAIS", link: "/promotions" },
-  { id: 3, img: dropsBanner, cta: "PARTICIPAR", link: "/casino" },
+  { id: 1, img: mainBanner, cta: "JOGUE AGORA!", link: "/casino" },
+  { id: 2, img: tigreBanner, cta: "JOGUE AGORA", link: "/casino" },
 ];
 
 const ORIGINALS = [
