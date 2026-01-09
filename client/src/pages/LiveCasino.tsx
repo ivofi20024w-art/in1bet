@@ -4,8 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Play, Video, Users, Mic2, Search, Loader2 } from "lucide-react";
-import casinoHero from "@assets/generated_images/premium_3d_casino_chips_and_cards_with_neon_orange_lighting.png";
+import { Play, Video, Users, Mic2, Search, Loader2, Sparkles, Crown, Zap } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -151,34 +150,112 @@ export default function LiveCasino() {
 
   return (
     <MainLayout>
-      <div className="relative h-[300px] md:h-[400px] rounded-b-3xl overflow-hidden mb-12 -mx-4 md:-mx-8 lg:-mx-0 md:rounded-3xl shadow-2xl">
-        <img src={casinoHero} alt="Live Casino Banner" className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 hover:scale-105" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0f0f15] via-black/40 to-transparent" />
+      {/* Premium Hero Section */}
+      <div className="relative min-h-[280px] md:min-h-[320px] rounded-2xl overflow-hidden mb-8">
+        {/* Animated gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-orange-950 via-[#1a0f0a] to-[#0f0f15]" />
         
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-8 z-10">
-           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-600/20 border border-red-500/30 backdrop-blur-md mb-6 animate-pulse">
-                <span className="w-2 h-2 rounded-full bg-red-500" />
-                <span className="text-xs font-bold text-red-400 uppercase tracking-widest">Ao Vivo em HD</span>
-           </div>
-           
-           <h1 className="text-5xl md:text-7xl font-heading font-black text-white mb-6 drop-shadow-2xl">
-                CASINO <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-red-500">AO VIVO</span>
-           </h1>
-           <p className="text-gray-200 text-lg md:text-xl max-w-2xl mb-8 font-medium leading-relaxed drop-shadow-md">
-                Interaja com dealers profissionais e outros jogadores em tempo real. A experiência mais imersiva de Las Vegas diretamente na sua tela.
-           </p>
-           
-           <div className="flex gap-4">
-               <Button 
-                 className="bg-white text-black hover:bg-gray-100 font-bold rounded-full px-8 h-12 shadow-[0_0_20px_rgba(255,255,255,0.3)]"
-                 onClick={() => popularGames[0] && handlePlayGame(popularGames[0])}
-                 disabled={isLoading || !popularGames.length}
-                 data-testid="button-play-featured"
-               >
-                    <Play className="w-5 h-5 mr-2 fill-black" /> Jogar Agora
-               </Button>
-           </div>
+        {/* Animated pattern overlay */}
+        <div className="absolute inset-0 opacity-20" style={{ 
+          backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(249,115,22,0.3) 1px, transparent 0)', 
+          backgroundSize: '24px 24px' 
+        }} />
+        
+        {/* Animated glow orbs */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-orange-500/20 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-red-500/15 rounded-full blur-[80px] animate-pulse" style={{ animationDelay: '1s' }} />
+        
+        {/* Decorative casino elements */}
+        <div className="absolute top-4 right-4 md:top-8 md:right-8">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-[0_0_30px_rgba(249,115,22,0.5)] animate-pulse">
+              <Sparkles className="w-4 h-4 md:w-6 md:h-6 text-white" />
+            </div>
+            <div className="hidden md:block">
+              <div className="text-[10px] text-orange-400 uppercase tracking-wider font-bold">Streaming</div>
+              <div className="text-white font-bold">4K Ultra HD</div>
+            </div>
+          </div>
         </div>
+        
+        {/* Content */}
+        <div className="relative z-10 px-6 py-10 md:px-12 md:py-16">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+            {/* Left content */}
+            <div className="flex-1">
+              {/* Live badge */}
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-red-600/30 border border-red-500/50 backdrop-blur-sm mb-4">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                </span>
+                <span className="text-xs font-bold text-red-300 uppercase tracking-widest">Ao Vivo Agora</span>
+              </div>
+              
+              <h1 className="text-3xl md:text-5xl font-heading font-black text-white mb-3 leading-tight">
+                CASINO <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-orange-500 to-red-500">AO VIVO</span>
+              </h1>
+              
+              <p className="text-gray-300 text-sm md:text-base max-w-lg mb-6 leading-relaxed">
+                Dealers profissionais, mesas 24/7 e a emoção de Las Vegas na palma da sua mão.
+              </p>
+              
+              {/* Feature badges */}
+              <div className="flex flex-wrap gap-2 mb-6">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+                  <Video className="w-3.5 h-3.5 text-orange-400" />
+                  <span className="text-xs text-white font-medium">HD Streaming</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+                  <Mic2 className="w-3.5 h-3.5 text-orange-400" />
+                  <span className="text-xs text-white font-medium">Chat Ao Vivo</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm">
+                  <Users className="w-3.5 h-3.5 text-orange-400" />
+                  <span className="text-xs text-white font-medium">Multiplayer</span>
+                </div>
+              </div>
+              
+              <Button 
+                className="bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold rounded-full px-8 h-12 shadow-[0_0_30px_rgba(249,115,22,0.4)] transition-all hover:shadow-[0_0_40px_rgba(249,115,22,0.6)] hover:scale-105"
+                onClick={() => popularGames[0] && handlePlayGame(popularGames[0])}
+                disabled={isLoading || !popularGames.length}
+                data-testid="button-play-featured"
+              >
+                <Play className="w-5 h-5 mr-2 fill-white" /> Jogar Agora
+              </Button>
+            </div>
+            
+            {/* Right side - Stats cards */}
+            <div className="flex md:flex-col gap-3">
+              <div className="flex-1 md:flex-none bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:border-orange-500/30 transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-600/20 flex items-center justify-center border border-orange-500/30">
+                    <Crown className="w-5 h-5 text-orange-400" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-white">{liveGames.length}+</div>
+                    <div className="text-[10px] text-gray-400 uppercase tracking-wider">Mesas Ao Vivo</div>
+                  </div>
+                </div>
+              </div>
+              <div className="flex-1 md:flex-none bg-white/5 backdrop-blur-md rounded-xl p-4 border border-white/10 hover:border-orange-500/30 transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/20 to-green-600/20 flex items-center justify-center border border-green-500/30">
+                    <Zap className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div>
+                    <div className="text-2xl font-bold text-white">24/7</div>
+                    <div className="text-[10px] text-gray-400 uppercase tracking-wider">Disponível</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Bottom decorative line */}
+        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent opacity-60" />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 pb-16">
