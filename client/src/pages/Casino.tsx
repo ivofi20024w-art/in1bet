@@ -1,9 +1,11 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { GameCard } from "@/components/shared/GameCard";
-import { PromotionalDepositBanner } from "@/components/shared/PromotionalDepositBanner";
 import { ORIGINALS_GAMES } from "@/lib/mockData";
 import casinoHero from "@assets/generated_images/casino_lobby_luxurious_background.png";
 import slotsTournamentBanner from "@assets/generated_images/promotional_banner_for_slots_tournament.png";
+import depositBannerImage from "@assets/image_1767985827021.png";
+import { useAuth } from "@/hooks/useAuth";
+import { useAuthModal } from "@/stores/authModalStore";
 import { Flame, Star, Heart, History, Rocket, Search, Filter, Play, Crown, Trophy, Users, Zap, Dice5, Timer, ChevronDown, Loader2 } from "lucide-react";
 import { useFavoritesStore } from "@/stores/favorites-store";
 import { useState, useEffect } from "react";
@@ -43,10 +45,7 @@ const GAME_CATEGORIES = [
     { id: "favorites", label: "Favoritos", icon: Heart },
     { id: "slots", label: "Slots", icon: Flame },
     { id: "live", label: "Ao Vivo", icon: Users },
-    { id: "crash", label: "Crash", icon: Rocket },
-    { id: "roulette", label: "Roleta", icon: DiscIcon },
-    { id: "blackjack", label: "Blackjack", icon: ClubIcon },
-    { id: "table", label: "Jogos de Mesa", icon: TableIcon },
+    { id: "originals", label: "Originais", icon: Rocket, isLink: true, link: "/originals" },
 ];
 
 function DiscIcon(props: any) {
@@ -78,6 +77,35 @@ function TableIcon(props: any) {
             <line x1="12" x2="12" y1="21" y2="9" />
         </svg>
     )
+}
+
+function DepositBannerSlide() {
+    const { isAuthenticated } = useAuth();
+    const { openLogin } = useAuthModal();
+    const [, setLocation] = useLocation();
+
+    const handleClick = () => {
+        if (isAuthenticated) {
+            setLocation("/wallet?tab=deposit");
+        } else {
+            openLogin();
+        }
+    };
+
+    return (
+        <div 
+            onClick={handleClick}
+            className="relative h-[140px] md:h-[160px] cursor-pointer group"
+            data-testid="carousel-deposit-banner"
+        >
+            <img 
+                src={depositBannerImage} 
+                alt="Deposite e ganhe bônus" 
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
+        </div>
+    );
 }
 
 async function fetchProviders(): Promise<SlotsgatewayProvider[]> {
@@ -186,14 +214,6 @@ export default function Casino() {
         return { gameType: 'video-slots' };
       case 'live':
         return { gameType: 'live' };
-      case 'crash':
-        return { gameType: 'crash' };
-      case 'roulette':
-        return { gameType: 'roulette' };
-      case 'blackjack':
-        return { gameType: 'blackjack' };
-      case 'table':
-        return { gameType: 'table' };
       default:
         return {};
     }
@@ -353,13 +373,12 @@ export default function Casino() {
                         </div>
                       </div>
                   </CarouselItem>
+                  <CarouselItem>
+                      <DepositBannerSlide />
+                  </CarouselItem>
               </CarouselContent>
           </Carousel>
       </div>
-
-      <section className="mb-6">
-        <PromotionalDepositBanner />
-      </section>
 
       <style>{`
         @keyframes marquee {
@@ -460,7 +479,20 @@ export default function Casino() {
                     
                     {isCategoriesOpen && (
                         <div className="p-2 pt-0 space-y-1 animate-in slide-in-from-top-2 duration-200">
-                            {GAME_CATEGORIES.map(cat => (
+                            {GAME_CATEGORIES.map(cat => 
+                                cat.isLink ? (
+                                  <Link key={cat.id} href={cat.link || "/"}>
+                                    <div
+                                        data-testid={`button-category-${cat.id}`}
+                                        className="flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-all group text-gray-400 hover:bg-white/5 hover:text-white cursor-pointer"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <cat.icon className="w-4 h-4 text-gray-500 group-hover:text-primary" />
+                                            {cat.label}
+                                        </div>
+                                    </div>
+                                  </Link>
+                                ) : (
                                 <button
                                     key={cat.id}
                                     onClick={() => setActiveCategory(cat.id)}
@@ -476,7 +508,8 @@ export default function Casino() {
                                     </div>
                                     {activeCategory === cat.id && <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />}
                                 </button>
-                            ))}
+                                )
+                            )}
                         </div>
                     )}
                 </div>
