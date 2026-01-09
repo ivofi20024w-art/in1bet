@@ -1,6 +1,4 @@
 import { Search, Wallet, ChevronDown, User as UserIcon, LogOut, LogIn, X, Gamepad2, Loader2, Star, Zap } from "lucide-react";
-import headerLogoMobile from "@assets/IN1BET_header_mobile_(1)_1767992129342.png";
-import headerLogoDesktopClosed from "@assets/IN1BET_header_desktop_sidebar_fechado_(1)_1767992129343.png";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { PROFILE_MENU_ITEMS } from "@/lib/mockData";
@@ -177,11 +175,9 @@ export function Header() {
       <div className="flex items-center gap-4 flex-1 max-w-xl">
         {/* Mobile Logo - only on small screens */}
         <Link href="/" className="md:hidden flex-shrink-0">
-          <img 
-            src={headerLogoMobile} 
-            alt="IN1BET" 
-            className="h-8 w-auto cursor-pointer hover:opacity-80 transition-opacity"
-          />
+          <h1 className="text-xl font-bold font-heading italic text-primary tracking-wide cursor-pointer hover:opacity-80 transition-opacity">
+            IN1<span className="text-white">BET</span>
+          </h1>
         </Link>
         
         {/* Search - visible on md+ screens */}

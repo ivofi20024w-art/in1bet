@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
-import loadingLogo from "@assets/IN1BET_loading_screen_(1)_1767992129344.png";
 
 interface LoaderProps {
   isLoading: boolean;
@@ -33,13 +32,11 @@ export function Loader({ isLoading, type }: LoaderProps) {
         <div className="absolute inset-[-40px] border-[3px] border-transparent border-t-primary border-r-primary/30 rounded-full animate-spin duration-[1.5s]" />
         <div className="absolute inset-[-20px] border-2 border-transparent border-b-secondary border-l-secondary/30 rounded-full animate-spin duration-[2s] direction-reverse" />
         
-        {/* Central Logo */}
-        <div className="relative z-10 flex items-center justify-center w-40 h-20 rounded-lg bg-background/80 backdrop-blur-md border border-white/5 shadow-[0_0_50px_rgba(249,115,22,0.15)] px-4">
-            <img 
-              src={loadingLogo} 
-              alt="IN1BET" 
-              className="max-h-14 w-auto object-contain"
-            />
+        {/* Central Typographic Logo - refined styles */}
+        <div className="relative z-10 flex items-center justify-center w-36 h-36 rounded-full bg-background/80 backdrop-blur-md border border-white/5 shadow-[0_0_50px_rgba(249,115,22,0.15)]">
+            <span className="text-5xl font-heading font-black italic text-white tracking-tighter transform -rotate-2 drop-shadow-lg">
+                IN1<span className="text-primary">BET</span>
+            </span>
         </div>
       </div>
       
