@@ -10,49 +10,47 @@ import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 
-interface PlayfiversGame {
+interface SlotsgatewayGame {
   id: string;
-  gameCode: string;
+  idHash: string;
   name: string;
   imageUrl: string | null;
   providerId: string | null;
   providerName: string;
-  isOriginal: boolean;
-  supportsFreeRounds: boolean;
   gameType: string | null;
+  isNew: boolean;
   status: string;
 }
 
-async function fetchLiveGames(): Promise<PlayfiversGame[]> {
-  const res = await fetch('/api/playfivers/games', { credentials: 'include' });
+async function fetchLiveGames(): Promise<SlotsgatewayGame[]> {
+  const res = await fetch('/api/slotsgateway/games?type=live', { credentials: 'include' });
   const data = await res.json();
   if (!data.success) return [];
-  return (data.data || []).filter((game: PlayfiversGame) => 
-    game.gameType === 'live' || 
-    game.name.toLowerCase().includes('live') ||
-    game.providerName.toLowerCase().includes('evolution') ||
-    game.providerName.toLowerCase().includes('pragmatic live')
-  );
+  return data.data || [];
 }
 
-async function launchGame(params: { gameCode: string; providerName: string; isOriginal: boolean }): Promise<{ launchUrl: string; sessionId: string }> {
-  const res = await fetch('/api/playfivers/launch', {
+async function launchGame(params: { idHash: string }): Promise<{ launchUrl: string }> {
+  const token = localStorage.getItem('accessToken');
+  const res = await fetch('/api/slotsgateway/launch', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
     credentials: 'include',
-    body: JSON.stringify(params),
+    body: JSON.stringify({ idHash: params.idHash }),
   });
   const data = await res.json();
   if (!data.success) throw new Error(data.error);
   return data.data;
 }
 
-function GameCard({ game, onPlay, isLaunching }: { game: PlayfiversGame; onPlay: () => void; isLaunching: boolean }) {
+function GameCard({ game, onPlay, isLaunching }: { game: SlotsgatewayGame; onPlay: () => void; isLaunching: boolean }) {
   return (
     <div 
       className="group relative rounded-xl overflow-hidden bg-card border border-white/5 hover:border-primary/50 transition-all cursor-pointer shadow-lg hover:shadow-primary/20 hover:-translate-y-1 duration-300"
       onClick={onPlay}
-      data-testid={`game-card-${game.gameCode}`}
+      data-testid={`game-card-${game.idHash}`}
     >
       <div className="aspect-[4/3] relative">
         <img 
@@ -92,7 +90,7 @@ export default function LiveCasino() {
   const [, setLocation] = useLocation();
 
   const { data: liveGames = [], isLoading } = useQuery({
-    queryKey: ['playfivers-live-games'],
+    queryKey: ['slotsgateway-live-games'],
     queryFn: fetchLiveGames,
     staleTime: 5 * 60 * 1000,
   });
@@ -122,12 +120,10 @@ export default function LiveCasino() {
     },
   });
 
-  const handlePlayGame = (game: PlayfiversGame) => {
-    setLaunchingGame(game.gameCode);
+  const handlePlayGame = (game: SlotsgatewayGame) => {
+    setLaunchingGame(game.idHash);
     launchMutation.mutate({
-      gameCode: game.gameCode,
-      providerName: game.providerName,
-      isOriginal: game.isOriginal,
+      idHash: game.idHash,
     });
   };
 
@@ -311,7 +307,7 @@ export default function LiveCasino() {
                                 key={game.id} 
                                 game={game} 
                                 onPlay={() => handlePlayGame(game)}
-                                isLaunching={launchingGame === game.gameCode}
+                                isLaunching={launchingGame === game.idHash}
                               />
                             ))}
                         </div>
@@ -336,7 +332,7 @@ export default function LiveCasino() {
                                   key={game.id} 
                                   game={game} 
                                   onPlay={() => handlePlayGame(game)}
-                                  isLaunching={launchingGame === game.gameCode}
+                                  isLaunching={launchingGame === game.idHash}
                                 />
                               ))}
                           </div>
@@ -352,7 +348,7 @@ export default function LiveCasino() {
                                   key={game.id} 
                                   game={game} 
                                   onPlay={() => handlePlayGame(game)}
-                                  isLaunching={launchingGame === game.gameCode}
+                                  isLaunching={launchingGame === game.idHash}
                                 />
                               ))}
                           </div>

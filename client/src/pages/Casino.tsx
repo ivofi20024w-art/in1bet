@@ -16,7 +16,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
-interface PlayfiversProvider {
+interface SlotsgatewayProvider {
   id: string;
   externalId: string;
   name: string;
@@ -24,16 +24,15 @@ interface PlayfiversProvider {
   status: string;
 }
 
-interface PlayfiversGame {
+interface SlotsgatewayGame {
   id: string;
-  gameCode: string;
+  idHash: string;
   name: string;
   imageUrl: string | null;
   providerId: string | null;
   providerName: string;
-  isOriginal: boolean;
-  supportsFreeRounds: boolean;
   gameType: string | null;
+  isNew: boolean;
   status: string;
 }
 
@@ -78,15 +77,15 @@ function TableIcon(props: any) {
     )
 }
 
-async function fetchProviders(): Promise<PlayfiversProvider[]> {
-  const res = await fetch('/api/playfivers/providers');
+async function fetchProviders(): Promise<SlotsgatewayProvider[]> {
+  const res = await fetch('/api/slotsgateway/providers');
   const data = await res.json();
   if (!data.success) throw new Error(data.error);
   return data.data;
 }
 
 interface GamesResponse {
-  games: PlayfiversGame[];
+  games: SlotsgatewayGame[];
   total: number;
   hasMore: boolean;
   limit: number;
@@ -95,45 +94,41 @@ interface GamesResponse {
 
 async function fetchGames(params: {
   providerId?: string;
-  providerName?: string;
   gameType?: string;
   search?: string;
-  namePatterns?: string[];
-  includeGameType?: boolean;
   limit?: number;
   offset?: number;
 }): Promise<GamesResponse> {
   const queryParams = new URLSearchParams();
   if (params.providerId) queryParams.set('providerId', params.providerId);
-  if (params.providerName) queryParams.set('provider', params.providerName);
   if (params.gameType) queryParams.set('type', params.gameType);
   if (params.search) queryParams.set('search', params.search);
-  if (params.namePatterns && params.namePatterns.length > 0) {
-    queryParams.set('namePatterns', params.namePatterns.join(','));
-  }
-  if (params.includeGameType) queryParams.set('includeGameType', 'true');
   if (params.limit) queryParams.set('limit', params.limit.toString());
   if (params.offset) queryParams.set('offset', params.offset.toString());
   
-  const url = `/api/playfivers/games?${queryParams.toString()}`;
+  const url = `/api/slotsgateway/games?${queryParams.toString()}`;
   const res = await fetch(url);
   const data = await res.json();
   if (!data.success) throw new Error(data.error);
   return {
     games: data.data,
-    total: data.total,
-    hasMore: data.hasMore,
-    limit: data.limit,
-    offset: data.offset,
+    total: data.total || data.data?.length || 0,
+    hasMore: data.hasMore || false,
+    limit: data.limit || params.limit || 20,
+    offset: data.offset || params.offset || 0,
   };
 }
 
-async function launchGame(params: { gameCode: string; providerName: string; isOriginal: boolean }): Promise<{ launchUrl: string; sessionId: string }> {
-  const res = await fetch('/api/playfivers/launch', {
+async function launchGame(params: { idHash: string }): Promise<{ launchUrl: string }> {
+  const token = localStorage.getItem('accessToken');
+  const res = await fetch('/api/slotsgateway/launch', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    },
     credentials: 'include',
-    body: JSON.stringify(params),
+    body: JSON.stringify({ idHash: params.idHash }),
   });
   const data = await res.json();
   if (!data.success) throw new Error(data.error);
@@ -149,7 +144,7 @@ export default function Casino() {
   const [activeCategory, setActiveCategory] = useState("all");
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(true);
   const [isProvidersOpen, setIsProvidersOpen] = useState(true);
-  const [games, setGames] = useState<PlayfiversGame[]>([]);
+  const [games, setGames] = useState<SlotsgatewayGame[]>([]);
   const [totalGames, setTotalGames] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [offset, setOffset] = useState(0);
@@ -165,25 +160,25 @@ export default function Casino() {
   }, [searchQuery]);
 
   const { data: providers = [], isLoading: loadingProviders } = useQuery({
-    queryKey: ['playfivers-providers'],
+    queryKey: ['slotsgateway-providers'],
     queryFn: fetchProviders,
     staleTime: 5 * 60 * 1000,
   });
 
-  const getCategoryFilters = (category: string): { gameType?: string; namePatterns?: string[]; includeGameType?: boolean } => {
+  const getCategoryFilters = (category: string): { gameType?: string } => {
     switch (category) {
       case 'slots':
         return { gameType: 'slot' };
       case 'live':
-        return { namePatterns: ['live', 'evolution', 'ezugi', 'live88', 'winfinity', 'pragmatic live'] };
+        return { gameType: 'live' };
       case 'crash':
         return { gameType: 'crash' };
       case 'roulette':
-        return { namePatterns: ['roleta', 'roulette'] };
+        return { gameType: 'roulette' };
       case 'blackjack':
-        return { namePatterns: ['blackjack', '21'] };
+        return { gameType: 'blackjack' };
       case 'table':
-        return { gameType: 'table', namePatterns: ['poker', 'baccarat', 'bacara', 'craps', 'sic bo'], includeGameType: true };
+        return { gameType: 'table' };
       default:
         return {};
     }
@@ -192,13 +187,11 @@ export default function Casino() {
   const categoryFilters = getCategoryFilters(activeCategory);
 
   const { isLoading: loadingGames, refetch } = useQuery({
-    queryKey: ['playfivers-games', selectedProvider, activeCategory, debouncedSearch],
+    queryKey: ['slotsgateway-games', selectedProvider, activeCategory, debouncedSearch],
     queryFn: async () => {
       const result = await fetchGames({
         providerId: selectedProvider || undefined,
         gameType: categoryFilters.gameType,
-        namePatterns: categoryFilters.namePatterns,
-        includeGameType: categoryFilters.includeGameType,
         search: debouncedSearch || undefined,
         limit: GAMES_PER_PAGE,
         offset: 0,
@@ -218,8 +211,6 @@ export default function Casino() {
       const result = await fetchGames({
         providerId: selectedProvider || undefined,
         gameType: categoryFilters.gameType,
-        namePatterns: categoryFilters.namePatterns,
-        includeGameType: categoryFilters.includeGameType,
         search: debouncedSearch || undefined,
         limit: GAMES_PER_PAGE,
         offset,
@@ -257,17 +248,15 @@ export default function Casino() {
     },
   });
 
-  const handlePlayGame = (game: PlayfiversGame) => {
+  const handlePlayGame = (game: SlotsgatewayGame) => {
     launchMutation.mutate({
-      gameCode: game.gameCode,
-      providerName: game.providerName,
-      isOriginal: game.isOriginal,
+      idHash: game.idHash,
     });
   };
 
   const loading = loadingProviders || loadingGames;
 
-  const convertToGameCard = (game: PlayfiversGame, index: number) => ({
+  const convertToGameCard = (game: SlotsgatewayGame, index: number) => ({
     id: index,
     title: game.name,
     provider: game.providerName,
@@ -516,7 +505,7 @@ export default function Casino() {
                                 key={game.id} 
                                 onClick={() => handlePlayGame(game)}
                                 className="cursor-pointer"
-                                data-testid={`card-game-${game.gameCode}`}
+                                data-testid={`card-game-${game.idHash}`}
                               >
                                 <GameCard {...convertToGameCard(game, index)} loading={false} />
                               </div>
