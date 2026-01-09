@@ -63,6 +63,7 @@ import AdminSupportTickets from "@/pages/admin/SupportTickets";
 import AdminSupportDepartments from "@/pages/admin/SupportDepartments";
 import AdminChat from "@/pages/admin/Chat";
 import CommunityChat from "@/components/chat/CommunityChat";
+import AuthModal from "@/components/auth/AuthModal";
 import { useEffect, useState } from "react";
 import { Loader } from "@/components/ui/Loader";
 import { useAuth } from "@/hooks/useAuth";
@@ -239,6 +240,7 @@ function App() {
       <TooltipProvider>
         <Toaster />
         <Router />
+        <AuthModal />
       </TooltipProvider>
     </QueryClientProvider>
   );

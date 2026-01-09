@@ -17,6 +17,7 @@ import { useState, useEffect, useRef } from "react";
 import { getStoredAuth, logout as authLogout, getWallet, type User } from "@/lib/auth";
 import { useQuery } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
+import { useAuthModal } from "@/stores/authModalStore";
 
 interface SearchGame {
   id: string;
@@ -34,6 +35,7 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const { openLogin, openRegister } = useAuthModal();
 
   const { data: searchResults = [], isLoading: isSearching } = useQuery<SearchGame[]>({
     queryKey: ['search-games', searchQuery],
@@ -248,16 +250,21 @@ export function Header() {
       <div className="flex items-center gap-1 sm:gap-3">
         {!isAuthenticated ? (
             <div className="flex items-center gap-3 animate-in fade-in duration-300">
-                <Link href="/login">
-                    <Button variant="ghost" className="font-bold text-muted-foreground hover:text-white">
-                        Entrar
-                    </Button>
-                </Link>
-                <Link href="/register">
-                    <Button className="font-bold shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-white rounded-xl">
-                        Criar Conta
-                    </Button>
-                </Link>
+                <Button 
+                    variant="ghost" 
+                    className="font-bold text-muted-foreground hover:text-white"
+                    onClick={openLogin}
+                    data-testid="header-btn-login"
+                >
+                    Entrar
+                </Button>
+                <Button 
+                    className="font-bold shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-white rounded-xl"
+                    onClick={openRegister}
+                    data-testid="header-btn-register"
+                >
+                    Criar Conta
+                </Button>
             </div>
         ) : (
             <>
