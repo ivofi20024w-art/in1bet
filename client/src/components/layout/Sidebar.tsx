@@ -1,5 +1,7 @@
 import { useState, useEffect, type ComponentType } from "react";
 import { Link, useLocation } from "wouter";
+import sidebarLogoOpen from "@assets/IN1BET_sidebar_aberto_1767991061897.png";
+import sidebarLogoCompact from "@assets/IN1BET_header_desktop_sidebar_fechado_1767991061899.png";
 import { cn } from "@/lib/utils";
 import { 
   ChevronDown, 
@@ -245,9 +247,11 @@ export function Sidebar({ className, isMobile = false }: SidebarProps) {
         {isMobile && (
           <div className="mb-4 px-4">
             <Link href="/">
-              <h1 className="text-2xl font-bold font-heading italic text-primary tracking-wide cursor-pointer hover:opacity-80 transition-opacity">
-                IN1<span className="text-white">BET</span>
-              </h1>
+              <img 
+                src={sidebarLogoOpen} 
+                alt="IN1BET" 
+                className="h-10 w-auto cursor-pointer hover:opacity-80 transition-opacity"
+              />
             </Link>
           </div>
         )}
@@ -259,15 +263,14 @@ export function Sidebar({ className, isMobile = false }: SidebarProps) {
             effectiveCompact ? "justify-center" : "justify-between"
           )}>
             <Link href="/">
-              {effectiveCompact ? (
-                <span className="text-xl font-bold font-heading italic text-primary">
-                  IN1
-                </span>
-              ) : (
-                <h1 className="text-2xl font-bold font-heading italic text-primary tracking-wide cursor-pointer hover:opacity-80 transition-opacity">
-                  IN1<span className="text-white">BET</span>
-                </h1>
-              )}
+              <img 
+                src={effectiveCompact ? sidebarLogoCompact : sidebarLogoOpen} 
+                alt="IN1BET" 
+                className={cn(
+                  "cursor-pointer hover:opacity-80 transition-opacity",
+                  effectiveCompact ? "h-8 w-8 object-contain" : "h-10 w-auto"
+                )}
+              />
             </Link>
           </div>
         )}
