@@ -884,6 +884,137 @@ export const playfiversTransactionsRelations = relations(playfiversTransactions,
 }));
 
 // =============================================
+// SLOTSGATEWAY INTEGRATION TABLES
+// =============================================
+
+export const SlotsgatewayProviderStatus = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+} as const;
+
+export const SlotsgatewayGameStatus = {
+  ACTIVE: "ACTIVE",
+  INACTIVE: "INACTIVE",
+} as const;
+
+export const SlotsgatewayPlayerStatus = {
+  ACTIVE: "ACTIVE",
+  SUSPENDED: "SUSPENDED",
+} as const;
+
+export const SlotsgatewayTransactionType = {
+  BALANCE: "BALANCE",
+  BET: "BET",
+  WIN: "WIN",
+  REFUND: "REFUND",
+} as const;
+
+export const SlotsgatewayTransactionStatus = {
+  SUCCESS: "SUCCESS",
+  FAILED: "FAILED",
+  DUPLICATE: "DUPLICATE",
+} as const;
+
+export const slotsgatewayProviders = pgTable("slotsgateway_providers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  slug: varchar("slug", { length: 100 }).notNull().unique(),
+  name: text("name").notNull(),
+  imageUrl: text("image_url"),
+  status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
+  lastSyncedAt: timestamp("last_synced_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const slotsgatewayGames = pgTable("slotsgateway_games", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  idHash: varchar("id_hash", { length: 200 }).notNull().unique(),
+  name: text("name").notNull(),
+  imageUrl: text("image_url"),
+  imageSquare: text("image_square"),
+  imagePortrait: text("image_portrait"),
+  providerId: varchar("provider_id").references(() => slotsgatewayProviders.id),
+  providerSlug: varchar("provider_slug", { length: 100 }).notNull(),
+  gameType: varchar("game_type", { length: 50 }).default("video-slots"),
+  subcategory: varchar("subcategory", { length: 50 }),
+  isMobile: boolean("is_mobile").default(true),
+  isNew: boolean("is_new").default(false),
+  hasJackpot: boolean("has_jackpot").default(false),
+  supportsFreeRounds: boolean("supports_free_rounds").default(false),
+  supportsFeatureBuy: boolean("supports_feature_buy").default(false),
+  supportsPlayForFun: boolean("supports_play_for_fun").default(true),
+  currency: varchar("currency", { length: 10 }).default("BRL"),
+  status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
+  lastSyncedAt: timestamp("last_synced_at").defaultNow().notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const slotsgatewayPlayers = pgTable("slotsgateway_players", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id).unique(),
+  username: varchar("username", { length: 100 }).notNull().unique(),
+  password: varchar("password", { length: 100 }).notNull(),
+  currency: varchar("currency", { length: 10 }).default("BRL"),
+  status: varchar("status", { length: 20 }).default("ACTIVE").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const slotsgatewayTransactions = pgTable("slotsgateway_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  externalTransactionId: varchar("external_transaction_id", { length: 200 }).notNull().unique(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  playerId: varchar("player_id").references(() => slotsgatewayPlayers.id),
+  transactionType: varchar("transaction_type", { length: 30 }).notNull(),
+  gameIdHash: varchar("game_id_hash", { length: 200 }),
+  roundId: varchar("round_id", { length: 200 }),
+  betAmount: numeric("bet_amount", { precision: 15, scale: 2 }).default("0.00"),
+  winAmount: numeric("win_amount", { precision: 15, scale: 2 }).default("0.00"),
+  balanceBefore: numeric("balance_before", { precision: 15, scale: 2 }).notNull(),
+  balanceAfter: numeric("balance_after", { precision: 15, scale: 2 }).notNull(),
+  status: varchar("status", { length: 20 }).default("SUCCESS").notNull(),
+  walletTransactionId: varchar("wallet_transaction_id").references(() => transactions.id),
+  rawPayload: text("raw_payload"),
+  errorMessage: text("error_message"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const slotsgatewayProvidersRelations = relations(slotsgatewayProviders, ({ many }) => ({
+  games: many(slotsgatewayGames),
+}));
+
+export const slotsgatewayGamesRelations = relations(slotsgatewayGames, ({ one }) => ({
+  provider: one(slotsgatewayProviders, {
+    fields: [slotsgatewayGames.providerId],
+    references: [slotsgatewayProviders.id],
+  }),
+}));
+
+export const slotsgatewayPlayersRelations = relations(slotsgatewayPlayers, ({ one, many }) => ({
+  user: one(users, {
+    fields: [slotsgatewayPlayers.userId],
+    references: [users.id],
+  }),
+  transactions: many(slotsgatewayTransactions),
+}));
+
+export const slotsgatewayTransactionsRelations = relations(slotsgatewayTransactions, ({ one }) => ({
+  user: one(users, {
+    fields: [slotsgatewayTransactions.userId],
+    references: [users.id],
+  }),
+  player: one(slotsgatewayPlayers, {
+    fields: [slotsgatewayTransactions.playerId],
+    references: [slotsgatewayPlayers.id],
+  }),
+  walletTransaction: one(transactions, {
+    fields: [slotsgatewayTransactions.walletTransactionId],
+    references: [transactions.id],
+  }),
+}));
+
+// =============================================
 // ENTERPRISE SUPPORT SYSTEM TABLES
 // =============================================
 
@@ -1428,6 +1559,26 @@ export type PlayfiversGameStatusValue = typeof PlayfiversGameStatus[keyof typeof
 export type PlayfiversSessionStatusValue = typeof PlayfiversSessionStatus[keyof typeof PlayfiversSessionStatus];
 export type PlayfiversTransactionTypeValue = typeof PlayfiversTransactionType[keyof typeof PlayfiversTransactionType];
 export type PlayfiversTransactionStatusValue = typeof PlayfiversTransactionStatus[keyof typeof PlayfiversTransactionStatus];
+
+// SlotsGateway Types
+export type SlotsgatewayProvider = typeof slotsgatewayProviders.$inferSelect;
+export type SlotsgatewayGame = typeof slotsgatewayGames.$inferSelect;
+export type SlotsgatewayPlayer = typeof slotsgatewayPlayers.$inferSelect;
+export type SlotsgatewayTransaction = typeof slotsgatewayTransactions.$inferSelect;
+export type SlotsgatewayProviderStatusValue = typeof SlotsgatewayProviderStatus[keyof typeof SlotsgatewayProviderStatus];
+export type SlotsgatewayGameStatusValue = typeof SlotsgatewayGameStatus[keyof typeof SlotsgatewayGameStatus];
+export type SlotsgatewayPlayerStatusValue = typeof SlotsgatewayPlayerStatus[keyof typeof SlotsgatewayPlayerStatus];
+export type SlotsgatewayTransactionTypeValue = typeof SlotsgatewayTransactionType[keyof typeof SlotsgatewayTransactionType];
+export type SlotsgatewayTransactionStatusValue = typeof SlotsgatewayTransactionStatus[keyof typeof SlotsgatewayTransactionStatus];
+
+// SlotsGateway schemas
+export const slotsgatewayLaunchGameSchema = z.object({
+  gameIdHash: z.string().min(1, "ID do jogo obrigatório"),
+  homeUrl: z.string().url().optional(),
+  cashierUrl: z.string().url().optional(),
+});
+
+export type SlotsgatewayLaunchGame = z.infer<typeof slotsgatewayLaunchGameSchema>;
 
 // PlayFivers schemas
 export const launchGameSchema = z.object({

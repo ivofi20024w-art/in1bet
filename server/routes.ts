@@ -19,7 +19,7 @@ import { affiliateRouter } from "./modules/affiliates";
 import { bettingRouter } from "./modules/betting";
 import { minesRouter, crashRouter, startCrashGameLoop, doubleRouter, startDoubleGameLoop, plinkoRouter } from "./modules/games";
 import historyRoutes from "./modules/history/history.routes";
-import playfiversRoutes from "./modules/playfivers/playfivers.routes";
+import { slotsgatewayRoutes } from "./modules/slotsgateway";
 import { supportRouter, initializeDefaultDepartments, initializeDefaultSlaRules, initializeDefaultTriageRules } from "./modules/support";
 import levelRoutes from "./modules/levels/level.routes";
 import rakebackRoutes from "./modules/rakeback/rakeback.routes";
@@ -74,7 +74,7 @@ export async function registerRoutes(
   startDoubleGameLoop();
   
   app.use("/api/history", historyRoutes);
-  app.use("/api/playfivers", playfiversRoutes);
+  app.use("/api/slotsgateway", slotsgatewayRoutes);
   app.use("/api/support", supportRouter);
   app.use("/api/levels", levelRoutes);
   app.use("/api/rakeback", rakebackRoutes);
