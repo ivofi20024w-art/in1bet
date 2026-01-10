@@ -114,20 +114,20 @@ export function JackpotBanner() {
           <div 
             className="absolute"
             style={{
-              right: '6.8%',
-              top: '20.8%',
-              width: '16.3%',
-              height: '43%',
+              right: '6.6%',
+              top: '24.3%',
+              width: '17.6%',
+              height: '37.2%',
             }}
           >
             <div
-              className="w-full h-full flex flex-col items-center justify-center gap-0.5 md:gap-1"
+              className="w-full h-full flex flex-col items-center justify-center gap-0.5 md:gap-1 px-1.5"
               data-testid="jackpot-last-winner"
             >
-              <p className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[10px] lg:text-xs font-semibold text-white/90 uppercase tracking-wide ml-[6px] mr-[6px]">
+              <p className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[10px] lg:text-xs font-semibold text-white/90 uppercase tracking-wide text-center">
                 Último Ganhador
               </p>
-              <p className="text-[7px] xs:text-[8px] sm:text-[10px] md:text-xs lg:text-sm font-bold text-primary truncate px-1" data-testid="jackpot-winner-name">
+              <p className="text-[7px] xs:text-[8px] sm:text-[10px] md:text-xs lg:text-sm font-bold text-primary text-center" data-testid="jackpot-winner-name">
                 {lastWinner || "Seja o primeiro!"}
               </p>
             </div>
