@@ -124,7 +124,7 @@ export function JackpotBanner() {
               className="w-full h-full flex flex-col items-center justify-center gap-0.5 md:gap-1"
               data-testid="jackpot-last-winner"
             >
-              <p className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[10px] lg:text-xs font-semibold text-white/90 uppercase tracking-wide">
+              <p className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[10px] lg:text-xs font-semibold text-white/90 uppercase tracking-wide ml-[6px] mr-[6px]">
                 Último Ganhador
               </p>
               <p className="text-[7px] xs:text-[8px] sm:text-[10px] md:text-xs lg:text-sm font-bold text-primary truncate px-1" data-testid="jackpot-winner-name">
