@@ -80,9 +80,9 @@ export function JackpotBanner() {
             className="absolute flex flex-col justify-center"
             style={{
               left: '44%',
-              top: '20%',
-              width: '38%',
-              height: '60%',
+              top: '16.5%',
+              width: '36%',
+              height: '54%',
             }}
           >
             <h2
@@ -115,9 +115,9 @@ export function JackpotBanner() {
             className="absolute flex items-center justify-center"
             style={{
               right: '6.8%',
-              top: '24.5%',
-              width: '17%',
-              height: '50%',
+              top: '21.5%',
+              width: '16.5%',
+              height: '46%',
             }}
           >
             <div
