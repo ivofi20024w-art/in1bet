@@ -207,7 +207,7 @@ export default function Home() {
           <img 
             src={originalsLogo} 
             alt="IN1BET ORIGINALS" 
-            className="h-24 md:h-36 w-auto object-contain"
+            className="h-36 md:h-52 w-auto object-contain"
           />
         </div>
         
