@@ -26,6 +26,17 @@
   --color-sidebar: hsl(var(--sidebar));
   --color-sidebar-foreground: hsl(var(--sidebar-foreground));
   
+  /* Extended IN1BET Premium Colors */
+  --color-bg-elevated: hsl(var(--bg-elevated));
+  --color-border-soft: hsl(var(--border-soft));
+  --color-badge-bg: hsl(var(--badge-bg));
+  --color-badge-border: hsl(var(--badge-border));
+  --color-brand-hover: hsl(var(--brand-hover));
+  --color-brand-active: hsl(var(--brand-active));
+  --color-brand-soft: hsl(var(--brand-soft));
+  --color-text-secondary: hsl(var(--text-secondary));
+  --color-text-disabled: hsl(var(--text-disabled));
+  
   --font-sans: "Plus Jakarta Sans", sans-serif;
   --font-heading: "Teko", sans-serif;
   
@@ -35,39 +46,62 @@
 }
 
 :root {
-  /* Premium Dark Theme Variables - Base HSL values */
-  --background: 222 15% 10%;    /* #16191d - Deep dark blue-grey */
-  --foreground: 210 20% 98%;    /* #f8fafc */
+  /* ═══════════════════════════════════════════════════════════════════
+     IN1BET PREMIUM THEME - Obsidian Dark + Neon Orange
+     Para ajustar intensidade do laranja: modifique --primary (valor 55%)
+     Mais forte: aumente % | Mais suave: diminua %
+     ═══════════════════════════════════════════════════════════════════ */
   
-  --card: 222 15% 13%;          /* Slightly lighter than bg */
-  --card-foreground: 210 20% 98%;
+  /* Background Hierarchy - Deep Obsidian */
+  --background: 240 12% 6%;           /* #0F0F12 - bg-main */
+  --foreground: 0 0% 100%;            /* #FFFFFF - text-primary */
   
-  --popover: 222 15% 13%;
-  --popover-foreground: 210 20% 98%;
+  --card: 220 15% 9%;                 /* #14171C - bg-secondary */
+  --card-foreground: 0 0% 100%;
   
-  --primary: 16 90% 55%;        /* #f26631 - Vibrant Orange */
-  --primary-foreground: 0 0% 100%;
+  --popover: 220 12% 12%;             /* #1A1D22 - bg-tertiary */
+  --popover-foreground: 0 0% 100%;
   
-  --secondary: 217 10% 18%;     /* #2e3238 */
-  --secondary-foreground: 210 20% 98%;
+  /* Brand Colors - Neon Orange */
+  --primary: 26 100% 55%;             /* #FF7A1A - brand-primary */
+  --primary-foreground: 240 12% 6%;   /* Dark text on orange buttons */
   
-  --muted: 217 10% 20%;
-  --muted-foreground: 215 15% 65%;
+  --secondary: 220 12% 12%;           /* #1A1D22 - bg-tertiary */
+  --secondary-foreground: 0 0% 100%;
   
-  --accent: 16 90% 55%;         
-  --accent-foreground: 0 0% 100%;
+  --muted: 220 15% 14%;               /* #1F232A - bg-elevated */
+  --muted-foreground: 220 9% 65%;     /* #9CA3AF - text-muted */
+  
+  --accent: 26 100% 55%;              /* #FF7A1A */
+  --accent-foreground: 240 12% 6%;
   
   --destructive: 0 84% 60%;
-  --destructive-foreground: 210 20% 98%;
+  --destructive-foreground: 0 0% 100%;
 
-  --border: 217 10% 20%;
-  --input: 217 10% 20%;
-  --ring: 16 90% 55%;
+  /* Borders & Inputs */
+  --border: 216 11% 18%;              /* #2A2E35 - border-default */
+  --input: 220 12% 12%;               /* #1A1D22 - bg-tertiary */
+  --ring: 26 100% 55%;                /* #FF7A1A */
   
-  --sidebar: 222 15% 11%;       
-  --sidebar-foreground: 210 20% 98%;
+  --sidebar: 220 15% 9%;              /* #14171C - bg-secondary */
+  --sidebar-foreground: 0 0% 100%;
   
   --radius: 0.75rem;
+  
+  /* Extended IN1BET Premium Tokens */
+  --bg-elevated: 220 15% 14%;         /* #1F232A */
+  --border-soft: 220 15% 14%;         /* #1F232A */
+  --badge-bg: 24 46% 12%;             /* #2A1A10 */
+  --badge-border: 26 100% 55%;        /* #FF7A1A */
+  
+  /* Brand Variants */
+  --brand-hover: 30 100% 55%;         /* #FF8C1A */
+  --brand-active: 24 89% 49%;         /* #E86910 */
+  --brand-soft: 23 100% 39%;          /* #C84E00 */
+  
+  /* Text Hierarchy */
+  --text-secondary: 220 9% 84%;       /* #D1D5DB */
+  --text-disabled: 220 6% 46%;        /* #6B7280 */
 }
 
 @layer base {
@@ -100,6 +134,25 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  
+  /* IN1BET Premium Glow Effects */
+  .glow-primary {
+    box-shadow: 0 0 18px rgba(255, 122, 26, 0.35);
+  }
+  
+  .hover\:glow-primary:hover {
+    box-shadow: 0 0 18px rgba(255, 122, 26, 0.35);
+  }
+  
+  .glow-primary-strong {
+    box-shadow: 0 0 24px rgba(255, 122, 26, 0.5);
+  }
+  
+  /* Premium Focus Ring */
+  .focus-ring-premium:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(255, 122, 26, 0.5);
+  }
 }
 
 /* Custom Scrollbar - More polished */
@@ -122,9 +175,9 @@
   background: hsl(var(--primary));
 }
 
-/* API-Sports Widget Custom Theme - IN1Bet Dark Theme */
+/* API-Sports Widget Custom Theme - IN1Bet Premium Dark Theme */
 api-sports-widget[data-theme="IN1Bet"] {
-  --primary-color: #f26631;
+  --primary-color: #FF7A1A;
   --success-color: #22c55e;
   --warning-color: #f59e0b;
   --danger-color: #ef4444;
@@ -133,10 +186,10 @@ api-sports-widget[data-theme="IN1Bet"] {
   --home-color: var(--primary-color);
   --away-color: #3b82f6;
 
-  --text-color: #f8fafc;
-  --text-color-info: #94a3b8;
+  --text-color: #FFFFFF;
+  --text-color-info: #9CA3AF;
 
-  --background-color: #1e2228;
+  --background-color: #14171C;
 
   --primary-font-size: 0.75rem;
   --secondary-font-size: 0.8rem;
