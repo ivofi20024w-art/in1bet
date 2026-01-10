@@ -10,6 +10,10 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 import mainBanner from "@assets/main1_1767994256496.png";
+import crashmaniaImg from "@assets/image_1768058310823.png";
+import doubleImg from "@assets/image_1768058350806.png";
+import minesImg from "@assets/image_1768058360882.png";
+import plinkoImg from "@assets/image_1768058372829.png";
 
 interface SlotsgatewayGame {
   id: string;
@@ -26,10 +30,10 @@ const BANNERS = [
 ];
 
 const ORIGINALS = [
-  { id: "crash", name: "Crashmania", link: "/games/crash", gradient: "from-[#FF6B1A] via-[#FF4D00] to-[#CC3D00]", icon: Rocket },
-  { id: "double", name: "Double", link: "/games/double", gradient: "from-[#FF8C42] via-[#E06C20] to-[#B85518]", icon: Zap },
-  { id: "mines", name: "Mines", link: "/games/mines", gradient: "from-[#FFA234] via-[#E87A10] to-[#C55A00]", icon: Star },
-  { id: "plinko", name: "Plinko", link: "/games/plinko", gradient: "from-[#FFB347] via-[#FF8F00] to-[#D46A00]", icon: Gamepad2 },
+  { id: "crash", name: "Crashmania", link: "/games/crash", img: crashmaniaImg },
+  { id: "double", name: "Double", link: "/games/double", img: doubleImg },
+  { id: "mines", name: "Mines", link: "/games/mines", img: minesImg },
+  { id: "plinko", name: "Plinko", link: "/games/plinko", img: plinkoImg },
 ];
 
 const CATEGORIES = [
@@ -215,41 +219,13 @@ export default function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {ORIGINALS.map((game) => (
             <Link key={game.id} href={game.link}>
-                <div className="group relative h-48 md:h-64 rounded-2xl overflow-hidden cursor-pointer border border-white/10 hover:border-orange-400/50 transition-all shadow-lg hover:shadow-[0_8px_40px_rgba(249,115,22,0.4)] hover:-translate-y-2 duration-300" data-testid={`original-${game.id}`}>
-                    {/* Main gradient background */}
-                    <div className={`absolute inset-0 bg-gradient-to-br ${game.gradient} transition-all duration-500`} />
-                    
-                    {/* Animated shine effect */}
+                <div className="group relative rounded-2xl overflow-hidden cursor-pointer border border-white/10 hover:border-orange-400/50 transition-all shadow-lg hover:shadow-[0_8px_40px_rgba(249,115,22,0.4)] hover:-translate-y-2 duration-300" data-testid={`original-${game.id}`}>
+                    <img 
+                      src={game.img} 
+                      alt={game.name}
+                      className="w-full h-auto object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    
-                    {/* Subtle pattern overlay */}
-                    <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '16px 16px' }} />
-                    
-                    {/* Dark vignette for depth */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                    
-                    {/* Large decorative icon */}
-                    <game.icon className="absolute -bottom-6 -right-6 w-36 h-36 text-white/10 group-hover:text-white/15 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500" />
-                    
-                    {/* Content */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center z-10">
-                        {/* Icon container with glow */}
-                        <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center mb-3 shadow-lg border border-white/30 group-hover:scale-110 group-hover:bg-white/30 transition-all duration-300">
-                            <game.icon className="w-8 h-8 text-white drop-shadow-lg" />
-                        </div>
-                        
-                        <h3 className="text-xl md:text-2xl font-heading font-black text-white italic drop-shadow-lg mb-2">{game.name}</h3>
-                        
-                        {/* RTP Badge */}
-                        <div className="px-3 py-1 rounded-full bg-black/40 backdrop-blur-md border border-white/20">
-                            <span className="text-[11px] font-bold text-white/90">99% RTP</span>
-                        </div>
-                        
-                        {/* Hover button */}
-                        <Button size="sm" className="mt-4 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 bg-white text-orange-600 hover:bg-orange-50 font-bold rounded-full px-6 shadow-lg">
-                            JOGAR
-                        </Button>
-                    </div>
                 </div>
             </Link>
           ))}
