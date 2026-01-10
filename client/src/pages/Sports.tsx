@@ -184,7 +184,7 @@ function MatchCard({ match, onSelectOdd }: { match: SportsMatch; onSelectOdd: (m
           <Link href={`/sports/match/${match.id}`} className="flex-1">
             <Button variant="outline" size="sm" className="w-full text-xs border-white/10 hover:border-primary/50 hover:bg-primary/10">
               <TrendingUp className="w-3 h-3 mr-1.5" />
-              +{Math.max(0, match.odds.length - 3)} mercados
+              {match.odds.length > 3 ? `+${match.odds.length - 3} mercados` : "Ver detalhes"}
             </Button>
           </Link>
           

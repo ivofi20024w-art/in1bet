@@ -156,18 +156,27 @@ export async function getMatches(filters: {
   }
   if (filters.isLive !== undefined) {
     conditions.push(eq(sportsMatches.isLive, filters.isLive));
+    // For live filter, only show real matches with external IDs
+    if (filters.isLive) {
+      conditions.push(isNotNull(sportsMatches.externalId));
+    }
   }
   if (filters.status) {
     conditions.push(eq(sportsMatches.status, filters.status));
   }
   if (filters.featured) {
     conditions.push(eq(sportsMatches.isFeatured, true));
+    // Only show matches with real API data (has externalId)
     conditions.push(isNotNull(sportsMatches.externalId));
   }
   
+  // Only show scheduled/live matches, with future start dates for scheduled
   conditions.push(or(
-    eq(sportsMatches.status, "SCHEDULED"),
-    eq(sportsMatches.status, "LIVE")
+    eq(sportsMatches.status, "LIVE"),
+    and(
+      eq(sportsMatches.status, "SCHEDULED"),
+      gte(sportsMatches.startsAt, new Date())
+    )
   ));
   
   const matchRows = await db.select()
