@@ -74,109 +74,109 @@ export function BetSlip() {
 
   return (
     <div className="flex flex-col h-full bg-card">
-      <div className="p-4 border-b border-white/5 flex justify-between items-center">
+      <div className="px-3 py-2.5 border-b border-white/5 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <div className="bg-primary/20 p-1.5 rounded text-primary font-bold text-xs">{items.length}</div>
-          <h3 className="font-heading font-bold text-white">Boletim de Apostas</h3>
+          <div className="bg-primary/20 px-1.5 py-1 rounded text-primary font-bold text-xs">{items.length}</div>
+          <h3 className="font-heading font-bold text-white text-sm">Boletim de Apostas</h3>
         </div>
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-8 w-8 text-muted-foreground hover:text-red-400" 
+          className="h-7 w-7 text-muted-foreground hover:text-red-400" 
           onClick={clearSlip}
           data-testid="clear-betslip"
         >
-          <Trash2 className="w-4 h-4" />
+          <Trash2 className="w-3.5 h-3.5" />
         </Button>
       </div>
 
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-3">
+      <ScrollArea className="flex-1 px-3 py-2">
+        <div className="space-y-2">
           {items.map((item) => (
             <div 
               key={item.id} 
-              className="bg-secondary/20 border border-white/5 rounded-lg p-3 relative group hover:border-primary/30 transition-colors"
+              className="bg-secondary/20 border border-white/5 rounded-lg p-2.5 relative group hover:border-primary/30 transition-colors"
             >
               <button 
                 onClick={() => removeSelection(item.oddId)}
-                className="absolute top-2 right-2 text-muted-foreground hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1.5 right-1.5 text-muted-foreground hover:text-white opacity-70 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                 data-testid={`remove-selection-${item.oddId}`}
               >
-                <X className="w-4 h-4" />
+                <X className="w-3.5 h-3.5" />
               </button>
-              <div className="pr-6">
+              <div className="pr-5">
                 {item.match?.homeTeam?.name && item.match?.awayTeam?.name ? (
                   <>
-                    <p className="text-xs text-muted-foreground mb-1">
+                    <p className="text-[10px] text-muted-foreground mb-0.5 truncate">
                       {item.match.league?.name || "Futebol"}
                     </p>
-                    <p className="text-sm font-bold text-white mb-1">
+                    <p className="text-xs font-bold text-white mb-0.5 truncate">
                       {item.match.homeTeam.name} vs {item.match.awayTeam.name}
                     </p>
                   </>
                 ) : null}
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold bg-white/10 px-1.5 py-0.5 rounded text-white">{item.odds.toFixed(2)}</span>
-                  <span className="text-[10px] text-muted-foreground uppercase">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] font-bold bg-white/10 px-1 py-0.5 rounded text-white">{item.odds.toFixed(2)}</span>
+                  <span className="text-[9px] text-muted-foreground uppercase">
                     {item.match?.isLive ? "AO VIVO" : "Pré-Jogo"}
                   </span>
                 </div>
-                <p className="text-sm font-bold text-primary mt-1">{item.selectionName}</p>
+                <p className="text-xs font-bold text-primary mt-0.5">{item.selectionName}</p>
               </div>
             </div>
           ))}
         </div>
       </ScrollArea>
 
-      <div className="p-4 border-t border-white/5 space-y-4 bg-secondary/10">
+      <div className="px-3 py-2.5 border-t border-white/5 space-y-2.5 bg-secondary/10">
         {items.length > 1 && (
-          <div className="flex justify-between items-center text-sm">
+          <div className="flex justify-between items-center text-xs">
             <span className="text-muted-foreground">Tipo de Aposta</span>
             <span className="font-bold text-primary">Múltipla ({items.length})</span>
           </div>
         )}
         
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-white font-bold">Valor da Aposta</span>
+            <span className="text-xs text-white font-bold">Valor da Aposta</span>
             {isAuthenticated && (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-[10px] text-muted-foreground">
                 Saldo: R$ {walletBalance.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
               </span>
             )}
           </div>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">R$</span>
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground font-bold text-sm">R$</span>
             <Input 
               type="number" 
               value={stake}
               onChange={(e) => setStake(parseFloat(e.target.value) || 0)}
-              className="pl-10 bg-background border-white/10 font-bold focus-visible:ring-primary"
+              className="pl-9 h-9 bg-background border-white/10 font-bold focus-visible:ring-primary text-sm"
               placeholder="0.00"
               min={1}
               data-testid="stake-input"
             />
           </div>
           {!hasBalance && isAuthenticated && stake > 0 && (
-            <p className="text-xs text-red-400">Saldo insuficiente</p>
+            <p className="text-[10px] text-red-400">Saldo insuficiente</p>
           )}
         </div>
 
-        <div className="flex justify-between items-center py-2 border-t border-white/5 border-dashed">
-          <span className="text-sm text-muted-foreground">Retorno Potencial</span>
-          <span className="text-lg font-bold text-green-500">
+        <div className="flex justify-between items-center py-1.5 border-t border-white/5 border-dashed">
+          <span className="text-xs text-muted-foreground">Retorno Potencial</span>
+          <span className="text-base font-bold text-green-500">
             R$ {potentialWin.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
           </span>
         </div>
 
-        <div className="flex justify-between items-center text-xs text-muted-foreground">
+        <div className="flex justify-between items-center text-[10px] text-muted-foreground">
           <span>Odds Totais: <strong className="text-white">{totalOdds.toFixed(2)}</strong></span>
         </div>
 
         {!isAuthenticated ? (
           <Link href="/auth">
             <Button 
-              className="w-full h-12 text-base font-bold bg-primary hover:bg-primary/90 text-white"
+              className="w-full h-10 text-sm font-bold bg-primary hover:bg-primary/90 text-white"
               data-testid="login-to-bet"
             >
               FAÇA LOGIN PARA APOSTAR
@@ -185,7 +185,7 @@ export function BetSlip() {
         ) : (
           <Button 
             className={cn(
-              "w-full h-12 text-base font-bold text-white",
+              "w-full h-10 text-sm font-bold text-white",
               hasBalance && validStake 
                 ? "bg-primary hover:bg-primary/90 shadow-[0_0_20px_-5px_rgba(242,102,49,0.4)]"
                 : "bg-muted cursor-not-allowed"
