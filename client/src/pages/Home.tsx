@@ -14,6 +14,7 @@ import crashmaniaImg from "@assets/image_1768058310823.png";
 import doubleImg from "@assets/image_1768058350806.png";
 import minesImg from "@assets/image_1768058360882.png";
 import plinkoImg from "@assets/image_1768058372829.png";
+import originalsLogo from "@assets/2ea89e20-86ec-41bb-b928-c95da2e5e2d0_1768077965099.png";
 
 interface SlotsgatewayGame {
   id: string;
@@ -203,15 +204,11 @@ export default function Home() {
 
       <section id="originals" className="mb-12 scroll-mt-24">
         <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-                <div className="p-2 bg-primary/20 rounded-lg">
-                    <Rocket className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                    <h2 className="text-2xl font-heading font-bold italic text-white leading-none">IN1BET <span className="text-primary">ORIGINALS</span></h2>
-                    <p className="text-xs text-muted-foreground">Jogos exclusivos com RTP de 99%</p>
-                </div>
-            </div>
+          <img 
+            src={originalsLogo} 
+            alt="IN1BET ORIGINALS" 
+            className="h-16 md:h-20 w-auto object-contain"
+          />
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
