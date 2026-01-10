@@ -75,15 +75,14 @@ export function JackpotBanner() {
           className="w-full h-auto"
         />
         
-        <div className="absolute inset-0 flex items-center">
-          <div 
-            className="absolute"
-            style={{
-              left: 'calc(40% + 40px)',
-              top: '50%',
-              transform: 'translateY(-50%)',
-            }}
-          >
+        <div 
+          className="absolute inset-0 flex items-center justify-between"
+          style={{
+            paddingLeft: 'calc(40% + 40px)',
+            paddingRight: '5%',
+          }}
+        >
+          <div className="flex-shrink-0" style={{ maxWidth: '40%' }}>
             <h2
               className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold tracking-[0.15em] uppercase text-left"
               style={{
@@ -107,27 +106,25 @@ export function JackpotBanner() {
               <AnimatedValue value={currentAmount} />
             </div>
             
-            <p className="text-[10px] sm:text-xs md:text-sm text-white/75 leading-relaxed max-w-sm text-left">
+            <p className="text-[10px] sm:text-xs md:text-sm text-white/75 leading-relaxed text-left">
               O Jackpot cresce automaticamente conforme as apostas são realizadas.
             </p>
           </div>
           
           <div 
-            className="absolute flex flex-col items-center justify-center rounded-lg px-3 py-2 sm:px-4 sm:py-3"
+            className="flex-shrink-0 flex flex-col items-center justify-center rounded-lg px-3 py-2 sm:px-4 sm:py-3"
             style={{
-              right: '6.6%',
-              top: '50%',
-              transform: 'translateY(-50%)',
               background: 'rgba(255, 122, 26, 0.08)',
               border: '1px solid rgba(255, 122, 26, 0.2)',
+              minWidth: '100px',
             }}
             data-testid="jackpot-last-winner"
           >
-            <p className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-white/60 uppercase tracking-wider mb-1 text-center">
+            <p className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-white/60 uppercase tracking-wider mb-1 text-center whitespace-nowrap">
               Último Ganhador
             </p>
             <p 
-              className="text-[10px] sm:text-xs md:text-sm font-semibold text-center"
+              className="text-[10px] sm:text-xs md:text-sm font-semibold text-center whitespace-nowrap"
               style={{ color: "rgba(255, 122, 26, 0.85)" }}
               data-testid="jackpot-winner-name"
             >
