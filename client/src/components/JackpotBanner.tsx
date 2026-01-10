@@ -68,69 +68,71 @@ export function JackpotBanner() {
 
   return (
     <section className="mb-8" data-testid="jackpot-banner">
-      <div className="relative w-full">
+      <div className="relative w-full overflow-hidden rounded-xl">
         <img 
           src={jackpotBg}
           alt="Jackpot IN1BET"
           className="w-full h-auto"
         />
         
-        <div className="absolute inset-0">
+        <div className="absolute inset-0 flex items-center">
           <div 
-            className="absolute flex flex-col justify-center"
+            className="absolute"
             style={{
-              left: '44%',
-              top: '16.5%',
-              width: '36%',
-              height: '54%',
+              left: 'calc(40% + 40px)',
+              top: '50%',
+              transform: 'translateY(-50%)',
             }}
           >
             <h2
-              className="text-[8px] xs:text-[10px] sm:text-xs md:text-sm lg:text-base font-bold tracking-[0.15em] uppercase mb-0.5 sm:mb-1 md:mb-2"
+              className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold tracking-[0.15em] uppercase text-left"
               style={{
                 background: "linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FF7A1A 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
+                marginBottom: '10px',
               }}
             >
               Jackpot IN1BET
             </h2>
             
             <div
-              className="text-base xs:text-lg sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white leading-none mb-0.5 sm:mb-1 md:mb-2"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black text-white leading-none text-left"
               style={{
-                textShadow: "0 2px 10px rgba(0,0,0,0.8)",
+                textShadow: "0 2px 20px rgba(255, 122, 26, 0.4), 0 4px 40px rgba(0,0,0,0.8)",
+                marginBottom: '14px',
               }}
               data-testid="jackpot-value"
             >
               <AnimatedValue value={currentAmount} />
             </div>
             
-            <p className="text-[6px] xs:text-[7px] sm:text-[9px] md:text-xs lg:text-sm text-white/60 leading-tight">
+            <p className="text-[10px] sm:text-xs md:text-sm text-white/75 leading-relaxed max-w-sm text-left">
               O Jackpot cresce automaticamente conforme as apostas são realizadas.
             </p>
           </div>
           
           <div 
-            className="absolute"
+            className="absolute flex flex-col items-center justify-center rounded-lg px-3 py-2 sm:px-4 sm:py-3"
             style={{
               right: '6.6%',
-              top: '24.3%',
-              width: '17.6%',
-              height: '37.2%',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              background: 'rgba(255, 122, 26, 0.08)',
+              border: '1px solid rgba(255, 122, 26, 0.2)',
             }}
+            data-testid="jackpot-last-winner"
           >
-            <div
-              className="w-full h-full flex flex-col items-center justify-center gap-0.5 md:gap-1 px-1.5"
-              data-testid="jackpot-last-winner"
+            <p className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-white/60 uppercase tracking-wider mb-1 text-center">
+              Último Ganhador
+            </p>
+            <p 
+              className="text-[10px] sm:text-xs md:text-sm font-semibold text-center"
+              style={{ color: "rgba(255, 122, 26, 0.85)" }}
+              data-testid="jackpot-winner-name"
             >
-              <p className="text-[6px] xs:text-[7px] sm:text-[8px] md:text-[10px] lg:text-xs font-semibold text-white/90 uppercase tracking-wide text-center">
-                Último Ganhador
-              </p>
-              <p className="text-[7px] xs:text-[8px] sm:text-[10px] md:text-xs lg:text-sm font-bold text-primary text-center" data-testid="jackpot-winner-name">
-                {lastWinner || "Seja o primeiro!"}
-              </p>
-            </div>
+              {lastWinner || "Seja o primeiro!"}
+            </p>
           </div>
         </div>
       </div>
