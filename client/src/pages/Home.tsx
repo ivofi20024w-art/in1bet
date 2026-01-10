@@ -10,7 +10,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 
 import mainBanner from "@assets/main1_1767994256496.png";
-import crashmaniaImg from "@assets/image_1768058310823.png";
+import crashmaniaImg from "@assets/image_1768079128068.png";
 import doubleImg from "@assets/image_1768058350806.png";
 import minesImg from "@assets/image_1768058360882.png";
 import plinkoImg from "@assets/image_1768058372829.png";
@@ -214,11 +214,11 @@ export default function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {ORIGINALS.map((game) => (
             <Link key={game.id} href={game.link}>
-                <div className="group relative h-48 md:h-64 rounded-2xl overflow-hidden cursor-pointer border border-white/10 hover:border-orange-400/50 transition-all shadow-lg hover:shadow-[0_8px_40px_rgba(249,115,22,0.4)] hover:-translate-y-2 duration-300" data-testid={`original-${game.id}`}>
+                <div className="group relative rounded-2xl overflow-hidden cursor-pointer border border-white/10 hover:border-orange-400/50 transition-all shadow-lg hover:shadow-[0_8px_40px_rgba(249,115,22,0.4)] hover:-translate-y-2 duration-300" data-testid={`original-${game.id}`}>
                     <img 
                       src={game.img} 
                       alt={game.name}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-auto transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
