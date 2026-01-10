@@ -16,7 +16,7 @@ import {
   type SportsBetSlip,
   type SportsBetSelection,
 } from "@shared/schema";
-import { eq, desc, and, or, gte, lte, sql, asc, inArray } from "drizzle-orm";
+import { eq, desc, and, or, gte, lte, sql, asc, inArray, isNotNull } from "drizzle-orm";
 import { processBalanceChange } from "../wallet/wallet.service";
 import { sendNotificationToUser } from "../notifications/notification.service";
 import { randomUUID } from "crypto";
@@ -162,6 +162,7 @@ export async function getMatches(filters: {
   }
   if (filters.featured) {
     conditions.push(eq(sportsMatches.isFeatured, true));
+    conditions.push(isNotNull(sportsMatches.externalId));
   }
   
   conditions.push(or(
