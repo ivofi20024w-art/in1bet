@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { initializeApiFootball } from "./modules/sports/api-football.service";
 
 const app = express();
 app.set('trust proxy', 1);
@@ -94,6 +95,10 @@ app.use((req, res, next) => {
     },
     () => {
       log(`serving on port ${port}`);
+      
+      initializeApiFootball().catch(err => {
+        console.error("[API-Football] Initialization failed:", err);
+      });
     },
   );
 })();

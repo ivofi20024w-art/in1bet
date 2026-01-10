@@ -23,6 +23,7 @@ import {
   getUserBets,
   seedSportsData,
 } from "./sports.service";
+import { syncPopularLeaguesFixtures } from "./api-football.service";
 import {
   createSportsLeagueSchema,
   createSportsTeamSchema,
@@ -323,6 +324,24 @@ router.post("/admin/seed", authMiddleware, adminCheck, async (req: Request, res:
   try {
     await seedSportsData();
     res.json({ success: true, message: "Dados de esportes criados com sucesso" });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post("/admin/sync", authMiddleware, adminCheck, async (req: Request, res: Response) => {
+  try {
+    const result = await syncPopularLeaguesFixtures();
+    res.json({ success: true, message: `Sincronizados ${result.synced} jogos`, data: result });
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post("/sync", async (req: Request, res: Response) => {
+  try {
+    const result = await syncPopularLeaguesFixtures();
+    res.json({ success: true, message: `Sincronizados ${result.synced} jogos`, data: result });
   } catch (error: any) {
     res.status(500).json({ success: false, error: error.message });
   }

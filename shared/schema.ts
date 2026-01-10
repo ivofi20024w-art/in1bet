@@ -2102,6 +2102,7 @@ export const sportsLeagues = pgTable("sports_leagues", {
   isPopular: boolean("is_popular").default(false).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
   sortOrder: integer("sort_order").default(0).notNull(),
+  externalId: varchar("external_id", { length: 100 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -2114,6 +2115,7 @@ export const sportsTeams = pgTable("sports_teams", {
   country: varchar("country", { length: 100 }),
   sport: varchar("sport", { length: 30 }).notNull(),
   isActive: boolean("is_active").default(true).notNull(),
+  externalId: varchar("external_id", { length: 100 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -2133,6 +2135,7 @@ export const sportsMatches = pgTable("sports_matches", {
   isFeatured: boolean("is_featured").default(false).notNull(),
   streamUrl: text("stream_url"),
   result: varchar("result", { length: 10 }),
+  externalId: varchar("external_id", { length: 100 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
