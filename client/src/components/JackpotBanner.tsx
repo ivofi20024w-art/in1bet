@@ -111,26 +111,28 @@ export function JackpotBanner() {
             </p>
           </div>
           
-          <div 
-            className="flex-shrink-0 flex flex-col items-center justify-center rounded-lg px-3 py-2 sm:px-4 sm:py-3"
-            style={{
-              background: 'rgba(255, 122, 26, 0.08)',
-              border: '1px solid rgba(255, 122, 26, 0.2)',
-              minWidth: '100px',
-            }}
-            data-testid="jackpot-last-winner"
+        </div>
+        
+        <div 
+          className="absolute flex flex-col items-center justify-center"
+          style={{
+            top: '23%',
+            right: '8%',
+            width: '18%',
+            height: '22%',
+          }}
+          data-testid="jackpot-last-winner"
+        >
+          <p className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-white/80 uppercase tracking-wider mb-1 text-center">
+            Último Ganhador
+          </p>
+          <p 
+            className="text-[10px] sm:text-xs md:text-sm font-bold text-center"
+            style={{ color: "#FF7A1A" }}
+            data-testid="jackpot-winner-name"
           >
-            <p className="text-[8px] sm:text-[10px] md:text-xs font-semibold text-white/60 uppercase tracking-wider mb-1 text-center whitespace-nowrap">
-              Último Ganhador
-            </p>
-            <p 
-              className="text-[10px] sm:text-xs md:text-sm font-semibold text-center whitespace-nowrap"
-              style={{ color: "rgba(255, 122, 26, 0.85)" }}
-              data-testid="jackpot-winner-name"
-            >
-              {lastWinner || "Seja o primeiro!"}
-            </p>
-          </div>
+            {lastWinner || "Seja o primeiro!"}
+          </p>
         </div>
       </div>
     </section>
