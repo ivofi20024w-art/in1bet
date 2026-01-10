@@ -184,8 +184,6 @@ export default function Home() {
         </Carousel>
       </section>
 
-      <JackpotBanner />
-
       <section className="mb-10 overflow-x-auto pb-2 scrollbar-none md:overflow-visible">
         <div className="flex gap-3 min-w-max md:min-w-0 md:w-full md:justify-center">
           {CATEGORIES.map((cat) => (
@@ -231,6 +229,8 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      <JackpotBanner />
 
       <section className="mb-12">
         <div className="flex items-center justify-between mb-6">
