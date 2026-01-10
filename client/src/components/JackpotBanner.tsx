@@ -116,8 +116,8 @@ export function JackpotBanner() {
         <div 
           className="absolute flex flex-col items-center justify-center"
           style={{
-            top: '32%',
-            right: '10%',
+            top: '35%',
+            right: '11%',
             width: '18%',
             height: '22%',
           }}
