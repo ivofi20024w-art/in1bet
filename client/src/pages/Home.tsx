@@ -3,7 +3,6 @@ import { SectionHeader } from "@/components/shared/SectionHeader";
 import { Button } from "@/components/ui/button";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { JackpotDisplay } from "@/components/JackpotDisplay";
-import { PromotionalDepositBanner } from "@/components/shared/PromotionalDepositBanner";
 import { Rocket, Gamepad2, Flame, Play, Star, Zap, Loader2 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import Autoplay from "embla-carousel-autoplay";
@@ -182,10 +181,6 @@ export default function Home() {
       </section>
 
       <JackpotDisplay />
-
-      <section className="mb-8">
-        <PromotionalDepositBanner />
-      </section>
 
       <section className="mb-10 overflow-x-auto pb-2 scrollbar-none md:overflow-visible">
         <div className="flex gap-3 min-w-max md:min-w-0 md:w-full md:justify-center">
