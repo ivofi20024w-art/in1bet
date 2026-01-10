@@ -14,6 +14,7 @@ import { useMatches, usePopularLeagues, type SportsMatch, type SportsOdd } from 
 import { useBetSlipStore } from "@/stores/betslip-store";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { WidgetConfig, GamesWidget, StandingsWidget } from "@/components/sports/ApiSportsWidgets";
 
 const SPORTS_NAV = [
     { id: "all", label: "Destaques", icon: Flame, sport: undefined },
@@ -259,6 +260,16 @@ export default function Sports() {
                 data-testid="search-sports"
               />
             </div>
+          </div>
+
+          <WidgetConfig sport="football" theme="IN1Bet" lang="en" />
+          
+          <div className="bg-card border border-white/5 rounded-xl p-4 overflow-hidden">
+            <div className="flex items-center gap-2 mb-4">
+              <Trophy className="w-5 h-5 text-primary" />
+              <h3 className="font-heading font-bold text-white uppercase tracking-wide">Jogos com Estatísticas</h3>
+            </div>
+            <GamesWidget sport="football" className="min-h-[400px]" />
           </div>
 
           <div className="space-y-3">
