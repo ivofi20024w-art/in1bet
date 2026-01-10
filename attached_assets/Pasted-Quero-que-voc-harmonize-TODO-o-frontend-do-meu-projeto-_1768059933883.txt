@@ -1,0 +1,67 @@
+Quero que você harmonize TODO o frontend do meu projeto com uma nova paleta “IN1BET Premium”, sem editar manualmente 90+ páginas. 
+A prioridade é fazer a troca de cores pelo sistema de tema (tokens/variáveis), evitando mudanças por componente/página.
+
+OBJETIVO
+- Unificar cores do site inteiro (fundos, textos, bordas, botões, inputs, hovers, focus, badges, cards, modais, navbar/sidebar)
+- Manter o layout, espaçamentos, tipografia e estrutura exatamente iguais
+- Trocar apenas cores e efeitos visuais (shadow/glow) para combinar com a marca
+
+PALETA (CSS Variables)
+Use essas variáveis como fonte única da verdade:
+
+:root {
+  --bg-main:#0F0F12;
+  --bg-secondary:#14171C;
+  --bg-tertiary:#1A1D22;
+  --bg-elevated:#1F232A;
+
+  --brand-primary:#FF7A1A;
+  --brand-hover:#FF8C1A;
+  --brand-active:#E86910;
+  --brand-soft:#C84E00;
+
+  --text-primary:#FFFFFF;
+  --text-secondary:#D1D5DB;
+  --text-muted:#9CA3AF;
+  --text-disabled:#6B7280;
+
+  --badge-bg:#2A1A10;
+  --badge-border:#FF7A1A;
+  --badge-text:#FFFFFF;
+
+  --border-default:#2A2E35;
+  --border-soft:#1F232A;
+}
+
+REGRAS IMPORTANTES
+1) NÃO faça alterações página por página.
+2) Priorize uma mudança global:
+   - Se for Tailwind: atualize tailwind.config (theme.extend.colors) e/ou crie tokens CSS e use theming.
+   - Se for shadcn/ui: atualize o arquivo globals.css com CSS variables e ajuste o tema conforme tokens.
+   - Se for CSS puro: crie um arquivo theme.css com as variáveis e aplique globalmente.
+3) Remova hardcodes de cor (hex/rgb) e substitua por tokens, começando pelos mais frequentes.
+4) Garanta contraste: textos principais brancos, textos secundários cinza claro, muted cinza médio.
+5) Botões:
+   - Primário: bg brand-primary, texto bg-main, hover brand-hover, active brand-active.
+   - Secundário: fundo bg-tertiary, borda border-default, hover bg-elevated.
+6) Inputs e focus:
+   - fundo bg-tertiary
+   - borda border-default
+   - focus ring: 0 0 0 2px rgba(255,122,26,0.5)
+7) Efeito premium (sutil):
+   - hover cards/botões: box-shadow 0 0 18px rgba(255,122,26,0.35)
+   - evite glow exagerado
+
+PROCESSO (faça nessa ordem)
+A) Detecte o stack de estilos (Tailwind? CSS modules? styled-components? shadcn?).
+B) Crie/edite o arquivo de tema global (ex: src/styles/theme.css ou globals.css) e importe no app root.
+C) Mapeie as cores antigas -> tokens (substituições globais). 
+   - Use busca por hex mais comuns e substitua de forma segura.
+D) Ajuste os componentes base (Button, Input, Card, Badge, Modal, Navbar, Sidebar) para usar tokens.
+E) Verifique páginas críticas: Home, header, sidebar, botões “Criar conta”, cards “Originals”, inputs de busca.
+F) Não quebre responsividade nem classes. Se houver conflito, preserve classes e altere somente cores.
+
+ENTREGA
+- Me diga exatamente quais arquivos você alterou
+- Mostre os trechos principais (theme/globals + config Tailwind se existir)
+- Explique como eu posso ajustar rapidamente a intensidade do laranja (brand-primary) caso eu queira mais forte/fraco.
