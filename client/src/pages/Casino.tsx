@@ -414,10 +414,10 @@ export default function Casino() {
              <Link key={game.id} href={`/games/${game.id}`}>
                 <div className="min-w-[160px] h-24 rounded-xl relative overflow-hidden group cursor-pointer border border-white/5 hover:border-primary/50 transition-all snap-start shadow-lg hover:shadow-primary/20 hover:-translate-y-1 duration-300">
                     <div className={`absolute inset-0 bg-gradient-to-br ${
-                         game.id === 'crash' ? 'from-[#FF6B1A] via-[#FF4D00] to-[#CC3D00]' : 
-                         game.id === 'double' ? 'from-[#FF8C42] via-[#E06C20] to-[#B85518]' :
-                         game.id === 'mines' ? 'from-[#FFA234] via-[#E87A10] to-[#C55A00]' : 
-                         game.id === 'plinko' ? 'from-[#FFB347] via-[#FF8F00] to-[#D46A00]' :
+                         game.id === 'crash' ? 'from-[#FF7A1A] via-[#E86910] to-[#C84E00]' : 
+                         game.id === 'double' ? 'from-[#FF8C1A] via-[#E86910] to-[#C84E00]' :
+                         game.id === 'mines' ? 'from-[#FF7A1A] via-[#E86910] to-[#C84E00]' : 
+                         game.id === 'plinko' ? 'from-[#FF8C1A] via-[#FF7A1A] to-[#E86910]' :
                          'from-gray-700 to-gray-900'
                     } transition-transform group-hover:scale-110 duration-500`} />
                     <div className="absolute inset-0 flex items-center justify-between p-4">

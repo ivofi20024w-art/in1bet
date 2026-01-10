@@ -56,11 +56,11 @@ export default function Crash() {
             
             ctx.quadraticCurveTo(x / 2, canvas.height, x, y);
             ctx.lineWidth = 4;
-            ctx.strokeStyle = gameStatus === 'CRASHED' ? '#EF4444' : '#F97316';
+            ctx.strokeStyle = gameStatus === 'CRASHED' ? '#EF4444' : '#FF7A1A';
             ctx.stroke();
             
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, gameStatus === 'CRASHED' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(249, 115, 22, 0.2)');
+            gradient.addColorStop(0, gameStatus === 'CRASHED' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 122, 26, 0.2)');
             gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
             ctx.fillStyle = gradient;
             ctx.fill();
@@ -69,7 +69,7 @@ export default function Crash() {
             ctx.arc(x, y, 6, 0, Math.PI * 2);
             ctx.fillStyle = '#fff';
             ctx.fill();
-            ctx.shadowColor = gameStatus === 'CRASHED' ? '#EF4444' : '#F97316';
+            ctx.shadowColor = gameStatus === 'CRASHED' ? '#EF4444' : '#FF7A1A';
             ctx.shadowBlur = 10;
         }
     }, [multiplier, gameStatus]);

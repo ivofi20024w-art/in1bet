@@ -143,7 +143,7 @@ function getStatusConfig(status: string) {
   return config[status] || { color: "text-gray-500", bgColor: "bg-gray-500/10", label: status, icon: Clock };
 }
 
-function MiniSparkline({ data, color = "#f97316", height = 32 }: { data: number[]; color?: string; height?: number }) {
+function MiniSparkline({ data, color = "#FF7A1A", height = 32 }: { data: number[]; color?: string; height?: number }) {
   const chartData = data.map((value, index) => ({ value, index }));
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -539,17 +539,17 @@ function FinancialOverview({ stats, payouts }: { stats: AffiliateData['stats']; 
               ]}>
                 <defs>
                   <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#FF7A1A" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#FF7A1A" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <XAxis dataKey="name" stroke="#525252" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis stroke="#525252" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `R$${v}`} />
                 <RechartsTooltip 
-                  contentStyle={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: '8px' }}
-                  labelStyle={{ color: '#888' }}
+                  contentStyle={{ background: '#0F0F12', border: '1px solid #2A2E35', borderRadius: '8px' }}
+                  labelStyle={{ color: '#9CA3AF' }}
                 />
-                <Area type="monotone" dataKey="value" stroke="#f97316" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
+                <Area type="monotone" dataKey="value" stroke="#FF7A1A" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -895,7 +895,7 @@ export default function Affiliates() {
             value={formatCurrency(stats.pendingBalance)}
             subtitle="Para saque"
             icon={Wallet}
-            iconColor="#f97316"
+            iconColor="#FF7A1A"
           />
         </div>
 

@@ -383,7 +383,7 @@ export default function AdminDashboard() {
                     <Bar
                       dataKey="withdrawals"
                       name="Saques"
-                      fill="#f97316"
+                      fill="#FF7A1A"
                       radius={[2, 2, 0, 0]}
                     />
                   </BarChart>
