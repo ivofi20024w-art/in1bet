@@ -216,14 +216,14 @@ export default function Home() {
             </div>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-stretch">
           {ORIGINALS.map((game) => (
-            <Link key={game.id} href={game.link}>
-                <div className="group relative rounded-2xl overflow-hidden cursor-pointer border border-white/10 hover:border-orange-400/50 transition-all shadow-lg hover:shadow-[0_8px_40px_rgba(249,115,22,0.4)] hover:-translate-y-2 duration-300" data-testid={`original-${game.id}`}>
+            <Link key={game.id} href={game.link} className="block h-full">
+                <div className="group relative aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer border border-white/10 hover:border-orange-400/50 transition-all shadow-lg hover:shadow-[0_8px_40px_rgba(249,115,22,0.4)] hover:-translate-y-2 duration-300" data-testid={`original-${game.id}`}>
                     <img 
                       src={game.img} 
                       alt={game.name}
-                      className={`w-full object-cover transition-transform duration-500 group-hover:scale-105 ${game.id === 'double' ? 'aspect-[4/3]' : 'h-auto'}`}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
