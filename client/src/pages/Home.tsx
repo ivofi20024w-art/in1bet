@@ -203,11 +203,12 @@ export default function Home() {
       </section>
 
       <section id="originals" className="mb-12 scroll-mt-24">
-        <div className="flex items-center justify-center mb-3">
+        <div className="flex items-center justify-center" style={{ marginBottom: 'clamp(12px, 2.4vw, 24px)' }}>
           <img 
             src={originalsLogo} 
             alt="IN1BET ORIGINALS" 
-            className="h-36 md:h-52 w-auto object-contain"
+            className="h-auto object-contain"
+            style={{ width: 'clamp(240px, 32vw, 520px)' }}
           />
         </div>
         
