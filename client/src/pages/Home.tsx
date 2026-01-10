@@ -203,11 +203,11 @@ export default function Home() {
       </section>
 
       <section id="originals" className="mb-12 scroll-mt-24">
-        <div className="flex items-center justify-center mb-6">
+        <div className="flex items-center justify-center mb-3">
           <img 
             src={originalsLogo} 
             alt="IN1BET ORIGINALS" 
-            className="h-20 md:h-28 w-auto object-contain"
+            className="h-24 md:h-36 w-auto object-contain"
           />
         </div>
         
