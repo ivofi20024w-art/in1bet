@@ -52,6 +52,7 @@ export async function createAffiliate(
   const [affiliate] = await db
     .insert(affiliates)
     .values({
+      userId: createdBy,
       name: data.name,
       email: data.email,
       phone: data.phone,

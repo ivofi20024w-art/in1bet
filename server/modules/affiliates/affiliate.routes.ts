@@ -194,7 +194,11 @@ router.post("/links", authMiddleware, async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Dados inválidos", details: parsed.error.errors });
     }
 
-    const link = await createAffiliateLink(affiliate.id, parsed.data.name, parsed.data.code);
+    const link = await createAffiliateLink(
+      affiliate.id, 
+      { name: parsed.data.name, code: parsed.data.code },
+      userId
+    );
 
     res.json({ 
       success: true, 
@@ -238,7 +242,6 @@ router.post("/become", authMiddleware, async (req: Request, res: Response) => {
     }
 
     const affiliate = await createAffiliate({
-      userId,
       name: user.name,
       email: user.email,
       cpf: user.cpf || undefined,
@@ -247,9 +250,13 @@ router.post("/become", authMiddleware, async (req: Request, res: Response) => {
       revsharePercentage: 25,
       minDepositForCpa: 50,
       minWagerForCpa: 100,
-    });
+    }, userId);
 
-    const link = await createAffiliateLink(affiliate.id, "Principal", undefined);
+    const link = await createAffiliateLink(
+      affiliate.id, 
+      { name: "Principal" },
+      userId
+    );
 
     res.json({ 
       success: true, 
