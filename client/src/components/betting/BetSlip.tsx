@@ -105,16 +105,23 @@ export function BetSlip() {
                 <X className="w-4 h-4" />
               </button>
               <div className="pr-6">
-                <p className="text-sm font-bold text-primary mb-1">{item.selectionName}</p>
-                <p className="text-xs text-white font-medium mb-0.5">
-                  {item.match.homeTeam.name} vs {item.match.awayTeam.name}
-                </p>
-                <div className="flex items-center gap-2 mt-2">
+                {item.match?.homeTeam?.name && item.match?.awayTeam?.name ? (
+                  <>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      {item.match.league?.name || "Futebol"}
+                    </p>
+                    <p className="text-sm font-bold text-white mb-1">
+                      {item.match.homeTeam.name} vs {item.match.awayTeam.name}
+                    </p>
+                  </>
+                ) : null}
+                <div className="flex items-center gap-2">
                   <span className="text-xs font-bold bg-white/10 px-1.5 py-0.5 rounded text-white">{item.odds.toFixed(2)}</span>
                   <span className="text-[10px] text-muted-foreground uppercase">
-                    {item.match.isLive ? "Ao Vivo" : "Pré-Jogo"}
+                    {item.match?.isLive ? "AO VIVO" : "Pré-Jogo"}
                   </span>
                 </div>
+                <p className="text-sm font-bold text-primary mt-1">{item.selectionName}</p>
               </div>
             </div>
           ))}

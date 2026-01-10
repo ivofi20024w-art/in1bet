@@ -141,20 +141,27 @@ export async function fetchUpcomingFixtures(leagueId?: number): Promise<ApiFixtu
 }
 
 // Get current season based on date (football seasons span Aug-May)
+// Note: Free API plan only has access to 2022-2024 seasons
 function getCurrentSeason(): number {
   const now = new Date();
   const year = now.getFullYear();
   const month = now.getMonth() + 1; // 1-12
   // If before August, use previous year as season start
-  return month < 8 ? year - 1 : year;
+  let season = month < 8 ? year - 1 : year;
+  // Cap at 2024 due to API free plan limitation
+  if (season > 2024) {
+    season = 2024;
+  }
+  return season;
 }
 
 export async function fetchFixturesForLeague(leagueId: number, season?: number): Promise<ApiFixture[]> {
   const currentSeason = season ?? getCurrentSeason();
-  const today = new Date().toISOString().split("T")[0];
-  const nextMonth = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
   
-  const endpoint = `/fixtures?league=${leagueId}&season=${currentSeason}&from=${today}&to=${nextMonth}`;
+  // Fetch live and upcoming fixtures for this league
+  // Free plan limitation: can only access seasons 2022-2024 and no "next" parameter
+  const today = new Date().toISOString().split("T")[0];
+  const endpoint = `/fixtures?league=${leagueId}&season=${currentSeason}&date=${today}`;
   
   console.log("[API-Football] Fetching fixtures for league", leagueId, "season", currentSeason);
   const data = await fetchFromApi(endpoint);
@@ -256,10 +263,13 @@ export async function syncFixturesToDatabase(fixtures: ApiFixture[]): Promise<nu
       const isLive = status === "LIVE";
       
       if (existingMatch) {
+        // Update existing match including isFeatured flag
+        const isFeatured = isLive || POPULAR_LEAGUES.some(l => l.id === fixture.league.id);
         await db.update(sportsMatches)
           .set({
             status,
             isLive,
+            isFeatured,
             homeScore: fixture.goals.home,
             awayScore: fixture.goals.away,
             minute: fixture.fixture.status.elapsed,
@@ -268,6 +278,8 @@ export async function syncFixturesToDatabase(fixtures: ApiFixture[]): Promise<nu
           })
           .where(eq(sportsMatches.id, existingMatch.id));
       } else {
+        // Mark as featured if live OR from popular leagues
+        const isFeatured = isLive || POPULAR_LEAGUES.some(l => l.id === fixture.league.id);
         const [newMatch] = await db.insert(sportsMatches).values({
           leagueId,
           homeTeamId,
@@ -281,7 +293,7 @@ export async function syncFixturesToDatabase(fixtures: ApiFixture[]): Promise<nu
           minute: fixture.fixture.status.elapsed,
           period: fixture.fixture.status.short,
           externalId,
-          isFeatured: POPULAR_LEAGUES.some(l => l.id === fixture.league.id),
+          isFeatured,
         }).returning();
         
         await createDefaultOdds(newMatch.id, fixture.teams.home.name, fixture.teams.away.name);
@@ -327,48 +339,38 @@ async function createDefaultOdds(matchId: string, homeTeam: string, awayTeam: st
 }
 
 export async function syncPopularLeaguesFixtures(): Promise<{ total: number; synced: number }> {
-  console.log("[API-Football] Syncing popular leagues fixtures...");
+  console.log("[API-Football] Syncing live fixtures...");
+  
+  // Free plan limitation: only live fixtures work reliably
+  // Other endpoints (league fixtures, next parameter) are restricted
   
   let totalFixtures: ApiFixture[] = [];
-  const currentSeason = getCurrentSeason();
   
-  // Fetch fixtures from all popular leagues
-  for (const league of POPULAR_LEAGUES) {
-    try {
-      const fixtures = await fetchFixturesForLeague(league.id, currentSeason);
-      if (fixtures && fixtures.length > 0) {
-        // Get up to 15 fixtures per league
-        totalFixtures = [...totalFixtures, ...fixtures.slice(0, 15)];
-        console.log(`[API-Football] Got ${fixtures.length} fixtures for ${league.name}`);
-      }
-    } catch (error) {
-      console.error(`[API-Football] Error fetching fixtures for ${league.name}:`, error);
-    }
-    // Rate limit delay
-    await new Promise(resolve => setTimeout(resolve, 300));
-  }
-  
-  // Fetch live fixtures from all leagues
   try {
     const liveFixtures = await fetchLiveFixtures();
     if (liveFixtures && liveFixtures.length > 0) {
-      totalFixtures = [...totalFixtures, ...liveFixtures];
+      totalFixtures = [...liveFixtures];
       console.log(`[API-Football] Got ${liveFixtures.length} live fixtures`);
+    } else {
+      console.log("[API-Football] No live fixtures available, keeping existing data");
     }
   } catch (error) {
     console.error("[API-Football] Error fetching live fixtures:", error);
+    // Don't clear existing data on API error - just return
+    return { total: 0, synced: 0 };
   }
   
-  // Deduplicate fixtures
-  const uniqueFixtures = totalFixtures.filter((f, i, arr) => 
-    arr.findIndex(x => x.fixture.id === f.fixture.id) === i
-  );
+  // Only sync if we have new fixtures - don't overwrite good data with nothing
+  if (totalFixtures.length === 0) {
+    console.log("[API-Football] No new fixtures to sync, preserving existing data");
+    return { total: 0, synced: 0 };
+  }
   
-  const synced = await syncFixturesToDatabase(uniqueFixtures);
+  const synced = await syncFixturesToDatabase(totalFixtures);
   
   console.log(`[API-Football] Synced ${synced} fixtures total`);
   
-  return { total: uniqueFixtures.length, synced };
+  return { total: totalFixtures.length, synced };
 }
 
 // Store for periodic sync interval

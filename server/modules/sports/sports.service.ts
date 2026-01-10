@@ -165,7 +165,11 @@ export async function getMatches(filters: {
     conditions.push(eq(sportsMatches.status, filters.status));
   }
   if (filters.featured) {
-    conditions.push(eq(sportsMatches.isFeatured, true));
+    // Featured means: isFeatured=true OR isLive=true (live matches are always highlights)
+    conditions.push(or(
+      eq(sportsMatches.isFeatured, true),
+      eq(sportsMatches.isLive, true)
+    ));
     // Only show matches with real API data (has externalId)
     conditions.push(isNotNull(sportsMatches.externalId));
   }
