@@ -51,6 +51,7 @@ export interface SportsMatch {
   isFeatured: boolean;
   streamUrl: string | null;
   result: string | null;
+  externalId: string | null;
   league: SportsLeague;
   homeTeam: SportsTeam;
   awayTeam: SportsTeam;

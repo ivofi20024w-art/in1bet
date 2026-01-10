@@ -1,7 +1,7 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { OddsCard } from "@/components/shared/OddsCard";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Trophy, Search, ChevronRight, Ticket, Filter, Flame, Globe, Calendar, Star, Gamepad2, Swords, Timer, Loader2 } from "lucide-react";
+import { Trophy, Search, ChevronRight, Ticket, Filter, Flame, Globe, Calendar, Star, Gamepad2, Swords, Timer, Loader2, BarChart3, TrendingUp } from "lucide-react";
 import sportsHero from "@assets/generated_images/live_sports_stadium_atmosphere.png";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,9 @@ import { useMatches, usePopularLeagues, type SportsMatch, type SportsOdd } from 
 import { useBetSlipStore } from "@/stores/betslip-store";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { WidgetConfig, GamesWidget, StandingsWidget } from "@/components/sports/ApiSportsWidgets";
+import { WidgetConfig, GamesWidget, StandingsWidget, GameWidget } from "@/components/sports/ApiSportsWidgets";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const SPORTS_NAV = [
     { id: "all", label: "Destaques", icon: Flame, sport: undefined },
@@ -26,8 +28,37 @@ const SPORTS_NAV = [
     { id: "MMA", label: "MMA", icon: Swords, sport: "MMA" },
 ];
 
+function TeamLogo({ logo, name, size = "md" }: { logo: string | null; name: string; size?: "sm" | "md" | "lg" }) {
+  const [imageError, setImageError] = useState(false);
+  const sizeClasses = {
+    sm: "w-6 h-6 text-[10px]",
+    md: "w-10 h-10 text-xs",
+    lg: "w-14 h-14 text-sm"
+  };
+  
+  const fallback = (
+    <div className={cn(sizeClasses[size], "rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center font-bold text-primary border border-primary/20")}>
+      {name.substring(0, 2).toUpperCase()}
+    </div>
+  );
+  
+  if (!logo || imageError) {
+    return fallback;
+  }
+  
+  return (
+    <img 
+      src={logo} 
+      alt={name} 
+      className={cn(sizeClasses[size], "object-contain rounded-lg bg-white/5 p-1")}
+      onError={() => setImageError(true)}
+    />
+  );
+}
+
 function MatchCard({ match, onSelectOdd }: { match: SportsMatch; onSelectOdd: (match: SportsMatch, odd: SportsOdd) => void }) {
   const { hasSelection } = useBetSlipStore();
+  const [statsOpen, setStatsOpen] = useState(false);
   const matchWinnerOdds = match.odds.filter(o => o.marketType === "MATCH_WINNER");
   const homeOdd = matchWinnerOdds.find(o => o.selection === "HOME");
   const drawOdd = matchWinnerOdds.find(o => o.selection === "DRAW");
@@ -41,94 +72,144 @@ function MatchCard({ match, onSelectOdd }: { match: SportsMatch; onSelectOdd: (m
     ? null 
     : format(startsAt, "dd/MM", { locale: ptBR });
 
+  const externalId = match.externalId ? match.externalId.replace('apifootball_', '') : null;
+
   return (
-    <div className="bg-card border border-white/5 rounded-xl p-4 hover:border-primary/30 transition-all group">
-      <div className="flex items-center justify-between mb-3">
+    <div className="bg-card border border-white/5 rounded-xl overflow-hidden hover:border-primary/30 transition-all group">
+      <div className="flex items-center justify-between px-4 py-2 bg-gradient-to-r from-white/5 to-transparent border-b border-white/5">
+        <div className="flex items-center gap-2">
+          {match.league.logo && (
+            <img src={match.league.logo} alt={match.league.name} className="w-4 h-4 object-contain" />
+          )}
+          <span className="text-xs text-muted-foreground font-medium">{match.league.name}</span>
+        </div>
         <div className="flex items-center gap-2">
           {match.isLive && (
-            <Badge variant="destructive" className="bg-red-500/20 text-red-400 border-red-500/30 text-[10px]">
+            <Badge variant="destructive" className="bg-red-500/20 text-red-400 border-red-500/30 text-[10px] px-1.5">
               <span className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse mr-1" />
-              AO VIVO
+              {timeDisplay}
             </Badge>
           )}
-          <span className="text-xs text-muted-foreground">{match.league.name}</span>
-        </div>
-        <div className="text-right">
-          <span className="text-xs font-bold text-white">{timeDisplay}</span>
-          {dateDisplay && <span className="text-[10px] text-muted-foreground ml-1">{dateDisplay}</span>}
+          {!match.isLive && (
+            <div className="text-right">
+              <span className="text-xs font-bold text-white">{timeDisplay}</span>
+              {dateDisplay && <span className="text-[10px] text-muted-foreground ml-1.5">{dateDisplay}</span>}
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-sm font-medium text-white">{match.homeTeam.name}</span>
+      <div className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3 flex-1">
+            <TeamLogo logo={match.homeTeam.logo} name={match.homeTeam.name} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white truncate">{match.homeTeam.name}</p>
+              <p className="text-[10px] text-muted-foreground">Casa</p>
+            </div>
             {match.homeScore !== null && (
-              <span className="text-sm font-bold text-primary">{match.homeScore}</span>
+              <span className="text-2xl font-black text-white tabular-nums">{match.homeScore}</span>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-white">{match.awayTeam.name}</span>
+          
+          <div className="px-3 text-center">
+            {match.isLive ? (
+              <div className="text-primary font-bold text-sm">VS</div>
+            ) : (
+              <div className="text-muted-foreground text-xs">VS</div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3 flex-1 flex-row-reverse">
+            <TeamLogo logo={match.awayTeam.logo} name={match.awayTeam.name} />
+            <div className="flex-1 min-w-0 text-right">
+              <p className="text-sm font-medium text-white truncate">{match.awayTeam.name}</p>
+              <p className="text-[10px] text-muted-foreground">Fora</p>
+            </div>
             {match.awayScore !== null && (
-              <span className="text-sm font-bold text-primary">{match.awayScore}</span>
+              <span className="text-2xl font-black text-white tabular-nums">{match.awayScore}</span>
             )}
           </div>
         </div>
-      </div>
 
-      <div className="grid grid-cols-3 gap-2">
-        {homeOdd && (
-          <button
-            onClick={(e) => { e.preventDefault(); onSelectOdd(match, homeOdd); }}
-            className={cn(
-              "flex flex-col items-center justify-center py-2 px-3 rounded-lg border transition-all",
-              hasSelection(homeOdd.id)
-                ? "bg-primary/20 border-primary text-primary"
-                : "bg-secondary/30 border-white/10 hover:border-primary/50 hover:bg-primary/10"
-            )}
-            data-testid={`odd-home-${match.id}`}
-          >
-            <span className="text-[10px] text-muted-foreground mb-0.5">{match.homeTeam.shortName || "1"}</span>
-            <span className="text-sm font-bold text-white">{parseFloat(homeOdd.odds).toFixed(2)}</span>
-          </button>
-        )}
-        {drawOdd && (
-          <button
-            onClick={(e) => { e.preventDefault(); onSelectOdd(match, drawOdd); }}
-            className={cn(
-              "flex flex-col items-center justify-center py-2 px-3 rounded-lg border transition-all",
-              hasSelection(drawOdd.id)
-                ? "bg-primary/20 border-primary text-primary"
-                : "bg-secondary/30 border-white/10 hover:border-primary/50 hover:bg-primary/10"
-            )}
-            data-testid={`odd-draw-${match.id}`}
-          >
-            <span className="text-[10px] text-muted-foreground mb-0.5">X</span>
-            <span className="text-sm font-bold text-white">{parseFloat(drawOdd.odds).toFixed(2)}</span>
-          </button>
-        )}
-        {awayOdd && (
-          <button
-            onClick={(e) => { e.preventDefault(); onSelectOdd(match, awayOdd); }}
-            className={cn(
-              "flex flex-col items-center justify-center py-2 px-3 rounded-lg border transition-all",
-              hasSelection(awayOdd.id)
-                ? "bg-primary/20 border-primary text-primary"
-                : "bg-secondary/30 border-white/10 hover:border-primary/50 hover:bg-primary/10"
-            )}
-            data-testid={`odd-away-${match.id}`}
-          >
-            <span className="text-[10px] text-muted-foreground mb-0.5">{match.awayTeam.shortName || "2"}</span>
-            <span className="text-sm font-bold text-white">{parseFloat(awayOdd.odds).toFixed(2)}</span>
-          </button>
-        )}
-      </div>
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          {homeOdd && (
+            <button
+              onClick={(e) => { e.preventDefault(); onSelectOdd(match, homeOdd); }}
+              className={cn(
+                "flex flex-col items-center justify-center py-2.5 px-3 rounded-lg border transition-all",
+                hasSelection(homeOdd.id)
+                  ? "bg-primary/20 border-primary text-primary shadow-lg shadow-primary/20"
+                  : "bg-secondary/30 border-white/10 hover:border-primary/50 hover:bg-primary/10"
+              )}
+              data-testid={`odd-home-${match.id}`}
+            >
+              <span className="text-[10px] text-muted-foreground mb-0.5 font-medium">1</span>
+              <span className="text-sm font-bold text-white">{parseFloat(homeOdd.odds).toFixed(2)}</span>
+            </button>
+          )}
+          {drawOdd && (
+            <button
+              onClick={(e) => { e.preventDefault(); onSelectOdd(match, drawOdd); }}
+              className={cn(
+                "flex flex-col items-center justify-center py-2.5 px-3 rounded-lg border transition-all",
+                hasSelection(drawOdd.id)
+                  ? "bg-primary/20 border-primary text-primary shadow-lg shadow-primary/20"
+                  : "bg-secondary/30 border-white/10 hover:border-primary/50 hover:bg-primary/10"
+              )}
+              data-testid={`odd-draw-${match.id}`}
+            >
+              <span className="text-[10px] text-muted-foreground mb-0.5 font-medium">X</span>
+              <span className="text-sm font-bold text-white">{parseFloat(drawOdd.odds).toFixed(2)}</span>
+            </button>
+          )}
+          {awayOdd && (
+            <button
+              onClick={(e) => { e.preventDefault(); onSelectOdd(match, awayOdd); }}
+              className={cn(
+                "flex flex-col items-center justify-center py-2.5 px-3 rounded-lg border transition-all",
+                hasSelection(awayOdd.id)
+                  ? "bg-primary/20 border-primary text-primary shadow-lg shadow-primary/20"
+                  : "bg-secondary/30 border-white/10 hover:border-primary/50 hover:bg-primary/10"
+              )}
+              data-testid={`odd-away-${match.id}`}
+            >
+              <span className="text-[10px] text-muted-foreground mb-0.5 font-medium">2</span>
+              <span className="text-sm font-bold text-white">{parseFloat(awayOdd.odds).toFixed(2)}</span>
+            </button>
+          )}
+        </div>
 
-      <Link href={`/sports/match/${match.id}`} className="block mt-3">
-        <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground hover:text-primary">
-          +{match.odds.length - 3} mercados <ChevronRight className="w-3 h-3 ml-1" />
-        </Button>
-      </Link>
+        <div className="flex items-center gap-2">
+          <Link href={`/sports/match/${match.id}`} className="flex-1">
+            <Button variant="outline" size="sm" className="w-full text-xs border-white/10 hover:border-primary/50 hover:bg-primary/10">
+              <TrendingUp className="w-3 h-3 mr-1.5" />
+              +{Math.max(0, match.odds.length - 3)} mercados
+            </Button>
+          </Link>
+          
+          {externalId && (
+            <Dialog open={statsOpen} onOpenChange={setStatsOpen}>
+              <DialogTrigger asChild>
+                <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-primary">
+                  <BarChart3 className="w-3.5 h-3.5" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-primary" />
+                    Estatísticas do Jogo
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="py-4">
+                  <GameWidget gameId={Number(externalId)} className="min-h-[400px]" />
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -136,6 +217,7 @@ function MatchCard({ match, onSelectOdd }: { match: SportsMatch; onSelectOdd: (m
 export default function Sports() {
   const [activeSport, setActiveSport] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [displayLimit, setDisplayLimit] = useState(10);
   const { addSelection } = useBetSlipStore();
 
   const selectedNav = SPORTS_NAV.find(n => n.id === activeSport);
@@ -151,15 +233,25 @@ export default function Sports() {
 
   const filteredMatches = useMemo(() => {
     if (!matches) return [];
-    if (!searchQuery) return matches;
     
-    const query = searchQuery.toLowerCase();
-    return matches.filter(m => 
-      m.homeTeam.name.toLowerCase().includes(query) ||
-      m.awayTeam.name.toLowerCase().includes(query) ||
-      m.league.name.toLowerCase().includes(query)
-    );
+    let filtered = matches;
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = matches.filter(m => 
+        m.homeTeam.name.toLowerCase().includes(query) ||
+        m.awayTeam.name.toLowerCase().includes(query) ||
+        m.league.name.toLowerCase().includes(query)
+      );
+    }
+    
+    return filtered;
   }, [matches, searchQuery]);
+
+  const displayedMatches = useMemo(() => {
+    return filteredMatches.slice(0, displayLimit);
+  }, [filteredMatches, displayLimit]);
+
+  const hasMoreMatches = filteredMatches.length > displayLimit;
 
   const handleSelectOdd = (match: SportsMatch, odd: SportsOdd) => {
     addSelection(match, odd);
@@ -167,6 +259,7 @@ export default function Sports() {
 
   return (
     <MainLayout>
+      <WidgetConfig sport="football" theme="IN1Bet" lang="pt" />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <div className="hidden lg:block lg:col-span-2 space-y-6">
@@ -262,46 +355,83 @@ export default function Sports() {
             </div>
           </div>
 
-          <WidgetConfig sport="football" theme="IN1Bet" lang="en" />
-          
-          <div className="bg-card border border-white/5 rounded-xl p-4 overflow-hidden">
-            <div className="flex items-center gap-2 mb-4">
-              <Trophy className="w-5 h-5 text-primary" />
-              <h3 className="font-heading font-bold text-white uppercase tracking-wide">Jogos com Estatísticas</h3>
-            </div>
-            <GamesWidget sport="football" className="min-h-[400px]" />
-          </div>
+          <Tabs defaultValue="betting" className="w-full">
+            <TabsList className="w-full bg-card border border-white/5 p-1 mb-4">
+              <TabsTrigger value="betting" className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-white">
+                <Ticket className="w-4 h-4 mr-2" />
+                Apostas
+              </TabsTrigger>
+              <TabsTrigger value="stats" className="flex-1 data-[state=active]:bg-primary data-[state=active]:text-white">
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Estatísticas
+              </TabsTrigger>
+            </TabsList>
 
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 px-2 pb-2">
-              {isLiveFilter ? <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> : <Calendar className="w-4 h-4 text-primary" />}
-              <h3 className="font-heading font-bold text-white uppercase tracking-wide text-sm">
-                {isLiveFilter ? 'Jogos Ao Vivo' : 'Próximos Jogos'}
-              </h3>
-            </div>
-            
-            {isLoading ? (
-              <div className="flex items-center justify-center py-16">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <TabsContent value="betting" className="space-y-4 mt-0">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 px-2 pb-2">
+                  {isLiveFilter ? <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> : <Calendar className="w-4 h-4 text-primary" />}
+                  <h3 className="font-heading font-bold text-white uppercase tracking-wide text-sm">
+                    {isLiveFilter ? 'Jogos Ao Vivo' : 'Próximos Jogos'} 
+                  </h3>
+                  <span className="text-xs text-muted-foreground">({filteredMatches.length} jogos)</span>
+                </div>
+                
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-16">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                  </div>
+                ) : displayedMatches.length > 0 ? (
+                  <>
+                    <div className="grid gap-3">
+                      {displayedMatches.map(match => (
+                        <MatchCard 
+                          key={match.id} 
+                          match={match} 
+                          onSelectOdd={handleSelectOdd}
+                        />
+                      ))}
+                    </div>
+                    {hasMoreMatches && (
+                      <Button 
+                        variant="outline" 
+                        className="w-full mt-4 border-white/10 hover:border-primary/50"
+                        onClick={() => setDisplayLimit(prev => prev + 10)}
+                        data-testid="load-more-matches"
+                      >
+                        Carregar mais jogos ({filteredMatches.length - displayLimit} restantes)
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  <div className="text-center py-16 border border-dashed border-white/10 rounded-xl bg-white/5 flex flex-col items-center">
+                    <Search className="w-10 h-10 text-muted-foreground mb-4 opacity-50" />
+                    <p className="text-white font-bold">Nenhum jogo encontrado</p>
+                    <p className="text-sm text-muted-foreground">Tente buscar por outro termo ou selecione outra categoria.</p>
+                  </div>
+                )}
               </div>
-            ) : filteredMatches.length > 0 ? (
-              <div className="grid gap-3">
-                {filteredMatches.map(match => (
-                  <MatchCard 
-                    key={match.id} 
-                    match={match} 
-                    onSelectOdd={handleSelectOdd}
-                  />
-                ))}
+            </TabsContent>
+
+            <TabsContent value="stats" className="space-y-4 mt-0">
+              <div className="bg-card border border-white/5 rounded-xl p-4 overflow-hidden">
+                <div className="flex items-center gap-2 mb-4">
+                  <Trophy className="w-5 h-5 text-primary" />
+                  <h3 className="font-heading font-bold text-white uppercase tracking-wide">Partidas e Resultados</h3>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">Veja estatísticas detalhadas, escalações, e histórico de confrontos.</p>
+                <GamesWidget sport="football" className="min-h-[400px]" />
               </div>
-            ) : (
-              <div className="text-center py-16 border border-dashed border-white/10 rounded-xl bg-white/5 flex flex-col items-center">
-                <Search className="w-10 h-10 text-muted-foreground mb-4 opacity-50" />
-                <p className="text-white font-bold">Nenhum jogo encontrado</p>
-                <p className="text-sm text-muted-foreground">Tente buscar por outro termo.</p>
+
+              <div className="bg-card border border-white/5 rounded-xl p-4 overflow-hidden">
+                <div className="flex items-center gap-2 mb-4">
+                  <Star className="w-5 h-5 text-yellow-500" />
+                  <h3 className="font-heading font-bold text-white uppercase tracking-wide">Classificação - Brasileirão</h3>
+                </div>
+                <StandingsWidget leagueId={71} className="min-h-[300px]" />
               </div>
-            )}
-          </div>
+            </TabsContent>
+          </Tabs>
         </div>
 
         <div className="hidden lg:block lg:col-span-3 space-y-6">
