@@ -309,16 +309,62 @@ router.post("/verify", async (req: Request, res: Response) => {
 
 router.get("/top-wins", async (req: Request, res: Response) => {
   try {
+    const { users } = await import("../../../../shared/schema");
     const wins = await db
-      .select()
+      .select({
+        id: aviatorBets.id,
+        betAmount: aviatorBets.betAmount,
+        cashedOutAt: aviatorBets.cashedOutAt,
+        profit: aviatorBets.profit,
+        status: aviatorBets.status,
+        createdAt: aviatorBets.createdAt,
+        userName: users.name,
+        userLevel: users.level,
+      })
       .from(aviatorBets)
+      .leftJoin(users, eq(aviatorBets.userId, users.id))
       .where(eq(aviatorBets.status, "won"))
       .orderBy(desc(aviatorBets.profit))
       .limit(10);
     
     res.json(wins);
   } catch (error) {
+    console.error("Top wins error:", error);
     res.status(500).json({ message: "Falha ao obter maiores ganhos" });
+  }
+});
+
+router.get("/round-bets", async (req: Request, res: Response) => {
+  try {
+    if (!aviatorEngine) {
+      return res.json([]);
+    }
+    
+    const roundId = aviatorEngine.getCurrentRoundId();
+    if (!roundId) {
+      return res.json([]);
+    }
+    
+    const { users } = await import("../../../../shared/schema");
+    const bets = await db
+      .select({
+        id: aviatorBets.id,
+        betAmount: aviatorBets.betAmount,
+        cashedOutAt: aviatorBets.cashedOutAt,
+        profit: aviatorBets.profit,
+        status: aviatorBets.status,
+        userName: users.name,
+        userLevel: users.level,
+      })
+      .from(aviatorBets)
+      .leftJoin(users, eq(aviatorBets.userId, users.id))
+      .where(eq(aviatorBets.roundId, roundId))
+      .limit(30);
+    
+    res.json(bets);
+  } catch (error) {
+    console.error("Round bets error:", error);
+    res.status(500).json({ message: "Falha ao obter apostas da rodada" });
   }
 });
 

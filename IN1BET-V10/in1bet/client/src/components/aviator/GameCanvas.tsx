@@ -15,9 +15,9 @@ export function GameCanvas({ gameState, multiplier, countdown = 15, showCrashMes
   
   const progress = useMemo(() => {
      if (gameState !== "FLYING" && gameState !== "CRASHED") return 0;
-     const maxVal = 10; 
+     const maxVal = 100; 
      const p = Math.min(1, Math.log(multiplier) / Math.log(maxVal));
-     return Math.max(0.05, p); 
+     return Math.max(0.02, p); 
   }, [multiplier, gameState]);
 
   return (

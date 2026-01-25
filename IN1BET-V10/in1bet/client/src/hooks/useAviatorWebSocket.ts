@@ -104,9 +104,7 @@ export function useAviatorWebSocket() {
             if (crashMessageTimer.current) {
               clearTimeout(crashMessageTimer.current);
             }
-            crashMessageTimer.current = setTimeout(() => {
-              setShowCrashMessage(true);
-            }, 3000);
+            setShowCrashMessage(true);
             break;
 
           case "new_round_starting":

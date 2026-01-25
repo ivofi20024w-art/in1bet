@@ -24,32 +24,31 @@ interface ActiveBet {
   amount: number;
 }
 
-const MOCK_NAMES = [
-  "Gabriel", "Ana", "Lucas", "Pedro", "Julia", "Marcos", "Fernanda", "Rafael", 
-  "Beatriz", "Gustavo", "Mariana", "Felipe", "Camila", "Bruno", "Larissa"
-];
+interface RoundBet {
+  id: number;
+  betAmount: string;
+  cashedOutAt: string | null;
+  profit: string | null;
+  status: string;
+  userName: string | null;
+  userLevel: number | null;
+}
 
-const getInitials = (name: string) => name.substring(0, 2).toUpperCase();
+interface TopWin {
+  id: number;
+  betAmount: string;
+  cashedOutAt: string | null;
+  profit: string | null;
+  status: string;
+  userName: string | null;
+  userLevel: number | null;
+}
 
-const generateMockBets = (count: number, isTop = false) => Array.from({ length: count }).map((_, i) => {
-  const name = MOCK_NAMES[Math.floor(Math.random() * MOCK_NAMES.length)];
-  const level = Math.floor(Math.random() * 50) + 1;
-  const betAmount = isTop ? (Math.random() * 5000 + 100).toFixed(2) : (Math.random() * 500 + 10).toFixed(2);
-  const mult = isTop ? (Math.random() * 50 + 2).toFixed(2) : (Math.random() > 0.3 ? (1 + Math.random() * 5).toFixed(2) : null);
-  
-  return {
-    id: i,
-    name,
-    initials: getInitials(name),
-    level,
-    bet: betAmount,
-    multiplier: mult,
-    payout: mult ? (parseFloat(betAmount) * parseFloat(mult)).toFixed(2) : null,
-  };
-});
-
-const ALL_BETS = generateMockBets(30);
-const TOP_BETS = generateMockBets(10, true).sort((a, b) => parseFloat(b.payout!) - parseFloat(a.payout!));
+const getInitials = (name: string) => name ? name.substring(0, 2).toUpperCase() : "??";
+const maskName = (name: string) => {
+  if (!name || name.length < 3) return name || "Anônimo";
+  return name.slice(0, 3) + "***";
+};
 
 function LoginRequiredScreen({ gameName }: { gameName: string }) {
   return (
@@ -178,6 +177,26 @@ export default function AviatorMania() {
 
   const balance = walletData?.wallet?.balance ? parseFloat(walletData.wallet.balance) : 0;
 
+  const { data: roundBets = [] } = useQuery<RoundBet[]>({
+    queryKey: ["aviator-round-bets", roundId],
+    queryFn: async () => {
+      const res = await fetch("/api/games/aviator/round-bets");
+      if (!res.ok) return [];
+      return res.json();
+    },
+    refetchInterval: 2000,
+  });
+
+  const { data: topWins = [] } = useQuery<TopWin[]>({
+    queryKey: ["aviator-top-wins"],
+    queryFn: async () => {
+      const res = await fetch("/api/games/aviator/top-wins");
+      if (!res.ok) return [];
+      return res.json();
+    },
+    refetchInterval: 30000,
+  });
+
   const refreshBalance = () => {
     queryClient.invalidateQueries({ queryKey: ["wallet"] });
   };
@@ -284,9 +303,6 @@ export default function AviatorMania() {
     }
   };
 
-  const displayedAllBets = ALL_BETS.slice(0, 9);
-  const remainingCount = ALL_BETS.length - 9;
-
   if (!isAuthenticated) {
     return <LoginRequiredScreen gameName="Aviator Mania" />;
   }
@@ -327,7 +343,7 @@ export default function AviatorMania() {
           <div className="flex-1 flex flex-col gap-4">
             <HistoryBar history={history} />
             
-            <div className="min-h-[300px] w-full relative aspect-[2/1] max-h-[50vh] bg-card rounded-2xl overflow-hidden border border-white/5">
+            <div className="min-h-[280px] w-full relative aspect-[16/9] max-h-[45vh] bg-card rounded-2xl overflow-hidden border border-white/5">
               <GameCanvas gameState={gameState} multiplier={multiplier} countdown={countdown} showCrashMessage={showCrashMessage} />
             </div>
 
@@ -388,47 +404,49 @@ export default function AviatorMania() {
               <TabsContent value="all" className="flex-1 mt-0 relative overflow-hidden">
                 <ScrollArea className="h-full w-full">
                   <div className="flex flex-col pb-4">
-                    {displayedAllBets.map((player) => (
-                      <div 
-                        key={player.id} 
-                        className={cn(
-                          "flex justify-between items-center px-4 py-1.5 text-sm border-b border-white/5 transition-colors group hover:bg-white/5",
-                          player.payout ? "bg-secondary/5 border-secondary/10" : "bg-transparent"
-                        )}
-                      >
-                        <div className="flex items-center gap-2 w-24 overflow-hidden">
-                          <Avatar className="w-6 h-6 rounded-full border border-white/10 shrink-0">
-                            <AvatarFallback className="text-[9px] font-bold bg-green-600 text-white rounded-full">
-                              {player.initials}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-white font-bold text-xs truncate">{player.name}</span>
-                            <span className="text-[9px] text-muted-foreground">Nv. {player.level}</span>
+                    {roundBets.length === 0 ? (
+                      <div className="flex items-center justify-center px-4 py-8 text-sm text-muted-foreground">
+                        Nenhuma aposta nesta rodada
+                      </div>
+                    ) : (
+                      roundBets.map((bet) => (
+                        <div 
+                          key={bet.id} 
+                          className={cn(
+                            "flex justify-between items-center px-4 py-1.5 text-sm border-b border-white/5 transition-colors group hover:bg-white/5",
+                            bet.status === "won" ? "bg-secondary/5 border-secondary/10" : "bg-transparent"
+                          )}
+                        >
+                          <div className="flex items-center gap-2 w-24 overflow-hidden">
+                            <Avatar className="w-6 h-6 rounded-full border border-white/10 shrink-0">
+                              <AvatarFallback className="text-[9px] font-bold bg-green-600 text-white rounded-full">
+                                {getInitials(bet.userName || "")}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex flex-col min-w-0">
+                              <span className="text-white font-bold text-xs truncate">{maskName(bet.userName || "")}</span>
+                              <span className="text-[9px] text-muted-foreground">Nv. {bet.userLevel || 1}</span>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 flex-1 justify-end items-center">
+                             <span className="font-mono text-white/60 text-[10px] w-14 text-right truncate">
+                               {parseFloat(bet.betAmount).toFixed(2)}
+                             </span>
+                             <span className={cn(
+                               "font-mono text-[10px] w-14 text-right font-bold truncate", 
+                               bet.cashedOutAt ? "text-secondary" : "text-muted-foreground/30"
+                             )}>
+                               {bet.cashedOutAt ? `${parseFloat(bet.cashedOutAt).toFixed(2)}x` : "-"}
+                             </span>
+                             <span className={cn(
+                               "font-mono text-[10px] w-16 text-right font-bold truncate",
+                               bet.profit ? "text-white" : "text-muted-foreground/30"
+                             )}>
+                                {bet.profit ? parseFloat(bet.profit).toFixed(2) : "-"}
+                             </span>
                           </div>
                         </div>
-                        <div className="flex gap-2 flex-1 justify-end items-center">
-                           <span className="font-mono text-white/60 text-[10px] w-14 text-right truncate">{player.bet}</span>
-                           <span className={cn(
-                             "font-mono text-[10px] w-14 text-right font-bold truncate", 
-                             player.multiplier ? "text-secondary" : "text-muted-foreground/30"
-                           )}>
-                             {player.multiplier ? `${player.multiplier}x` : "-"}
-                           </span>
-                           <span className={cn(
-                             "font-mono text-[10px] w-16 text-right font-bold truncate",
-                             player.payout ? "text-white" : "text-muted-foreground/30"
-                           )}>
-                              {player.payout || "-"}
-                           </span>
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {remainingCount > 0 && (
-                      <div className="flex items-center justify-center px-4 py-3 text-sm text-muted-foreground border-b border-white/5 bg-white/5 font-bold italic">
-                         Outros... (+ {remainingCount})
-                      </div>
+                      ))
                     )}
                   </div>
                 </ScrollArea>
@@ -437,47 +455,55 @@ export default function AviatorMania() {
               <TabsContent value="top" className="flex-1 mt-0 relative overflow-hidden">
                  <ScrollArea className="h-full w-full">
                   <div className="flex flex-col pb-4">
-                    {TOP_BETS.map((player, index) => {
-                       let crownColor = "text-muted-foreground";
-                       if (index === 0) crownColor = "text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]";
-                       else if (index === 1) crownColor = "text-slate-300 drop-shadow-[0_0_5px_rgba(203,213,225,0.5)]";
-                       else if (index === 2) crownColor = "text-orange-400 drop-shadow-[0_0_5px_rgba(251,146,60,0.5)]";
-                       else crownColor = "text-white/20";
+                    {topWins.length === 0 ? (
+                      <div className="flex items-center justify-center px-4 py-8 text-sm text-muted-foreground">
+                        Nenhum ganho registrado ainda
+                      </div>
+                    ) : (
+                      topWins.map((win, index) => {
+                         let crownColor = "text-muted-foreground";
+                         if (index === 0) crownColor = "text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]";
+                         else if (index === 1) crownColor = "text-slate-300 drop-shadow-[0_0_5px_rgba(203,213,225,0.5)]";
+                         else if (index === 2) crownColor = "text-orange-400 drop-shadow-[0_0_5px_rgba(251,146,60,0.5)]";
+                         else crownColor = "text-white/20";
 
-                       return (
-                        <div 
-                          key={player.id} 
-                          className="flex justify-between items-center px-4 py-2 text-sm border-b border-white/5 bg-secondary/5 hover:bg-secondary/10 transition-colors"
-                        >
-                          <div className="flex items-center gap-2 w-24 overflow-hidden">
-                            <div className="relative shrink-0 pt-2 pr-1">
-                              <Avatar className={cn("w-7 h-7 rounded-full shrink-0", index < 3 ? "ring-2 ring-offset-1 ring-offset-black/50" : "", 
-                                 index === 0 ? "ring-yellow-400" : index === 1 ? "ring-slate-300" : index === 2 ? "ring-orange-400" : "")}>
-                                <AvatarFallback className="text-[10px] font-bold bg-green-600 text-white rounded-full">
-                                  {player.initials}
-                                </AvatarFallback>
-                              </Avatar>
-                              {index < 3 && (
-                                <Crown className={cn("absolute -top-0.5 -right-0.5 w-4 h-4 fill-current rotate-12", crownColor)} />
-                              )}
+                         return (
+                          <div 
+                            key={win.id} 
+                            className="flex justify-between items-center px-4 py-2 text-sm border-b border-white/5 bg-secondary/5 hover:bg-secondary/10 transition-colors"
+                          >
+                            <div className="flex items-center gap-2 w-24 overflow-hidden">
+                              <div className="relative shrink-0 pt-2 pr-1">
+                                <Avatar className={cn("w-7 h-7 rounded-full shrink-0", index < 3 ? "ring-2 ring-offset-1 ring-offset-black/50" : "", 
+                                   index === 0 ? "ring-yellow-400" : index === 1 ? "ring-slate-300" : index === 2 ? "ring-orange-400" : "")}>
+                                  <AvatarFallback className="text-[10px] font-bold bg-green-600 text-white rounded-full">
+                                    {getInitials(win.userName || "")}
+                                  </AvatarFallback>
+                                </Avatar>
+                                {index < 3 && (
+                                  <Crown className={cn("absolute -top-0.5 -right-0.5 w-4 h-4 fill-current rotate-12", crownColor)} />
+                                )}
+                              </div>
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-white font-bold text-xs truncate">{maskName(win.userName || "")}</span>
+                                <span className="text-[9px] text-muted-foreground">Nv. {win.userLevel || 1}</span>
+                              </div>
                             </div>
-                            <div className="flex flex-col min-w-0">
-                              <span className="text-white font-bold text-xs truncate">{player.name}</span>
-                              <span className="text-[9px] text-muted-foreground">Nv. {player.level}</span>
+                            <div className="flex gap-2 flex-1 justify-end items-center">
+                               <span className="font-mono text-white/60 text-[10px] w-14 text-right truncate">
+                                 {parseFloat(win.betAmount).toFixed(2)}
+                               </span>
+                               <span className="font-mono text-[10px] w-14 text-right font-bold text-yellow-500 truncate">
+                                 {win.cashedOutAt ? `${parseFloat(win.cashedOutAt).toFixed(2)}x` : "-"}
+                               </span>
+                               <span className="font-mono text-[10px] w-16 text-right font-bold text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] truncate">
+                                  {win.profit ? parseFloat(win.profit).toFixed(2) : "-"}
+                               </span>
                             </div>
                           </div>
-                          <div className="flex gap-2 flex-1 justify-end items-center">
-                             <span className="font-mono text-white/60 text-[10px] w-14 text-right truncate">{player.bet}</span>
-                             <span className="font-mono text-[10px] w-14 text-right font-bold text-yellow-500 truncate">
-                               {player.multiplier}x
-                             </span>
-                             <span className="font-mono text-[10px] w-16 text-right font-bold text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] truncate">
-                                {player.payout}
-                             </span>
-                          </div>
-                        </div>
-                       );
-                    })}
+                         );
+                      })
+                    )}
                   </div>
                 </ScrollArea>
               </TabsContent>
