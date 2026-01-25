@@ -1,0 +1,52 @@
+root@srv1189238:/var/www/in1bet# ^C
+root@srv1189238:/var/www/in1bet# pm2 logs in1bet --lines 20
+netstat -tlnp | grep 5000
+[TAILING] Tailing last 20 lines for [in1bet] process (change the value with --lines option)
+/root/.pm2/logs/in1bet-error.log last 20 lines:
+0|in1bet   | Error: DATABASE_URL or NEON_DATABASE_URL must be set. Did you forget to provision a database?
+0|in1bet   |     at /var/www/in1bet/dist/index.cjs:77:33061
+0|in1bet   |     at /var/www/in1bet/dist/index.cjs:1:225
+0|in1bet   |     at Object.<anonymous> (/var/www/in1bet/dist/index.cjs:200:14595)
+0|in1bet   |     at Module._compile (node:internal/modules/cjs/loader:1521:14)
+0|in1bet   |     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+0|in1bet   |     at Module.load (node:internal/modules/cjs/loader:1266:32)
+0|in1bet   |     at Module._load (node:internal/modules/cjs/loader:1091:12)
+0|in1bet   |     at cjsLoader (node:internal/modules/esm/translators:298:15)
+0|in1bet   |     at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:240:7)
+0|in1bet   |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+0|in1bet   | (node:222751) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+0|in1bet   | In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+0|in1bet   |
+0|in1bet   | To prepare for this change:
+0|in1bet   | - If you want the current behavior, explicitly use 'sslmode=verify-full'
+0|in1bet   | - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+0|in1bet   |
+0|in1bet   | See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+0|in1bet   | (Use `node --trace-warnings ...` to show where the warning was created)
+
+/root/.pm2/logs/in1bet-out.log last 20 lines:
+0|in1bet   | 4:32:22 AM [express] serving on port 5000
+0|in1bet   | [SlotsGateway] Fetched 4169 games
+0|in1bet   | [SUPPORT] Default SLA rules initialized
+0|in1bet   | [SUPPORT] Default triage rules initialized
+0|in1bet   | [SUPPORT] Default departments initialized
+0|in1bet   | [Aviator] Starting new round #1 with crash point: 1.06x
+0|in1bet   | [DOUBLE] Game 6a46fc9c5b70a777 spinning, stopIndex: 82, result: red
+0|in1bet   | [DOUBLE] BETTING ended, starting SPINNING phase
+0|in1bet   | [Aviator] Starting new round #2 with crash point: 1.13x
+0|in1bet   | [Aviator] Starting new round #3 with crash point: 1.18x
+0|in1bet   | [Aviator] Game crashed at 1.18x
+0|in1bet   | [Aviator] Game crashed at 1.18x
+0|in1bet   | [Aviator] Game crashed at 1.18x
+0|in1bet   | [Aviator] Game crashed at 1.18x
+0|in1bet   | [Aviator] Game crashed at 1.18x
+0|in1bet   | [Aviator] Game crashed at 1.18x
+0|in1bet   | [Aviator] Game crashed at 1.18x
+0|in1bet   | [Aviator] Game crashed at 1.18x
+0|in1bet   | [DOUBLE] Game finished at red, showing result for 4000ms
+0|in1bet   | [DOUBLE] SHOWING_RESULT ended, starting BETTING phase for 15000ms
+
+^C
+tcp        0      0 127.0.0.1:15000         0.0.0.0:*               LISTEN      809/php-fpm: master
+tcp        0      0 0.0.0.0:5000            0.0.0.0:*               LISTEN      222751/node /var/ww
+root@srv1189238:/var/www/in1bet#
