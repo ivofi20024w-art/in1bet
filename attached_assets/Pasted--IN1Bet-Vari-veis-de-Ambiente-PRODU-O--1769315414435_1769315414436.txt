@@ -1,0 +1,53 @@
+# ===========================================
+# IN1Bet - Variáveis de Ambiente (PRODUÇÃO)
+# ===========================================
+
+# Ambiente
+NODE_ENV=production
+PORT=5000
+
+# ===========================================
+# BANCO DE DADOS (Obrigatório)
+# ===========================================
+# Use NEON_DATABASE_URL ou DATABASE_URL
+DATABASE_URL=postgresql://neondb_owner:npg_rE15cDGWeBTO@ep-purple-grass-ahk928kt-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
+
+# ===========================================
+# AUTENTICAÇÃO (Obrigatório)
+# ===========================================
+# Gere com: openssl rand -hex 64
+JWT_SECRET=15ff59be27981085b63d275b755078f290ea45466ecc81a0e6a5815f3eececfa28e3dbe2b18d021b7c212b3beab66b8a4de55ad3f633125648a72a6eefd3895d
+
+# ===========================================
+# ONDAPAY - Pagamentos PIX (Obrigatório)
+# ===========================================
+ONDAPAY_CLIENT_ID=011849f6-5f43-4338-a412-342c8af59f77
+ONDAPAY_CLIENT_SECRET=nInfThaxfdSUTBTSMzhEjifwaZI5S2tI
+ONDAPAY_WEBHOOK_SECRET=c3d302a285ee68be1260cf27cf18dd842a73cfb347a3fe448c2dbb5ad97bbc3f
+ONDAPAY_WEBHOOK_URL=https://in1bet.com.br/api/webhook/ondapay
+
+# ===========================================
+# SLOTSGATEWAY - Jogos de Cassino (Obrigatório)
+# ===========================================
+SLOTSGATEWAY_API_LOGIN=477899e2-4cfd-49f2-b20b-e6bb3b7b0fa9-578668
+SLOTSGATEWAY_API_PASSWORD=HsK5EF5O4PVp
+SLOTSGATEWAY_BASE_URL=https://api-eu-1.slotsgateway.com/api/system/operator
+SLOTSGATEWAY_SALT=773e2d22b971
+SLOTSGATEWAY_CALLBACK_URL=https://in1bet.com.br/api/slotsgateway/callback
+
+# ===========================================
+# API-FOOTBALL - Esportes (Opcional)
+# ===========================================
+API_FOOTBALL_KEY=sua_api_key
+
+# ===========================================
+# WEB PUSH - Notificações (Opcional)
+# ===========================================
+VAPID_PUBLIC_KEY=BCHOqDLjGJO-5Rzo36vIddzYGmSD6hPn7eQE1R77H5u9WpIaWZK-6kM3vs0NpoU4u4JciS9BGLPltq0zt5gZimw
+VAPID_PRIVATE_KEY=ivKJ4T3-xHLDn5aqSZsopHHP_4ZohC_UboTq6DKo4dk
+VAPID_SUBJECT=mailto:testesnosamenew@gmail.com
+
+# ===========================================
+# CONFIGURAÇÕES (Opcional)
+# ===========================================
+LOG_LEVEL=INFO
