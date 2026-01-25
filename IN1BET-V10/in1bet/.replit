@@ -1,0 +1,67 @@
+modules = ["nodejs-20", "web", "postgresql-16"]
+run = "npm run dev"
+hidden = [".config", ".git", "generated-icon.png", "node_modules", "dist"]
+
+[nix]
+channel = "stable-25_05"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 5001
+externalPort = 3001
+
+[[ports]]
+localPort = 5002
+externalPort = 3002
+
+[env]
+PORT = "5000"
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["npm", "run", "build"]
+run = ["node", "./dist/index.cjs"]
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "npm run dev"
+waitForPort = 5000
+
+[agent]
+mockupState = "FULLSTACK"
+integrations = ["javascript_database:1.0.0"]
+expertMode = true
+
+[userenv]
+
+[userenv.shared]
+JWT_SECRET = "11c0909ada462b9de7f3911ad3c0d8d8b7044e791a506f1cc53a27a187ab5b24cf1b48426cdb440a8e481ad4cabb860e3991cce985447c67bd10e82acb902ec8"
+SLOTSGATEWAY_BASE_URL = "https://api-eu-1.slotsgateway.com/api/system/operator"
+VITE_API_FOOTBALL_KEY = "4265b912278c34ae84c63c14d068076e"
+SLOTSGATEWAY_API_LOGIN = "477899e2-4cfd-49f2-b20b-e6bb3b7b0fa9-578668"
+SLOTSGATEWAY_API_PASSWORD = "HsK5EF5O4PVp"
+API_FOOTBALL_KEY = "4265b912278c34ae84c63c14d068076e"
+GITHUB_PERSONAL_ACCESS_TOKEN = "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"
+
+[userenv.production]
+NEON_DATABASE_URL = "postgresql://neondb_owner:npg_rE15cDGWeBTO@ep-purple-grass-ahk928kt-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require"
+ONDAPAY_WEBHOOK_URL = "https://in1bet.com/api/webhook/ondapay"

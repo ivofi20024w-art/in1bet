@@ -1,0 +1,41 @@
+
+root@srv1189238:/var/www/in1bet/in1bet# cd /var/www/in1bet
+root@srv1189238:/var/www/in1bet# git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        in1bet/
+
+nothing added to commit but untracked files present (use "git add" to track)
+root@srv1189238:/var/www/in1bet# ls -la
+total 560
+drwxrwxr-x 10 root root   4096 Jan 25 02:45 .
+drwxr-xr-x  4 root root   4096 Jan  8 02:59 ..
+-rw-rw-r--  1 root root   8540 Jan 25 02:45 AUDITORIA_PROJETO_IN1BET.md
+-rw-rw-r--  1 root root  29826 Jan 25 02:45 AUDITORIA_TECNICA_COMPLETA.md
+drwxrwxr-x  4 root root   4096 Jan 25 02:45 client
+-rw-rw-r--  1 root root    451 Jan 25 02:45 components.json
+-rw-rw-r--  1 root root    325 Jan 25 02:45 drizzle.config.ts
+-rw-rw-r--  1 root root    346 Jan 25 02:45 ecosystem.config.js
+-rw-rw-r--  1 root root   2143 Jan 22 04:22 .env
+-rw-rw-r--  1 root root   1973 Jan 25 02:45 .env.example
+drwxrwxr-x  8 root root   4096 Jan 25 03:28 .git
+-rw-rw-r--  1 root root    110 Jan 25 02:45 .gitignore
+drwxrwxr-x  3 root root   4096 Jan 25 03:25 in1bet
+drwxrwxr-x  3 root root   4096 Jan 25 02:45 migrations
+-rw-rw-r--  1 root root   3067 Jan 25 02:45 nginx-websocket-config.md
+-rw-rw-r--  1 root root   4184 Jan 25 02:45 package.json
+-rw-rw-r--  1 root root 410468 Jan 25 02:45 package-lock.json
+-rw-rw-r--  1 root root     80 Jan 25 02:45 postcss.config.js
+-rw-rw-r--  1 root root   1683 Jan 25 02:45 .replit
+-rw-rw-r--  1 root root  14165 Jan 25 02:45 replit.md
+drwxrwxr-x  2 root root   4096 Jan 25 02:45 script
+drwxrwxr-x  2 root root   4096 Jan 25 02:45 scripts
+drwxrwxr-x  5 root root   4096 Jan 25 02:45 server
+drwxrwxr-x  2 root root   4096 Jan 25 02:45 shared
+-rw-rw-r--  1 root root    657 Jan 25 02:45 tsconfig.json
+-rw-rw-r--  1 root root   1330 Jan 25 02:45 vite.config.ts
+-rw-rw-r--  1 root root   2333 Jan 25 02:45 vite-plugin-meta-images.ts
+root@srv1189238:/var/www/in1bet#

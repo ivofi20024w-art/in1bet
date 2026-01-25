@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+.cache/
+.tmp/
+.local/
+attached_assets/
+.env
+.env.*
+!.env.example
+zipFile.zip
+*.zip
