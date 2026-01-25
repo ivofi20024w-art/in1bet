@@ -1,6 +1,7 @@
 import { createHmac, randomBytes, createHash } from "crypto";
 import * as BetService from "../betting/bet.service";
 import { GameType } from "@shared/schema";
+import { addXpFromWager } from "../levels/level.service";
 
 export type PlinkoRisk = "LOW" | "MEDIUM" | "HIGH";
 export type PlinkoRows = 8 | 12 | 16;
@@ -109,6 +110,12 @@ export async function playPlinko(
   
   if (!betResult.success || !betResult.bet) {
     return { success: false, error: betResult.error || "Erro ao apostar" };
+  }
+  
+  try {
+    await addXpFromWager(userId, betAmount);
+  } catch (err) {
+    console.error(`[PLINKO] Failed to add XP for user ${userId}:`, err);
   }
   
   const { path, bucket } = calculatePath(serverSeed, finalClientSeed, nonce, rows);

@@ -1,6 +1,7 @@
 import { createHmac, randomBytes, createHash, randomInt } from "crypto";
 import * as BetService from "../betting/bet.service";
 import { GameType, DoubleBetType, DoubleBet, DoubleRoundResult, DoubleGameStats, DoubleGameState, DoubleSpinState, DoubleGamePhase } from "@shared/schema";
+import { addXpFromWager } from "../levels/level.service";
 
 function generateWheelPattern(): DoubleBetType[] {
   const pattern: DoubleBetType[] = [];
@@ -402,6 +403,12 @@ export async function placeBet(
   
   if (!betResult.success || !betResult.bet) {
     return { success: false, error: betResult.error || "Erro ao apostar" };
+  }
+  
+  try {
+    await addXpFromWager(userId, betAmount);
+  } catch (err) {
+    console.error(`[DOUBLE] Failed to add XP for user ${userId}:`, err);
   }
   
   const maskedUsername = username.length > 4 

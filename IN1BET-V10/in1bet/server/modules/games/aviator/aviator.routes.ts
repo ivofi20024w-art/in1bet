@@ -5,6 +5,7 @@ import { eq, desc, and } from "drizzle-orm";
 import { verifyCrashPoint } from "./aviator.engine";
 import { authMiddleware } from "../../auth/auth.middleware";
 import crypto from "crypto";
+import { addXpFromWager } from "../../levels/level.service";
 
 const router = Router();
 
@@ -86,6 +87,12 @@ router.post("/bet", authMiddleware, async (req: Request, res: Response) => {
       description: `Aposta Aviator Mania - Rodada #${targetRoundId}`,
       status: "COMPLETED",
     });
+
+    try {
+      await addXpFromWager(userId, amount);
+    } catch (err) {
+      console.error(`[AVIATOR] Failed to add XP for user ${userId}:`, err);
+    }
 
     res.json({ 
       bet, 

@@ -3,6 +3,7 @@ import { db } from "../../db";
 import { bets, minesGames, BetStatus, GameType } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 import * as BetService from "../betting/bet.service";
+import { addXpFromWager } from "../levels/level.service";
 
 export interface MinesGameState {
   betId: string;
@@ -170,6 +171,12 @@ export async function startMinesGame(request: StartMinesRequest): Promise<{
 
   if (!betResult.success || !betResult.bet) {
     return { success: false, error: betResult.error };
+  }
+
+  try {
+    await addXpFromWager(userId, betAmount);
+  } catch (err) {
+    console.error(`[MINES] Failed to add XP for user ${userId}:`, err);
   }
 
   const bet = betResult.bet;
