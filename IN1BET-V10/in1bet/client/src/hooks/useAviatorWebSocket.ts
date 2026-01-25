@@ -88,10 +88,16 @@ export function useAviatorWebSocket() {
             setCrashPoint(message.data.crashPoint);
             setMultiplier(message.data.crashPoint);
             
-            setHistory(prev => [{
-              crashPoint: message.data.crashPoint,
-              roundId: message.data.roundId
-            }, ...prev].slice(0, 20));
+            setHistory(prev => {
+              const newItem = {
+                crashPoint: message.data.crashPoint,
+                roundId: message.data.roundId
+              };
+              if (prev.some(h => h.roundId === newItem.roundId)) {
+                return prev;
+              }
+              return [newItem, ...prev].slice(0, 10);
+            });
             
             if (message.data.provablyFair) {
               setProvablyFair({

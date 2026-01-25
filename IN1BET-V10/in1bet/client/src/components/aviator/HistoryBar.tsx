@@ -20,9 +20,9 @@ export function HistoryBar({ history }: HistoryBarProps) {
       </div>
       <div className="flex-1 overflow-hidden">
         <div className="flex gap-2 overflow-x-auto no-scrollbar mask-fade-right pb-4 mb-[-16px]">
-          {history.map((item, i) => (
+          {history.slice(0, 10).map((item, i) => (
             <Badge
-              key={item.roundId || i}
+              key={`${item.roundId}-${i}`}
               variant="outline"
               className={cn(
                 "font-mono border-0 px-2 py-0.5 h-6 text-xs min-w-[3rem] justify-center transition-all hover:scale-105 cursor-default",
