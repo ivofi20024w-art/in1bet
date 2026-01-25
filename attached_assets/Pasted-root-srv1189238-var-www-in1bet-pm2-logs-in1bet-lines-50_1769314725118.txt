@@ -1,0 +1,53 @@
+root@srv1189238:/var/www/in1bet# pm2 logs in1bet --lines 50
+[TAILING] Tailing last 50 lines for [in1bet] process (change the value with --lines option)
+/root/.pm2/logs/in1bet-error.log last 50 lines:
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/in1bet/dist/index.cjs:77:29664
+0|in1bet   |     at async ES.getRefreshToken (/var/www/in1bet/in1bet/dist/index.cjs:200:16146)
+0|in1bet   |     at async i8 (/var/www/in1bet/in1bet/dist/index.cjs:200:28458)
+0|in1bet   |     at async /var/www/in1bet/in1bet/dist/index.cjs:200:32784 {
+0|in1bet   |   length: 110,
+0|in1bet   |   severity: 'ERROR',
+0|in1bet   |   code: '42703',
+0|in1bet   |   detail: undefined,
+0|in1bet   |   hint: undefined,
+0|in1bet   |   position: '62',
+0|in1bet   |   internalPosition: undefined,
+0|in1bet   |   internalQuery: undefined,
+0|in1bet   |   where: undefined,
+0|in1bet   |   schema: undefined,
+0|in1bet   |   table: undefined,
+0|in1bet   |   column: undefined,
+0|in1bet   |   dataType: undefined,
+0|in1bet   |   constraint: undefined,
+0|in1bet   |   file: 'parse_relation.c',
+0|in1bet   |   line: '3716',
+0|in1bet   |   routine: 'errorMissingColumn'
+0|in1bet   | }
+0|in1bet   | Database operation failed (attempt 1/3): column "user_agent" of relation "refresh_tokens" does not exist
+0|in1bet   | Login error details: {
+0|in1bet   |   message: 'column "user_agent" of relation "refresh_tokens" does not exist',
+0|in1bet   |   code: '42703',
+0|in1bet   |   detail: undefined
+0|in1bet   | }
+0|in1bet   | Database operation failed (attempt 1/3): column "user_agent" of relation "refresh_tokens" does not exist
+0|in1bet   | Login error details: {
+0|in1bet   |   message: 'column "user_agent" of relation "refresh_tokens" does not exist',
+0|in1bet   |   code: '42703',
+0|in1bet   |   detail: undefined
+0|in1bet   | }
+0|in1bet   | Database operation failed (attempt 1/3): column "user_agent" of relation "refresh_tokens" does not exist
+0|in1bet   | Login error details: {
+0|in1bet   |   message: 'column "user_agent" of relation "refresh_tokens" does not exist',
+0|in1bet   |   code: '42703',
+0|in1bet   |   detail: undefined
+0|in1bet   | }
+0|in1bet   | (node:215162) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+0|in1bet   | In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+0|in1bet   |
+0|in1bet   | To prepare for this change:
+0|in1bet   | - If you want the current behavior, explicitly use 'sslmode=verify-full'
+0|in1bet   | - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+0|in1bet   |
+0|in1bet   | See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+0|in1bet   | (Use `node --trace-warnings ...` to show where the warning was created)
