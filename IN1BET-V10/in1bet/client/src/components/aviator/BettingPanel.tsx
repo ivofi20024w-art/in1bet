@@ -33,6 +33,8 @@ export function BettingPanel({
   const [amount, setAmount] = useState(10.00);
   const [autoBet, setAutoBet] = useState(false);
   const [autoCashout, setAutoCashout] = useState(false);
+  const [autoRounds, setAutoRounds] = useState(10);
+  const [autoCashoutMultiplier, setAutoCashoutMultiplier] = useState(2.00);
 
   const adjustAmount = (delta: number) => {
     setAmount(prev => Math.max(MIN_BET, prev + delta));
@@ -109,8 +111,8 @@ export function BettingPanel({
     <div className="bg-card rounded-xl border border-white/5 p-2 flex flex-col gap-2 relative overflow-hidden group">
       <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       
-      <div className="flex justify-between items-center text-[10px] text-muted-foreground px-1">
-        <div className="flex gap-3">
+      <div className="flex flex-col gap-2 px-1">
+        <div className="flex gap-4 text-[10px] text-muted-foreground">
            <div className="flex items-center gap-2">
             <Switch 
               id={`autobet-${id}`} 
@@ -130,6 +132,38 @@ export function BettingPanel({
             <Label htmlFor={`autocash-${id}`} className="cursor-pointer font-bold">Saque Auto</Label>
            </div>
         </div>
+        
+        {(autoBet || autoCashout) && (
+          <div className="flex gap-2 text-[10px]">
+            {autoBet && (
+              <div className="flex items-center gap-1 bg-black/30 rounded px-2 py-1 border border-white/10">
+                <span className="text-muted-foreground">Rodadas:</span>
+                <Input 
+                  type="number"
+                  value={autoRounds}
+                  onChange={(e) => setAutoRounds(Math.max(1, Math.min(100, Number(e.target.value))))}
+                  min={1}
+                  max={100}
+                  className="h-5 w-12 text-center font-mono text-xs bg-transparent border-none focus-visible:ring-0 p-0"
+                />
+              </div>
+            )}
+            {autoCashout && (
+              <div className="flex items-center gap-1 bg-black/30 rounded px-2 py-1 border border-white/10">
+                <span className="text-muted-foreground">Sacar em:</span>
+                <Input 
+                  type="number"
+                  value={autoCashoutMultiplier}
+                  onChange={(e) => setAutoCashoutMultiplier(Math.max(1.01, Number(e.target.value)))}
+                  min={1.01}
+                  step={0.1}
+                  className="h-5 w-14 text-center font-mono text-xs bg-transparent border-none focus-visible:ring-0 p-0"
+                />
+                <span className="text-muted-foreground">x</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-[1fr_auto] gap-2">
