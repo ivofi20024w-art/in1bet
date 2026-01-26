@@ -34,6 +34,7 @@ export class AviatorEngine {
   private currentServerSeed: string = "";
   private nextServerSeed: string = "";
   private nextServerSeedHash: string = "";
+  private isTransitioning: boolean = false;
 
   constructor(server: HTTPServer) {
     this.wss = new WebSocketServer({ 
@@ -57,12 +58,12 @@ export class AviatorEngine {
     
     this.gameState = {
       roundId: null,
-      status: "waiting",
+      status: "crashed",
       startTime: 0,
       crashPoint: 1.0,
       currentMultiplier: 1.0,
-      waitingStartTime: Date.now(),
-      crashTime: 0,
+      waitingStartTime: 0,
+      crashTime: Date.now() - 10000,
       provablyFair: null,
     };
 
@@ -198,33 +199,18 @@ export class AviatorEngine {
       } else if (this.gameState.status === "crashed") {
         const crashElapsed = now - this.gameState.crashTime;
         
-        if (crashElapsed >= CRASH_DISPLAY_DURATION) {
-          this.gameState = {
-            roundId: null,
-            status: "waiting",
-            startTime: 0,
-            crashPoint: 1.0,
-            currentMultiplier: 1.0,
-            waitingStartTime: Date.now(),
-            crashTime: 0,
-            provablyFair: null,
-          };
-          
-          this.broadcast({
-            type: "new_round_starting",
-            data: {
-              nextServerSeedHash: this.nextServerSeedHash,
-            },
-          });
+        if (crashElapsed >= CRASH_DISPLAY_DURATION && !this.isTransitioning) {
+          this.isTransitioning = true;
+          await this.startWaitingPeriod();
+          this.isTransitioning = false;
         }
       }
     }, GAME_TICK_MS);
   }
 
-  private async startNewRound() {
+  private async startWaitingPeriod() {
     this.nonce++;
     
-    const revealedServerSeed = this.currentServerSeed;
     this.currentServerSeed = this.nextServerSeed;
     this.nextServerSeed = this.generateServerSeed();
     this.nextServerSeedHash = this.hashSeed(this.nextServerSeed);
@@ -239,31 +225,62 @@ export class AviatorEngine {
       nonce: this.nonce,
     };
     
-    console.log(`[Aviator] Starting new round #${this.nonce} with crash point: ${crashPoint.toFixed(2)}x`);
-
     const [round] = await db.insert(aviatorRounds).values({
       crashPoint: crashPoint.toFixed(2),
-      status: "running",
+      status: "waiting",
       serverSeedHash: provablyFairData.serverSeedHash,
       clientSeed: provablyFairData.clientSeed,
       nonce: provablyFairData.nonce,
     }).returning();
+    
+    console.log(`[Aviator] Created waiting round #${round.id} with crash point: ${crashPoint.toFixed(2)}x`);
 
     this.gameState = {
       roundId: round.id,
-      status: "running",
-      startTime: Date.now(),
+      status: "waiting",
+      startTime: 0,
       crashPoint,
       currentMultiplier: 1.0,
-      waitingStartTime: 0,
+      waitingStartTime: Date.now(),
       crashTime: 0,
       provablyFair: provablyFairData,
     };
+    
+    this.broadcast({
+      type: "new_round_starting",
+      data: {
+        roundId: round.id,
+        nextServerSeedHash: this.nextServerSeedHash,
+      },
+    });
+  }
+
+  private async startNewRound() {
+    if (!this.gameState.roundId) {
+      console.error("[Aviator] No round ID found when starting game");
+      return;
+    }
+    
+    const roundId = this.gameState.roundId;
+    const crashPoint = this.gameState.crashPoint;
+    const provablyFairData = this.gameState.provablyFair!;
+    
+    console.log(`[Aviator] Starting round #${roundId} at ${crashPoint.toFixed(2)}x`);
+
+    await db.update(aviatorRounds)
+      .set({ status: "running" })
+      .where(eq(aviatorRounds.id, roundId));
+
+    this.gameState.status = "running";
+    this.gameState.startTime = Date.now();
+    this.gameState.waitingStartTime = 0;
 
     const bets = await db
       .select()
       .from(aviatorBets)
-      .where(eq(aviatorBets.roundId, round.id));
+      .where(eq(aviatorBets.roundId, roundId));
+    
+    console.log(`[Aviator] Activating ${bets.length} pending bets for round #${roundId}`);
     
     for (const bet of bets) {
       if (bet.status === "pending") {
@@ -277,7 +294,7 @@ export class AviatorEngine {
     this.broadcast({
       type: "round_start",
       data: {
-        roundId: round.id,
+        roundId: roundId,
         timestamp: Date.now(),
         serverSeedHash: provablyFairData.serverSeedHash,
         clientSeed: provablyFairData.clientSeed,
