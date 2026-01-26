@@ -157,7 +157,7 @@ function ProvablyFairModal({ provablyFair, nextServerSeedHash }: { provablyFair:
 }
 
 export default function AviatorMania() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, accessToken } = useAuth();
   const queryClient = useQueryClient();
   const { multiplier, gameStatus, roundId, countdown, crashPoint, connected, showCrashMessage, history, provablyFair, nextServerSeedHash } = useAviatorWebSocket();
   const [gameState, setGameState] = useState<GameState>("BETTING");
@@ -228,7 +228,7 @@ export default function AviatorMania() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+          "Authorization": `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ amount }),
       });
@@ -271,7 +271,7 @@ export default function AviatorMania() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+          "Authorization": `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ betId: bet.betId }),
       });
