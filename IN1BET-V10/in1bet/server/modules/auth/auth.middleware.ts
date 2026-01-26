@@ -39,14 +39,19 @@ export async function authMiddleware(
   try {
     const authHeader = req.headers.authorization;
     
+    console.log(`[AUTH] ${req.method} ${req.path} - Authorization header: ${authHeader ? 'present' : 'missing'}`);
+    
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      console.log(`[AUTH] No Bearer token provided for ${req.path}`);
       res.status(401).json({ error: "Token de acesso não fornecido" });
       return;
     }
 
     const token = authHeader.split(" ")[1];
+    console.log(`[AUTH] Token first 20 chars: ${token.substring(0, 20)}...`);
     
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    console.log(`[AUTH] Token verified for user: ${decoded.userId}`);
     
     const user = await storage.getUser(decoded.userId);
     
