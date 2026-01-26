@@ -287,6 +287,13 @@ export class AviatorEngine {
   }
 
   private async crashGame() {
+    if (this.gameState.status === "crashed") {
+      return;
+    }
+    
+    this.gameState.status = "crashed";
+    this.gameState.crashTime = Date.now();
+    
     console.log(`[Aviator] Game crashed at ${this.gameState.crashPoint.toFixed(2)}x`);
 
     if (this.gameState.roundId) {
@@ -333,9 +340,6 @@ export class AviatorEngine {
         },
       });
     }
-
-    this.gameState.status = "crashed";
-    this.gameState.crashTime = Date.now();
   }
 
   public getCurrentRoundId(): number | null {
