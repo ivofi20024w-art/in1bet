@@ -1,9 +1,10 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { Server as HTTPServer } from "http";
 import { db } from "../../../db";
-import { aviatorRounds, aviatorBets, wallets, transactions } from "../../../../shared/schema";
+import { aviatorRounds, aviatorBets, wallets, transactions, users } from "../../../../shared/schema";
 import { eq, desc, and, isNotNull } from "drizzle-orm";
 import crypto from "crypto";
+import { broadcastCasinoWin } from "../../chat/chat.websocket";
 
 const WAITING_DURATION = 15000;
 const CRASH_DISPLAY_DURATION = 5000;
@@ -360,6 +361,17 @@ export class AviatorEngine {
             });
 
             console.log(`[Aviator] Auto-cashout: User ${bet.userId} at ${autoCashoutAt.toFixed(2)}x, won ${winAmount.toFixed(2)}`);
+            
+            if (winAmount >= 100) {
+              try {
+                const [userData] = await db.select().from(users).where(eq(users.id, bet.userId)).limit(1);
+                if (userData) {
+                  await broadcastCasinoWin(bet.userId, userData.name, "Aviator Mania", winAmount, userData.vipLevel || undefined, userData.level, autoCashoutAt);
+                }
+              } catch (chatErr) {
+                console.error("[Aviator] Error broadcasting casino win:", chatErr);
+              }
+            }
             
             this.broadcast({
               type: "auto_cashout",

@@ -17,6 +17,8 @@ import { createHash, randomBytes, randomUUID } from "crypto";
 import { logOperational } from "../../utils/operationalLog";
 import { contributeToJackpot } from "../jackpot/jackpot.service";
 import { updateMissionProgress } from "../missions/mission.service";
+import { broadcastCasinoWin } from "../chat/chat.websocket";
+import { users } from "@shared/schema";
 
 export interface PlaceBetRequest {
   userId: string;
@@ -343,6 +345,25 @@ export async function settleBet(request: SettleBetRequest): Promise<BetResult> {
         const winAmount = parseFloat(result.winAmount);
         await updateMissionProgress(userId, "WIN_COUNT", 1, betId);
         await updateMissionProgress(userId, "WIN_AMOUNT", winAmount, betId);
+        
+        if (winAmount >= 100) {
+          try {
+            const [userData] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+            if (userData) {
+              const gameNameMap: Record<string, string> = {
+                double: "Double",
+                mines: "Mines",
+                plinko: "Plinko",
+                crash: "Crash",
+                aviator: "Aviator",
+              };
+              const gameName = gameNameMap[result.gameType] || result.gameType;
+              await broadcastCasinoWin(userId, userData.name, gameName, winAmount, userData.vipLevel || undefined, userData.level, multiplier);
+            }
+          } catch (chatErr) {
+            console.error("[BET] Error broadcasting casino win:", chatErr);
+          }
+        }
       } catch (missionError) {
         console.error("[MISSIONS] Error updating win mission progress:", missionError);
       }

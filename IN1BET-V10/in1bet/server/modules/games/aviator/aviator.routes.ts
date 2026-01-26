@@ -1,11 +1,12 @@
 import { Router, Request, Response } from "express";
 import { db } from "../../../db";
-import { aviatorRounds, aviatorBets, wallets, transactions } from "../../../../shared/schema";
+import { aviatorRounds, aviatorBets, wallets, transactions, users } from "../../../../shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { verifyCrashPoint } from "./aviator.engine";
 import { authMiddleware } from "../../auth/auth.middleware";
 import crypto from "crypto";
 import { addXpFromWager } from "../../levels/level.service";
+import { broadcastCasinoWin } from "../../chat/chat.websocket";
 
 const router = Router();
 
@@ -177,6 +178,17 @@ router.post("/cashout", authMiddleware, async (req: Request, res: Response) => {
       description: `Ganho Aviator Mania ${currentMultiplier.toFixed(2)}x`,
       status: "COMPLETED",
     });
+
+    if (winAmount >= 100) {
+      try {
+        const [userData] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+        if (userData) {
+          await broadcastCasinoWin(userId, userData.name, "Aviator Mania", winAmount, userData.vipLevel || undefined, userData.level, currentMultiplier);
+        }
+      } catch (chatErr) {
+        console.error("[Aviator] Error broadcasting casino win:", chatErr);
+      }
+    }
 
     res.json({ 
       success: true, 
