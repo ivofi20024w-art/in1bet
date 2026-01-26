@@ -12,7 +12,7 @@ import {
   deleteMessage
 } from "./chat.service";
 import { db } from "../../db";
-import { users, chatUserCustomization, chatUserBlocks, chatPenalties, wallets, transactions, TransactionType, TransactionStatus } from "@shared/schema";
+import { users, chatUserCustomization, chatUserBlocks, chatPenalties, wallets, transactions, TransactionType, TransactionStatus, chatMessages } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
@@ -774,24 +774,39 @@ export function getRoomOnlineCount(roomId: string): number {
 }
 
 export async function broadcastCasinoWin(userId: string, userName: string, gameName: string, winAmount: number, userVipLevel?: string, userLevel?: number, multiplier?: number) {
-  const message: ChatMessageWithUser = {
-    id: randomUUID(),
-    message: `Ganhou R$ ${winAmount.toFixed(2)} no ${gameName}${multiplier ? ` (${multiplier.toFixed(2)}x)` : ""}`,
-    createdAt: new Date(),
-    isDeleted: false,
-    user: {
-      id: userId,
-      name: userName,
-      vipLevel: userVipLevel || "bronze",
-      level: userLevel || 1,
-      role: "NONE",
-      customization: null,
-    },
-  };
+  const messageText = `Ganhou R$ ${winAmount.toFixed(2)} no ${gameName}${multiplier ? ` (${multiplier.toFixed(2)}x)` : ""}`;
+  
+  try {
+    const [savedMessage] = await db
+      .insert(chatMessages)
+      .values({
+        roomId: "casino",
+        userId,
+        message: messageText,
+      })
+      .returning();
 
-  broadcastToRoom("casino", {
-    type: "new_message",
-    roomId: "casino",
-    message,
-  });
+    const message: ChatMessageWithUser = {
+      id: savedMessage.id,
+      message: savedMessage.message,
+      createdAt: savedMessage.createdAt,
+      isDeleted: false,
+      user: {
+        id: userId,
+        name: userName,
+        vipLevel: userVipLevel || "bronze",
+        level: userLevel || 1,
+        role: "NONE",
+        customization: null,
+      },
+    };
+
+    broadcastToRoom("casino", {
+      type: "new_message",
+      roomId: "casino",
+      message,
+    });
+  } catch (error) {
+    console.error("[CASINO WIN] Error saving win message:", error);
+  }
 }
