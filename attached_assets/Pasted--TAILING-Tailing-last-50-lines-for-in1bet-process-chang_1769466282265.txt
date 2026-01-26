@@ -1,0 +1,108 @@
+[TAILING] Tailing last 50 lines for [in1bet] process (change the value with --lines option)
+/root/.pm2/logs/in1bet-error.log last 50 lines:
+0|in1bet   |   code: 'MODULE_NOT_FOUND',
+0|in1bet   |   requireStack: [ '/var/www/in1bet/dist/index.cjs' ]
+0|in1bet   | }
+0|in1bet   | Error: Cannot find module 'bcrypt'
+0|in1bet   | Require stack:
+0|in1bet   | - /var/www/in1bet/dist/index.cjs
+0|in1bet   |     at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+0|in1bet   |     at Hook._require.Module.require (/usr/lib/node_modules/pm2/node_modules/require-in-the-middle/index.js:81:25)
+0|in1bet   |     at require (node:internal/modules/helpers:182:18)
+0|in1bet   |     at Object.<anonymous> (/var/www/in1bet/dist/index.cjs:200:14542)
+0|in1bet   |     at Module._compile (node:internal/modules/cjs/loader:1521:14)
+0|in1bet   |     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+0|in1bet   |     at Module.load (node:internal/modules/cjs/loader:1266:32)
+0|in1bet   |     at Module._load (node:internal/modules/cjs/loader:1091:12)
+0|in1bet   |     at Object.<anonymous> (/usr/lib/node_modules/pm2/lib/ProcessContainerFork.js:33:23)
+0|in1bet   |     at Module._compile (node:internal/modules/cjs/loader:1521:14) {
+0|in1bet   |   code: 'MODULE_NOT_FOUND',
+0|in1bet   |   requireStack: [ '/var/www/in1bet/dist/index.cjs' ]
+0|in1bet   | }
+0|in1bet   | Error: DATABASE_URL or NEON_DATABASE_URL must be set. Did you forget to provision a database?
+0|in1bet   |     at /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:77:33061
+0|in1bet   |     at /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:1:225
+0|in1bet   |     at Object.<anonymous> (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:14595)
+0|in1bet   |     at Module._compile (node:internal/modules/cjs/loader:1521:14)
+0|in1bet   |     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+0|in1bet   |     at Module.load (node:internal/modules/cjs/loader:1266:32)
+0|in1bet   |     at Module._load (node:internal/modules/cjs/loader:1091:12)
+0|in1bet   |     at cjsLoader (node:internal/modules/esm/translators:298:15)
+0|in1bet   |     at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:240:7)
+0|in1bet   |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+0|in1bet   | Error: DATABASE_URL or NEON_DATABASE_URL must be set. Did you forget to provision a database?
+0|in1bet   |     at /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:77:33061
+0|in1bet   |     at /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:1:225
+0|in1bet   |     at Object.<anonymous> (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:14595)
+0|in1bet   |     at Module._compile (node:internal/modules/cjs/loader:1521:14)
+0|in1bet   |     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+0|in1bet   |     at Module.load (node:internal/modules/cjs/loader:1266:32)
+0|in1bet   |     at Module._load (node:internal/modules/cjs/loader:1091:12)
+0|in1bet   |     at cjsLoader (node:internal/modules/esm/translators:298:15)
+0|in1bet   |     at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:240:7)
+0|in1bet   |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+0|in1bet   | (node:256605) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+0|in1bet   | In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+0|in1bet   |
+0|in1bet   | To prepare for this change:
+0|in1bet   | - If you want the current behavior, explicitly use 'sslmode=verify-full'
+0|in1bet   | - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+0|in1bet   |
+0|in1bet   | See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+0|in1bet   | (Use `node --trace-warnings ...` to show where the warning was created)
+
+/root/.pm2/logs/in1bet-out.log last 50 lines:
+0|in1bet   | [DOUBLE] BETTING ended, starting SPINNING phase
+0|in1bet   | 10:23:45 PM [express] GET /api/wallet 304 in 238ms :: {"wallet":{"id":"520d10ed-92db-496b-898c-e5dafca3cd47","balance":69490.4,"lockedBalance":0,"bonusBalance":0,"totalBalance":69490.4,"rolloverRemaining":0,"rolloverTotal":0,"rolloverProgress":100,"currency":"BRL","createdAt":"2025-12-28T21:20:38.547Z","updatedAt":"2026-01-25T09:08:34.121Z"}}
+0|in1bet   | [CHAT WS][37e23d5c] Message received: type=ping, clientId=916904f6-04e7-44d0-a252-5939743ce8da
+0|in1bet   | 10:23:50 PM [express] GET /api/games/aviator/round-bets 304 in 1ms :: []
+0|in1bet   | 10:23:50 PM [express] GET /api/wallet 304 in 237ms :: {"wallet":{"id":"520d10ed-92db-496b-898c-e5dafca3cd47","balance":69490.4,"lockedBalance":0,"bonusBalance":0,"totalBalance":69490.4,"rolloverRemaining":0,"rolloverTotal":0,"rolloverProgress":100,"currency":"BRL","createdAt":"2025-12-28T21:20:38.547Z","updatedAt":"2026-01-25T09:08:34.121Z"}}
+0|in1bet   | [DOUBLE] Game finished at black, showing result for 4000ms
+0|in1bet   | 10:23:52 PM [express] GET /api/games/aviator/round-bets 304 in 1ms :: []
+0|in1bet   | [Aviator] Starting new round #16 with crash point: 1.04x
+0|in1bet   | [Aviator] Starting new round #17 with crash point: 2.70x
+0|in1bet   | [Aviator] Starting new round #18 with crash point: 3.91x
+0|in1bet   | 10:23:53 PM [express] GET /api/games/aviator/round-bets 304 in 118ms :: []
+0|in1bet   | 10:23:53 PM [express] GET /api/games/aviator/round-bets 304 in 123ms :: []
+0|in1bet   | 10:23:54 PM [express] GET /api/games/aviator/round-bets 304 in 120ms :: []
+0|in1bet   | [CHAT WS][37e23d5c] Message received: type=pong, clientId=916904f6-04e7-44d0-a252-5939743ce8da
+0|in1bet   | [DOUBLE] SHOWING_RESULT ended, starting BETTING phase for 15000ms
+0|in1bet   | 10:23:55 PM [express] GET /api/wallet 304 in 242ms :: {"wallet":{"id":"520d10ed-92db-496b-898c-e5dafca3cd47","balance":69490.4,"lockedBalance":0,"bonusBalance":0,"totalBalance":69490.4,"rolloverRemaining":0,"rolloverTotal":0,"rolloverProgress":100,"currency":"BRL","createdAt":"2025-12-28T21:20:38.547Z","updatedAt":"2026-01-25T09:08:34.121Z"}}
+0|in1bet   | 10:23:56 PM [express] GET /api/games/aviator/round-bets 304 in 118ms :: []
+0|in1bet   | 10:23:58 PM [express] GET /api/games/aviator/round-bets 304 in 118ms :: []
+0|in1bet   | 10:24:00 PM [express] GET /api/wallet 304 in 250ms :: {"wallet":{"id":"520d10ed-92db-496b-898c-e5dafca3cd47","balance":69490.4,"lockedBalance":0,"bonusBalance":0,"totalBalance":69490.4,"rolloverRemaining":0,"rolloverTotal":0,"rolloverProgress":100,"currency":"BRL","createdAt":"2025-12-28T21:20:38.547Z","updatedAt":"2026-01-25T09:08:34.121Z"}}
+0|in1bet   | 10:24:00 PM [express] GET /api/games/aviator/round-bets 304 in 123ms :: []
+0|in1bet   | [Aviator] Game crashed at 3.91x
+0|in1bet   | [Aviator] Game crashed at 3.91x
+0|in1bet   | [Aviator] Game crashed at 3.91x
+0|in1bet   | [Aviator] Game crashed at 3.91x
+0|in1bet   | [Aviator] Game crashed at 3.91x
+0|in1bet   | 10:24:02 PM [express] GET /api/games/aviator/round-bets 304 in 119ms :: []
+0|in1bet   | [Aviator] Game crashed at 3.91x
+0|in1bet   | [Aviator] Game crashed at 3.91x
+0|in1bet   | [Aviator] Game crashed at 3.91x
+0|in1bet   | 10:24:04 PM [express] GET /api/games/aviator/round-bets 304 in 118ms :: []
+0|in1bet   | 10:24:05 PM [express] GET /api/wallet 304 in 238ms :: {"wallet":{"id":"520d10ed-92db-496b-898c-e5dafca3cd47","balance":69490.4,"lockedBalance":0,"bonusBalance":0,"totalBalance":69490.4,"rolloverRemaining":0,"rolloverTotal":0,"rolloverProgress":100,"currency":"BRL","createdAt":"2025-12-28T21:20:38.547Z","updatedAt":"2026-01-25T09:08:34.121Z"}}
+0|in1bet   | [DOUBLE] Game ad4be7a926997606 spinning, stopIndex: 30, result: red
+0|in1bet   | [DOUBLE] BETTING ended, starting SPINNING phase
+0|in1bet   | 10:24:10 PM [express] GET /api/wallet 304 in 237ms :: {"wallet":{"id":"520d10ed-92db-496b-898c-e5dafca3cd47","balance":69490.4,"lockedBalance":0,"bonusBalance":0,"totalBalance":69490.4,"rolloverRemaining":0,"rolloverTotal":0,"rolloverProgress":100,"currency":"BRL","createdAt":"2025-12-28T21:20:38.547Z","updatedAt":"2026-01-25T09:08:34.121Z"}}
+0|in1bet   | [CHAT WS][37e23d5c] Message received: type=ping, clientId=916904f6-04e7-44d0-a252-5939743ce8da
+0|in1bet   | 10:24:14 PM [express] GET /api/chat/online-count 304 in 1ms :: {"count":1}
+0|in1bet   | 10:24:14 PM [express] GET /api/chat/online-count 304 in 1ms :: {"count":1}
+0|in1bet   | 10:24:15 PM [express] GET /api/games/aviator/round-bets 304 in 1ms :: []
+0|in1bet   | 10:24:15 PM [express] GET /api/wallet 304 in 238ms :: {"wallet":{"id":"520d10ed-92db-496b-898c-e5dafca3cd47","balance":69490.4,"lockedBalance":0,"bonusBalance":0,"totalBalance":69490.4,"rolloverRemaining":0,"rolloverTotal":0,"rolloverProgress":100,"currency":"BRL","createdAt":"2025-12-28T21:20:38.547Z","updatedAt":"2026-01-25T09:08:34.121Z"}}
+0|in1bet   | [DOUBLE] Game finished at red, showing result for 4000ms
+0|in1bet   | [DOUBLE] SHOWING_RESULT ended, starting BETTING phase for 15000ms
+0|in1bet   | 10:24:20 PM [express] GET /api/wallet 304 in 240ms :: {"wallet":{"id":"520d10ed-92db-496b-898c-e5dafca3cd47","balance":69490.4,"lockedBalance":0,"bonusBalance":0,"totalBalance":69490.4,"rolloverRemaining":0,"rolloverTotal":0,"rolloverProgress":100,"currency":"BRL","createdAt":"2025-12-28T21:20:38.547Z","updatedAt":"2026-01-25T09:08:34.121Z"}}
+0|in1bet   | [Aviator] Starting new round #19 with crash point: 5.44x
+0|in1bet   | [Aviator] Starting new round #20 with crash point: 1.98x
+0|in1bet   | [Aviator] Starting new round #21 with crash point: 4.87x
+0|in1bet   | 10:24:24 PM [express] GET /api/games/aviator/round-bets 304 in 118ms :: []
+0|in1bet   | [CHAT WS][37e23d5c] Message received: type=pong, clientId=916904f6-04e7-44d0-a252-5939743ce8da
+0|in1bet   | 10:24:24 PM [express] GET /api/games/aviator/round-bets 304 in 118ms :: []
+0|in1bet   | 10:24:24 PM [express] GET /api/games/aviator/round-bets 304 in 118ms :: []
+0|in1bet   | 10:24:25 PM [express] GET /api/wallet 304 in 239ms :: {"wallet":{"id":"520d10ed-92db-496b-898c-e5dafca3cd47","balance":69490.4,"lockedBalance":0,"bonusBalance":0,"totalBalance":69490.4,"rolloverRemaining":0,"rolloverTotal":0,"rolloverProgress":100,"currency":"BRL","createdAt":"2025-12-28T21:20:38.547Z","updatedAt":"2026-01-25T09:08:34.121Z"}}
+
+0|in1bet  | 10:24:30 PM [express] GET /api/wallet 304 in 239ms :: {"wallet":{"id":"520d10ed-92db-496b-898c-e5dafca3cd47","balance":69490.4,"lockedBalance":0,"bonusBalance":0,"totalBalance":69490.4,"rolloverRemaining":0,"rolloverTotal":0,"rolloverProgress":100,"currency":"BRL","createdAt":"2025-12-28T21:20:38.547Z","updatedAt":"2026-01-25T09:08:34.121Z"}}
+^C
+root@srv1189238:/var/www/in1bet/IN1BET-V10/in1bet#

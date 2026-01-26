@@ -1,0 +1,94 @@
+
+root@srv1189238:/var/www/in1bet# ls -la && find . -name "build.ts" 2>/dev/null
+total 92
+drwxrwxr-x  7 root root  4096 Jan 26 22:14 .
+drwxr-xr-x  4 root root  4096 Jan  8 02:59 ..
+drwxrwxr-x  2 root root  4096 Jan 26 22:14 attached_assets
+drwxrwxr-x  3 root root  4096 Jan 25 09:33 dist
+-rw-rw-r--  1 root root  1085 Jan 25 04:34 .env
+drwxrwxr-x  8 root root  4096 Jan 26 22:14 .git
+drwxrwxr-x  3 root root  4096 Jan 26 22:14 IN1BET-V10
+drwxrwxr-x 81 root root 20480 Jan 26 22:15 node_modules
+-rw-rw-r--  1 root root   404 Jan 26 22:14 package.json
+-rw-rw-r--  1 root root 28258 Jan 26 22:15 package-lock.json
+-rw-rw-r--  1 root root   650 Jan 26 22:14 .replit
+-rw-rw-r--  1 root root  5230 Jan 26 22:14 replit.md
+./IN1BET-V10/in1bet/script/build.ts
+root@srv1189238:/var/www/in1bet# ^C
+root@srv1189238:/var/www/in1bet# cd IN1BET-V10/in1bet && npm install && npx tsx script/build.ts && cd /var/www/in1bet && pm2 restart in1bet
+npm warn deprecated @otplib/preset-default@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+npm warn deprecated @otplib/plugin-thirty-two@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+npm warn deprecated @otplib/plugin-crypto@12.0.1: Please upgrade to v13 of otplib. Refer to otplib docs for migration paths
+npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+npm warn deprecated @hapi/formula@2.0.0: Moved to 'npm install @sideway/formula'
+npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+npm warn deprecated @hapi/address@4.1.0: Moved to 'npm install @sideway/address'
+npm warn deprecated @hapi/joi@17.1.1: Switch to 'npm install joi'
+
+added 644 packages, and audited 645 packages in 29s
+
+56 packages are looking for funding
+  run `npm fund` for details
+
+4 moderate severity vulnerabilities
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+building client...
+vite v7.3.1 building client environment for production...
+
+/grid.svg referenced in /grid.svg didn't resolve at build time, it will remain unchanged to be resolved at runtime
+✓ 3869 modules transformed.
+rendering chunks (1)...[meta-images] no Replit deployment domain found, skipping meta tag updates
+../dist/public/index.html                                                                        1.72 kB │ gzip:   0.72 kB
+../dist/public/assets/tigre1_1767994256497-BFEWCRBD.jpeg                                       188.52 kB
+../dist/public/assets/image_1768079128068-DRLEH0Zf.png                                         210.56 kB
+../dist/public/assets/vip_program_luxury_gold_and_black_card-DZGYVF9b.png                      978.86 kB
+../dist/public/assets/elegant_background_for_double_casino_game-CnbVPme-.png                   997.51 kB
+../dist/public/assets/ChatGPT_Image_11_01_2026__05_27_36_1768109552475-CwNZQby4.png          1,041.27 kB
+../dist/public/assets/gold-v3-6pl6luS9.png                                                   1,202.67 kB
+../dist/public/assets/weekly_cashback_promo_banner-op2QBMmx.png                              1,206.30 kB
+../dist/public/assets/casino_welcome_bonus_banner_with_neon_lights-BjKBecun.png              1,312.11 kB
+../dist/public/assets/mine-v4-D9XSWAvq.png                                                   1,313.97 kB
+../dist/public/assets/neon_plinko_game_background_with_pyramid_structure-Bw9HMUyl.png        1,376.16 kB
+../dist/public/assets/futuristic_neon_cityscape_background_for_crash_game-B3cFTbTU.png       1,380.43 kB
+../dist/public/assets/drops_and_wins_tournament_banner-wbmiW2mQ.png                          1,460.90 kB
+../dist/public/assets/mysterious_background_for_mines_casino_game-BDeluLii.png               1,465.13 kB
+../dist/public/assets/professional_soccer_stadium_night_scene_with_floodlights-BrB7wTwV.png  1,495.62 kB
+../dist/public/assets/ChatGPT_Image_10_01_2026__23_38_48_1769032748300-CAWUc9I5.png          2,340.95 kB
+../dist/public/assets/ChatGPT_Image_10_01_2026__22_33_28_1768108766810-Cky7nm3Q.png          2,399.15 kB
+../dist/public/assets/ChatGPT_Image_10_01_2026__22_30_56_1768108766811-B3F3I8hy.png          2,402.92 kB
+../dist/public/assets/ChatGPT_Image_10_01_2026__22_27_38_1768108766811-B52FOhuP.png          2,483.96 kB
+../dist/public/assets/plane-CBNJWTDk.png                                                     2,550.23 kB
+../dist/public/assets/plane-crash-lWlmPh-j.png                                               2,912.02 kB
+../dist/public/assets/index-DeqxTAH4.css                                                       276.99 kB │ gzip:  34.40 kB
+../dist/public/assets/index-Dges6xZh.js                                                      1,910.64 kB │ gzip: 505.26 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 12.65s
+building server...
+▲ [WARNING] Import "cashoutMines" will always be undefined because there is no matching export in "server/modules/games/mines.service.ts" [import-is-undefined]
+
+    server/modules/games/mines.routes.ts:88:38:
+      88 │     const result = await MinesService.cashoutMines({
+         ╵                                       ~~~~~~~~~~~~
+
+1 warning
+
+  dist/index.cjs  1.8mb ⚠️
+
+⚡ Done in 392ms
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [in1bet](ids: [ 0 ])
+[PM2] [in1bet](0) ✓
+┌────┬────────────────────┬──────────┬──────┬───────────┬──────────┬──────────┐
+│ id │ name               │ mode     │ ↺    │ status    │ cpu      │ memory   │
+├────┼────────────────────┼──────────┼──────┼───────────┼──────────┼──────────┤
+│ 0  │ in1bet             │ fork     │ 2    │ online    │ 0%       │ 25.9mb   │
+└────┴────────────────────┴──────────┴──────┴───────────┴──────────┴──────────┘
+root@srv1189238:/var/www/in1bet#

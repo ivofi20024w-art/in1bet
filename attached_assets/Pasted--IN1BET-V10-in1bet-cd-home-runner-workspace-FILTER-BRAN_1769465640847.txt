@@ -1,0 +1,54 @@
+~/.../IN1BET-V10/in1bet$ cd /home/runner/workspace && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --force --index-filter "git rm --cached --ignore-unmatch IN1BET-V10/in1bet/zipFile.zip zipFile.zip" --prune-empty --tag-name-filter cat -- --all
+Rewrite bcb1bfaffbb1e7ae50faad616dcc1cdcc641dc8a (1/36) (0 seconds passed, remaining 0 predicted)  Rewrite 99bc9b392727448e0c9556a1626a5ef0b8b043c9 (2/36) (0 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite c13b8fe2e24379de41e719183b18dac43eb20a67 (3/36) (0 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite fb5a52bbb08c34fb1ec56fa031636458512719a9 (4/36) (0 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite aeca4db311f39990b4c01b8ed0fb72aa5ede5adf (5/36) (0 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite f011a120388d4bad4517d56dddd5a42c1f7a7304 (6/36) (0 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite 80aabec5bebdd4f54ba9645054e45f4664e46a62 (7/36) (0 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite 3bbb62611a095cbb1ad388d99ad761ffc9e2346f (8/36) (0 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite 7a5e454ee050170ec0f59877586eb692b5762a66 (9/36) (0 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite abe410164540de34c78c4fe18270ba20490048b5 (10/36) (0 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite ab5d86d14823406db2fecf1db7557ee971de348a (11/36) (0 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite 3958d892862dda47018c9a6a78a402f1512485f2 (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite f6b57ad91c70ddca0c182bbc64a5d28342a3d2f6 (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite a8f3aa5ad77b19de7ad36a36a6ba2c17687dd377 (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite e75cc50ad00cdac754907f169888fd2315cbbf97 (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite 2a3b6afc54964150566f471a912d342a3bc9784e (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite 52ac1eb8ac72d0aa1ac5c209152b0bdebc2a0f98 (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite 1ab3a5928aa537eed9a7b973358871458c3b6c08 (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite af885fe20aa2c7597eb7a516d53d7d83c72cbe7b (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite 81b7be9c4f948fa7ff704bd898b2c61a8c9fdff8 (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite 07d6ad7373be378e8c133d428663a79ece26a44e (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite 732c08e77b5fbcdf7a6189c2c34467572d5c942c (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite 25830b0f74f215641a8e15fd24f03d54149cd1a9 (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite 23c8e3233901a20f78b4f85ace65de5693226678 (12/36) (1 seconds passed, remaining 2 predicted)    rm 'zipFile.zip'
+Rewrite 9bcb4d18e2d22229940459723b7a59fe63b7b330 (25/36) (1 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite b0221ef013fc69383c976b45840c04f6eaa7c6a2 (25/36) (1 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite 4ae76500dec506ae87776953b840ad44c71a6bd0 (25/36) (1 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite 17e1068d63667bebabe2836167f2d810e5eb5433 (25/36) (1 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite f91be1f103316102d31328b7c029ac7952933e98 (25/36) (1 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite 035db7a18029334ddb0be4f7c2a31ffbfc7a64c8 (25/36) (1 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite fc0f232460bda621ead4cf83f4b28bad4464e896 (25/36) (1 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite b8d6d7d30c7a3d45bb695bbc883a573b1563b162 (25/36) (1 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite 13fa9e947099c68ca9e694866a74b1f961d6bbc1 (25/36) (1 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite 531abc945443b9dbe022942fc0673677bdbb117d (25/36) (1 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite e93673d06921b5aced168976032c2aa87477513a (25/36) (1 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+Rewrite 69a2bded5104173fa5ee24142ddc0fc32705f48a (25/36) (1 seconds passed, remaining 0 predicted)    rm 'zipFile.zip'
+
+Ref 'refs/heads/main' was rewritten
+Ref 'refs/heads/replit-agent' was rewritten
+Ref 'refs/remotes/gitsafe-backup/main' was rewritten
+WARNING: Ref 'refs/remotes/origin/main' is unchanged
+WARNING: Ref 'refs/remotes/origin/main' is unchanged
+Ref 'refs/replit/agent-ledger' was rewritten
+~/workspace$ cd /home/runner/workspace/IN1BET-V10/in1bet && git push origin main --force
+Enumerating objects: 491, done.
+Counting objects: 100% (491/491), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (405/405), done.
+Writing objects: 100% (491/491), 33.46 MiB | 5.82 MiB/s, done.
+Total 491 (delta 135), reused 393 (delta 68), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (135/135), done.
+To https://github.com/ivofi20024w-art/in1bet.git
+ + bcb1bfa...7278613 main -> main (forced update)
+~/.../IN1BET-V10/in1bet$ 
