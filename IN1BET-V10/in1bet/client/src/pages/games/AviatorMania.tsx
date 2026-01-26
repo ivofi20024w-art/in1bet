@@ -27,7 +27,7 @@ interface ActiveBet {
 interface RoundBet {
   id: number;
   betAmount: string;
-  cashedOutAt: string | null;
+  cashoutMultiplier: string | null;
   profit: string | null;
   status: string;
   userName: string | null;
@@ -37,7 +37,7 @@ interface RoundBet {
 interface TopWin {
   id: number;
   betAmount: string;
-  cashedOutAt: string | null;
+  cashoutMultiplier: string | null;
   profit: string | null;
   status: string;
   userName: string | null;
@@ -434,9 +434,9 @@ export default function AviatorMania() {
                              </span>
                              <span className={cn(
                                "font-mono text-[10px] w-14 text-right font-bold truncate", 
-                               bet.cashedOutAt ? "text-secondary" : "text-muted-foreground/30"
+                               bet.cashoutMultiplier ? "text-secondary" : "text-muted-foreground/30"
                              )}>
-                               {bet.cashedOutAt ? `${parseFloat(bet.cashedOutAt).toFixed(2)}x` : "-"}
+                               {bet.cashoutMultiplier ? `${parseFloat(bet.cashoutMultiplier).toFixed(2)}x` : "-"}
                              </span>
                              <span className={cn(
                                "font-mono text-[10px] w-16 text-right font-bold truncate",
@@ -494,7 +494,7 @@ export default function AviatorMania() {
                                  {parseFloat(win.betAmount).toFixed(2)}
                                </span>
                                <span className="font-mono text-[10px] w-14 text-right font-bold text-yellow-500 truncate">
-                                 {win.cashedOutAt ? `${parseFloat(win.cashedOutAt).toFixed(2)}x` : "-"}
+                                 {win.cashoutMultiplier ? `${parseFloat(win.cashoutMultiplier).toFixed(2)}x` : "-"}
                                </span>
                                <span className="font-mono text-[10px] w-16 text-right font-bold text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] truncate">
                                   {win.profit ? parseFloat(win.profit).toFixed(2) : "-"}

@@ -314,7 +314,7 @@ router.get("/top-wins", async (req: Request, res: Response) => {
       .select({
         id: aviatorBets.id,
         betAmount: aviatorBets.betAmount,
-        cashedOutAt: aviatorBets.cashedOutAt,
+        cashoutMultiplier: aviatorBets.cashoutMultiplier,
         profit: aviatorBets.profit,
         status: aviatorBets.status,
         createdAt: aviatorBets.createdAt,
@@ -350,7 +350,7 @@ router.get("/round-bets", async (req: Request, res: Response) => {
       .select({
         id: aviatorBets.id,
         betAmount: aviatorBets.betAmount,
-        cashedOutAt: aviatorBets.cashedOutAt,
+        cashoutMultiplier: aviatorBets.cashoutMultiplier,
         profit: aviatorBets.profit,
         status: aviatorBets.status,
         userName: users.name,
