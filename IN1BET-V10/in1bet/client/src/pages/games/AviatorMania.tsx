@@ -159,7 +159,7 @@ function ProvablyFairModal({ provablyFair, nextServerSeedHash }: { provablyFair:
 export default function AviatorMania() {
   const { user, isAuthenticated, accessToken } = useAuth();
   const queryClient = useQueryClient();
-  const { multiplier, gameStatus, roundId, countdown, crashPoint, connected, showCrashMessage, history, provablyFair, nextServerSeedHash } = useAviatorWebSocket();
+  const { multiplier, gameStatus, roundId, countdown, crashPoint, connected, showCrashMessage, history, provablyFair, nextServerSeedHash, lastAutoCashout } = useAviatorWebSocket();
   const [gameState, setGameState] = useState<GameState>("BETTING");
   const [activeBets, setActiveBets] = useState<ActiveBet[]>([]);
   const [cashedOutBets, setCashedOutBets] = useState<{id: number, at: number}[]>([]);
@@ -212,6 +212,25 @@ export default function AviatorMania() {
       setGameState("CRASHED");
     }
   }, [gameStatus]);
+
+  useEffect(() => {
+    if (lastAutoCashout) {
+      const activeBet = activeBets.find(b => b.betId === lastAutoCashout.betId);
+      if (activeBet) {
+        setCashedOutBets(prev => {
+          if (prev.some(b => b.id === activeBet.panelId)) return prev;
+          return [...prev, { id: activeBet.panelId, at: lastAutoCashout.multiplier }];
+        });
+        refreshBalance();
+        queryClient.invalidateQueries({ queryKey: ["aviator-round-bets"] });
+        toast({
+          title: "Saque Automático!",
+          description: `Você sacou R$ ${lastAutoCashout.winAmount.toFixed(2)} em ${lastAutoCashout.multiplier.toFixed(2)}x`,
+          variant: "default",
+        });
+      }
+    }
+  }, [lastAutoCashout]);
 
   const handleBet = async (panelId: number, amount: number, autoCashoutAt?: number) => {
     if (!user) {

@@ -7,8 +7,14 @@ export interface ProvablyFairData {
   nonce?: number;
 }
 
+export interface AutoCashoutEvent {
+  betId: number;
+  multiplier: number;
+  winAmount: number;
+}
+
 export interface WebSocketMessage {
-  type: "state" | "countdown" | "multiplier" | "round_start" | "crash" | "new_round_starting";
+  type: "state" | "countdown" | "multiplier" | "round_start" | "crash" | "new_round_starting" | "auto_cashout";
   data: any;
 }
 
@@ -23,6 +29,7 @@ export function useAviatorWebSocket() {
   const [provablyFair, setProvablyFair] = useState<ProvablyFairData | null>(null);
   const [nextServerSeedHash, setNextServerSeedHash] = useState<string | null>(null);
   const [history, setHistory] = useState<{crashPoint: number, roundId: number}[]>([]);
+  const [lastAutoCashout, setLastAutoCashout] = useState<AutoCashoutEvent | null>(null);
   
   const ws = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<NodeJS.Timeout | null>(null);
@@ -116,9 +123,18 @@ export function useAviatorWebSocket() {
           case "new_round_starting":
             setGameStatus("waiting");
             setShowCrashMessage(false);
+            setLastAutoCashout(null);
             if (message.data.nextServerSeedHash) {
               setNextServerSeedHash(message.data.nextServerSeedHash);
             }
+            break;
+
+          case "auto_cashout":
+            setLastAutoCashout({
+              betId: message.data.betId,
+              multiplier: message.data.multiplier,
+              winAmount: message.data.winAmount,
+            });
             break;
         }
       } catch (error) {
@@ -167,5 +183,6 @@ export function useAviatorWebSocket() {
     provablyFair,
     nextServerSeedHash,
     history,
+    lastAutoCashout,
   };
 }
