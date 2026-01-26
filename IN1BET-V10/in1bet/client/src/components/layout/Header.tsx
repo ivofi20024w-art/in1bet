@@ -39,7 +39,7 @@ export function Header() {
                      location.startsWith('/mines') || 
                      location.startsWith('/plinko') ||
                      location.startsWith('/slots') ||
-                     location.startsWith('/aviator');
+                     location.startsWith('/games/');
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [gameModalOpen, setGameModalOpen] = useState(false);
