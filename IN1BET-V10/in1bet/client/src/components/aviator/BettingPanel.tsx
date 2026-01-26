@@ -34,7 +34,39 @@ export function BettingPanel({
   const [autoBet, setAutoBet] = useState(false);
   const [autoCashout, setAutoCashout] = useState(false);
   const [autoRounds, setAutoRounds] = useState(10);
+  const [autoRoundsRemaining, setAutoRoundsRemaining] = useState(0);
   const [autoCashoutMultiplier, setAutoCashoutMultiplier] = useState(2.00);
+  const [lastGameState, setLastGameState] = useState<string>("");
+
+  useEffect(() => {
+    if (autoBet && autoRoundsRemaining > 0 && gameState === "BETTING" && lastGameState === "CRASHED" && !isBetting) {
+      if (amount <= balance && amount >= MIN_BET) {
+        onBet(amount);
+        setAutoRoundsRemaining(prev => prev - 1);
+      }
+    }
+    setLastGameState(gameState);
+  }, [gameState, autoBet, autoRoundsRemaining, isBetting, amount, balance]);
+
+  useEffect(() => {
+    if (autoCashout && isBetting && !cashedOutAt && gameState === "FLYING") {
+      if (currentMultiplier >= autoCashoutMultiplier) {
+        onCashout();
+      }
+    }
+  }, [currentMultiplier, autoCashout, isBetting, cashedOutAt, gameState, autoCashoutMultiplier]);
+
+  useEffect(() => {
+    if (autoBet && autoRoundsRemaining === 0) {
+      setAutoRoundsRemaining(autoRounds);
+    }
+  }, [autoBet]);
+
+  useEffect(() => {
+    if (!autoBet) {
+      setAutoRoundsRemaining(0);
+    }
+  }, [autoBet]);
 
   const adjustAmount = (delta: number) => {
     setAmount(prev => Math.max(MIN_BET, prev + delta));
@@ -141,11 +173,18 @@ export function BettingPanel({
                 <Input 
                   type="number"
                   value={autoRounds}
-                  onChange={(e) => setAutoRounds(Math.max(1, Math.min(100, Number(e.target.value))))}
+                  onChange={(e) => {
+                    const val = Math.max(1, Math.min(100, Number(e.target.value)));
+                    setAutoRounds(val);
+                    setAutoRoundsRemaining(val);
+                  }}
                   min={1}
                   max={100}
                   className="h-5 w-12 text-center font-mono text-xs bg-transparent border-none focus-visible:ring-0 p-0"
                 />
+                {autoRoundsRemaining > 0 && (
+                  <span className="text-secondary font-bold">({autoRoundsRemaining})</span>
+                )}
               </div>
             )}
             {autoCashout && (
