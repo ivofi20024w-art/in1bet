@@ -38,7 +38,8 @@ export function Header() {
                      location.startsWith('/crash') || 
                      location.startsWith('/mines') || 
                      location.startsWith('/plinko') ||
-                     location.startsWith('/slots');
+                     location.startsWith('/slots') ||
+                     location.startsWith('/aviator');
   const [searchQuery, setSearchQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
   const [gameModalOpen, setGameModalOpen] = useState(false);
