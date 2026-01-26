@@ -37,5 +37,5 @@ externalPort = 80
 [userenv]
 
 [userenv.shared]
-JWT_SECRET = "fDc+1QCDCNaacBuUP0ych8rcsKe6FQBOy657OxEQnmI="
+JWT_SECRET = "15ff59be27981085b63d275b755078f290ea45466ecc81a0e6a5815f3eececfa28e3dbe2b18d021b7c212b3beab66b8a4de55ad3f633125648a72a6eefd3895d"
 DATABASE_URL = "postgresql://neondb_owner:npg_rE15cDGWeBTO@ep-purple-grass-ahk928kt-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require"
