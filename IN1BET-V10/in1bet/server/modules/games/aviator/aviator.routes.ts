@@ -17,7 +17,7 @@ export function setAviatorEngine(engine: any) {
 
 router.post("/bet", authMiddleware, async (req: Request, res: Response) => {
   try {
-    const { amount } = req.body;
+    const { amount, autoCashoutAt } = req.body;
     const userId = req.user!.id;
     
     if (!amount || amount < 0.10) {
@@ -74,6 +74,7 @@ router.post("/bet", authMiddleware, async (req: Request, res: Response) => {
       roundId: targetRoundId,
       userId,
       betAmount: amount.toFixed(2),
+      autoCashoutAt: autoCashoutAt ? autoCashoutAt.toFixed(2) : null,
       status: "pending",
     }).returning();
 

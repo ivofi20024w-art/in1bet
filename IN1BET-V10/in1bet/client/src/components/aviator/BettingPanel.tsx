@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 interface BettingPanelProps {
   id: number;
   gameState: "IDLE" | "BETTING" | "FLYING" | "CRASHED";
-  onBet: (amount: number) => void;
+  onBet: (amount: number, autoCashoutAt?: number) => void;
   onCashout: () => void;
   isBetting: boolean;
   cashedOutAt: number | null;
@@ -41,20 +41,12 @@ export function BettingPanel({
   useEffect(() => {
     if (autoBet && autoRoundsRemaining > 0 && gameState === "BETTING" && lastGameState === "CRASHED" && !isBetting) {
       if (amount <= balance && amount >= MIN_BET) {
-        onBet(amount);
+        onBet(amount, autoCashout ? autoCashoutMultiplier : undefined);
         setAutoRoundsRemaining(prev => prev - 1);
       }
     }
     setLastGameState(gameState);
-  }, [gameState, autoBet, autoRoundsRemaining, isBetting, amount, balance]);
-
-  useEffect(() => {
-    if (autoCashout && isBetting && !cashedOutAt && gameState === "FLYING") {
-      if (currentMultiplier >= autoCashoutMultiplier) {
-        onCashout();
-      }
-    }
-  }, [currentMultiplier, autoCashout, isBetting, cashedOutAt, gameState, autoCashoutMultiplier]);
+  }, [gameState, autoBet, autoRoundsRemaining, isBetting, amount, balance, autoCashout, autoCashoutMultiplier]);
 
   useEffect(() => {
     if (autoBet && autoRoundsRemaining === 0) {
@@ -82,7 +74,7 @@ export function BettingPanel({
       if (amount < MIN_BET) {
         return;
       }
-      onBet(amount);
+      onBet(amount, autoCashout ? autoCashoutMultiplier : undefined);
     }
   };
 

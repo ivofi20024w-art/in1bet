@@ -213,7 +213,7 @@ export default function AviatorMania() {
     }
   }, [gameStatus]);
 
-  const handleBet = async (panelId: number, amount: number) => {
+  const handleBet = async (panelId: number, amount: number, autoCashoutAt?: number) => {
     if (!user) {
       toast({
         title: "Login Necessário",
@@ -230,7 +230,7 @@ export default function AviatorMania() {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify({ amount, autoCashoutAt }),
       });
 
       const data = await response.json();
@@ -354,7 +354,7 @@ export default function AviatorMania() {
                 currentMultiplier={multiplier}
                 isBetting={activeBets.some(b => b.panelId === 1)}
                 cashedOutAt={cashedOutBets.find(b => b.id === 1)?.at || null}
-                onBet={(amount) => handleBet(1, amount)}
+                onBet={(amount, autoCashoutAt) => handleBet(1, amount, autoCashoutAt)}
                 onCashout={() => handleCashout(1)}
                 balance={balance}
               />
@@ -364,7 +364,7 @@ export default function AviatorMania() {
                 currentMultiplier={multiplier}
                 isBetting={activeBets.some(b => b.panelId === 2)}
                 cashedOutAt={cashedOutBets.find(b => b.id === 2)?.at || null}
-                onBet={(amount) => handleBet(2, amount)}
+                onBet={(amount, autoCashoutAt) => handleBet(2, amount, autoCashoutAt)}
                 onCashout={() => handleCashout(2)}
                 balance={balance}
               />

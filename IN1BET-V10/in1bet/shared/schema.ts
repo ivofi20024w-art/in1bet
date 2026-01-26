@@ -2876,6 +2876,7 @@ export const aviatorBets = pgTable("aviator_bets", {
   userId: varchar("user_id").notNull().references(() => users.id),
   betAmount: numeric("bet_amount", { precision: 15, scale: 2 }).notNull(),
   cashoutMultiplier: numeric("cashout_multiplier", { precision: 10, scale: 2 }),
+  autoCashoutAt: numeric("auto_cashout_at", { precision: 10, scale: 2 }),
   profit: numeric("profit", { precision: 15, scale: 2 }),
   status: varchar("status", { length: 20 }).default("pending").notNull(),
   cashedOutAt: timestamp("cashed_out_at"),

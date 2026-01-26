@@ -1,8 +1,8 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { Server as HTTPServer } from "http";
 import { db } from "../../../db";
-import { aviatorRounds, aviatorBets } from "../../../../shared/schema";
-import { eq, desc } from "drizzle-orm";
+import { aviatorRounds, aviatorBets, wallets, transactions } from "../../../../shared/schema";
+import { eq, desc, and, isNotNull } from "drizzle-orm";
 import crypto from "crypto";
 
 const WAITING_DURATION = 15000;
@@ -188,6 +188,8 @@ export class AviatorEngine {
         if (currentMultiplier >= this.gameState.crashPoint) {
           await this.crashGame();
         } else {
+          await this.processAutoCashouts(currentMultiplier);
+          
           this.broadcast({
             type: "multiplier",
             data: {
@@ -301,6 +303,78 @@ export class AviatorEngine {
         nonce: provablyFairData.nonce,
       },
     });
+  }
+
+  private async processAutoCashouts(currentMultiplier: number) {
+    if (!this.gameState.roundId) return;
+    
+    const betsToAutoCashout = await db
+      .select()
+      .from(aviatorBets)
+      .where(and(
+        eq(aviatorBets.roundId, this.gameState.roundId),
+        eq(aviatorBets.status, "active"),
+        isNotNull(aviatorBets.autoCashoutAt)
+      ));
+    
+    for (const bet of betsToAutoCashout) {
+      const autoCashoutAt = parseFloat(bet.autoCashoutAt!);
+      if (currentMultiplier >= autoCashoutAt) {
+        try {
+          const betAmount = parseFloat(bet.betAmount);
+          const winAmount = betAmount * autoCashoutAt;
+          const profit = winAmount - betAmount;
+
+          await db
+            .update(aviatorBets)
+            .set({
+              cashoutMultiplier: autoCashoutAt.toFixed(2),
+              profit: profit.toFixed(2),
+              status: "won",
+              cashedOutAt: new Date(),
+            })
+            .where(eq(aviatorBets.id, bet.id));
+
+          const [wallet] = await db
+            .select()
+            .from(wallets)
+            .where(eq(wallets.userId, bet.userId));
+
+          if (wallet) {
+            const oldBalance = parseFloat(wallet.balance);
+            const newBalance = (oldBalance + winAmount).toFixed(2);
+            await db
+              .update(wallets)
+              .set({ balance: newBalance })
+              .where(eq(wallets.userId, bet.userId));
+
+            await db.insert(transactions).values({
+              userId: bet.userId,
+              walletId: wallet.id,
+              type: "WIN",
+              amount: winAmount.toFixed(2),
+              balanceBefore: oldBalance.toFixed(2),
+              balanceAfter: newBalance,
+              description: `Saque automático Aviator - ${autoCashoutAt.toFixed(2)}x`,
+              status: "COMPLETED",
+            });
+
+            console.log(`[Aviator] Auto-cashout: User ${bet.userId} at ${autoCashoutAt.toFixed(2)}x, won ${winAmount.toFixed(2)}`);
+            
+            this.broadcast({
+              type: "auto_cashout",
+              data: {
+                betId: bet.id,
+                multiplier: autoCashoutAt,
+                winAmount,
+              },
+            });
+          }
+        } catch (error) {
+          console.error(`[Aviator] Auto-cashout error for bet ${bet.id}:`, error);
+        }
+      }
+    }
   }
 
   private async crashGame() {
