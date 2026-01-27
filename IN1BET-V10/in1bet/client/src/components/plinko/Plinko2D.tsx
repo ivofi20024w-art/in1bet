@@ -393,6 +393,7 @@ export function Plinko2D() {
       });
       
       pins.current.forEach((pin) => {
+        if (!isFinite(pin.x) || !isFinite(pin.y)) return;
         ctx.shadowColor = IN1BET_COLORS.primary;
         ctx.shadowBlur = 8;
         const pinGrad = ctx.createRadialGradient(pin.x - 1, pin.y - 1, 0, pin.x, pin.y, PIN_RADIUS);

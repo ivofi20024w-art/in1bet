@@ -763,8 +763,6 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
-  const messageAudioRef = useRef<HTMLAudioElement | null>(null);
-  const mentionAudioRef = useRef<HTMLAudioElement | null>(null);
   const prevMessageCountRef = useRef<number>(0);
   
   const [unauthOnlineCount, setUnauthOnlineCount] = useState(0);
@@ -793,14 +791,6 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
   
   const displayOnlineCount = accessToken ? roomOnlineCount : unauthOnlineCount;
 
-  // Initialize audio elements
-  useEffect(() => {
-    messageAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-    messageAudioRef.current.volume = 0.3;
-    mentionAudioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2570/2570-preview.mp3');
-    mentionAudioRef.current.volume = 0.5;
-  }, []);
-
   // Save settings to localStorage
   useEffect(() => {
     localStorage.setItem('chat_settings', JSON.stringify(chatSettings));
@@ -810,16 +800,30 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
     setChatSettings(prev => ({ ...prev, [key]: value }));
   };
 
-  // Play sound for new messages
+  // Play sound using Web Audio API (always works, no external files)
   const playMessageSound = useCallback((isMention: boolean = false) => {
     if (!chatSettings.soundEnabled) return;
     try {
-      if (isMention && mentionAudioRef.current) {
-        mentionAudioRef.current.currentTime = 0;
-        mentionAudioRef.current.play().catch(() => {});
-      } else if (messageAudioRef.current) {
-        messageAudioRef.current.currentTime = 0;
-        messageAudioRef.current.play().catch(() => {});
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      if (isMention) {
+        oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+        oscillator.frequency.setValueAtTime(1100, audioContext.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+      } else {
+        oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.15);
       }
     } catch {}
   }, [chatSettings.soundEnabled]);
