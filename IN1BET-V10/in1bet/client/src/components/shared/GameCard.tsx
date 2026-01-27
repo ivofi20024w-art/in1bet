@@ -38,12 +38,8 @@ export function GameCard({ id, title, provider, image, hot, className, loading, 
 
   if (loading) {
       return (
-          <div className={cn("rounded-xl overflow-hidden", className)}>
+          <div className={cn("rounded-2xl overflow-hidden", className)}>
               <Skeleton className="w-full aspect-square bg-secondary/30" />
-              <div className="p-2 bg-card">
-                <Skeleton className="h-4 w-3/4 bg-secondary/30 mb-1" />
-                <Skeleton className="h-3 w-1/2 bg-secondary/30" />
-              </div>
           </div>
       )
   }
@@ -52,12 +48,13 @@ export function GameCard({ id, title, provider, image, hot, className, loading, 
       <div 
         onClick={handleCardClick}
         className={cn(
-          "group relative rounded-xl overflow-hidden bg-card border-2 border-white/5 transition-all duration-300 cursor-pointer",
-          "hover:border-orange-500/70 hover:shadow-[0_0_30px_-5px_rgba(249,115,22,0.6)] hover:-translate-y-2",
+          "group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300",
+          "border-2 border-transparent hover:border-orange-500",
+          "hover:shadow-[0_0_25px_rgba(249,115,22,0.5)]",
           className
         )}>
         
-        <div className="relative aspect-square overflow-hidden">
+        <div className="relative aspect-square overflow-hidden bg-[#1a1a1f]">
           {imageLoading && !imageError && (
             <div className="absolute inset-0 bg-secondary/30 animate-pulse" />
           )}
@@ -71,8 +68,8 @@ export function GameCard({ id, title, provider, image, hot, className, loading, 
               src={image} 
               alt={title} 
               className={cn(
-                "w-full h-full object-cover transition-all duration-500",
-                "group-hover:scale-110 group-hover:brightness-110",
+                "w-full h-full object-cover transition-all duration-300",
+                "group-hover:scale-105",
                 imageLoading && "opacity-0"
               )}
               loading="lazy"
@@ -94,30 +91,27 @@ export function GameCard({ id, title, provider, image, hot, className, loading, 
             <button 
               onClick={handleFavoriteClick}
               className={cn(
-                "absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all z-20",
+                "absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all z-20 border border-white/20",
                 isFav 
-                  ? "bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)]" 
-                  : "bg-black/60 text-white/80 opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white hover:shadow-[0_0_15px_rgba(239,68,68,0.5)]"
+                  ? "bg-white/20 text-white" 
+                  : "bg-black/40 text-white/70 opacity-0 group-hover:opacity-100 hover:bg-white/20"
               )}
               data-testid={`favorite-btn-${idHash}`}
             >
-              <Heart className={cn("w-4 h-4", isFav && "fill-current")} />
+              <Heart className={cn("w-4 h-4", isFav && "fill-current text-red-500")} />
             </button>
           )}
 
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
-            <div className="absolute inset-0 bg-gradient-to-t from-orange-600/40 via-orange-500/20 to-transparent" />
-            <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(249,115,22,0.7)] transform scale-0 group-hover:scale-100 transition-all duration-300 border-2 border-white/30">
+            <div className="w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center shadow-lg transform scale-75 group-hover:scale-100 transition-all duration-300">
               <Play className="w-7 h-7 text-white fill-white ml-1" />
             </div>
           </div>
 
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        </div>
-
-        <div className="p-3 bg-gradient-to-b from-[#1a1a1f] to-[#0f0f12] border-t border-white/5">
-          <p className="text-white font-semibold truncate text-sm group-hover:text-orange-400 transition-colors duration-300">{title}</p>
-          <p className="text-muted-foreground text-xs truncate capitalize">{provider}</p>
+          <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/90 via-black/60 to-transparent">
+            <p className="text-white font-semibold truncate text-sm">{title}</p>
+            <p className="text-orange-400 text-xs truncate capitalize">{provider}</p>
+          </div>
         </div>
       </div>
   );
