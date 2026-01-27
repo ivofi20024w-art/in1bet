@@ -127,8 +127,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }
 
     const auth = getStoredAuthState();
-    if (!auth.accessToken) {
-      console.log('[ChatStore] connect ABORTED - no auth token');
+    if (!auth.isAuthenticated) {
+      console.log('[ChatStore] connect ABORTED - not authenticated');
       return;
     }
 
@@ -142,10 +142,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
     wsInstance = ws;
 
     ws.onopen = () => {
-      console.log('[ChatStore] WebSocket OPEN, sending auth...');
-      const currentAuth = getStoredAuthState();
-      console.log('[ChatStore] Auth token (first 20 chars):', currentAuth.accessToken?.slice(0, 20));
-      ws.send(JSON.stringify({ type: 'auth', token: currentAuth.accessToken }));
+      console.log('[ChatStore] WebSocket OPEN, sending auth (cookie-based)...');
+      ws.send(JSON.stringify({ type: 'auth' }));
     };
 
     ws.onmessage = async (event) => {
@@ -170,14 +168,14 @@ export const useChatStore = create<ChatState>((set, get) => ({
       }
 
       const auth = getStoredAuthState();
-      if (auth.accessToken && event.code !== 1000) {
+      if (auth.isAuthenticated && event.code !== 1000) {
         console.log('[ChatStore] Will reconnect in', RECONNECT_DELAY, 'ms');
         reconnectTimeout = setTimeout(() => {
           console.log('[ChatStore] Attempting reconnect...');
           get().connect();
         }, RECONNECT_DELAY);
       } else {
-        console.log('[ChatStore] Not reconnecting - code=1000 or no token');
+        console.log('[ChatStore] Not reconnecting - code=1000 or not authenticated');
       }
     };
 

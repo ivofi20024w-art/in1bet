@@ -34,6 +34,16 @@ function verifyAccessToken(token: string): JWTPayload | null {
   }
 }
 
+function extractTokenFromCookies(cookieHeader: string | undefined): string | null {
+  if (!cookieHeader) return null;
+  const cookies = cookieHeader.split(';').reduce((acc, cookie) => {
+    const [key, value] = cookie.trim().split('=');
+    if (key && value) acc[key] = value;
+    return acc;
+  }, {} as Record<string, string>);
+  return cookies['access_token'] || null;
+}
+
 interface ChatClient {
   ws: WebSocket;
   userId: string;
@@ -112,9 +122,10 @@ export function setupChatWebSocket(server: Server) {
         
         switch (message.type) {
           case "auth": {
-            console.log(`[CHAT WS][${connectionId}] Auth attempt with token: ${message.token ? message.token.slice(0, 20) + '...' : 'NONE'}`);
-            const token = message.token;
-            const decoded = verifyAccessToken(token);
+            const cookieToken = extractTokenFromCookies(req.headers.cookie);
+            const token = message.token || cookieToken;
+            console.log(`[CHAT WS][${connectionId}] Auth attempt - messageToken: ${message.token ? 'yes' : 'no'}, cookieToken: ${cookieToken ? 'yes' : 'no'}`);
+            const decoded = verifyAccessToken(token || '');
             
             if (!decoded) {
               console.log(`[CHAT WS][${connectionId}] Auth FAILED - token invalid or expired`);

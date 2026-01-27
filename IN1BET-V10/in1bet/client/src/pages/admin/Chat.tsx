@@ -136,15 +136,15 @@ export default function AdminChat() {
 
   const fetchData = useCallback(async () => {
     try {
-      const headers = { Authorization: `Bearer ${auth.accessToken}` };
+      const opts = { credentials: 'include' as RequestCredentials };
       
       const [statsRes, reportsRes, penaltiesRes, wordsRes, roomsRes, modsRes] = await Promise.all([
-        fetch("/api/chat/admin/stats", { headers }),
-        fetch("/api/chat/admin/reports?status=PENDING", { headers }),
-        fetch("/api/chat/admin/penalties", { headers }),
-        fetch("/api/chat/admin/bad-words", { headers }),
-        fetch("/api/chat/rooms", { headers }),
-        fetch("/api/chat/admin/chat-moderators", { headers }),
+        fetch("/api/chat/admin/stats", opts),
+        fetch("/api/chat/admin/reports?status=PENDING", opts),
+        fetch("/api/chat/admin/penalties", opts),
+        fetch("/api/chat/admin/bad-words", opts),
+        fetch("/api/chat/rooms", opts),
+        fetch("/api/chat/admin/chat-moderators", opts),
       ]);
 
       if (statsRes.ok) setStats(await statsRes.json());
@@ -158,20 +158,20 @@ export default function AdminChat() {
     } finally {
       setLoading(false);
     }
-  }, [auth.accessToken]);
+  }, []);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
   
   useEffect(() => {
-    if (isLiveMonitoring && auth.accessToken) {
+    if (isLiveMonitoring && auth.isAuthenticated) {
       const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       const ws = new WebSocket(`${protocol}//${window.location.host}/ws/chat`);
       wsRef.current = ws;
       
       ws.onopen = () => {
-        ws.send(JSON.stringify({ type: "auth", token: auth.accessToken }));
+        ws.send(JSON.stringify({ type: "auth" }));
       };
       
       ws.onmessage = (event) => {
@@ -196,16 +196,14 @@ export default function AdminChat() {
         ws.close();
       };
     }
-  }, [isLiveMonitoring, auth.accessToken]);
+  }, [isLiveMonitoring, auth.isAuthenticated]);
 
   const handleReportAction = async (reportId: string, action: "approve" | "reject", penaltyType?: string) => {
     try {
       const res = await fetch(`/api/chat/admin/reports/${reportId}/action`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include' as RequestCredentials,
         body: JSON.stringify({ action, penaltyType }),
       });
 
@@ -225,7 +223,7 @@ export default function AdminChat() {
     try {
       const res = await fetch(`/api/chat/admin/penalty/${penaltyId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include' as RequestCredentials,
       });
 
       if (res.ok) {
@@ -247,10 +245,8 @@ export default function AdminChat() {
     try {
       const res = await fetch("/api/chat/admin/bad-words", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include' as RequestCredentials,
         body: JSON.stringify({ word: newWord.trim() }),
       });
 
@@ -271,7 +267,7 @@ export default function AdminChat() {
     try {
       const res = await fetch(`/api/chat/admin/bad-words/${wordId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include' as RequestCredentials,
       });
 
       if (res.ok) {
@@ -294,10 +290,8 @@ export default function AdminChat() {
     try {
       const res = await fetch("/api/chat/admin/rooms", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include' as RequestCredentials,
         body: JSON.stringify({
           name: newRoom.name.toLowerCase().replace(/\s/g, "-"),
           displayName: newRoom.displayName,
@@ -325,10 +319,8 @@ export default function AdminChat() {
     try {
       const res = await fetch(`/api/chat/admin/rooms/${roomId}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include' as RequestCredentials,
         body: JSON.stringify({ isActive }),
       });
       
@@ -350,10 +342,8 @@ export default function AdminChat() {
     try {
       const res = await fetch("/api/chat/admin/set-moderator-role", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include' as RequestCredentials,
         body: JSON.stringify({
           userId: newModeratorId,
           role: newModeratorRole,
@@ -378,10 +368,8 @@ export default function AdminChat() {
     try {
       const res = await fetch("/api/chat/admin/set-moderator-role", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include' as RequestCredentials,
         body: JSON.stringify({ userId, role: "NONE" }),
       });
       
