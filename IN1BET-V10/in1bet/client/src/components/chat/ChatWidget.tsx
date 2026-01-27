@@ -349,7 +349,11 @@ function DraggableMessageItem({
   isAdmin,
   onAdminAction,
   showTimestamps,
-  compactMode
+  compactMode,
+  showStaffBadge,
+  isStaff,
+  chatIsAdmin,
+  chatMyRole
 }: { 
   msg: Message; 
   currentUser: User; 
@@ -360,6 +364,10 @@ function DraggableMessageItem({
   onAdminAction?: (action: 'ban' | 'mute' | 'delete', msg: Message) => void;
   showTimestamps?: boolean;
   compactMode?: boolean;
+  showStaffBadge?: boolean;
+  isStaff?: boolean;
+  chatIsAdmin?: boolean;
+  chatMyRole?: string;
 }) {
   const x = useMotionValue(0);
   const opacity = useTransform(x, [0, 50, 100], [0, 1, 0]);
@@ -1251,6 +1259,10 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
               onAdminAction={handleAdminAction}
               showTimestamps={chatSettings.showTimestamps}
               compactMode={chatSettings.compactMode}
+              showStaffBadge={showStaffBadge}
+              isStaff={isStaff}
+              chatIsAdmin={chatIsAdmin}
+              chatMyRole={chatMyRole}
             />
           ))}
           <div ref={messagesEndRef} />
