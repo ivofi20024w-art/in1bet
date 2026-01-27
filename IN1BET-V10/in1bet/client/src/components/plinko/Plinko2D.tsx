@@ -21,19 +21,19 @@ type RowsOption = 8 | 12 | 16;
 
 const MULTIPLIERS: Record<RiskLevel, Record<RowsOption, number[]>> = {
   LOW: {
-    8: [5.6, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 5.6],
-    12: [8.9, 3, 1.4, 1.1, 1, 0.5, 0.3, 0.5, 1, 1.1, 1.4, 3, 8.9],
-    16: [16, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9, 16],
+    8: [5.6, 2.1, 1.1, 0.5, 0.3, 0.5, 1.1, 2.1, 5.6],
+    12: [8.9, 3, 1.4, 1.1, 0.5, 0.3, 0.2, 0.3, 0.5, 1.1, 1.4, 3, 8.9],
+    16: [16, 9, 2, 1.4, 1.2, 0.7, 0.4, 0.3, 0.2, 0.3, 0.4, 0.7, 1.2, 1.4, 2, 9, 16],
   },
   MEDIUM: {
-    8: [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
-    12: [33, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 33],
-    16: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110],
+    8: [13, 3, 1.3, 0.4, 0.2, 0.4, 1.3, 3, 13],
+    12: [33, 11, 4, 2, 0.6, 0.3, 0.2, 0.3, 0.6, 2, 4, 11, 33],
+    16: [110, 41, 10, 5, 3, 1, 0.4, 0.2, 0.1, 0.2, 0.4, 1, 3, 5, 10, 41, 110],
   },
   HIGH: {
-    8: [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
-    12: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170],
-    16: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000],
+    8: [29, 4, 1.5, 0.2, 0.1, 0.2, 1.5, 4, 29],
+    12: [170, 24, 8.1, 2, 0.4, 0.1, 0.1, 0.1, 0.4, 2, 8.1, 24, 170],
+    16: [1000, 130, 26, 9, 4, 1, 0.1, 0.1, 0.1, 0.1, 0.1, 1, 4, 9, 26, 130, 1000],
   },
 };
 
@@ -53,6 +53,8 @@ interface AnimatedBall {
   id: string;
   x: number;
   y: number;
+  vx: number;
+  vy: number;
   pathIndex: number;
   positions: { x: number; y: number }[];
   bet: number;
@@ -60,6 +62,7 @@ interface AnimatedBall {
   winAmount: number;
   bucket: number;
   completed: boolean;
+  progress: number;
 }
 
 interface Pin {
@@ -341,6 +344,8 @@ export function Plinko2D() {
         id,
         x: CANVAS_WIDTH / 2,
         y: 25,
+        vx: 0,
+        vy: 0,
         pathIndex: 0,
         positions,
         bet: amount,
@@ -348,6 +353,7 @@ export function Plinko2D() {
         winAmount: bet.winAmount,
         bucket: bet.bucket,
         completed: false,
+        progress: 0,
       };
 
       animatedBallsRef.current.push(ball);
@@ -454,11 +460,25 @@ export function Plinko2D() {
           const dy = target.y - ball.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
 
-          const speed = 5;
-          if (isFinite(dist) && dist > speed) {
-            ball.x += (dx / dist) * speed;
-            ball.y += (dy / dist) * speed;
+          const gravity = 0.35;
+          const friction = 0.98;
+          const bounce = 0.6;
+          
+          ball.vy += gravity;
+          ball.vx *= friction;
+          ball.vy *= friction;
+          
+          const baseSpeed = 3 + Math.min(ball.vy, 4);
+          
+          if (isFinite(dist) && dist > baseSpeed) {
+            const dirX = dx / dist;
+            const dirY = dy / dist;
+            ball.vx += dirX * 0.8;
+            ball.vy += dirY * 0.5;
+            ball.x += ball.vx;
+            ball.y += ball.vy;
           } else {
+            ball.vx *= bounce * (Math.random() * 0.4 + 0.8);
             ball.x = target.x;
             ball.y = target.y;
             ball.pathIndex++;
