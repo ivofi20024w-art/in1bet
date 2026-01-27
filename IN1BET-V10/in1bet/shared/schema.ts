@@ -69,6 +69,9 @@ export const users = pgTable("users", {
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
   twoFactorSecret: text("two_factor_secret"),
   twoFactorBackupCodes: text("two_factor_backup_codes"),
+  hideWins: boolean("hide_wins").default(false),
+  avatarUrl: text("avatar_url"),
+  profileBackground: text("profile_background"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

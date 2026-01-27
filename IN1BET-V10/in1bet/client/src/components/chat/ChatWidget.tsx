@@ -39,7 +39,7 @@ import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { getStoredAuth } from "@/lib/auth";
 import { toast } from "sonner";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuthModal } from "@/stores/authModalStore";
 import { useChatStore, type ChatMessage as StoreChatMessage } from "@/stores/chatStore";
 
@@ -84,18 +84,38 @@ interface ChatRoom {
 }
 
 interface UserStats {
-  totalWagered: number;
-  totalWins: number;
-  totalGames: number;
-  ranking: number;
-  favoriteGame: string;
-  favoriteGameRounds: number;
+  user: {
+    id: string;
+    username: string;
+    level: number;
+    xp: number;
+    vipLevel: string;
+    hideWins: boolean;
+    avatarUrl: string | null;
+    profileBackground: string | null;
+    createdAt: string;
+    daysSinceJoin: number;
+  };
+  stats: {
+    totalWagered: number | null;
+    totalBets: number;
+    totalWins: number | null;
+    totalWinAmount: number | null;
+    biggestWin: number | null;
+    winRate: number | null;
+    totalGames: number;
+    ranking: number;
+    favoriteGame: string;
+    favoriteGameRounds: number;
+  };
   recentWins: Array<{
+    id: string;
     game: string;
     multiplier: number;
-    amount: number;
+    amount: number | null;
     createdAt: string;
   }>;
+  isOwner: boolean;
 }
 
 interface ChatSettings {
@@ -674,6 +694,11 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
   const [activeTab, setActiveTab] = useState<'global' | 'highrollers' | 'casino'>('global');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [profileTab, setProfileTab] = useState<'overview' | 'wins' | 'stats'>('overview');
+  const [showEditProfile, setShowEditProfile] = useState(false);
+  const [editHideWins, setEditHideWins] = useState(false);
+  const [editAvatarUrl, setEditAvatarUrl] = useState('');
+  const [editBackgroundUrl, setEditBackgroundUrl] = useState('');
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   const [replyingTo, setReplyingTo] = useState<Message | null>(null);
   const [showRules, setShowRules] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -829,11 +854,53 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
   }, [chatSettings.soundEnabled]);
 
   // Fetch user stats when profile is opened
+  const queryClient = useQueryClient();
   const { data: userStats, isLoading: isLoadingStats } = useQuery({
     queryKey: ['user-stats', selectedUser?.id],
     queryFn: () => selectedUser ? fetchUserStats(selectedUser.id) : null,
     enabled: !!selectedUser,
   });
+
+  // Initialize edit form when stats load
+  useEffect(() => {
+    if (userStats?.isOwner) {
+      setEditHideWins(userStats.user.hideWins || false);
+      setEditAvatarUrl(userStats.user.avatarUrl || '');
+      setEditBackgroundUrl(userStats.user.profileBackground || '');
+    }
+  }, [userStats]);
+
+  // Update profile mutation
+  const updateProfile = async () => {
+    setIsUpdatingProfile(true);
+    try {
+      const auth = getStoredAuth();
+      const res = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+        body: JSON.stringify({
+          hideWins: editHideWins,
+          avatarUrl: editAvatarUrl || null,
+          profileBackground: editBackgroundUrl || null,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        toast.success('Perfil atualizado!');
+        queryClient.invalidateQueries({ queryKey: ['user-stats'] });
+        setShowEditProfile(false);
+      } else {
+        toast.error(data.error || 'Erro ao atualizar perfil');
+      }
+    } catch {
+      toast.error('Erro ao atualizar perfil');
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
 
   // Close emoji picker on outside click
   useEffect(() => {
@@ -1112,53 +1179,167 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="absolute inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
-            onClick={() => setSelectedUser(null)}
+            onClick={() => { setSelectedUser(null); setShowEditProfile(false); }}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-[#13151C] border border-white/10 rounded-xl shadow-2xl w-full max-w-xs overflow-hidden"
+              className="bg-[#13151C] border border-white/10 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden max-h-[85vh] flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Profile Header */}
-              <div className="relative h-24 bg-gradient-to-br from-orange-500/20 via-amber-500/10 to-transparent">
-                <div className="absolute -bottom-8 left-4">
-                  <div 
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold shadow-xl border-4 border-[#13151C]"
-                    style={{ 
-                      background: `linear-gradient(135deg, ${selectedUser.color}40, ${selectedUser.color}10)`,
-                      color: selectedUser.color
-                    }}
-                  >
-                    {selectedUser.username.charAt(0).toUpperCase()}
-                  </div>
+              {/* Profile Header with Background */}
+              <div 
+                className="relative h-28 bg-gradient-to-br from-orange-500/20 via-amber-500/10 to-transparent bg-cover bg-center shrink-0"
+                style={userStats?.user?.profileBackground ? { 
+                  backgroundImage: `url(${userStats.user.profileBackground})`,
+                  backgroundSize: 'cover'
+                } : {}}
+              >
+                <div className="absolute inset-0 bg-gradient-to-t from-[#13151C] to-transparent" />
+                <div className="absolute -bottom-10 left-4">
+                  {userStats?.user?.avatarUrl ? (
+                    <img 
+                      src={userStats.user.avatarUrl} 
+                      alt={selectedUser.username}
+                      className="w-20 h-20 rounded-2xl object-cover shadow-xl border-4 border-[#13151C]"
+                    />
+                  ) : (
+                    <div 
+                      className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold shadow-xl border-4 border-[#13151C]"
+                      style={{ 
+                        background: `linear-gradient(135deg, ${selectedUser.color}40, ${selectedUser.color}10)`,
+                        color: selectedUser.color
+                      }}
+                    >
+                      {selectedUser.username.charAt(0).toUpperCase()}
+                    </div>
+                  )}
                 </div>
-                <button
-                  onClick={() => setSelectedUser(null)}
-                  className="absolute top-2 right-2 p-1.5 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-colors"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+                <div className="absolute top-2 right-2 flex gap-1">
+                  {userStats?.isOwner && (
+                    <button
+                      onClick={() => setShowEditProfile(!showEditProfile)}
+                      className="p-1.5 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-colors"
+                    >
+                      <Settings className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setSelectedUser(null); setShowEditProfile(false); }}
+                    className="p-1.5 bg-black/30 hover:bg-black/50 rounded-full text-white/70 hover:text-white transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
               
               {/* Profile Info */}
-              <div className="pt-10 px-4 pb-4">
+              <div className="pt-12 px-4 pb-4 overflow-y-auto flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-lg font-bold" style={{ color: selectedUser.color }}>
-                    {selectedUser.username}
+                  <h3 className="text-xl font-bold" style={{ color: selectedUser.color }}>
+                    {userStats?.user?.username || selectedUser.username}
                   </h3>
                   {getRankBadge(selectedUser.rank, selectedUser.role)}
+                  {userStats?.user?.hideWins && !userStats.isOwner && (
+                    <span className="text-[10px] bg-zinc-700/50 text-zinc-400 px-1.5 py-0.5 rounded">
+                      Privado
+                    </span>
+                  )}
                 </div>
                 
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-1">
                   <div className={cn(
                     "px-2 py-0.5 rounded text-[10px] font-bold",
-                    getLevelStyle(selectedUser.level)
+                    getLevelStyle(userStats?.user?.level || selectedUser.level)
                   )}>
-                    Nível {selectedUser.level}
+                    Nível {userStats?.user?.level || selectedUser.level}
                   </div>
+                  {userStats?.user && (
+                    <span className="text-[10px] text-muted-foreground">
+                      {userStats.user.xp} XP
+                    </span>
+                  )}
                 </div>
+                
+                {userStats?.user && (
+                  <p className="text-[10px] text-muted-foreground mb-4">
+                    Membro há {userStats.user.daysSinceJoin} dias
+                  </p>
+                )}
+
+                {/* Edit Profile Panel */}
+                {showEditProfile && userStats?.isOwner && (
+                  <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10 space-y-3">
+                    <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                      <Settings className="w-4 h-4" /> Editar Perfil
+                    </h4>
+                    
+                    <label className="flex items-center justify-between cursor-pointer">
+                      <span className="text-xs text-zinc-300">Esconder Vitórias</span>
+                      <button
+                        onClick={() => setEditHideWins(!editHideWins)}
+                        className={cn(
+                          "w-10 h-5 rounded-full transition-colors relative",
+                          editHideWins ? "bg-orange-500" : "bg-zinc-700"
+                        )}
+                      >
+                        <span className={cn(
+                          "absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform",
+                          editHideWins ? "left-5" : "left-0.5"
+                        )} />
+                      </button>
+                    </label>
+                    
+                    <div className="space-y-1">
+                      <label className="text-xs text-zinc-300 flex items-center gap-1">
+                        Avatar GIF/Imagem
+                        {(userStats.user.level < 50) && (
+                          <span className="text-[10px] text-yellow-500">(Nível 50+)</span>
+                        )}
+                      </label>
+                      <input
+                        type="text"
+                        value={editAvatarUrl}
+                        onChange={(e) => setEditAvatarUrl(e.target.value)}
+                        placeholder="https://imgur.com/exemplo.gif"
+                        disabled={userStats.user.level < 50}
+                        className={cn(
+                          "w-full px-2 py-1.5 text-xs bg-black/30 border border-white/10 rounded text-white placeholder:text-zinc-500",
+                          userStats.user.level < 50 && "opacity-50 cursor-not-allowed"
+                        )}
+                      />
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <label className="text-xs text-zinc-300 flex items-center gap-1">
+                        Background GIF/Imagem
+                        {(userStats.user.level < 50) && (
+                          <span className="text-[10px] text-yellow-500">(Nível 50+)</span>
+                        )}
+                      </label>
+                      <input
+                        type="text"
+                        value={editBackgroundUrl}
+                        onChange={(e) => setEditBackgroundUrl(e.target.value)}
+                        placeholder="https://imgur.com/fundo.gif"
+                        disabled={userStats.user.level < 50}
+                        className={cn(
+                          "w-full px-2 py-1.5 text-xs bg-black/30 border border-white/10 rounded text-white placeholder:text-zinc-500",
+                          userStats.user.level < 50 && "opacity-50 cursor-not-allowed"
+                        )}
+                      />
+                    </div>
+                    
+                    <button
+                      onClick={updateProfile}
+                      disabled={isUpdatingProfile}
+                      className="w-full py-2 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-xs font-bold rounded transition-colors"
+                    >
+                      {isUpdatingProfile ? 'Salvando...' : 'Salvar Alterações'}
+                    </button>
+                  </div>
+                )}
 
                 {/* Stats Tabs */}
                 <div className="flex gap-1 mb-4">
@@ -1189,44 +1370,99 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
                       <>
                         <div className="grid grid-cols-2 gap-2">
                           <div className="bg-white/5 rounded-lg p-3">
-                            <div className="text-[10px] text-muted-foreground uppercase">Total Apostado</div>
-                            <div className="text-sm font-bold text-white">R$ {formatCurrency(userStats.totalWagered)}</div>
+                            <div className="text-[10px] text-muted-foreground uppercase">Total Jogos</div>
+                            <div className="text-sm font-bold text-white">{userStats.stats.totalGames.toLocaleString()}</div>
                           </div>
                           <div className="bg-white/5 rounded-lg p-3">
-                            <div className="text-[10px] text-muted-foreground uppercase">Ganhos</div>
-                            <div className="text-sm font-bold text-green-400">R$ {formatCurrency(userStats.totalWins)}</div>
+                            <div className="text-[10px] text-muted-foreground uppercase">Vitórias</div>
+                            <div className="text-sm font-bold text-green-400">
+                              {userStats.stats.totalWins !== null ? userStats.stats.totalWins.toLocaleString() : '---'}
+                            </div>
                           </div>
                         </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="bg-white/5 rounded-lg p-3">
+                            <div className="text-[10px] text-muted-foreground uppercase">Taxa Vitória</div>
+                            <div className="text-sm font-bold text-yellow-400">
+                              {userStats.stats.winRate !== null ? `${userStats.stats.winRate}%` : '---'}
+                            </div>
+                          </div>
+                          <div className="bg-white/5 rounded-lg p-3">
+                            <div className="text-[10px] text-muted-foreground uppercase">Ranking</div>
+                            <div className="text-sm font-bold text-orange-500">#{userStats.stats.ranking}</div>
+                          </div>
+                        </div>
+                        {userStats.stats.totalWagered !== null && (
+                          <div className="bg-white/5 rounded-lg p-3">
+                            <div className="text-[10px] text-muted-foreground uppercase">Total Apostado</div>
+                            <div className="text-sm font-bold text-white">R$ {formatCurrency(userStats.stats.totalWagered)}</div>
+                          </div>
+                        )}
                         <div className="bg-white/5 rounded-lg p-3">
                           <div className="text-[10px] text-muted-foreground uppercase mb-1">Jogo Favorito</div>
                           <div className="flex items-center gap-2">
                             <Gamepad2 className="w-4 h-4 text-orange-500" />
-                            <span className="text-sm font-bold text-white">{userStats.favoriteGame}</span>
-                            <span className="text-xs text-muted-foreground ml-auto">{userStats.favoriteGameRounds} partidas</span>
+                            <span className="text-sm font-bold text-white">{userStats.stats.favoriteGame}</span>
+                            <span className="text-xs text-muted-foreground ml-auto">{userStats.stats.favoriteGameRounds} partidas</span>
                           </div>
                         </div>
                       </>
                     )}
-                    {profileTab === 'wins' && userStats.recentWins && (
-                      <div className="space-y-2 max-h-40 overflow-y-auto">
-                        {userStats.recentWins.map((win, i) => (
-                          <div key={i} className="flex items-center gap-2 bg-white/5 rounded-lg p-2">
-                            <div className="text-sm font-bold text-green-400">R$ {formatCurrency(win.amount)}</div>
-                            <div className="text-[10px] text-yellow-500 font-mono">{win.multiplier}x</div>
-                            <div className="text-xs text-muted-foreground ml-auto">{win.game}</div>
+                    {profileTab === 'wins' && (
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {userStats.recentWins.length > 0 ? (
+                          userStats.recentWins.map((win) => (
+                            <div key={win.id} className="flex items-center gap-2 bg-white/5 rounded-lg p-2.5">
+                              <div className="flex-1">
+                                <div className="text-xs font-medium text-white">{win.game}</div>
+                                <div className="text-[10px] text-muted-foreground">
+                                  {new Date(win.createdAt).toLocaleDateString('pt-BR')}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                {win.amount !== null && (
+                                  <div className="text-sm font-bold text-green-400">R$ {formatCurrency(win.amount)}</div>
+                                )}
+                                <div className="text-[10px] text-yellow-500 font-mono">{win.multiplier}x</div>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-4 text-xs text-muted-foreground">
+                            {userStats.user.hideWins && !userStats.isOwner ? 'Vitórias ocultadas' : 'Nenhuma vitória registrada'}
                           </div>
-                        ))}
+                        )}
                       </div>
                     )}
                     {profileTab === 'stats' && (
                       <div className="space-y-2">
                         <div className="flex items-center justify-between py-2 border-b border-white/5">
-                          <span className="text-xs text-muted-foreground">Total de Jogos</span>
-                          <span className="text-sm font-bold text-white">{userStats.totalGames}</span>
+                          <span className="text-xs text-muted-foreground">Total de Apostas</span>
+                          <span className="text-sm font-bold text-white">{userStats.stats.totalBets.toLocaleString()}</span>
                         </div>
                         <div className="flex items-center justify-between py-2 border-b border-white/5">
-                          <span className="text-xs text-muted-foreground">Ranking</span>
-                          <span className="text-sm font-bold text-orange-500">#{userStats.ranking}</span>
+                          <span className="text-xs text-muted-foreground">Total de Jogos</span>
+                          <span className="text-sm font-bold text-white">{userStats.stats.totalGames.toLocaleString()}</span>
+                        </div>
+                        {userStats.stats.biggestWin !== null && (
+                          <div className="flex items-center justify-between py-2 border-b border-white/5">
+                            <span className="text-xs text-muted-foreground">Maior Ganho</span>
+                            <span className="text-sm font-bold text-green-400">R$ {formatCurrency(userStats.stats.biggestWin)}</span>
+                          </div>
+                        )}
+                        {userStats.stats.totalWinAmount !== null && (
+                          <div className="flex items-center justify-between py-2 border-b border-white/5">
+                            <span className="text-xs text-muted-foreground">Total Ganho</span>
+                            <span className="text-sm font-bold text-green-400">R$ {formatCurrency(userStats.stats.totalWinAmount)}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between py-2 border-b border-white/5">
+                          <span className="text-xs text-muted-foreground">Ranking Global</span>
+                          <span className="text-sm font-bold text-orange-500">#{userStats.stats.ranking}</span>
+                        </div>
+                        <div className="flex items-center justify-between py-2">
+                          <span className="text-xs text-muted-foreground">VIP</span>
+                          <span className="text-sm font-bold text-purple-400 capitalize">{userStats.user.vipLevel}</span>
                         </div>
                       </div>
                     )}
