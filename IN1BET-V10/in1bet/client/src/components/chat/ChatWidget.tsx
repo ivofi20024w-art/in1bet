@@ -1313,17 +1313,17 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
                 </div>
               </div>
               
-              {/* Avatar positioned overlapping header and content */}
-              <div className="absolute left-1/2 -translate-x-1/2 top-[88px] z-20 w-20 h-20">
+              {/* Avatar positioned in left corner overlapping header */}
+              <div className="absolute left-4 top-[88px] z-20 w-16 h-16">
                 {userStats?.user?.avatarUrl ? (
                   <img 
                     src={userStats.user.avatarUrl} 
                     alt={selectedUser.username}
-                    className="w-20 h-20 rounded-2xl object-cover shadow-xl border-4 border-[#13151C]"
+                    className="w-16 h-16 rounded-xl object-cover shadow-xl border-3 border-[#13151C]"
                   />
                 ) : (
                   <div 
-                    className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold shadow-xl border-4 border-[#13151C]"
+                    className="w-16 h-16 rounded-xl flex items-center justify-center text-2xl font-bold shadow-xl border-3 border-[#13151C]"
                     style={{ 
                       background: `linear-gradient(135deg, ${selectedUser.color}40, ${selectedUser.color}10)`,
                       color: selectedUser.color
@@ -1335,16 +1335,16 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
               </div>
 
               {/* Profile Info */}
-              <div className="px-4 pb-4 pt-14 overflow-y-auto flex-1">
-                {/* Name and level centered */}
-                <div className="text-center mb-3">
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <h3 className="text-lg font-bold" style={{ color: selectedUser.color }}>
+              <div className="px-4 pb-4 pt-2 overflow-y-auto flex-1">
+                {/* Name and level - offset for avatar */}
+                <div className="pl-20 mb-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-lg font-bold truncate" style={{ color: selectedUser.color }}>
                       {userStats?.user?.username || selectedUser.username}
                     </h3>
                     {getRankBadge(selectedUser.rank, selectedUser.role)}
                   </div>
-                  <div className="flex items-center justify-center gap-2">
+                  <div className="flex items-center gap-2">
                     <div className={cn(
                       "px-2 py-0.5 rounded text-[10px] font-bold",
                       getLevelStyle(userStats?.user?.level || selectedUser.level)
@@ -1360,7 +1360,7 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
                 </div>
                 
                 {userStats?.user && (
-                  <p className="text-[10px] text-muted-foreground text-center mb-3">
+                  <p className="text-[10px] text-muted-foreground mb-3">
                     Membro há {userStats.user.daysSinceJoin} dias • {userStats.user.xp} XP
                   </p>
                 )}
