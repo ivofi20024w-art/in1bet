@@ -221,8 +221,17 @@ export function Sidebar({ className, isMobile = false }: SidebarProps) {
   useEffect(() => {
     if (!isMobile) {
       localStorage.setItem('sidebar-compact', String(isCompact));
+      // Update CSS variable for MainLayout to use
+      document.documentElement.style.setProperty('--sidebar-width', isCompact ? '72px' : '260px');
     }
   }, [isCompact, isMobile]);
+
+  // Set initial CSS variable on mount
+  useEffect(() => {
+    if (!isMobile) {
+      document.documentElement.style.setProperty('--sidebar-width', isCompact ? '72px' : '260px');
+    }
+  }, []);
 
   const toggleSection = (sectionId: string) => {
     setOpenSections(prev => ({

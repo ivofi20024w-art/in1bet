@@ -468,23 +468,22 @@ export default function Home() {
         </MainLayout>
       </div>
 
-      {/* Chat Sidebar - Desktop (Fixed Position - Right Side) */}
-      <div className={`hidden lg:block fixed top-0 right-0 h-full transition-all duration-300 z-40 ${chatVisible ? 'w-80' : 'w-0'}`}>
-        {chatVisible && (
+      {/* Chat Overlay - Desktop (Floating over content) */}
+      {chatVisible && (
+        <div className="hidden lg:block fixed bottom-4 right-4 w-[380px] h-[600px] z-50 rounded-xl overflow-hidden shadow-2xl border border-white/10">
           <ChatWidget className="h-full" onClose={() => setChatVisible(false)} />
-        )}
-      </div>
+        </div>
+      )}
 
-      {/* Chat Toggle Box - Desktop (Right Side) */}
+      {/* Chat Toggle Button - Desktop (Right Side) */}
       {!chatVisible && (
-        <div 
-          className="hidden lg:flex fixed right-0 top-1/2 -translate-y-1/2 z-40 flex-col items-center gap-2 px-2 py-4 bg-secondary border border-r-0 border-secondary-border rounded-l-lg shadow-lg cursor-pointer hover:bg-secondary/80 transition-colors"
+        <Button 
           onClick={() => setChatVisible(true)}
+          className="hidden lg:flex fixed bottom-4 right-4 h-14 w-14 rounded-full bg-orange-500 hover:bg-orange-600 shadow-lg z-40 items-center justify-center"
           data-testid="button-open-chat"
         >
-          <MessageCircle className="h-5 w-5 text-foreground" />
-          <span className="text-sm font-medium text-foreground [writing-mode:vertical-rl] [text-orientation:mixed]">Chat</span>
-        </div>
+          <MessageCircle className="h-6 w-6" />
+        </Button>
       )}
 
       {/* Chat Toggle Button - Mobile (Right Side) - Positioned above support chat */}
