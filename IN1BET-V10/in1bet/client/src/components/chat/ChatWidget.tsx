@@ -1313,49 +1313,52 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
                 </div>
               </div>
               
-              {/* Avatar positioned in left corner overlapping header */}
-              <div className="absolute left-4 top-[88px] z-20 w-16 h-16">
-                {userStats?.user?.avatarUrl ? (
-                  <img 
-                    src={userStats.user.avatarUrl} 
-                    alt={selectedUser.username}
-                    className="w-16 h-16 rounded-xl object-cover shadow-xl border-3 border-[#13151C]"
-                  />
-                ) : (
-                  <div 
-                    className="w-16 h-16 rounded-xl flex items-center justify-center text-2xl font-bold shadow-xl border-3 border-[#13151C]"
-                    style={{ 
-                      background: `linear-gradient(135deg, ${selectedUser.color}40, ${selectedUser.color}10)`,
-                      color: selectedUser.color
-                    }}
-                  >
-                    {selectedUser.username.charAt(0).toUpperCase()}
-                  </div>
-                )}
-              </div>
-
               {/* Profile Info */}
-              <div className="px-4 pb-4 pt-2 overflow-y-auto flex-1">
-                {/* Name and level - offset for avatar */}
-                <div className="pl-20 mb-3">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h3 className="text-lg font-bold truncate" style={{ color: selectedUser.color }}>
-                      {userStats?.user?.username || selectedUser.username}
-                    </h3>
-                    {getRankBadge(selectedUser.rank, selectedUser.role)}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className={cn(
-                      "px-2 py-0.5 rounded text-[10px] font-bold",
-                      getLevelStyle(userStats?.user?.level || selectedUser.level)
-                    )}>
-                      Nível {userStats?.user?.level || selectedUser.level}
-                    </div>
-                    {userStats?.user?.hideWins && !userStats.isOwner && (
-                      <span className="text-[10px] bg-zinc-700/50 text-zinc-400 px-1.5 py-0.5 rounded">
-                        Privado
-                      </span>
+              <div className="px-4 pb-4 pt-4 overflow-y-auto flex-1">
+                {/* Avatar + Name Row */}
+                <div className="flex items-center gap-3 mb-3">
+                  {/* Avatar */}
+                  <div className="w-14 h-14 shrink-0">
+                    {userStats?.user?.avatarUrl ? (
+                      <img 
+                        src={userStats.user.avatarUrl} 
+                        alt={selectedUser.username}
+                        className="w-14 h-14 rounded-xl object-cover shadow-lg border-2 border-white/10"
+                      />
+                    ) : (
+                      <div 
+                        className="w-14 h-14 rounded-xl flex items-center justify-center text-xl font-bold shadow-lg border-2 border-white/10"
+                        style={{ 
+                          background: `linear-gradient(135deg, ${selectedUser.color}40, ${selectedUser.color}10)`,
+                          color: selectedUser.color
+                        }}
+                      >
+                        {selectedUser.username.charAt(0).toUpperCase()}
+                      </div>
                     )}
+                  </div>
+                  
+                  {/* Name and Level */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className="text-lg font-bold truncate" style={{ color: selectedUser.color }}>
+                        {userStats?.user?.username || selectedUser.username}
+                      </h3>
+                      {getRankBadge(selectedUser.rank, selectedUser.role)}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "px-2 py-0.5 rounded text-[10px] font-bold",
+                        getLevelStyle(userStats?.user?.level || selectedUser.level)
+                      )}>
+                        Nível {userStats?.user?.level || selectedUser.level}
+                      </div>
+                      {userStats?.user?.hideWins && !userStats.isOwner && (
+                        <span className="text-[10px] bg-zinc-700/50 text-zinc-400 px-1.5 py-0.5 rounded">
+                          Privado
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
