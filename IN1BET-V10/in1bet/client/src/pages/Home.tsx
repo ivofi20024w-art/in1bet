@@ -297,13 +297,21 @@ export default function Home() {
           iconColor="red"
           gameCount={pragmaticGames.length}
           viewAllLink="/casino?provider=pragmaticslots"
+          showNavigation
+          carouselId="pragmatic-carousel"
         />
         {loadingPragmatic ? (
           <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
         ) : pragmaticGames.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div 
+            id="pragmatic-carousel"
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
+            style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+          >
             {pragmaticGames.map(game => (
-              <GameCard key={game.id} game={game} onPlay={() => handlePlayGame(game)} />
+              <div key={game.id} className="flex-shrink-0 w-[160px] sm:w-[180px]" style={{ scrollSnapAlign: 'start' }}>
+                <GameCard game={game} onPlay={() => handlePlayGame(game)} />
+              </div>
             ))}
           </div>
         )}
@@ -317,13 +325,21 @@ export default function Home() {
           iconColor="purple"
           gameCount={pgsoftGames.length}
           viewAllLink="/casino?provider=pgsoft"
+          showNavigation
+          carouselId="pgsoft-carousel"
         />
         {loadingPgsoft ? (
           <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
         ) : pgsoftGames.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div 
+            id="pgsoft-carousel"
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
+            style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+          >
             {pgsoftGames.map(game => (
-              <GameCard key={game.id} game={game} onPlay={() => handlePlayGame(game)} />
+              <div key={game.id} className="flex-shrink-0 w-[160px] sm:w-[180px]" style={{ scrollSnapAlign: 'start' }}>
+                <GameCard game={game} onPlay={() => handlePlayGame(game)} />
+              </div>
             ))}
           </div>
         )}
@@ -337,13 +353,21 @@ export default function Home() {
           iconColor="green"
           gameCount={hacksawGames.length}
           viewAllLink="/casino?provider=hacksaw"
+          showNavigation
+          carouselId="hacksaw-carousel"
         />
         {loadingHacksaw ? (
           <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 text-primary animate-spin" /></div>
         ) : hacksawGames.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          <div 
+            id="hacksaw-carousel"
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
+            style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+          >
             {hacksawGames.map(game => (
-              <GameCard key={game.id} game={game} onPlay={() => handlePlayGame(game)} />
+              <div key={game.id} className="flex-shrink-0 w-[160px] sm:w-[180px]" style={{ scrollSnapAlign: 'start' }}>
+                <GameCard game={game} onPlay={() => handlePlayGame(game)} />
+              </div>
             ))}
           </div>
         )}
