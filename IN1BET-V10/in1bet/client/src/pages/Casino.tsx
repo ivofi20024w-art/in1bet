@@ -476,15 +476,13 @@ export default function Casino() {
              </Link>
           ))}
           
-           <div className="min-w-[160px] h-24 rounded-xl bg-gradient-to-br from-yellow-600 to-yellow-800 relative overflow-hidden group cursor-pointer border border-white/5 hover:border-white/30 transition-all snap-start shadow-lg hover:-translate-y-1 duration-300">
-                <div className="absolute inset-0 flex items-center justify-between p-4">
-                    <div className="flex flex-col">
-                        <span className="font-heading font-bold text-lg text-white italic">VIP</span>
-                        <span className="text-[10px] font-medium text-yellow-200">Recompensas</span>
-                    </div>
-                    <Crown className="w-8 h-8 text-yellow-300 group-hover:rotate-12 transition-transform" />
-                </div>
-            </div>
+           <Link href="/vip" className="snap-start">
+              <img 
+                src="/btn-vip.png" 
+                alt="VIP Recompensas" 
+                className="w-[125px] h-[160px] rounded-xl object-cover cursor-pointer hover:scale-105 transition-transform duration-300 hover:shadow-[0_0_20px_rgba(234,179,8,0.5)]"
+              />
+            </Link>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
