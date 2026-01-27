@@ -270,6 +270,8 @@ export default function Home() {
           iconColor="orange"
           gameCount={popularGames.length}
           viewAllLink="/casino"
+          showNavigation
+          carouselId="popular-carousel"
         />
         
         {isLoading ? (
@@ -281,9 +283,15 @@ export default function Home() {
             <p>Jogos serão exibidos quando a integração SlotsGateway estiver configurada.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div 
+            id="popular-carousel"
+            className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
+            style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}
+          >
             {popularGames.map(game => (
-              <GameCard key={game.id} game={game} onPlay={() => handlePlayGame(game)} />
+              <div key={game.id} className="flex-shrink-0 w-[160px] sm:w-[180px]" style={{ scrollSnapAlign: 'start' }}>
+                <GameCard game={game} onPlay={() => handlePlayGame(game)} />
+              </div>
             ))}
           </div>
         )}
