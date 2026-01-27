@@ -52,6 +52,48 @@ interface RecentWinner {
   createdAt: string;
 }
 
+const TOP_100_GAMES = [
+  "Starburst", "Book of Dead", "Gonzo's Quest", "Mega Moolah", "Sweet Bonanza",
+  "Gates of Olympus", "Big Bass Bonanza", "Bonanza Megaways", "Immortal Romance", "Dead or Alive",
+  "Book of Ra", "Mega Fortune", "Legacy of Dead", "Reactoonz", "Fire Joker",
+  "Rise of Olympus", "Jammin' Jars", "Razor Shark", "Fat Rabbit", "Money Train 2",
+  "Money Train 3", "Temple Tumble", "Book of 99", "Dead Man's Trail", "Wanted Dead or a Wild",
+  "Chaos Crew", "Chaos Crew 2", "RIP City", "Le Bandit", "Duel at Dawn",
+  "The Dog House", "The Dog House Megaways", "Wolf Gold", "Buffalo King Megaways", "Great Rhino Megaways",
+  "Madame Destiny Megaways", "Sugar Rush", "Sugar Rush 1000", "Starlight Princess", "Fruit Party",
+  "Fruit Party 2", "Aztec Gems", "Xmas Big Bass Bonanza", "Big Bass Splash", "Big Bass Christmas Bash",
+  "Mustang Gold", "Wild West Gold", "5 Lions Megaways", "Sweet Bonanza 1000", "Gates of Olympus 1000",
+  "Sweet Alchemy", "Hand of Midas", "Eye of Cleopatra", "Madame Destiny", "Phoenix Rise",
+  "Rise of Merlin", "Thunderstruck II", "Avalon II", "Break da Bank Again", "9 Masks of Fire",
+  "Divine Fortune", "Dead or Alive 2", "Jack and the Beanstalk", "Finn and the Swirly Spin", "Jumanji",
+  "Dracula", "Cleopatra", "Cleopatra Gold", "Fire Lightning", "Buffalo Blitz",
+  "Age of the Gods", "Temple of Iris", "Valley of the Gods", "Vikings Go Berzerk", "Holmes and the Stolen Stones",
+  "Who Wants to Be a Millionaire", "Book of Oz", "Book of Kingdoms", "Book of Aztec", "San Quentin xWays",
+  "Mental", "Tombstone RIP", "Punk Rocker", "Fire in the Hole", "Fire in the Hole 2",
+  "Fire in the Hole 3", "Buffalo Stack'n'Sync", "Stack'em", "Big Bamboo", "Wild Bandito",
+  "Fortune Tiger", "Fortune Ox", "Fortune Rabbit", "Fortune Dragon", "Mahjong Ways",
+  "Mahjong Ways 2", "Honey Trap of Diao Chan", "Treasures of Aztec", "Bikini Paradise"
+];
+
+function sortGamesByTop100(games: SlotsgatewayGame[]): SlotsgatewayGame[] {
+  const normalizeGameName = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const top100Normalized = TOP_100_GAMES.map(normalizeGameName);
+  
+  return [...games].sort((a, b) => {
+    const aNameNorm = normalizeGameName(a.name);
+    const bNameNorm = normalizeGameName(b.name);
+    
+    const aIndex = top100Normalized.findIndex(topName => aNameNorm.includes(topName) || topName.includes(aNameNorm));
+    const bIndex = top100Normalized.findIndex(topName => bNameNorm.includes(topName) || topName.includes(bNameNorm));
+    
+    if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+    if (aIndex !== -1) return -1;
+    if (bIndex !== -1) return 1;
+    
+    return 0;
+  });
+}
+
 const MOCK_NAMES = [
   "Lucas", "Fernanda", "Gabriel", "Ana", "Pedro", "Juliana", "Matheus", "Carla",
   "Rafael", "Amanda", "Bruno", "Patricia", "Diego", "Camila", "Thiago", "Mariana",
@@ -250,7 +292,6 @@ export default function Casino() {
   }, [searchQuery]);
 
   useEffect(() => {
-    setGames([]);
     setOffset(0);
     setHasMore(false);
   }, [activeCategory, selectedProvider, debouncedSearch]);
@@ -289,9 +330,10 @@ export default function Casino() {
   };
 
   const categoryFilters = getCategoryFilters(activeCategory);
+  const gameTypeFilter = categoryFilters.gameType;
 
   const { isLoading: loadingGames, refetch } = useQuery({
-    queryKey: ['slotsgateway-games', selectedProvider, activeCategory, debouncedSearch, favorites],
+    queryKey: ['slotsgateway-games', selectedProvider, activeCategory, gameTypeFilter, debouncedSearch, activeCategory === 'favorites' ? favorites : null],
     queryFn: async () => {
       if (activeCategory === 'favorites') {
         if (favorites.length === 0) {
@@ -307,25 +349,27 @@ export default function Casino() {
           offset: 0,
         });
         const favoriteGames = result.games.filter(g => favorites.includes(g.idHash));
-        setGames(favoriteGames);
-        setTotalGames(favoriteGames.length);
+        const sortedFavorites = sortGamesByTop100(favoriteGames);
+        setGames(sortedFavorites);
+        setTotalGames(sortedFavorites.length);
         setHasMore(false);
         setOffset(0);
-        return { ...result, games: favoriteGames, total: favoriteGames.length, hasMore: false };
+        return { ...result, games: sortedFavorites, total: sortedFavorites.length, hasMore: false };
       }
       
       const result = await fetchGames({
         providerId: selectedProvider || undefined,
-        gameType: categoryFilters.gameType,
+        gameType: gameTypeFilter,
         search: debouncedSearch || undefined,
         limit: GAMES_PER_PAGE,
         offset: 0,
       });
-      setGames(result.games);
+      const sortedGames = sortGamesByTop100(result.games);
+      setGames(sortedGames);
       setTotalGames(result.total);
       setHasMore(result.hasMore);
       setOffset(GAMES_PER_PAGE);
-      return result;
+      return { ...result, games: sortedGames };
     },
     staleTime: 5 * 60 * 1000,
   });
@@ -335,12 +379,12 @@ export default function Casino() {
     try {
       const result = await fetchGames({
         providerId: selectedProvider || undefined,
-        gameType: categoryFilters.gameType,
+        gameType: gameTypeFilter,
         search: debouncedSearch || undefined,
         limit: GAMES_PER_PAGE,
         offset,
       });
-      setGames(prev => [...prev, ...result.games]);
+      setGames(prev => sortGamesByTop100([...prev, ...result.games]));
       setHasMore(result.hasMore);
       setOffset(prev => prev + GAMES_PER_PAGE);
     } catch (error) {
