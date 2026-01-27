@@ -4,12 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Shield, Smartphone, Key, AlertTriangle, Fingerprint, History, Eye, EyeOff, Loader2, CheckCircle, AlertCircle, Clock, Trash2 } from "lucide-react";
+import { ArrowLeft, Smartphone, Key, AlertTriangle, Fingerprint, History, Eye, EyeOff, Loader2, CheckCircle, AlertCircle, Trash2 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getStoredAuth } from "@/lib/auth";
+import { TwoFactorSettings } from "@/components/TwoFactorSettings";
 
 interface Session {
   id: string;
@@ -190,33 +191,7 @@ export default function Security() {
         </div>
 
         <div className="grid grid-cols-1 gap-6">
-          <div className="bg-gradient-to-r from-gray-800/40 to-gray-700/10 border border-gray-500/20 rounded-2xl p-6 relative overflow-hidden flex flex-col md:flex-row items-center gap-6">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gray-500/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none" />
-            
-            <div className="relative z-10 p-4 bg-gray-500/20 rounded-full shrink-0">
-              <Shield className="w-8 h-8 text-gray-400" />
-            </div>
-            
-            <div className="flex-1 text-center md:text-left relative z-10">
-              <div className="flex items-center gap-2 mb-2 justify-center md:justify-start">
-                <h3 className="text-xl font-bold text-white">Autenticação de Dois Fatores (2FA)</h3>
-                <Badge variant="secondary" className="text-[10px] bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Em Breve
-                </Badge>
-              </div>
-              <p className="text-gray-300 text-sm mb-4">Adicione uma camada extra de proteção à sua conta exigindo um código do Google Authenticator para fazer login.</p>
-              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                <Button 
-                  disabled
-                  className="bg-gray-600 text-gray-300 font-bold border-0 shadow-lg cursor-not-allowed opacity-50"
-                  data-testid="button-enable-2fa"
-                >
-                  <Smartphone className="w-4 h-4 mr-2" /> Ativar 2FA Agora
-                </Button>
-              </div>
-            </div>
-          </div>
+          <TwoFactorSettings />
 
           <Card className="bg-card border-white/5 shadow-lg">
             <CardHeader>
