@@ -10,7 +10,6 @@ import {
   Zap,
   Bomb,
   Target,
-  Dices,
   Gamepad2,
   Flame,
   PlayCircle,
@@ -46,8 +45,7 @@ const ORIGINALS_MENU: MenuItem[] = [
   { id: "double", label: "Double", path: "/games/double", icon: CircleDot },
   { id: "mines", label: "Mines", path: "/games/mines", icon: Bomb },
   { id: "plinko", label: "Plinko", path: "/games/plinko", icon: Target },
-  { id: "dice", label: "Dice", path: "/games/dice", icon: Dices },
-];
+  ];
 
 const CASINO_MENU: MenuItem[] = [
   { id: "slots", label: "Slots", path: "/casino", icon: Gamepad2 },
