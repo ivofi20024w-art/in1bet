@@ -22,7 +22,7 @@ type TierInfo = {
 function getTierInfo(level: number): TierInfo {
   if (level >= 500) {
     return {
-      name: "Diamond",
+      name: "DIAMANTE",
       colorFrom: "#60a5fa",
       colorTo: "#3b82f6",
       glowColor: "rgba(96, 165, 250, 0.5)",
@@ -32,7 +32,7 @@ function getTierInfo(level: number): TierInfo {
   }
   if (level >= 300) {
     return {
-      name: "Platinum",
+      name: "PLATINA",
       colorFrom: "#a78bfa",
       colorTo: "#8b5cf6",
       glowColor: "rgba(167, 139, 250, 0.5)",
@@ -42,7 +42,7 @@ function getTierInfo(level: number): TierInfo {
   }
   if (level >= 100) {
     return {
-      name: "Gold",
+      name: "OURO",
       colorFrom: "#fbbf24",
       colorTo: "#f59e0b",
       glowColor: "rgba(251, 191, 36, 0.5)",
@@ -52,7 +52,7 @@ function getTierInfo(level: number): TierInfo {
   }
   if (level >= 50) {
     return {
-      name: "Silver",
+      name: "PRATA",
       colorFrom: "#e2e8f0",
       colorTo: "#94a3b8",
       glowColor: "rgba(226, 232, 240, 0.4)",
@@ -61,7 +61,7 @@ function getTierInfo(level: number): TierInfo {
     };
   }
   return {
-    name: "Bronze",
+    name: "BRONZE",
     colorFrom: "#f97316",
     colorTo: "#ea580c",
     glowColor: "rgba(249, 115, 22, 0.5)",

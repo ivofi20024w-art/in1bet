@@ -54,10 +54,10 @@ interface DailyBoxRecord {
 
 const VIP_TIERS = [
   { name: "Bronze", minLevel: 1, color: "text-amber-600", bgColor: "bg-amber-600/10" },
-  { name: "Silver", minLevel: 50, color: "text-gray-300", bgColor: "bg-gray-300/10" },
-  { name: "Gold", minLevel: 100, color: "text-yellow-400", bgColor: "bg-yellow-400/10" },
-  { name: "Platinum", minLevel: 300, color: "text-cyan-400", bgColor: "bg-cyan-400/10" },
-  { name: "Diamond", minLevel: 500, color: "text-purple-400", bgColor: "bg-purple-400/10" },
+  { name: "Prata", minLevel: 50, color: "text-gray-300", bgColor: "bg-gray-300/10" },
+  { name: "Ouro", minLevel: 100, color: "text-yellow-400", bgColor: "bg-yellow-400/10" },
+  { name: "Platina", minLevel: 300, color: "text-cyan-400", bgColor: "bg-cyan-400/10" },
+  { name: "Diamante", minLevel: 500, color: "text-purple-400", bgColor: "bg-purple-400/10" },
 ];
 
 export default function Levels() {
