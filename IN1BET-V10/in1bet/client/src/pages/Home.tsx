@@ -325,20 +325,15 @@ export default function Home() {
           {ORIGINALS.map((game, index) => (
             <Link key={game.id} href={game.link} className="flex-shrink-0" style={{ scrollSnapAlign: 'start' }}>
               <div 
-                className="group relative w-[200px] sm:w-[220px] md:w-[240px] aspect-[2/3] rounded-2xl overflow-hidden cursor-pointer border-2 border-white/10 hover:border-orange-500/60 transition-all shadow-lg hover:shadow-[0_8px_40px_rgba(249,115,22,0.5)] hover:-translate-y-2 duration-300 bg-gradient-to-b from-[#1a1a1f] to-[#0f0f12]" 
+                className="group relative w-[150px] sm:w-[170px] md:w-[190px] aspect-[225/420] rounded-2xl overflow-hidden cursor-pointer border-2 border-white/10 hover:border-orange-500/60 transition-all shadow-lg hover:shadow-[0_8px_40px_rgba(249,115,22,0.5)] hover:-translate-y-2 duration-300" 
                 data-testid={`original-${game.id}`}
               >
                 <img 
                   src={game.img} 
                   alt={game.name}
-                  className="absolute inset-0 w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center shadow-[0_4px_20px_rgba(249,115,22,0.5)] transform scale-0 group-hover:scale-100 transition-transform duration-300">
-                    <Play className="w-6 h-6 text-white fill-white ml-0.5" />
-                  </div>
-                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
             </Link>
           ))}
