@@ -448,7 +448,7 @@ function DraggableMessageItem({
               </button>
               
               {showAdminMenu && (
-                <div className="absolute right-0 top-full mt-1 bg-[#1A1D29] border border-white/10 rounded-lg shadow-xl py-1 min-w-[140px] z-50">
+                <div className="absolute right-0 bottom-full mb-1 bg-[#1A1D29] border border-white/10 rounded-lg shadow-xl py-1 min-w-[140px] z-[100]">
                   <button 
                     onClick={() => {
                       onAdminAction?.('delete', msg);
