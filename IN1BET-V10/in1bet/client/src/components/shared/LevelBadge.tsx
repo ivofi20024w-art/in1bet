@@ -20,43 +20,43 @@ type TierInfo = {
 };
 
 function getTierInfo(level: number): TierInfo {
-  if (level >= 76) {
+  if (level >= 500) {
     return {
-      name: "Diamante",
-      colorFrom: "#a855f7",
-      colorTo: "#ec4899",
-      glowColor: "rgba(168, 85, 247, 0.6)",
-      bgGradient: "from-purple-500/20 via-pink-500/10 to-purple-500/20",
-      textColor: "text-purple-400",
-    };
-  }
-  if (level >= 51) {
-    return {
-      name: "Platina",
-      colorFrom: "#3b82f6",
-      colorTo: "#06b6d4",
-      glowColor: "rgba(59, 130, 246, 0.6)",
-      bgGradient: "from-blue-500/20 via-cyan-500/10 to-blue-500/20",
+      name: "Diamond",
+      colorFrom: "#60a5fa",
+      colorTo: "#3b82f6",
+      glowColor: "rgba(96, 165, 250, 0.5)",
+      bgGradient: "from-blue-500/20 via-blue-400/10 to-blue-500/20",
       textColor: "text-blue-400",
     };
   }
-  if (level >= 31) {
+  if (level >= 300) {
     return {
-      name: "Ouro",
-      colorFrom: "#f59e0b",
-      colorTo: "#fbbf24",
-      glowColor: "rgba(245, 158, 11, 0.6)",
-      bgGradient: "from-amber-500/20 via-yellow-500/10 to-amber-500/20",
+      name: "Platinum",
+      colorFrom: "#a78bfa",
+      colorTo: "#8b5cf6",
+      glowColor: "rgba(167, 139, 250, 0.5)",
+      bgGradient: "from-violet-500/20 via-violet-400/10 to-violet-500/20",
+      textColor: "text-violet-400",
+    };
+  }
+  if (level >= 100) {
+    return {
+      name: "Gold",
+      colorFrom: "#fbbf24",
+      colorTo: "#f59e0b",
+      glowColor: "rgba(251, 191, 36, 0.5)",
+      bgGradient: "from-amber-500/20 via-yellow-400/10 to-amber-500/20",
       textColor: "text-amber-400",
     };
   }
-  if (level >= 11) {
+  if (level >= 50) {
     return {
-      name: "Prata",
-      colorFrom: "#94a3b8",
-      colorTo: "#e2e8f0",
-      glowColor: "rgba(148, 163, 184, 0.5)",
-      bgGradient: "from-slate-400/20 via-slate-300/10 to-slate-400/20",
+      name: "Silver",
+      colorFrom: "#e2e8f0",
+      colorTo: "#94a3b8",
+      glowColor: "rgba(226, 232, 240, 0.4)",
+      bgGradient: "from-slate-300/20 via-slate-200/10 to-slate-300/20",
       textColor: "text-slate-300",
     };
   }
