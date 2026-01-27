@@ -3,7 +3,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Wallet, ArrowDownLeft, Lock, Gift, TrendingUp } from "lucide-react";
-import { getWallet, getStoredAuth } from "@/lib/auth";
+import { getWallet } from "@/lib/auth";
 import { WalletModal } from "./WalletModal";
 import { Link } from "wouter";
 
