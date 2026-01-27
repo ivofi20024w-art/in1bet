@@ -94,16 +94,15 @@ const HACKSAW_POPULAR_IDS = [
 ];
 
 async function fetchGamesByIds(ids: string[]): Promise<SlotsgatewayGame[]> {
-  const res = await fetch('/api/slotsgateway/games?limit=500', { credentials: 'include' });
+  const res = await fetch('/api/slotsgateway/games/by-ids', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ ids }),
+  });
   const data = await res.json();
   if (!data.success || !data.data) return [];
-  
-  const allGames = data.data as SlotsgatewayGame[];
-  const gameMap = new Map(allGames.map(g => [g.id, g]));
-  
-  return ids
-    .map(id => gameMap.get(id))
-    .filter((g): g is SlotsgatewayGame => g !== undefined);
+  return data.data;
 }
 
 async function fetchPopularGames(): Promise<SlotsgatewayGame[]> {

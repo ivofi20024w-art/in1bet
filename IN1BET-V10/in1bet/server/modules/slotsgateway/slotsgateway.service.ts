@@ -16,7 +16,7 @@ import {
   type SlotsgatewayPlayer,
   type SlotsgatewayTransaction,
 } from "@shared/schema";
-import { eq, desc, and, or, sql, like, ilike } from "drizzle-orm";
+import { eq, desc, and, or, sql, like, ilike, inArray } from "drizzle-orm";
 import { SlotsGatewayClient, SlotsGatewayApiError, type SlotsGatewayGame as ApiGame } from "./slotsgateway.client";
 import crypto from "crypto";
 import { addXpFromWager } from "../levels/level.service";
@@ -198,6 +198,20 @@ export class SlotsGatewayService {
       .limit(1);
     
     return game || null;
+  }
+
+  async getGamesByIds(ids: string[]): Promise<SlotsgatewayGame[]> {
+    if (ids.length === 0) return [];
+    
+    const allGames = await db
+      .select()
+      .from(slotsgatewayGames)
+      .where(inArray(slotsgatewayGames.id, ids));
+    
+    const gameMap = new Map(allGames.map(g => [g.id, g]));
+    return ids
+      .map(id => gameMap.get(id))
+      .filter((g): g is SlotsgatewayGame => g !== undefined);
   }
 
   async getOrCreatePlayer(userId: string): Promise<SlotsgatewayPlayer> {

@@ -42,6 +42,21 @@ router.get("/games", async (req: Request, res: Response) => {
   }
 });
 
+router.post("/games/by-ids", async (req: Request, res: Response) => {
+  try {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ success: false, error: "IDs obrigatórios" });
+    }
+    
+    const games = await slotsGatewayService.getGamesByIds(ids);
+    res.json({ success: true, data: games });
+  } catch (error: any) {
+    console.error("[SlotsGateway] Error fetching games by IDs:", error);
+    res.status(500).json({ success: false, error: "Erro ao buscar jogos" });
+  }
+});
+
 router.get("/games/:idHash", async (req: Request, res: Response) => {
   try {
     const { idHash } = req.params;
