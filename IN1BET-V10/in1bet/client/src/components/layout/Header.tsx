@@ -304,9 +304,9 @@ export function Header() {
 
                 <div className="hidden sm:block h-6 w-px bg-white/10 mx-1" />
 
-                <WalletPopover currentBalance={walletBalance} isGamePage={isGamePage}>
-                  <div className="flex items-center gap-1 sm:gap-2 bg-secondary/50 rounded-full pl-2 sm:pl-4 pr-1 py-1 border border-white/5 hover:border-primary/30 transition-colors cursor-pointer group">
-                    <div className="flex flex-col items-end leading-none mr-1 sm:mr-2">
+                <div className="flex items-center gap-1 sm:gap-2 bg-secondary/50 rounded-full pl-2 sm:pl-4 pr-1 py-1 border border-white/5 hover:border-primary/30 transition-colors group">
+                  <WalletPopover currentBalance={walletBalance} isGamePage={isGamePage}>
+                    <div className="flex flex-col items-end leading-none mr-1 sm:mr-2 cursor-pointer">
                       <span className="hidden sm:block text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Saldo</span>
                       <span className="text-xs sm:text-sm font-bold text-primary tabular-nums group-hover:text-white transition-colors">
                         {isGamePage ? (
@@ -316,15 +316,15 @@ export function Header() {
                         )}
                       </span>
                     </div>
-                    
-                    <WalletModal>
-                      <Button size="sm" className="h-7 sm:h-8 rounded-full px-2 sm:px-4 bg-primary hover:bg-primary/90 text-white shadow-[0_0_15px_-3px_rgba(242,102,49,0.4)]">
-                        <Wallet className="w-4 h-4 sm:mr-2" />
-                        <span className="hidden sm:inline">Depositar</span>
-                      </Button>
-                    </WalletModal>
-                  </div>
-                </WalletPopover>
+                  </WalletPopover>
+                  
+                  <WalletModal>
+                    <Button size="sm" className="h-7 sm:h-8 rounded-full px-2 sm:px-4 bg-primary hover:bg-primary/90 text-white shadow-[0_0_15px_-3px_rgba(242,102,49,0.4)]">
+                      <Wallet className="w-4 h-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Depositar</span>
+                    </Button>
+                  </WalletModal>
+                </div>
 
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
