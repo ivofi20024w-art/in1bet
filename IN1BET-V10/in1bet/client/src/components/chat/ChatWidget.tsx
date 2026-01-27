@@ -379,7 +379,7 @@ function DraggableMessageItem({
       initial={{ opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className="relative overflow-hidden group"
+      className="relative group"
     >
       <motion.div 
         style={{ opacity, scale, x: -20 }}
