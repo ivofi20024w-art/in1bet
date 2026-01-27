@@ -183,8 +183,8 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
 
   const handleGeneratePix = async () => {
     const amountNum = parseFloat(amount);
-    if (!amount || amountNum < 1) {
-      toast.error("O valor mínimo de depósito é R$ 1,00");
+    if (!amount || amountNum < 20) {
+      toast.error("O valor mínimo de depósito é R$ 20,00");
       return;
     }
 
@@ -456,7 +456,7 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
                         onChange={(e) => setAmount(e.target.value)}
                         className="pl-10 bg-secondary/50 border-white/10 focus-visible:ring-primary font-bold text-xl h-12" 
                         data-testid="input-deposit-amount"
-                        min="1"
+                        min="20"
                         step="1"
                       />
                     </div>
