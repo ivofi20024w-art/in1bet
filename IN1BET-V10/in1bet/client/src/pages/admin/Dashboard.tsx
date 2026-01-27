@@ -96,9 +96,11 @@ function formatDate(dateStr: string): string {
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const auth = getStoredAuth();
 
-  const fetchStats = useCallback(async () => {
+  const fetchStats = useCallback(async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
     try {
       const response = await fetch("/api/admin/dashboard-stats", {
         headers: { Authorization: `Bearer ${auth.accessToken}` },
@@ -111,6 +113,7 @@ export default function AdminDashboard() {
       console.error("Error fetching stats:", error);
     } finally {
       setLoading(false);
+      if (isRefresh) setRefreshing(false);
     }
   }, [auth.accessToken]);
 
@@ -260,11 +263,12 @@ export default function AdminDashboard() {
           <Button
             variant="outline"
             size="sm"
-            onClick={fetchStats}
+            onClick={() => fetchStats(true)}
+            disabled={refreshing}
             className="gap-2"
           >
-            <RefreshCw className="h-4 w-4" />
-            Atualizar
+            <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            {refreshing ? 'Atualizando...' : 'Atualizar'}
           </Button>
         </div>
 
