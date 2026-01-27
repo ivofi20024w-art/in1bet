@@ -216,7 +216,12 @@ function parseCasinoWinMessage(content: string): CasinoWinInfo | null {
   const match = content.match(/Ganhou R\$ ([\d.,]+) no ([^\s(]+(?:\s+\w+)?)(?: \(([\d.]+)x\))?/);
   if (!match) return null;
   
-  const amountStr = match[1].replace(/\./g, '').replace(',', '.');
+  let amountStr = match[1];
+  if (amountStr.includes(',') && amountStr.includes('.')) {
+    amountStr = amountStr.replace(/\./g, '').replace(',', '.');
+  } else if (amountStr.includes(',')) {
+    amountStr = amountStr.replace(',', '.');
+  }
   const amount = parseFloat(amountStr);
   const gameName = match[2].trim();
   const multiplier = match[3] ? parseFloat(match[3]) : undefined;
