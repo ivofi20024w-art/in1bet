@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
@@ -21,7 +22,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Gift,
@@ -66,6 +75,43 @@ interface UserBonus {
   } | null;
 }
 
+interface BonusFormData {
+  name: string;
+  description: string;
+  type: string;
+  percentage: number;
+  maxValue: number;
+  fixedAmount: number;
+  maxWithdrawal: number;
+  rolloverMultiplier: number;
+  minDeposit: number;
+  isFirstDepositOnly: boolean;
+  validDays: number;
+}
+
+const initialFormData: BonusFormData = {
+  name: "",
+  description: "",
+  type: "FIRST_DEPOSIT",
+  percentage: 100,
+  maxValue: 500,
+  fixedAmount: 0,
+  maxWithdrawal: 0,
+  rolloverMultiplier: 35,
+  minDeposit: 20,
+  isFirstDepositOnly: false,
+  validDays: 30,
+};
+
+const typeLabels: Record<string, string> = {
+  FIRST_DEPOSIT: "Primeiro Depósito",
+  RELOAD: "Recarga",
+  CASHBACK: "Cashback",
+  FREE_BET: "Aposta Grátis",
+  VIP: "VIP",
+  NO_DEPOSIT: "Sem Depósito",
+};
+
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat("pt-BR", {
     style: "currency",
@@ -90,6 +136,10 @@ export default function AdminBonuses() {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [selectedBonus, setSelectedBonus] = useState<Bonus | null>(null);
+  const [formData, setFormData] = useState<BonusFormData>(initialFormData);
   const auth = getStoredAuth();
 
   const fetchBonuses = useCallback(async () => {
@@ -152,6 +202,89 @@ export default function AdminBonuses() {
     }
   };
 
+  const handleCreateBonus = async () => {
+    if (!formData.name.trim()) {
+      toast.error("Nome do bônus é obrigatório");
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const response = await fetch("/api/admin/bonuses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success("Promoção criada com sucesso!");
+        setShowCreateDialog(false);
+        setFormData(initialFormData);
+        fetchBonuses();
+      } else {
+        toast.error(data.error || "Erro ao criar promoção");
+      }
+    } catch (error) {
+      toast.error("Erro ao criar promoção");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleEditBonus = async () => {
+    if (!selectedBonus || !formData.name.trim()) {
+      toast.error("Nome do bônus é obrigatório");
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const response = await fetch(`/api/admin/bonuses/${selectedBonus.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      if (response.ok) {
+        toast.success("Promoção atualizada com sucesso!");
+        setShowEditDialog(false);
+        setSelectedBonus(null);
+        setFormData(initialFormData);
+        fetchBonuses();
+      } else {
+        toast.error(data.error || "Erro ao atualizar promoção");
+      }
+    } catch (error) {
+      toast.error("Erro ao atualizar promoção");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const openEditDialog = (bonus: Bonus) => {
+    setSelectedBonus(bonus);
+    setFormData({
+      name: bonus.name,
+      description: bonus.description || "",
+      type: bonus.type,
+      percentage: bonus.percentage,
+      maxValue: bonus.maxValue,
+      fixedAmount: bonus.fixedAmount,
+      maxWithdrawal: bonus.maxWithdrawal,
+      rolloverMultiplier: bonus.rolloverMultiplier,
+      minDeposit: bonus.minDeposit,
+      isFirstDepositOnly: bonus.isFirstDepositOnly,
+      validDays: bonus.validDays,
+    });
+    setShowEditDialog(true);
+  };
+
   const handleCancelUserBonus = async () => {
     if (!selectedUserBonus || !cancelReason.trim()) {
       toast.error("Informe o motivo do cancelamento");
@@ -196,7 +329,7 @@ export default function AdminBonuses() {
     };
     return (
       <Badge className={colors[type] || "bg-gray-500/20 text-gray-500"}>
-        {type}
+        {typeLabels[type] || type}
       </Badge>
     );
   };
@@ -224,13 +357,152 @@ export default function AdminBonuses() {
     (ub) => ub.status === "ACTIVE" && ub.rolloverRemaining > ub.rolloverTotal * 0.5
   );
 
+  const BonusFormFields = () => (
+    <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Nome *</Label>
+          <Input
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Ex: Bônus de Boas-Vindas"
+            className="bg-[#0a0a0a] border-gray-800"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label>Tipo *</Label>
+          <Select
+            value={formData.type}
+            onValueChange={(v) => setFormData({ ...formData, type: v })}
+          >
+            <SelectTrigger className="bg-[#0a0a0a] border-gray-800">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="FIRST_DEPOSIT">Primeiro Depósito</SelectItem>
+              <SelectItem value="RELOAD">Recarga</SelectItem>
+              <SelectItem value="CASHBACK">Cashback</SelectItem>
+              <SelectItem value="FREE_BET">Aposta Grátis</SelectItem>
+              <SelectItem value="VIP">VIP</SelectItem>
+              <SelectItem value="NO_DEPOSIT">Sem Depósito</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Descrição</Label>
+        <Textarea
+          value={formData.description}
+          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          placeholder="Descrição da promoção"
+          className="bg-[#0a0a0a] border-gray-800"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Percentual (%)</Label>
+          <Input
+            type="number"
+            value={formData.percentage}
+            onChange={(e) => setFormData({ ...formData, percentage: parseFloat(e.target.value) || 0 })}
+            placeholder="100"
+            className="bg-[#0a0a0a] border-gray-800"
+          />
+          <p className="text-xs text-gray-500">Percentual do depósito</p>
+        </div>
+        <div className="space-y-2">
+          <Label>Valor Máximo (R$)</Label>
+          <Input
+            type="number"
+            value={formData.maxValue}
+            onChange={(e) => setFormData({ ...formData, maxValue: parseFloat(e.target.value) || 0 })}
+            placeholder="500"
+            className="bg-[#0a0a0a] border-gray-800"
+          />
+          <p className="text-xs text-gray-500">Limite do bônus</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Valor Fixo (R$)</Label>
+          <Input
+            type="number"
+            value={formData.fixedAmount}
+            onChange={(e) => setFormData({ ...formData, fixedAmount: parseFloat(e.target.value) || 0 })}
+            placeholder="0"
+            className="bg-[#0a0a0a] border-gray-800"
+          />
+          <p className="text-xs text-gray-500">0 = usar percentual</p>
+        </div>
+        <div className="space-y-2">
+          <Label>Saque Máximo (R$)</Label>
+          <Input
+            type="number"
+            value={formData.maxWithdrawal}
+            onChange={(e) => setFormData({ ...formData, maxWithdrawal: parseFloat(e.target.value) || 0 })}
+            placeholder="0"
+            className="bg-[#0a0a0a] border-gray-800"
+          />
+          <p className="text-xs text-gray-500">0 = ilimitado</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Rollover (x)</Label>
+          <Input
+            type="number"
+            value={formData.rolloverMultiplier}
+            onChange={(e) => setFormData({ ...formData, rolloverMultiplier: parseFloat(e.target.value) || 1 })}
+            placeholder="35"
+            className="bg-[#0a0a0a] border-gray-800"
+          />
+          <p className="text-xs text-gray-500">Multiplicador de apostas</p>
+        </div>
+        <div className="space-y-2">
+          <Label>Depósito Mínimo (R$)</Label>
+          <Input
+            type="number"
+            value={formData.minDeposit}
+            onChange={(e) => setFormData({ ...formData, minDeposit: parseFloat(e.target.value) || 0 })}
+            placeholder="20"
+            className="bg-[#0a0a0a] border-gray-800"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label>Validade (dias)</Label>
+          <Input
+            type="number"
+            value={formData.validDays}
+            onChange={(e) => setFormData({ ...formData, validDays: parseInt(e.target.value) || 30 })}
+            placeholder="30"
+            className="bg-[#0a0a0a] border-gray-800"
+          />
+        </div>
+        <div className="flex items-center gap-3 pt-6">
+          <Switch
+            checked={formData.isFirstDepositOnly}
+            onCheckedChange={(v) => setFormData({ ...formData, isFirstDepositOnly: v })}
+          />
+          <Label>Apenas primeiro depósito</Label>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <AdminLayout title="Bônus & Rollover">
+    <AdminLayout title="Promoções & Bônus">
       <div className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="bg-[#111111] border-gray-800">
             <CardContent className="pt-6">
-              <p className="text-sm text-gray-400">Templates de Bônus</p>
+              <p className="text-sm text-gray-400">Templates de Promoções</p>
               <p className="text-2xl font-bold text-white">{bonuses.length}</p>
               <p className="text-xs text-gray-500">
                 {bonuses.filter((b) => b.isActive).length} ativos
@@ -251,18 +523,31 @@ export default function AdminBonuses() {
               </p>
             </CardContent>
           </Card>
-          <Card className="bg-[#111111] border-gray-800 ring-1 ring-yellow-500/30">
+          <Card className="bg-[#111111] border-gray-800">
             <CardContent className="pt-6">
-              <p className="text-sm text-gray-400">Risco (Alto Rollover)</p>
-              <p className="text-2xl font-bold text-yellow-500">{riskUsers.length}</p>
-              <p className="text-xs text-gray-500">usuários</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Gift className="h-8 w-8 text-purple-500" />
+                </div>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setFormData(initialFormData);
+                    setShowCreateDialog(true);
+                  }}
+                  className="gap-2 bg-emerald-600 hover:bg-emerald-700"
+                >
+                  <Plus className="h-4 w-4" />
+                  Nova Promoção
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
 
         <Tabs defaultValue="templates">
           <TabsList className="bg-[#111111]">
-            <TabsTrigger value="templates">Templates de Bônus</TabsTrigger>
+            <TabsTrigger value="templates">Templates de Promoções</TabsTrigger>
             <TabsTrigger value="active">Bônus de Usuários</TabsTrigger>
             <TabsTrigger value="alerts">Alertas de Risco</TabsTrigger>
           </TabsList>
@@ -270,7 +555,7 @@ export default function AdminBonuses() {
           <TabsContent value="templates" className="mt-6">
             <Card className="bg-[#111111] border-gray-800">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-white">Templates de Bônus</CardTitle>
+                <CardTitle className="text-white">Templates de Promoções</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
@@ -292,12 +577,13 @@ export default function AdminBonuses() {
                       <TableHead className="text-gray-400">Max Saque</TableHead>
                       <TableHead className="text-gray-400">Validade</TableHead>
                       <TableHead className="text-gray-400">Ativo</TableHead>
+                      <TableHead className="text-gray-400 text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {loading ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8">
+                        <TableCell colSpan={8} className="text-center py-8">
                           <div className="flex items-center justify-center">
                             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
                           </div>
@@ -305,8 +591,8 @@ export default function AdminBonuses() {
                       </TableRow>
                     ) : bonuses.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8 text-gray-400">
-                          Nenhum bônus cadastrado
+                        <TableCell colSpan={8} className="text-center py-8 text-gray-400">
+                          Nenhuma promoção cadastrada
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -330,7 +616,7 @@ export default function AdminBonuses() {
                             {bonus.rolloverMultiplier}x
                           </TableCell>
                           <TableCell className="text-gray-400">
-                            {formatCurrency(bonus.maxWithdrawal)}
+                            {bonus.maxWithdrawal > 0 ? formatCurrency(bonus.maxWithdrawal) : "Ilimitado"}
                           </TableCell>
                           <TableCell className="text-gray-400">
                             {bonus.validDays} dias
@@ -341,6 +627,16 @@ export default function AdminBonuses() {
                               onCheckedChange={() => handleToggleBonus(bonus.id)}
                               disabled={actionLoading}
                             />
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => openEditDialog(bonus)}
+                              className="text-gray-400 hover:text-white hover:bg-white/10"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
                           </TableCell>
                         </TableRow>
                       ))
@@ -502,6 +798,73 @@ export default function AdminBonuses() {
         </Tabs>
       </div>
 
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="bg-[#111111] border-gray-800 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Plus className="h-5 w-5 text-emerald-500" />
+              Criar Nova Promoção
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Configure todos os detalhes da nova promoção
+            </DialogDescription>
+          </DialogHeader>
+          <BonusFormFields />
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowCreateDialog(false);
+                setFormData(initialFormData);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleCreateBonus}
+              disabled={actionLoading || !formData.name.trim()}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              Criar Promoção
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="bg-[#111111] border-gray-800 max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Edit className="h-5 w-5 text-blue-500" />
+              Editar Promoção
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Atualize os detalhes da promoção
+            </DialogDescription>
+          </DialogHeader>
+          <BonusFormFields />
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setShowEditDialog(false);
+                setSelectedBonus(null);
+                setFormData(initialFormData);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleEditBonus}
+              disabled={actionLoading || !formData.name.trim()}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Salvar Alterações
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
         <DialogContent className="bg-[#111111] border-gray-800">
           <DialogHeader>
@@ -509,6 +872,9 @@ export default function AdminBonuses() {
               <AlertTriangle className="h-5 w-5 text-red-500" />
               Cancelar Bônus
             </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Esta ação irá remover o bônus do usuário
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <p className="text-gray-400">

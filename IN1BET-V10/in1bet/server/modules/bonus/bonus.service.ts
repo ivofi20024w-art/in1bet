@@ -92,8 +92,11 @@ export async function updateBonus(
   data: Partial<{
     name: string;
     description: string;
+    type: string;
     percentage: number;
     maxValue: number;
+    fixedAmount: number;
+    maxWithdrawal: number;
     rolloverMultiplier: number;
     minDeposit: number;
     isFirstDepositOnly: boolean;
@@ -106,8 +109,11 @@ export async function updateBonus(
     
     if (data.name !== undefined) updateData.name = data.name;
     if (data.description !== undefined) updateData.description = data.description;
+    if (data.type !== undefined) updateData.type = data.type;
     if (data.percentage !== undefined) updateData.percentage = data.percentage.toFixed(2);
     if (data.maxValue !== undefined) updateData.maxValue = data.maxValue.toFixed(2);
+    if (data.fixedAmount !== undefined) updateData.fixedAmount = data.fixedAmount.toFixed(2);
+    if (data.maxWithdrawal !== undefined) updateData.maxWithdrawal = data.maxWithdrawal.toFixed(2);
     if (data.rolloverMultiplier !== undefined) updateData.rolloverMultiplier = data.rolloverMultiplier.toFixed(2);
     if (data.minDeposit !== undefined) updateData.minDeposit = data.minDeposit.toFixed(2);
     if (data.isFirstDepositOnly !== undefined) updateData.isFirstDepositOnly = data.isFirstDepositOnly;

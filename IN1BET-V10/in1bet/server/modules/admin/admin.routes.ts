@@ -743,6 +743,8 @@ router.post("/bonuses", adminCheck, async (req: Request, res: Response) => {
       type: data.type,
       percentage: data.percentage,
       maxValue: data.maxValue,
+      fixedAmount: data.fixedAmount,
+      maxWithdrawal: data.maxWithdrawal,
       rolloverMultiplier: data.rolloverMultiplier,
       minDeposit: data.minDeposit,
       isFirstDepositOnly: data.isFirstDepositOnly,
