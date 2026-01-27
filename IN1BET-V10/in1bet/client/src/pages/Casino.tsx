@@ -513,65 +513,30 @@ export default function Casino() {
           <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
       </div>
 
-      <div className="flex gap-4 mb-10 overflow-x-auto pb-4 scrollbar-none snap-x px-1 md:justify-center">
+      <div className="flex gap-3 mb-10 overflow-x-auto pb-2 scrollbar-none snap-x px-1 md:justify-center">
           <Link href="/games/mines" className="snap-start flex-shrink-0 group">
-            <div className="relative w-[90px] sm:w-[110px] md:w-[130px] rounded-xl overflow-hidden bg-card border border-white/5 hover:border-primary/50 shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
-              <div className="aspect-[4/5] relative overflow-hidden">
-                <img src="/casino-mines.png" alt="Minas" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="p-2 text-center">
-                <p className="text-white font-semibold text-xs sm:text-sm truncate">Minas</p>
-                <p className="text-primary text-[10px] sm:text-xs">Original</p>
-              </div>
+            <div className="relative w-[80px] sm:w-[100px] md:w-[120px] aspect-square rounded-xl overflow-hidden border border-white/10 hover:border-primary/50 shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
+              <img src="/casino-mines.png" alt="Minas" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
             </div>
           </Link>
           <Link href="/games/double" className="snap-start flex-shrink-0 group">
-            <div className="relative w-[90px] sm:w-[110px] md:w-[130px] rounded-xl overflow-hidden bg-card border border-white/5 hover:border-primary/50 shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
-              <div className="aspect-[4/5] relative overflow-hidden">
-                <img src="/casino-double.png" alt="Roletas" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="p-2 text-center">
-                <p className="text-white font-semibold text-xs sm:text-sm truncate">Roletas</p>
-                <p className="text-primary text-[10px] sm:text-xs">Original</p>
-              </div>
+            <div className="relative w-[80px] sm:w-[100px] md:w-[120px] aspect-square rounded-xl overflow-hidden border border-white/10 hover:border-primary/50 shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
+              <img src="/casino-double.png" alt="Roletas" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
             </div>
           </Link>
           <Link href="/games/aviatormania" className="snap-start flex-shrink-0 group">
-            <div className="relative w-[90px] sm:w-[110px] md:w-[130px] rounded-xl overflow-hidden bg-card border border-white/5 hover:border-primary/50 shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
-              <div className="aspect-[4/5] relative overflow-hidden">
-                <img src="/casino-aviator.png" alt="Aviator Mania" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="p-2 text-center">
-                <p className="text-white font-semibold text-xs sm:text-sm truncate">Aviator</p>
-                <p className="text-primary text-[10px] sm:text-xs">Original</p>
-              </div>
+            <div className="relative w-[80px] sm:w-[100px] md:w-[120px] aspect-square rounded-xl overflow-hidden border border-white/10 hover:border-primary/50 shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
+              <img src="/casino-aviator.png" alt="Aviator Mania" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
             </div>
           </Link>
           <Link href="/games/plinko" className="snap-start flex-shrink-0 group">
-            <div className="relative w-[90px] sm:w-[110px] md:w-[130px] rounded-xl overflow-hidden bg-card border border-white/5 hover:border-primary/50 shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
-              <div className="aspect-[4/5] relative overflow-hidden">
-                <img src="/casino-plinko.png" alt="Plinko" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="p-2 text-center">
-                <p className="text-white font-semibold text-xs sm:text-sm truncate">Plinko</p>
-                <p className="text-primary text-[10px] sm:text-xs">Original</p>
-              </div>
+            <div className="relative w-[80px] sm:w-[100px] md:w-[120px] aspect-square rounded-xl overflow-hidden border border-white/10 hover:border-primary/50 shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
+              <img src="/casino-plinko.png" alt="Plinko" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
             </div>
           </Link>
           <Link href="/vip" className="snap-start flex-shrink-0 group">
-            <div className="relative w-[90px] sm:w-[110px] md:w-[130px] rounded-xl overflow-hidden bg-gradient-to-br from-yellow-900/40 to-amber-900/40 border border-yellow-500/30 hover:border-yellow-500/60 shadow-lg hover:shadow-yellow-500/20 hover:-translate-y-1 transition-all duration-300">
-              <div className="aspect-[4/5] relative overflow-hidden">
-                <img src="/btn-vip.png" alt="VIP Recompensas" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              </div>
-              <div className="p-2 text-center">
-                <p className="text-yellow-400 font-semibold text-xs sm:text-sm truncate">VIP</p>
-                <p className="text-yellow-500/70 text-[10px] sm:text-xs">Recompensas</p>
-              </div>
+            <div className="relative w-[80px] sm:w-[100px] md:w-[120px] aspect-square rounded-xl overflow-hidden border border-yellow-500/30 hover:border-yellow-500/60 shadow-lg hover:shadow-yellow-500/20 hover:-translate-y-1 transition-all duration-300">
+              <img src="/btn-vip.png" alt="VIP Recompensas" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
             </div>
           </Link>
       </div>
