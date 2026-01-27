@@ -37,6 +37,16 @@ function getInitials(name: string): string {
   return name.substring(0, 2).toUpperCase();
 }
 
+function formatWinAmount(amount: number): string {
+  if (amount >= 1000000) {
+    return (amount / 1000000).toFixed(2).replace(/\.?0+$/, '') + 'M';
+  }
+  if (amount >= 10000) {
+    return (amount / 1000).toFixed(1).replace(/\.?0+$/, '') + 'K';
+  }
+  return amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 export function WinsTicker({ className }: { className?: string }) {
   const { data: realWinners = [] } = useQuery({
     queryKey: ['recent-winners'],
@@ -93,7 +103,7 @@ export function WinsTicker({ className }: { className?: string }) {
                 </div>
                 <div className="flex flex-col items-end">
                   {winner.amount !== null ? (
-                    <span className="text-green-400 font-bold text-sm">+R$ {winner.amount.toFixed(2)}</span>
+                    <span className="text-green-400 font-bold text-sm">+R$ {formatWinAmount(winner.amount)}</span>
                   ) : (
                     <span className="text-green-400 font-bold text-sm">Ganhou!</span>
                   )}
