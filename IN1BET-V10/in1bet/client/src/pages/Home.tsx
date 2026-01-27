@@ -294,11 +294,11 @@ export default function Home() {
         <MainLayout>
       <section className="mb-4">
         <Link href={PROMO_BANNERS[0].link}>
-          <div className="relative w-full lg:max-w-3xl overflow-hidden group cursor-pointer rounded-xl bg-gradient-to-r from-[#1a0a00] via-[#2d1200] to-[#1a0a00]">
+          <div className="relative w-full lg:max-w-2xl overflow-hidden group cursor-pointer rounded-xl bg-gradient-to-r from-[#1a0a00] via-[#2d1200] to-[#1a0a00]">
             <img 
               src={PROMO_BANNERS[0].img} 
               alt={PROMO_BANNERS[0].title}
-              className="w-full h-auto lg:max-h-[180px] lg:object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+              className="w-full h-auto transition-transform duration-700 group-hover:scale-[1.02]"
             />
           </div>
         </Link>
