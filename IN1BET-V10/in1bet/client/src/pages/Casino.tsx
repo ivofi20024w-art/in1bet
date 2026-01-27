@@ -198,6 +198,8 @@ async function fetchGames(params: {
   search?: string;
   limit?: number;
   offset?: number;
+  isNew?: boolean;
+  hasJackpot?: boolean;
 }): Promise<GamesResponse> {
   const queryParams = new URLSearchParams();
   if (params.providerId) queryParams.set('providerId', params.providerId);
@@ -205,6 +207,8 @@ async function fetchGames(params: {
   if (params.search) queryParams.set('search', params.search);
   if (params.limit) queryParams.set('limit', params.limit.toString());
   if (params.offset) queryParams.set('offset', params.offset.toString());
+  if (params.isNew) queryParams.set('isNew', 'true');
+  if (params.hasJackpot) queryParams.set('hasJackpot', 'true');
   
   const url = `/api/slotsgateway/games?${queryParams.toString()}`;
   const res = await fetch(url);
@@ -257,12 +261,12 @@ const GAMES_PER_PAGE = 20;
 export default function Casino() {
   const searchString = useSearch();
   const urlParams = new URLSearchParams(searchString);
-  const initialCategory = urlParams.get('category') || 'all';
+  const initialFilter = urlParams.get('filter') || urlParams.get('category') || 'all';
   
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
-  const [activeCategory, setActiveCategory] = useState(initialCategory);
+  const [activeCategory, setActiveCategory] = useState(initialFilter);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isProvidersOpen, setIsProvidersOpen] = useState(false);
   const [games, setGames] = useState<SlotsgatewayGame[]>([]);
@@ -278,9 +282,9 @@ export default function Casino() {
   const { favorites } = useFavoritesStore();
   
   useEffect(() => {
-    const newCategory = urlParams.get('category') || 'all';
-    if (newCategory !== activeCategory) {
-      setActiveCategory(newCategory);
+    const newFilter = urlParams.get('filter') || urlParams.get('category') || 'all';
+    if (newFilter !== activeCategory) {
+      setActiveCategory(newFilter);
     }
   }, [searchString]);
 
@@ -318,22 +322,28 @@ export default function Casino() {
 
   const winnersToDisplay = realWinners.length > 0 ? realWinners : MOCK_WINNERS;
 
-  const getCategoryFilters = (category: string): { gameType?: string } => {
+  const getCategoryFilters = (category: string): { gameType?: string; isNew?: boolean; hasJackpot?: boolean } => {
     switch (category) {
       case 'slots':
         return { gameType: 'video-slots' };
       case 'live':
         return { gameType: 'live' };
+      case 'new':
+        return { isNew: true };
+      case 'jackpot':
+        return { hasJackpot: true };
+      case 'popular':
+        return {};
       default:
         return {};
     }
   };
 
   const categoryFilters = getCategoryFilters(activeCategory);
-  const gameTypeFilter = categoryFilters.gameType;
+  const { gameType: gameTypeFilter, isNew: isNewFilter, hasJackpot: hasJackpotFilter } = categoryFilters;
 
   const { isLoading: loadingGames, refetch } = useQuery({
-    queryKey: ['slotsgateway-games', selectedProvider, activeCategory, gameTypeFilter, debouncedSearch, activeCategory === 'favorites' ? favorites : null],
+    queryKey: ['slotsgateway-games', selectedProvider, activeCategory, gameTypeFilter, isNewFilter, hasJackpotFilter, debouncedSearch, activeCategory === 'favorites' ? favorites : null],
     queryFn: async () => {
       if (activeCategory === 'favorites') {
         if (favorites.length === 0) {
@@ -363,6 +373,8 @@ export default function Casino() {
         search: debouncedSearch || undefined,
         limit: GAMES_PER_PAGE,
         offset: 0,
+        isNew: isNewFilter,
+        hasJackpot: hasJackpotFilter,
       });
       const sortedGames = sortGamesByTop100(result.games);
       setGames(sortedGames);
@@ -383,6 +395,8 @@ export default function Casino() {
         search: debouncedSearch || undefined,
         limit: GAMES_PER_PAGE,
         offset,
+        isNew: isNewFilter,
+        hasJackpot: hasJackpotFilter,
       });
       setGames(prev => sortGamesByTop100([...prev, ...result.games]));
       setHasMore(result.hasMore);

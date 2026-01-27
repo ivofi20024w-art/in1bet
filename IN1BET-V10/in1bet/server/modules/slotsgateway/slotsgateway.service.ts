@@ -143,7 +143,9 @@ export class SlotsGatewayService {
     gameType?: string,
     search?: string,
     limitCount?: number,
-    offsetCount?: number
+    offsetCount?: number,
+    isNew?: boolean,
+    hasJackpot?: boolean
   ): Promise<{ games: SlotsgatewayGame[]; total: number; hasMore: boolean }> {
     const conditions = [eq(slotsgatewayGames.status, "ACTIVE")];
 
@@ -157,6 +159,14 @@ export class SlotsGatewayService {
 
     if (search) {
       conditions.push(ilike(slotsgatewayGames.name, `%${search}%`));
+    }
+
+    if (isNew === true) {
+      conditions.push(eq(slotsgatewayGames.isNew, true));
+    }
+
+    if (hasJackpot === true) {
+      conditions.push(eq(slotsgatewayGames.hasJackpot, true));
     }
 
     // Get total count first

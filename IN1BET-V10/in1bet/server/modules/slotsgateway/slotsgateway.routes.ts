@@ -17,7 +17,7 @@ router.get("/providers", async (req: Request, res: Response) => {
 
 router.get("/games", async (req: Request, res: Response) => {
   try {
-    const { providerId, gameType, type, search, limit, offset } = req.query;
+    const { providerId, gameType, type, search, limit, offset, isNew, hasJackpot } = req.query;
     const effectiveGameType = (gameType || type) as string | undefined;
     
     const result = await slotsGatewayService.getCachedGames(
@@ -25,7 +25,9 @@ router.get("/games", async (req: Request, res: Response) => {
       effectiveGameType,
       search as string | undefined,
       limit ? parseInt(limit as string) : undefined,
-      offset ? parseInt(offset as string) : undefined
+      offset ? parseInt(offset as string) : undefined,
+      isNew === 'true' ? true : undefined,
+      hasJackpot === 'true' ? true : undefined
     );
     
     res.json({ 
