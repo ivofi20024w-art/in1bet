@@ -24,6 +24,14 @@ import {
   Search,
   ToggleLeft,
   ToggleRight,
+  CreditCard,
+  Check,
+  X,
+  Eye,
+  EyeOff,
+  AlertTriangle,
+  CheckCircle,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -39,6 +47,17 @@ interface UserAutoWithdrawSetting {
   userEmail: string;
   autoWithdrawAllowed: boolean;
   updatedAt: string;
+}
+
+interface OndaPayStatus {
+  configured: boolean;
+  fields: {
+    clientId: boolean;
+    clientSecret: boolean;
+    webhookSecret: boolean;
+    webhookUrl: boolean;
+  };
+  webhookUrl: string | null;
 }
 
 function formatDate(date: string): string {
@@ -59,6 +78,22 @@ export default function AdminSettings() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loadingUsers, setLoadingUsers] = useState(false);
   const auth = getStoredAuth();
+
+  const [ondapayStatus, setOndapayStatus] = useState<OndaPayStatus | null>(null);
+  const [loadingOndapay, setLoadingOndapay] = useState(true);
+  const [savingOndapay, setSavingOndapay] = useState(false);
+  const [testingOndapay, setTestingOndapay] = useState(false);
+  const [ondapayForm, setOndapayForm] = useState({
+    clientId: "",
+    clientSecret: "",
+    webhookSecret: "",
+    webhookUrl: "",
+  });
+  const [showSecrets, setShowSecrets] = useState({
+    clientId: false,
+    clientSecret: false,
+    webhookSecret: false,
+  });
 
   const fetchSettings = useCallback(async () => {
     try {
@@ -111,10 +146,101 @@ export default function AdminSettings() {
     }
   }, [auth?.accessToken]);
 
+  const fetchOndapayStatus = useCallback(async () => {
+    try {
+      setLoadingOndapay(true);
+      const response = await fetch("/api/admin/settings/ondapay-status", {
+        headers: {
+          Authorization: `Bearer ${auth?.accessToken}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setOndapayStatus(data);
+        if (data.webhookUrl) {
+          setOndapayForm(prev => ({ ...prev, webhookUrl: data.webhookUrl }));
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch OndaPay status:", error);
+    } finally {
+      setLoadingOndapay(false);
+    }
+  }, [auth?.accessToken]);
+
+  const saveOndapaySettings = async () => {
+    const hasChanges = ondapayForm.clientId || ondapayForm.clientSecret || 
+                       ondapayForm.webhookSecret || ondapayForm.webhookUrl;
+    
+    if (!hasChanges) {
+      toast.error("Preencha pelo menos um campo para atualizar");
+      return;
+    }
+
+    try {
+      setSavingOndapay(true);
+      const response = await fetch("/api/admin/settings/ondapay", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth?.accessToken}`,
+        },
+        body: JSON.stringify(ondapayForm),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message || "Configurações atualizadas com sucesso");
+        setOndapayForm({
+          clientId: "",
+          clientSecret: "",
+          webhookSecret: "",
+          webhookUrl: "",
+        });
+        fetchOndapayStatus();
+      } else {
+        toast.error(data.error || "Erro ao atualizar configurações");
+      }
+    } catch (error) {
+      console.error("Failed to save OndaPay settings:", error);
+      toast.error("Erro ao salvar configurações");
+    } finally {
+      setSavingOndapay(false);
+    }
+  };
+
+  const testOndapayConnection = async () => {
+    try {
+      setTestingOndapay(true);
+      const response = await fetch("/api/admin/settings/ondapay/test", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${auth?.accessToken}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(data.message || "Conexão estabelecida com sucesso!");
+      } else {
+        toast.error(data.error || "Falha na conexão");
+      }
+    } catch (error) {
+      console.error("Failed to test OndaPay connection:", error);
+      toast.error("Erro ao testar conexão");
+    } finally {
+      setTestingOndapay(false);
+    }
+  };
+
   useEffect(() => {
     fetchSettings();
     fetchUsers();
-  }, [fetchSettings, fetchUsers]);
+    fetchOndapayStatus();
+  }, [fetchSettings, fetchUsers, fetchOndapayStatus]);
 
   const toggleGlobalAutoWithdraw = async () => {
     try {
@@ -246,6 +372,168 @@ export default function AdminSettings() {
                 />
               </div>
             </div>
+          </CardContent>
+        </Card>
+
+        <Card data-testid="card-ondapay-settings">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CreditCard className="w-5 h-5" />
+              Configurações OndaPay (PIX)
+            </CardTitle>
+            <CardDescription>
+              Configure as credenciais da integração com OndaPay para pagamentos PIX
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {loadingOndapay ? (
+              <div className="flex justify-center py-8">
+                <RefreshCw className="w-6 h-6 animate-spin" />
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center gap-4 p-4 rounded-lg border bg-card">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      {ondapayStatus?.configured ? (
+                        <CheckCircle className="w-5 h-5 text-green-500" />
+                      ) : (
+                        <AlertTriangle className="w-5 h-5 text-yellow-500" />
+                      )}
+                      <span className="font-medium">
+                        Status: {ondapayStatus?.configured ? "Configurado" : "Incompleto"}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 text-sm">
+                      <Badge variant={ondapayStatus?.fields.clientId ? "default" : "secondary"}>
+                        {ondapayStatus?.fields.clientId ? <Check className="w-3 h-3 mr-1" /> : <X className="w-3 h-3 mr-1" />}
+                        Client ID
+                      </Badge>
+                      <Badge variant={ondapayStatus?.fields.clientSecret ? "default" : "secondary"}>
+                        {ondapayStatus?.fields.clientSecret ? <Check className="w-3 h-3 mr-1" /> : <X className="w-3 h-3 mr-1" />}
+                        Client Secret
+                      </Badge>
+                      <Badge variant={ondapayStatus?.fields.webhookSecret ? "default" : "secondary"}>
+                        {ondapayStatus?.fields.webhookSecret ? <Check className="w-3 h-3 mr-1" /> : <X className="w-3 h-3 mr-1" />}
+                        Webhook Secret
+                      </Badge>
+                    </div>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={testOndapayConnection}
+                    disabled={testingOndapay || !ondapayStatus?.fields.clientId}
+                  >
+                    {testingOndapay ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Zap className="w-4 h-4 mr-2" />
+                    )}
+                    Testar Conexão
+                  </Button>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Preencha os campos abaixo para atualizar as credenciais. Deixe em branco para manter o valor atual.
+                    Por segurança, os valores atuais nunca são exibidos.
+                  </p>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="ondapay-client-id">Client ID</Label>
+                    <div className="relative">
+                      <Input
+                        id="ondapay-client-id"
+                        type={showSecrets.clientId ? "text" : "password"}
+                        placeholder={ondapayStatus?.fields.clientId ? "••••••••••••••••" : "Insira o Client ID"}
+                        value={ondapayForm.clientId}
+                        onChange={(e) => setOndapayForm(prev => ({ ...prev, clientId: e.target.value }))}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={() => setShowSecrets(prev => ({ ...prev, clientId: !prev.clientId }))}
+                      >
+                        {showSecrets.clientId ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="ondapay-client-secret">Client Secret</Label>
+                    <div className="relative">
+                      <Input
+                        id="ondapay-client-secret"
+                        type={showSecrets.clientSecret ? "text" : "password"}
+                        placeholder={ondapayStatus?.fields.clientSecret ? "••••••••••••••••" : "Insira o Client Secret"}
+                        value={ondapayForm.clientSecret}
+                        onChange={(e) => setOndapayForm(prev => ({ ...prev, clientSecret: e.target.value }))}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={() => setShowSecrets(prev => ({ ...prev, clientSecret: !prev.clientSecret }))}
+                      >
+                        {showSecrets.clientSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="ondapay-webhook-secret">Webhook Secret</Label>
+                    <div className="relative">
+                      <Input
+                        id="ondapay-webhook-secret"
+                        type={showSecrets.webhookSecret ? "text" : "password"}
+                        placeholder={ondapayStatus?.fields.webhookSecret ? "••••••••••••••••" : "Insira o Webhook Secret"}
+                        value={ondapayForm.webhookSecret}
+                        onChange={(e) => setOndapayForm(prev => ({ ...prev, webhookSecret: e.target.value }))}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-1/2 -translate-y-1/2"
+                        onClick={() => setShowSecrets(prev => ({ ...prev, webhookSecret: !prev.webhookSecret }))}
+                      >
+                        {showSecrets.webhookSecret ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="ondapay-webhook-url">Webhook URL</Label>
+                    <Input
+                      id="ondapay-webhook-url"
+                      type="url"
+                      placeholder="https://seu-dominio.com/api/webhook/ondapay"
+                      value={ondapayForm.webhookUrl}
+                      onChange={(e) => setOndapayForm(prev => ({ ...prev, webhookUrl: e.target.value }))}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      URL que o OndaPay usará para notificar sobre pagamentos. Deve começar com https://
+                    </p>
+                  </div>
+
+                  <Button
+                    onClick={saveOndapaySettings}
+                    disabled={savingOndapay}
+                    className="w-full"
+                  >
+                    {savingOndapay ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Check className="w-4 h-4 mr-2" />
+                    )}
+                    Salvar Configurações
+                  </Button>
+                </div>
+              </>
+            )}
           </CardContent>
         </Card>
 

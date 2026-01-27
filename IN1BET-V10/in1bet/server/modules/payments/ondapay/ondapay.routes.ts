@@ -96,18 +96,10 @@ interface WebhookVerificationResult {
 
 function verifyWebhookSignature(req: Request): WebhookVerificationResult {
   const webhookSecret = process.env.ONDAPAY_WEBHOOK_SECRET;
-  const skipSignatureVerification = process.env.ONDAPAY_SKIP_SIGNATURE === "true";
-  
-  console.log("[OndaPay Webhook] All headers received:", JSON.stringify(req.headers, null, 2));
-  
-  if (skipSignatureVerification) {
-    console.warn("[SECURITY] ONDAPAY_SKIP_SIGNATURE is enabled - accepting webhook without signature verification");
-    return { valid: true };
-  }
   
   if (!webhookSecret) {
-    console.warn("[SECURITY] ONDAPAY_WEBHOOK_SECRET not set - accepting webhook without signature");
-    return { valid: true };
+    console.error("[SECURITY CRITICAL] ONDAPAY_WEBHOOK_SECRET not configured - rejecting all webhooks");
+    return { valid: false, error: "Webhook secret not configured" };
   }
 
   const possibleHeaders = [
@@ -115,45 +107,53 @@ function verifyWebhookSignature(req: Request): WebhookVerificationResult {
     "x-signature", 
     "signature",
     "x-webhook-signature",
-    "authorization",
   ];
   
   let signature: string | undefined;
   for (const header of possibleHeaders) {
     const value = req.headers[header] as string;
     if (value) {
-      console.log(`[OndaPay Webhook] Found signature in header: ${header}`);
       signature = value.replace(/^(Bearer |sha256=)/, "");
       break;
     }
   }
   
   if (!signature) {
-    console.warn("[OndaPay Webhook] No signature header found, but accepting webhook (signature verification disabled for compatibility)");
-    return { valid: true };
+    console.error("[SECURITY] Webhook rejected: No signature header found");
+    return { valid: false, error: "Missing signature header" };
   }
 
-  const payload = JSON.stringify(req.body);
+  const rawBody = (req as any).rawBody;
+  if (!rawBody) {
+    console.error("[SECURITY] Webhook rejected: Raw body not available for signature verification");
+    return { valid: false, error: "Raw body not available" };
+  }
+
   const expectedSignature = crypto
     .createHmac("sha256", webhookSecret)
-    .update(payload)
+    .update(rawBody)
     .digest("hex");
 
-  console.log(`[OndaPay Webhook] Signature received: ${signature.substring(0, 20)}...`);
-  console.log(`[OndaPay Webhook] Signature expected: ${expectedSignature.substring(0, 20)}...`);
+  if (signature.length !== expectedSignature.length) {
+    console.error("[SECURITY] Webhook rejected: Signature length mismatch");
+    return { valid: false, error: "Invalid signature" };
+  }
 
   try {
     const isValid = crypto.timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature)
+      Buffer.from(signature, "hex"),
+      Buffer.from(expectedSignature, "hex")
     );
+    
     if (!isValid) {
-      console.warn("[OndaPay Webhook] Signature mismatch, but accepting webhook for compatibility");
+      console.error("[SECURITY] Webhook rejected: Signature verification failed");
+      return { valid: false, error: "Invalid signature" };
     }
+    
     return { valid: true };
   } catch (error) {
-    console.warn("[OndaPay Webhook] Signature verification error, but accepting webhook for compatibility:", error);
-    return { valid: true };
+    console.error("[SECURITY] Webhook rejected: Signature verification error:", error);
+    return { valid: false, error: "Signature verification error" };
   }
 }
 

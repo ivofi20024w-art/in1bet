@@ -1133,4 +1133,164 @@ router.post("/settings/maturation-days", adminCheck, async (req: Request, res: R
   }
 });
 
+router.get("/settings/ondapay-status", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const hasClientId = !!process.env.ONDAPAY_CLIENT_ID;
+    const hasClientSecret = !!process.env.ONDAPAY_CLIENT_SECRET;
+    const hasWebhookSecret = !!process.env.ONDAPAY_WEBHOOK_SECRET;
+    const webhookUrl = process.env.ONDAPAY_WEBHOOK_URL || null;
+
+    res.json({
+      configured: hasClientId && hasClientSecret && hasWebhookSecret,
+      fields: {
+        clientId: hasClientId,
+        clientSecret: hasClientSecret,
+        webhookSecret: hasWebhookSecret,
+        webhookUrl: !!webhookUrl,
+      },
+      webhookUrl,
+    });
+  } catch (error: any) {
+    console.error("Admin OndaPay status error:", error);
+    res.status(500).json({ error: "Erro ao verificar configuração do OndaPay" });
+  }
+});
+
+router.post("/settings/ondapay", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const { clientId, clientSecret, webhookSecret, webhookUrl } = req.body;
+    const adminId = req.user!.id;
+
+    const updates: Record<string, string> = {};
+    
+    if (clientId && typeof clientId === "string" && clientId.trim().length > 0) {
+      updates.ONDAPAY_CLIENT_ID = clientId.trim();
+    }
+    
+    if (clientSecret && typeof clientSecret === "string" && clientSecret.trim().length > 0) {
+      updates.ONDAPAY_CLIENT_SECRET = clientSecret.trim();
+    }
+    
+    if (webhookSecret && typeof webhookSecret === "string" && webhookSecret.trim().length > 0) {
+      updates.ONDAPAY_WEBHOOK_SECRET = webhookSecret.trim();
+    }
+    
+    if (webhookUrl && typeof webhookUrl === "string" && webhookUrl.trim().length > 0) {
+      if (!webhookUrl.startsWith("https://")) {
+        return res.status(400).json({ error: "Webhook URL deve começar com https://" });
+      }
+      updates.ONDAPAY_WEBHOOK_URL = webhookUrl.trim();
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "Nenhum campo válido para atualizar" });
+    }
+
+    const fs = await import("fs");
+    const path = await import("path");
+    
+    const envPath = path.resolve(process.cwd(), ".env");
+    let envContent = "";
+    
+    try {
+      envContent = await fs.promises.readFile(envPath, "utf-8");
+    } catch (e) {
+      envContent = "";
+    }
+
+    const envLines = envContent.split("\n");
+    const existingKeys = new Set<string>();
+    
+    const updatedLines = envLines.map(line => {
+      const trimmedLine = line.trim();
+      if (!trimmedLine || trimmedLine.startsWith("#")) return line;
+      
+      const eqIndex = trimmedLine.indexOf("=");
+      if (eqIndex === -1) return line;
+      
+      const key = trimmedLine.substring(0, eqIndex);
+      if (updates[key] !== undefined) {
+        existingKeys.add(key);
+        return `${key}=${updates[key]}`;
+      }
+      return line;
+    });
+
+    for (const [key, value] of Object.entries(updates)) {
+      if (!existingKeys.has(key)) {
+        updatedLines.push(`${key}=${value}`);
+      }
+    }
+
+    await fs.promises.writeFile(envPath, updatedLines.join("\n"));
+
+    for (const [key, value] of Object.entries(updates)) {
+      process.env[key] = value;
+    }
+
+    await createAuditLog({
+      adminId,
+      action: AdminAction.SETTING_UPDATE,
+      targetType: "user",
+      targetId: adminId,
+      dataBefore: {},
+      dataAfter: { 
+        updatedFields: Object.keys(updates).map(k => k.replace("ONDAPAY_", "").toLowerCase())
+      },
+    });
+
+    res.json({ 
+      success: true, 
+      message: "Configurações do OndaPay atualizadas com sucesso. As alterações já estão ativas.",
+      updatedFields: Object.keys(updates).length
+    });
+  } catch (error: any) {
+    console.error("Admin update OndaPay settings error:", error);
+    res.status(500).json({ error: "Erro ao atualizar configurações do OndaPay" });
+  }
+});
+
+router.post("/settings/ondapay/test", adminCheck, async (req: Request, res: Response) => {
+  try {
+    const clientId = process.env.ONDAPAY_CLIENT_ID;
+    const clientSecret = process.env.ONDAPAY_CLIENT_SECRET;
+
+    if (!clientId || !clientSecret) {
+      return res.status(400).json({ 
+        success: false,
+        error: "Credenciais do OndaPay não configuradas" 
+      });
+    }
+
+    const response = await fetch("https://api.ondapay.app/api/v1/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "client_id": clientId,
+        "client_secret": clientSecret,
+      },
+    });
+
+    if (response.ok) {
+      res.json({ 
+        success: true, 
+        message: "Conexão com OndaPay estabelecida com sucesso!" 
+      });
+    } else {
+      const errorText = await response.text();
+      res.status(400).json({ 
+        success: false, 
+        error: `Falha na autenticação: ${response.status}`,
+        details: errorText
+      });
+    }
+  } catch (error: any) {
+    console.error("OndaPay test connection error:", error);
+    res.status(500).json({ 
+      success: false, 
+      error: "Erro ao conectar com OndaPay: " + error.message 
+    });
+  }
+});
+
 export default router;

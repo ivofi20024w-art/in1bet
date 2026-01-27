@@ -1,5 +1,28 @@
 # IN1Bet - Casino & Sports Betting Platform
 
+## Recent Changes (2026-01-27)
+
+### Security Audit & Fixes
+- **CRITICAL FIX: OndaPay Webhook Signature Verification**
+  - Fixed bypass vulnerability where `verifyWebhookSignature()` always returned `{valid: true}`
+  - Now enforces HMAC-SHA256 signature validation with timing-safe comparison
+  - Rejects webhooks when `ONDAPAY_WEBHOOK_SECRET` is not configured
+  - Uses raw body for accurate signature calculation
+  - Location: `server/modules/payments/ondapay/ondapay.routes.ts`
+
+- **Admin Panel: OndaPay Key Management**
+  - Added UI section in Admin Settings for managing OndaPay credentials
+  - Secure credential update without exposing previous values
+  - Connection test functionality
+  - Full audit logging of changes
+  - New endpoints: `/api/admin/settings/ondapay`, `/api/admin/settings/ondapay-status`, `/api/admin/settings/ondapay/test`
+
+- **Security Audit Documentation**
+  - Created comprehensive `SECURITY_AUDIT_REPORT.md` with:
+    - All vulnerabilities identified by severity
+    - Prioritized fix recommendations
+    - Status of corrections
+
 ## Recent Changes (2026-01-23)
 - **Real Device Tracking**: Sessions now show actual device info (browser, OS, IP)
   - Extended refresh_tokens table with userAgent, ipAddress, deviceName, lastUsedAt
