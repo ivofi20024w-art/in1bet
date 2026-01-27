@@ -51,10 +51,13 @@ export function GameCard({ id, title, provider, image, hot, className, loading, 
   return (
       <div 
         onClick={handleCardClick}
-        className={cn("group relative rounded-xl overflow-hidden bg-card border border-white/5 hover:border-primary/50 transition-all duration-300 hover:shadow-[0_0_20px_-5px_rgba(249,115,22,0.4)] hover:-translate-y-1 cursor-pointer", className)}>
+        className={cn(
+          "group relative rounded-xl overflow-hidden bg-card border-2 border-white/5 transition-all duration-300 cursor-pointer",
+          "hover:border-orange-500/70 hover:shadow-[0_0_30px_-5px_rgba(249,115,22,0.6)] hover:-translate-y-2",
+          className
+        )}>
         
-        {/* Image Container */}
-        <div className="relative aspect-square overflow-hidden rounded-t-xl">
+        <div className="relative aspect-square overflow-hidden">
           {imageLoading && !imageError && (
             <div className="absolute inset-0 bg-secondary/30 animate-pulse" />
           )}
@@ -68,7 +71,8 @@ export function GameCard({ id, title, provider, image, hot, className, loading, 
               src={image} 
               alt={title} 
               className={cn(
-                "w-full h-full object-cover transition-transform duration-500 group-hover:scale-105",
+                "w-full h-full object-cover transition-all duration-500",
+                "group-hover:scale-110 group-hover:brightness-110",
                 imageLoading && "opacity-0"
               )}
               loading="lazy"
@@ -80,40 +84,39 @@ export function GameCard({ id, title, provider, image, hot, className, loading, 
             />
           )}
           
-          {/* Badges */}
           {hot && (
             <div className="absolute top-2 left-2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-lg uppercase tracking-wider z-10">
               Hot
             </div>
           )}
           
-          {/* Favorite Button */}
           {idHash && (
             <button 
               onClick={handleFavoriteClick}
               className={cn(
-                "absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center transition-all z-20",
+                "absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all z-20",
                 isFav 
-                  ? "bg-red-500/90 text-white" 
-                  : "bg-black/50 text-white/70 opacity-0 group-hover:opacity-100 hover:bg-black/70 hover:text-red-400"
+                  ? "bg-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.5)]" 
+                  : "bg-black/60 text-white/80 opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white hover:shadow-[0_0_15px_rgba(239,68,68,0.5)]"
               )}
               data-testid={`favorite-btn-${idHash}`}
             >
-              <Heart className={cn("w-3.5 h-3.5", isFav && "fill-current")} />
+              <Heart className={cn("w-4 h-4", isFav && "fill-current")} />
             </button>
           )}
 
-          {/* Play Button Overlay */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10 bg-black/30">
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center shadow-lg transform scale-50 group-hover:scale-100 transition-transform duration-300">
-              <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+            <div className="absolute inset-0 bg-gradient-to-t from-orange-600/40 via-orange-500/20 to-transparent" />
+            <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(249,115,22,0.7)] transform scale-0 group-hover:scale-100 transition-all duration-300 border-2 border-white/30">
+              <Play className="w-7 h-7 text-white fill-white ml-1" />
             </div>
           </div>
+
+          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         </div>
 
-        {/* Info - Below Image */}
-        <div className="p-2.5 bg-card">
-          <p className="text-white font-semibold truncate text-sm">{title}</p>
+        <div className="p-3 bg-gradient-to-b from-[#1a1a1f] to-[#0f0f12] border-t border-white/5">
+          <p className="text-white font-semibold truncate text-sm group-hover:text-orange-400 transition-colors duration-300">{title}</p>
           <p className="text-muted-foreground text-xs truncate capitalize">{provider}</p>
         </div>
       </div>
