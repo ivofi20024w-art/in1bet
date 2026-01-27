@@ -35,6 +35,7 @@ interface ChatUser {
   vipLevel: string;
   level: number;
   role?: string;
+  avatarUrl?: string | null;
   customization?: ChatUserCustomization | null;
 }
 
@@ -386,9 +387,9 @@ export default function CommunityChat({ isVisible, onToggle }: CommunityChatProp
               data-testid={`chat-message-${msg.id}`}
             >
               <img 
-                src={getAvatarUrl(msg.user.id, msg.user.username || msg.user.name)}
+                src={msg.user.avatarUrl || getAvatarUrl(msg.user.id, msg.user.username || msg.user.name)}
                 alt={msg.user.username || msg.user.name}
-                className="w-10 h-10 rounded-full flex-shrink-0"
+                className="w-10 h-10 rounded-full flex-shrink-0 object-cover"
               />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">

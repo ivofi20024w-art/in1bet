@@ -611,8 +611,9 @@ export interface RecentWinner {
   id: string;
   username: string;
   level: number;
-  amount: number;
+  amount: number | null;
   gameName: string;
+  avatarUrl: string | null;
   createdAt: Date;
 }
 
@@ -620,10 +621,13 @@ export async function getRecentWinners(limit: number = 20): Promise<RecentWinner
   const recentWins = await db
     .select({
       id: bets.id,
-      username: users.name,
+      username: users.username,
+      name: users.name,
       level: users.level,
       amount: sql<number>`${bets.winAmount}::float`,
       gameType: bets.gameType,
+      avatarUrl: users.avatarUrl,
+      hideWins: users.hideWins,
       createdAt: bets.updatedAt,
     })
     .from(bets)
@@ -648,10 +652,11 @@ export async function getRecentWinners(limit: number = 20): Promise<RecentWinner
 
   return recentWins.map(win => ({
     id: win.id,
-    username: win.username,
+    username: win.username || win.name.split(' ')[0],
     level: win.level,
-    amount: win.amount,
+    amount: win.hideWins ? null : win.amount,
     gameName: gameTypeNames[win.gameType] || win.gameType,
+    avatarUrl: win.avatarUrl,
     createdAt: win.createdAt,
   }));
 }

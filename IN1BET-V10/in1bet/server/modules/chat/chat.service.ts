@@ -27,9 +27,11 @@ export interface ChatMessageWithUser {
   user: {
     id: string;
     name: string;
+    username?: string;
     vipLevel: string;
     level: number;
     role?: string;
+    avatarUrl?: string | null;
     customization?: ChatUserCustomizationData | null;
   };
   replyTo?: ReplyToData;
@@ -109,6 +111,8 @@ export async function getRoomMessages(roomId: string, limit = 100): Promise<Chat
       isDeleted: chatMessages.isDeleted,
       userId: chatMessages.userId,
       userName: users.name,
+      userUsername: users.username,
+      userAvatarUrl: users.avatarUrl,
       userVipLevel: users.vipLevel,
       userLevel: users.level,
       replyToId: chatMessages.replyToId,
@@ -134,8 +138,10 @@ export async function getRoomMessages(roomId: string, limit = 100): Promise<Chat
     user: {
       id: m.userId,
       name: m.userName,
+      username: m.userUsername || undefined,
       vipLevel: m.userVipLevel || "bronze",
       level: m.userLevel,
+      avatarUrl: m.userAvatarUrl || undefined,
     },
     replyTo: m.replyToId ? {
       id: m.replyToId,
@@ -164,7 +170,9 @@ export async function sendMessage(
   userLevel: number,
   userRole?: string,
   customization?: ChatUserCustomizationData | null,
-  replyTo?: ReplyToData
+  replyTo?: ReplyToData,
+  userUsername?: string,
+  userAvatarUrl?: string | null
 ): Promise<SendMessageResult> {
   const penaltyStatus = await checkUserPenalty(userId, roomId);
   
@@ -233,9 +241,11 @@ export async function sendMessage(
       user: {
         id: userId,
         name: userName,
+        username: userUsername,
         vipLevel: userVipLevel,
         level: userLevel,
         role: userRole,
+        avatarUrl: userAvatarUrl,
         customization,
       },
       replyTo: replyTo,

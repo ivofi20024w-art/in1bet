@@ -331,7 +331,15 @@ export function Header() {
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-9 w-9 sm:h-10 sm:w-10 rounded-full p-0 overflow-hidden border-2 border-transparent hover:border-primary/50 transition-all ml-1 sm:ml-2 bg-primary/20 flex-shrink-0">
-                    <span className="text-primary font-bold text-xs sm:text-sm">{getInitials()}</span>
+                    {user?.avatarUrl ? (
+                      <img 
+                        src={user.avatarUrl} 
+                        alt={getDisplayName()}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-primary font-bold text-xs sm:text-sm">{getInitials()}</span>
+                    )}
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-card border-white/10 text-foreground p-2">

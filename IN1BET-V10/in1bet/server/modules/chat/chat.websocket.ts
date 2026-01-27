@@ -38,6 +38,8 @@ interface ChatClient {
   ws: WebSocket;
   userId: string;
   userName: string;
+  userUsername?: string;
+  userAvatarUrl?: string | null;
   userVipLevel: string;
   userLevel: number;
   userRole: string;
@@ -149,6 +151,8 @@ export function setupChatWebSocket(server: Server) {
               ws,
               userId: user.id,
               userName: user.name,
+              userUsername: user.username || undefined,
+              userAvatarUrl: user.avatarUrl || undefined,
               userVipLevel: user.vipLevel || "bronze",
               userLevel: user.level,
               userRole: user.chatModeratorRole || "NONE",
@@ -292,7 +296,9 @@ export function setupChatWebSocket(server: Server) {
               client.userLevel,
               client.userRole,
               client.customization,
-              replyTo
+              replyTo,
+              client.userUsername,
+              client.userAvatarUrl
             );
 
             if (!result.success) {

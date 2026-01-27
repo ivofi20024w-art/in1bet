@@ -5,8 +5,9 @@ interface RecentWinner {
   id: string;
   username: string;
   level: number;
-  amount: number;
+  amount: number | null;
   gameName: string;
+  avatarUrl?: string | null;
   createdAt: string;
 }
 
@@ -71,9 +72,17 @@ export function WinsTicker({ className }: { className?: string }) {
             return (
               <div key={`${winner.id}-${i}`} className="flex items-center gap-3 bg-black/40 backdrop-blur-sm rounded-lg px-4 py-2 border border-white/10 flex-shrink-0 hover:border-green-500/30 transition-colors">
                 <div className="relative">
-                  <div className="w-7 h-7 rounded-full border-2 border-green-500/50 shadow-lg shadow-green-500/20 bg-gradient-to-br from-green-600 to-emerald-700 flex items-center justify-center">
-                    <span className="text-[9px] font-bold text-white">{getInitials(winner.username)}</span>
-                  </div>
+                  {winner.avatarUrl ? (
+                    <img 
+                      src={winner.avatarUrl} 
+                      alt={winner.username}
+                      className="w-7 h-7 rounded-full border-2 border-green-500/50 shadow-lg shadow-green-500/20 object-cover"
+                    />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full border-2 border-green-500/50 shadow-lg shadow-green-500/20 bg-gradient-to-br from-green-600 to-emerald-700 flex items-center justify-center">
+                      <span className="text-[9px] font-bold text-white">{getInitials(winner.username)}</span>
+                    </div>
+                  )}
                   <div className={`absolute -bottom-1 -right-1 bg-gradient-to-r ${levelColor} text-[7px] text-white font-bold px-1.5 py-0.5 rounded-full shadow-md`}>
                     {winner.level}
                   </div>
@@ -83,7 +92,11 @@ export function WinsTicker({ className }: { className?: string }) {
                   <span className="text-gray-500 text-[9px]">{winner.gameName}</span>
                 </div>
                 <div className="flex flex-col items-end">
-                  <span className="text-green-400 font-bold text-sm">+R$ {winner.amount.toFixed(2)}</span>
+                  {winner.amount !== null ? (
+                    <span className="text-green-400 font-bold text-sm">+R$ {winner.amount.toFixed(2)}</span>
+                  ) : (
+                    <span className="text-green-400 font-bold text-sm">Ganhou!</span>
+                  )}
                   <span className="text-gray-600 text-[8px]">agora</span>
                 </div>
               </div>

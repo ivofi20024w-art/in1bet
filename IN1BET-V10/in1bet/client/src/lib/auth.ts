@@ -24,6 +24,9 @@ export interface User {
   vipLevel: string;
   level?: number;
   xp?: number;
+  avatarUrl?: string | null;
+  profileBackground?: string | null;
+  hideWins?: boolean;
   createdAt: string;
   updatedAt: string;
 }
