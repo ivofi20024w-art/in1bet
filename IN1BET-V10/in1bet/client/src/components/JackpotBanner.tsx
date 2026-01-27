@@ -56,9 +56,11 @@ function AnimatedValue({ value, duration = 1500 }: { value: number; duration?: n
 
 interface JackpotBannerProps {
   chatOpen?: boolean;
+  sidebarOpen?: boolean;
 }
 
-export function JackpotBanner({ chatOpen = false }: JackpotBannerProps) {
+export function JackpotBanner({ chatOpen = false, sidebarOpen = true }: JackpotBannerProps) {
+  const isCompact = chatOpen && sidebarOpen;
   const { data } = useQuery<{ success: boolean; data: JackpotInfo }>({
     queryKey: ["/api/jackpot/info"],
     refetchInterval: 3000,
@@ -79,7 +81,7 @@ export function JackpotBanner({ chatOpen = false }: JackpotBannerProps) {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
-          minHeight: '120px',
+          minHeight: isCompact ? '90px' : '120px',
           aspectRatio: '16 / 5',
         }}
       >
@@ -88,7 +90,11 @@ export function JackpotBanner({ chatOpen = false }: JackpotBannerProps) {
           data-testid="jackpot-value"
         >
           <p 
-            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black text-white leading-none whitespace-nowrap"
+            className={`font-black text-white leading-none whitespace-nowrap ${
+              isCompact 
+                ? 'text-lg sm:text-xl md:text-2xl lg:text-2xl xl:text-3xl' 
+                : 'text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl'
+            }`}
             style={{
               textShadow: "0 2px 20px rgba(255, 122, 26, 0.6), 0 4px 40px rgba(0,0,0,0.8)",
             }}
@@ -98,11 +104,21 @@ export function JackpotBanner({ chatOpen = false }: JackpotBannerProps) {
         </div>
         
         <div 
-          className={`absolute top-[42%] -translate-y-1/2 flex items-center justify-center w-[85px] sm:w-[100px] md:w-[120px] lg:w-[180px] xl:w-[200px] right-[11%] sm:right-[12%] md:right-[13%] ${chatOpen ? 'lg:right-[8%] xl:right-[8%]' : 'lg:right-[10%] xl:right-[10%]'}`}
+          className={`absolute top-[42%] -translate-y-1/2 flex items-center justify-center right-[11%] sm:right-[12%] md:right-[13%] ${
+            isCompact 
+              ? 'w-[70px] sm:w-[80px] md:w-[100px] lg:w-[120px] xl:w-[140px] lg:right-[6%] xl:right-[6%]' 
+              : chatOpen 
+                ? 'w-[85px] sm:w-[100px] md:w-[120px] lg:w-[180px] xl:w-[200px] lg:right-[8%] xl:right-[8%]' 
+                : 'w-[85px] sm:w-[100px] md:w-[120px] lg:w-[180px] xl:w-[200px] lg:right-[10%] xl:right-[10%]'
+          }`}
           data-testid="jackpot-last-winner"
         >
           <p 
-            className="text-[10px] sm:text-xs md:text-sm lg:text-xl xl:text-2xl font-bold text-center w-full"
+            className={`font-bold text-center w-full ${
+              isCompact 
+                ? 'text-[8px] sm:text-[10px] md:text-xs lg:text-sm xl:text-base' 
+                : 'text-[10px] sm:text-xs md:text-sm lg:text-xl xl:text-2xl'
+            }`}
             style={{ color: "#FFD700" }}
             data-testid="jackpot-winner-name"
           >

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { JackpotBanner } from "@/components/JackpotBanner";
 import { ChatWidget } from "@/components/chat/ChatWidget";
@@ -133,6 +133,19 @@ export default function Home() {
     }
     return true;
   });
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
+  
+  useEffect(() => {
+    const handleResize = () => setIsDesktop(window.innerWidth >= 1024);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
   const [gameModalOpen, setGameModalOpen] = useState(false);
   const [gameUrl, setGameUrl] = useState<string | null>(null);
   const [currentGameName, setCurrentGameName] = useState<string>("");
@@ -260,7 +273,7 @@ export default function Home() {
         </div>
       </section>
 
-      <JackpotBanner chatOpen={chatVisible} />
+      <JackpotBanner chatOpen={chatVisible} sidebarOpen={isDesktop} />
 
       <section className="mb-12 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
         <GameSectionHeader
