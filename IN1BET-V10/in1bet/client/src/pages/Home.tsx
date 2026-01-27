@@ -325,20 +325,14 @@ export default function Home() {
           {ORIGINALS.map((game, index) => (
             <Link key={game.id} href={game.link} className="flex-shrink-0" style={{ scrollSnapAlign: 'start' }}>
               <div 
-                className="group relative w-[150px] sm:w-[170px] md:w-[190px] aspect-[225/420] rounded-2xl overflow-hidden cursor-pointer border-2 border-white/10 hover:border-orange-500/70 transition-all duration-300 hover:shadow-[0_0_35px_rgba(249,115,22,0.6)] hover:-translate-y-3" 
+                className="group relative w-[125px] h-[160px] rounded-xl overflow-hidden cursor-pointer border-2 border-white/10 hover:border-orange-500 transition-all duration-300 hover:shadow-[0_0_25px_rgba(249,115,22,0.5)] hover:scale-105" 
                 data-testid={`original-${game.id}`}
               >
                 <img 
                   src={game.img} 
                   alt={game.name}
-                  className="absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-orange-600/30 via-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
-                  <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(249,115,22,0.7)] transform scale-0 group-hover:scale-100 transition-all duration-300 border-2 border-white/30">
-                    <Play className="w-7 h-7 text-white fill-white ml-1" />
-                  </div>
-                </div>
               </div>
             </Link>
           ))}
