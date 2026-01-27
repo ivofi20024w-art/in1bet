@@ -152,7 +152,7 @@ export function LevelBadge({ level, progressPercent, xpProgress, xpNeeded, class
             "transition-transform duration-300 group-hover:scale-105"
           )}
         >
-          <div className="relative w-11 h-11 sm:w-12 sm:h-12">
+          <div className="relative w-11 h-11 flex items-center justify-center">
             <CircularProgress
               progress={Math.min(progressPercent, 100)}
               size={44}
@@ -163,27 +163,26 @@ export function LevelBadge({ level, progressPercent, xpProgress, xpNeeded, class
               uniqueId={uniqueId}
             />
             <div 
-              className={cn(
-                "absolute inset-1 rounded-full flex items-center justify-center",
-                "bg-gradient-to-br from-background via-background/95 to-background",
-                "border border-white/10",
-                "shadow-inner"
-              )}
-              style={{
-                boxShadow: `inset 0 0 12px ${tier.glowColor}`,
-              }}
+              className="absolute inset-0 flex items-center justify-center"
             >
-              <span 
-                className={cn(
-                  "text-sm sm:text-base font-black tabular-nums",
-                  tier.textColor
-                )}
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center bg-background border border-white/10"
                 style={{
-                  textShadow: `0 0 12px ${tier.glowColor}`,
+                  boxShadow: `inset 0 0 8px ${tier.glowColor}`,
                 }}
               >
-                {level}
-              </span>
+                <span 
+                  className={cn(
+                    "text-sm font-bold tabular-nums leading-none",
+                    tier.textColor
+                  )}
+                  style={{
+                    textShadow: `0 0 8px ${tier.glowColor}`,
+                  }}
+                >
+                  {level}
+                </span>
+              </div>
             </div>
           </div>
         </div>
