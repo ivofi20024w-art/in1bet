@@ -459,12 +459,12 @@ export function Plinko2D() {
           
           // Velocidade ajustada pelo número de linhas (menos linhas = mais lento)
           const totalRows = positions.length;
-          const rowSpeedFactor = totalRows <= 8 ? 0.6 : totalRows <= 12 ? 0.8 : 1.0;
+          const rowSpeedFactor = totalRows <= 8 ? 0.4 : totalRows <= 12 ? 0.5 : 0.7;
           
           // Velocidade aumenta suavemente conforme a bola cai (simula gravidade)
           const rowProgress = ball.pathIndex / totalRows;
-          const gravityMultiplier = 1 + rowProgress * 0.8; // Acelera de 1x a 1.8x
-          const baseSpeed = 0.07 * rowSpeedFactor; // Velocidade base ajustável
+          const gravityMultiplier = 1 + rowProgress * 0.5; // Acelera de 1x a 1.5x (mais suave)
+          const baseSpeed = 0.06 * rowSpeedFactor; // Velocidade base mais lenta
           ball.progress += baseSpeed * gravityMultiplier;
           
           if (ball.progress >= 1) {
