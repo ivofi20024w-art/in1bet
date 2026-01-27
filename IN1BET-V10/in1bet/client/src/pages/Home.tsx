@@ -50,9 +50,9 @@ async function fetchPopularGames(): Promise<SlotsgatewayGame[]> {
 }
 
 const PROVIDER_IDS: Record<string, string> = {
-  pragmaticslots: '6c841f79-cd1b-4af4-ba5b-f3b9a6888410',
-  pgsoft: 'f05c6248-d8b6-4d4b-bfb8-b9a44df6238a',
-  hacksaw: 'f3a3e603-a7b4-4897-b67d-d8a32197dce0',
+  pragmaticslots: '615d6f88-6127-4c75-ad53-a3d00125640c',
+  pgsoft: '36e80eda-5ba2-43cd-ad21-70cebc14acef',
+  hacksaw: 'dea8a3ee-942a-4922-a8f6-3cac56cbdea1',
 };
 
 async function fetchProviderGames(providerSlug: string): Promise<SlotsgatewayGame[]> {
