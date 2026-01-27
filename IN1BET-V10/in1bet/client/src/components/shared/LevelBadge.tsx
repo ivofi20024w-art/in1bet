@@ -1,6 +1,5 @@
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
-import { Crown, Gem, Star, Sparkles, Zap } from "lucide-react";
 import { useId } from "react";
 
 interface LevelBadgeProps {
@@ -18,7 +17,6 @@ type TierInfo = {
   glowColor: string;
   bgGradient: string;
   textColor: string;
-  icon: typeof Star;
 };
 
 function getTierInfo(level: number): TierInfo {
@@ -30,7 +28,6 @@ function getTierInfo(level: number): TierInfo {
       glowColor: "rgba(168, 85, 247, 0.6)",
       bgGradient: "from-purple-500/20 via-pink-500/10 to-purple-500/20",
       textColor: "text-purple-400",
-      icon: Gem,
     };
   }
   if (level >= 51) {
@@ -41,7 +38,6 @@ function getTierInfo(level: number): TierInfo {
       glowColor: "rgba(59, 130, 246, 0.6)",
       bgGradient: "from-blue-500/20 via-cyan-500/10 to-blue-500/20",
       textColor: "text-blue-400",
-      icon: Crown,
     };
   }
   if (level >= 31) {
@@ -52,7 +48,6 @@ function getTierInfo(level: number): TierInfo {
       glowColor: "rgba(245, 158, 11, 0.6)",
       bgGradient: "from-amber-500/20 via-yellow-500/10 to-amber-500/20",
       textColor: "text-amber-400",
-      icon: Star,
     };
   }
   if (level >= 11) {
@@ -63,7 +58,6 @@ function getTierInfo(level: number): TierInfo {
       glowColor: "rgba(148, 163, 184, 0.5)",
       bgGradient: "from-slate-400/20 via-slate-300/10 to-slate-400/20",
       textColor: "text-slate-300",
-      icon: Sparkles,
     };
   }
   return {
@@ -73,7 +67,6 @@ function getTierInfo(level: number): TierInfo {
     glowColor: "rgba(249, 115, 22, 0.5)",
     bgGradient: "from-orange-500/20 via-orange-400/10 to-orange-500/20",
     textColor: "text-orange-400",
-    icon: Zap,
   };
 }
 
@@ -148,7 +141,6 @@ function CircularProgress({
 
 export function LevelBadge({ level, progressPercent, xpProgress, xpNeeded, className }: LevelBadgeProps) {
   const tier = getTierInfo(level);
-  const TierIcon = tier.icon;
   const uniqueId = useId();
 
   return (
@@ -192,20 +184,6 @@ export function LevelBadge({ level, progressPercent, xpProgress, xpNeeded, class
               >
                 {level}
               </span>
-            </div>
-            <div 
-              className={cn(
-                "absolute -bottom-0.5 -right-0.5 w-4 h-4 sm:w-5 sm:h-5 rounded-full",
-                "flex items-center justify-center",
-                "bg-gradient-to-br border border-white/20",
-                "shadow-lg"
-              )}
-              style={{
-                background: `linear-gradient(135deg, ${tier.colorFrom}, ${tier.colorTo})`,
-                boxShadow: `0 2px 8px ${tier.glowColor}`,
-              }}
-            >
-              <TierIcon className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white" />
             </div>
           </div>
         </div>
