@@ -320,7 +320,7 @@ export function Header() {
                     <WalletModal>
                       <Button size="sm" className="h-7 sm:h-8 rounded-full px-2 sm:px-4 bg-primary hover:bg-primary/90 text-white shadow-[0_0_15px_-3px_rgba(242,102,49,0.4)]">
                         <Wallet className="w-4 h-4 sm:mr-2" />
-                        <span className="hidden sm:inline">Depósito</span>
+                        <span className="hidden sm:inline">Depositar</span>
                       </Button>
                     </WalletModal>
                   </div>
