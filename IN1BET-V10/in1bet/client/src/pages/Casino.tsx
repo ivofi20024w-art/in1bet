@@ -342,14 +342,11 @@ export default function Casino() {
   const categoryFilters = getCategoryFilters(activeCategory);
   const { gameType: gameTypeFilter, isNew: isNewFilter, hasJackpot: hasJackpotFilter } = categoryFilters;
 
-  const { isLoading: loadingGames, refetch } = useQuery({
+  const { data: gamesData, isLoading: loadingGames, refetch } = useQuery({
     queryKey: ['slotsgateway-games', selectedProvider, activeCategory, gameTypeFilter, isNewFilter, hasJackpotFilter, debouncedSearch, activeCategory === 'favorites' ? favorites : null],
     queryFn: async () => {
       if (activeCategory === 'favorites') {
         if (favorites.length === 0) {
-          setGames([]);
-          setTotalGames(0);
-          setHasMore(false);
           return { games: [], total: 0, hasMore: false, limit: 0, offset: 0 };
         }
         const result = await fetchGames({
@@ -360,10 +357,6 @@ export default function Casino() {
         });
         const favoriteGames = result.games.filter(g => favorites.includes(g.idHash));
         const sortedFavorites = sortGamesByTop100(favoriteGames);
-        setGames(sortedFavorites);
-        setTotalGames(sortedFavorites.length);
-        setHasMore(false);
-        setOffset(0);
         return { ...result, games: sortedFavorites, total: sortedFavorites.length, hasMore: false };
       }
       
@@ -377,14 +370,19 @@ export default function Casino() {
         hasJackpot: hasJackpotFilter,
       });
       const sortedGames = sortGamesByTop100(result.games);
-      setGames(sortedGames);
-      setTotalGames(result.total);
-      setHasMore(result.hasMore);
-      setOffset(GAMES_PER_PAGE);
       return { ...result, games: sortedGames };
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0,
   });
+
+  useEffect(() => {
+    if (gamesData) {
+      setGames(gamesData.games);
+      setTotalGames(gamesData.total);
+      setHasMore(gamesData.hasMore);
+      setOffset(GAMES_PER_PAGE);
+    }
+  }, [gamesData]);
 
   const loadMoreGames = async () => {
     setIsLoadingMore(true);
