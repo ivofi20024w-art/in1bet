@@ -12,7 +12,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 
 interface Notification {
   id: string;
@@ -66,6 +66,7 @@ const getPriorityColor = (priority: string) => {
 export function NotificationBell() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [, setLocation] = useLocation();
 
   const { data: feed } = useQuery<NotificationFeed>({
     queryKey: ["/api/notifications/feed"],
@@ -108,6 +109,7 @@ export function NotificationBell() {
     }
     if (notification.actionUrl) {
       setOpen(false);
+      setLocation(notification.actionUrl);
     }
   };
 
