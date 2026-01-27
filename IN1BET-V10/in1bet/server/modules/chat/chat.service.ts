@@ -5,7 +5,7 @@ import {
   ChatRoom, ChatMessage, InsertChatRoom, InsertChatMessage
 } from "@shared/schema";
 import { eq, desc, and, gt, sql, asc } from "drizzle-orm";
-import { moderateMessage, checkUserPenalty, applyPenalty, checkSpam, ChatViolationType } from "./chat.moderation";
+import { moderateMessage, checkUserPenalty, applyPenalty, applyInstantBan, checkSpam, ChatViolationType } from "./chat.moderation";
 
 export interface ChatUserCustomizationData {
   nameColor?: string;
@@ -159,6 +159,7 @@ export interface SendMessageResult {
     type: string;
     expiresAt?: Date;
   };
+  banned?: boolean;
 }
 
 export async function sendMessage(
@@ -208,6 +209,16 @@ export async function sendMessage(
   
   if (!moderationResult.allowed) {
     const mainViolation = moderationResult.violations[0];
+    
+    if (moderationResult.instantBan) {
+      await applyInstantBan(userId, mainViolation.type, messageText, roomId);
+      return {
+        success: false,
+        error: moderationResult.banMessage || "Você foi banido do chat. Para contestar, abra um ticket de suporte.",
+        banned: true,
+      };
+    }
+    
     const penalty = await applyPenalty(userId, mainViolation.type, messageText, roomId);
     
     return {

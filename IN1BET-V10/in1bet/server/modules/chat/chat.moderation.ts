@@ -47,24 +47,31 @@ const DEFAULT_BAD_WORDS = [
   "mongol", "debil", "débil", "lixo", "vagabundo", "vagaba",
 ];
 
-let cachedBadWords: string[] | null = null;
+interface BadWordEntry {
+  word: string;
+  severity: number;
+}
+
+let cachedBadWords: BadWordEntry[] | null = null;
 let badWordsCacheTime = 0;
 const BAD_WORDS_CACHE_TTL = 60000;
 
-async function getBadWords(): Promise<string[]> {
+const SEVERITY_HIGH = 3;
+
+async function getBadWords(): Promise<BadWordEntry[]> {
   const now = Date.now();
   if (cachedBadWords && (now - badWordsCacheTime) < BAD_WORDS_CACHE_TTL) {
     return cachedBadWords;
   }
   
   const dbWords = await db
-    .select({ word: chatBadWords.word })
+    .select({ word: chatBadWords.word, severity: chatBadWords.severity })
     .from(chatBadWords)
     .where(eq(chatBadWords.isActive, true));
   
   cachedBadWords = dbWords.length > 0 
-    ? dbWords.map(w => w.word.toLowerCase())
-    : DEFAULT_BAD_WORDS;
+    ? dbWords.map(w => ({ word: w.word.toLowerCase(), severity: w.severity }))
+    : DEFAULT_BAD_WORDS.map(w => ({ word: w, severity: 1 }));
   badWordsCacheTime = now;
   
   return cachedBadWords;
@@ -81,6 +88,8 @@ export interface ModerationResult {
     details: string;
   }[];
   filteredMessage?: string;
+  instantBan?: boolean;
+  banMessage?: string;
 }
 
 export async function moderateMessage(message: string): Promise<ModerationResult> {
@@ -119,14 +128,24 @@ export async function moderateMessage(message: string): Promise<ModerationResult
   
   const badWords = await getBadWords();
   const lowerMessage = message.toLowerCase();
-  for (const word of badWords) {
-    if (lowerMessage.includes(word)) {
-      violations.push({
-        type: ChatViolationType.PROFANITY,
-        details: "Linguagem inapropriada detectada",
-      });
-      const regex = new RegExp(word, "gi");
-      filteredMessage = filteredMessage.replace(regex, "*".repeat(word.length));
+  let instantBan = false;
+  
+  for (const entry of badWords) {
+    if (lowerMessage.includes(entry.word)) {
+      if (entry.severity >= SEVERITY_HIGH) {
+        instantBan = true;
+        violations.push({
+          type: ChatViolationType.SCAM,
+          details: "Uso de linguagem proibida - violação grave",
+        });
+      } else {
+        violations.push({
+          type: ChatViolationType.PROFANITY,
+          details: "Linguagem inapropriada detectada",
+        });
+      }
+      const regex = new RegExp(entry.word, "gi");
+      filteredMessage = filteredMessage.replace(regex, "*".repeat(entry.word.length));
     }
   }
   
@@ -134,12 +153,16 @@ export async function moderateMessage(message: string): Promise<ModerationResult
     v.type === ChatViolationType.LINK || 
     v.type === ChatViolationType.SCAM ||
     v.type === ChatViolationType.PHONE_NUMBER
-  );
+  ) || instantBan;
   
   return {
     allowed: !hasBlockingViolation,
     violations,
     filteredMessage: violations.length > 0 ? filteredMessage : undefined,
+    instantBan,
+    banMessage: instantBan 
+      ? "Você foi banido do chat por uso de linguagem proibida. Para contestar, abra um ticket de suporte ou use o chat ao vivo." 
+      : undefined,
   };
 }
 
@@ -273,6 +296,28 @@ export async function applyPenalty(
   });
   
   return { penaltyType, expiresAt };
+}
+
+export async function applyInstantBan(
+  userId: string,
+  violationType: string,
+  messageContent?: string,
+  roomId?: string,
+  issuedBy?: string
+): Promise<void> {
+  console.log(`[CHAT] Applying instant ban to user ${userId} for violation: ${violationType}`);
+  
+  await db.insert(chatPenalties).values({
+    userId,
+    roomId: roomId || null,
+    penaltyType: ChatPenaltyType.BAN,
+    violationType,
+    reason: "Uso de linguagem proibida - violação grave. Para contestar, abra um ticket de suporte.",
+    messageContent: messageContent?.substring(0, 500),
+    expiresAt: null,
+    isActive: true,
+    issuedBy,
+  });
 }
 
 const userMessageTimestamps = new Map<string, number[]>();
