@@ -437,7 +437,7 @@ function DraggableMessageItem({
           <div className="w-px h-3 bg-white/10 mx-0.5" />
           
           {/* Admin Actions */}
-          {isAdmin && currentUser?.id !== msg.user.id && (
+          {isAdmin && (
             <div className="relative">
               <button 
                 onClick={() => setShowAdminMenu(!showAdminMenu)}
@@ -458,33 +458,31 @@ function DraggableMessageItem({
                   >
                     <Trash2 className="w-3 h-3" /> Apagar mensagem
                   </button>
-                  <button 
-                    onClick={() => {
-                      onAdminAction?.('mute', msg);
-                      setShowAdminMenu(false);
-                    }}
-                    className="w-full px-3 py-1.5 text-xs text-left hover:bg-white/5 flex items-center gap-2 text-orange-400 hover:text-orange-300"
-                  >
-                    <VolumeOff className="w-3 h-3" /> Mutar usuário
-                  </button>
-                  <button 
-                    onClick={() => {
-                      onAdminAction?.('ban', msg);
-                      setShowAdminMenu(false);
-                    }}
-                    className="w-full px-3 py-1.5 text-xs text-left hover:bg-white/5 flex items-center gap-2 text-red-400 hover:text-red-300"
-                  >
-                    <Ban className="w-3 h-3" /> Banir usuário
-                  </button>
+                  {currentUser?.id !== msg.user.id && (
+                    <>
+                      <button 
+                        onClick={() => {
+                          onAdminAction?.('mute', msg);
+                          setShowAdminMenu(false);
+                        }}
+                        className="w-full px-3 py-1.5 text-xs text-left hover:bg-white/5 flex items-center gap-2 text-orange-400 hover:text-orange-300"
+                      >
+                        <VolumeOff className="w-3 h-3" /> Mutar usuário
+                      </button>
+                      <button 
+                        onClick={() => {
+                          onAdminAction?.('ban', msg);
+                          setShowAdminMenu(false);
+                        }}
+                        className="w-full px-3 py-1.5 text-xs text-left hover:bg-white/5 flex items-center gap-2 text-red-400 hover:text-red-300"
+                      >
+                        <Ban className="w-3 h-3" /> Banir usuário
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>
-          )}
-          
-          {!isAdmin && (
-            <button className="p-1 hover:bg-white/10 rounded text-muted-foreground hover:text-white">
-              <MoreVertical className="w-3 h-3" />
-            </button>
           )}
         </div>
 
