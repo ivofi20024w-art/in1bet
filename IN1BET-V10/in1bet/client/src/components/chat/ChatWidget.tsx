@@ -47,7 +47,7 @@ import { useChatStore, type ChatMessage as StoreChatMessage } from "@/stores/cha
 interface User {
   id: string;
   username: string;
-  avatar?: string;
+  avatar?: string | null;
   rank: 'admin' | 'suporte' | 'influencer' | 'vip' | 'platinum' | 'gold' | 'user';
   level: number;
   color: string;
@@ -466,13 +466,19 @@ function DraggableMessageItem({
             <div 
               className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold shadow-lg border border-white/10 shrink-0 cursor-pointer overflow-hidden relative"
               style={{
-                background: `linear-gradient(135deg, ${msg.user.color}20, ${msg.user.color}05)`,
+                background: msg.user.avatar ? 'transparent' : `linear-gradient(135deg, ${msg.user.color}20, ${msg.user.color}05)`,
                 color: msg.user.color
               }}
               onClick={() => setSelectedUser(msg.user)}
             >
-              <div className="absolute inset-0 bg-white/5 opacity-50" />
-              <span className="relative z-10">{msg.user.username.charAt(0).toUpperCase()}</span>
+              {msg.user.avatar ? (
+                <img src={msg.user.avatar} alt={msg.user.username} className="w-full h-full object-cover" />
+              ) : (
+                <>
+                  <div className="absolute inset-0 bg-white/5 opacity-50" />
+                  <span className="relative z-10">{msg.user.username.charAt(0).toUpperCase()}</span>
+                </>
+              )}
             </div>
 
             <div className="flex-1 min-w-0">
@@ -543,16 +549,22 @@ function DraggableMessageItem({
                 <div 
                   className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold shadow-lg border border-white/10 transition-all group-hover:scale-105 group-hover:rotate-3 select-none relative overflow-hidden cursor-pointer"
                   style={{
-                    background: `linear-gradient(135deg, ${msg.user.color}20, ${msg.user.color}05)`,
+                    background: msg.user.avatar ? 'transparent' : `linear-gradient(135deg, ${msg.user.color}20, ${msg.user.color}05)`,
                     color: msg.user.color,
                     boxShadow: `0 4px 12px -2px ${msg.user.color}20`
                   }}
                   onClick={() => setSelectedUser(msg.user)}
                 >
-                  <div className="absolute inset-0 bg-white/5 opacity-50" />
-                  <span className="relative z-10 drop-shadow-sm font-display tracking-wide">
-                    {msg.user.username.charAt(0).toUpperCase()}
-                  </span>
+                  {msg.user.avatar ? (
+                    <img src={msg.user.avatar} alt={msg.user.username} className="w-full h-full object-cover" />
+                  ) : (
+                    <>
+                      <div className="absolute inset-0 bg-white/5 opacity-50" />
+                      <span className="relative z-10 drop-shadow-sm font-display tracking-wide">
+                        {msg.user.username.charAt(0).toUpperCase()}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -749,6 +761,7 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
       user: {
         id: m.user.id,
         username: m.user.username || m.user.name,
+        avatar: m.user.avatarUrl || null,
         rank: mapVipToRank(m.user.vipLevel, m.user.role === 'ADMIN', m.user.role),
         level: m.user.level || 1,
         color: getUserColor(m.user.id),

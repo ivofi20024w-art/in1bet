@@ -23,6 +23,7 @@ export interface ChatUser {
   vipLevel: string;
   level: number;
   role?: string;
+  avatarUrl?: string | null;
   customization?: ChatUserCustomization | null;
 }
 
