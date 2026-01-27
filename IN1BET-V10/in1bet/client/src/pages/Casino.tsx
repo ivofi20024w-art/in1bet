@@ -416,7 +416,7 @@ export default function Casino() {
 
   return (
     <MainLayout>
-      <div className="relative h-[140px] md:h-[160px] rounded-xl overflow-hidden mb-4 group shadow-lg">
+      <div className="relative h-[140px] md:h-[160px] rounded-xl overflow-hidden mb-1 md:mb-4 group shadow-lg">
           <DepositBannerSlide />
       </div>
 
