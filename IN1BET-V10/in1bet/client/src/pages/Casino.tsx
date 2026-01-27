@@ -458,31 +458,21 @@ export default function Casino() {
       </div>
 
       <div className="flex gap-4 mb-10 overflow-x-auto pb-4 scrollbar-none snap-x px-1">
-          {ORIGINALS_GAMES.slice(0, 4).map((game) => (
-             <Link key={game.id} href={`/games/${game.id}`}>
-                <div className="min-w-[160px] h-24 rounded-xl relative overflow-hidden group cursor-pointer border border-white/5 hover:border-primary/50 transition-all snap-start shadow-lg hover:shadow-primary/20 hover:-translate-y-1 duration-300">
-                    <div className={`absolute inset-0 bg-gradient-to-br ${
-                         game.id === 'crash' ? 'from-[#FF7A1A] via-[#E86910] to-[#C84E00]' : 
-                         game.id === 'double' ? 'from-[#FF8C1A] via-[#E86910] to-[#C84E00]' :
-                         game.id === 'mines' ? 'from-[#FF7A1A] via-[#E86910] to-[#C84E00]' : 
-                         game.id === 'plinko' ? 'from-[#FF8C1A] via-[#FF7A1A] to-[#E86910]' :
-                         'from-gray-700 to-gray-900'
-                    } transition-transform group-hover:scale-110 duration-500`} />
-                    <div className="absolute inset-0 flex items-center justify-between p-4">
-                        <span className="font-heading font-bold text-lg text-white italic shadow-black drop-shadow-md">{game.name}</span>
-                        <Play className="w-8 h-8 text-white/80 fill-white/80 group-hover:scale-110 transition-transform" />
-                    </div>
-                </div>
-             </Link>
-          ))}
-          
-           <Link href="/vip" className="snap-start">
-              <img 
-                src="/btn-vip.png" 
-                alt="VIP Recompensas" 
-                className="w-[125px] h-[160px] rounded-xl object-cover cursor-pointer hover:scale-105 transition-transform duration-300 hover:shadow-[0_0_20px_rgba(234,179,8,0.5)]"
-              />
-            </Link>
+          <Link href="/games/mines" className="snap-start">
+            <img src="/casino-mines.png" alt="Minas" className="w-[125px] h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-orange-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]" />
+          </Link>
+          <Link href="/games/double" className="snap-start">
+            <img src="/casino-double.png" alt="Roletas" className="w-[125px] h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-orange-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]" />
+          </Link>
+          <Link href="/games/aviatormania" className="snap-start">
+            <img src="/casino-aviator.png" alt="Aviator Mania" className="w-[125px] h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-orange-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]" />
+          </Link>
+          <Link href="/games/plinko" className="snap-start">
+            <img src="/casino-plinko.png" alt="Plinko" className="w-[125px] h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-orange-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]" />
+          </Link>
+          <Link href="/vip" className="snap-start">
+            <img src="/btn-vip.png" alt="VIP Recompensas" className="w-[125px] h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-yellow-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(234,179,8,0.5)]" />
+          </Link>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
