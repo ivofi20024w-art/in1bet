@@ -457,21 +457,21 @@ export default function Casino() {
           <div className="absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-background to-transparent z-10" />
       </div>
 
-      <div className="flex gap-4 mb-10 overflow-x-auto pb-4 scrollbar-none snap-x px-1">
+      <div className="flex gap-3 mb-10 overflow-x-auto pb-4 scrollbar-none snap-x px-1">
           <Link href="/games/mines" className="snap-start">
-            <img src="/casino-mines.png" alt="Minas" className="w-[125px] h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-orange-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]" />
+            <img src="/casino-mines.png" alt="Minas" className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[125px] md:h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-orange-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]" />
           </Link>
           <Link href="/games/double" className="snap-start">
-            <img src="/casino-double.png" alt="Roletas" className="w-[125px] h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-orange-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]" />
+            <img src="/casino-double.png" alt="Roletas" className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[125px] md:h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-orange-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]" />
           </Link>
           <Link href="/games/aviatormania" className="snap-start">
-            <img src="/casino-aviator.png" alt="Aviator Mania" className="w-[125px] h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-orange-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]" />
+            <img src="/casino-aviator.png" alt="Aviator Mania" className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[125px] md:h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-orange-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]" />
           </Link>
           <Link href="/games/plinko" className="snap-start">
-            <img src="/casino-plinko.png" alt="Plinko" className="w-[125px] h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-orange-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]" />
+            <img src="/casino-plinko.png" alt="Plinko" className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[125px] md:h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-orange-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(249,115,22,0.5)]" />
           </Link>
           <Link href="/vip" className="snap-start">
-            <img src="/btn-vip.png" alt="VIP Recompensas" className="w-[125px] h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-yellow-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(234,179,8,0.5)]" />
+            <img src="/btn-vip.png" alt="VIP Recompensas" className="w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] md:w-[125px] md:h-[160px] rounded-xl object-cover cursor-pointer border-2 border-transparent hover:border-yellow-500 hover:scale-105 transition-all duration-300 hover:shadow-[0_0_20px_rgba(234,179,8,0.5)]" />
           </Link>
       </div>
 
