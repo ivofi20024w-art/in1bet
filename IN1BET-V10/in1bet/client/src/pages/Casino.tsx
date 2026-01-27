@@ -3,7 +3,7 @@ import { GameCard } from "@/components/shared/GameCard";
 import { ORIGINALS_GAMES } from "@/lib/mockData";
 import casinoHero from "@assets/generated_images/casino_lobby_luxurious_background.png";
 import slotsTournamentBanner from "@assets/generated_images/promotional_banner_for_slots_tournament.png";
-import depositBannerImage from "@assets/tigre1_1767994256497.jpeg";
+import depositBannerImage from "@assets/casino_banner_rodadas_gratis.jpeg";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/stores/authModalStore";
 import { Flame, Star, Heart, History, Rocket, Search, Filter, Play, Crown, Trophy, Users, Zap, Dice5, Timer, ChevronDown, Loader2 } from "lucide-react";
