@@ -122,13 +122,13 @@ function DepositBannerSlide() {
     return (
         <div 
             onClick={handleClick}
-            className="relative h-auto md:h-[160px] cursor-pointer group"
+            className="relative cursor-pointer group"
             data-testid="carousel-deposit-banner"
         >
             <img 
                 src={depositBannerImage} 
                 alt="Deposite e ganhe bônus" 
-                className="w-full h-auto md:h-full object-contain md:object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                className="w-full h-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
         </div>
@@ -416,7 +416,7 @@ export default function Casino() {
 
   return (
     <MainLayout>
-      <div className="relative h-[140px] md:h-[160px] rounded-xl overflow-hidden mb-1 md:mb-4 group shadow-lg">
+      <div className="relative rounded-xl overflow-hidden mb-1 md:mb-4 group shadow-lg">
           <DepositBannerSlide />
       </div>
 
