@@ -78,6 +78,7 @@ const PGSOFT_POPULAR_IDS = [
   '6b474eec-8a7f-4e11-a6b6-d34831f3bb2f', // The Great Icescape
   'f7498818-5619-4d26-a801-790003673191', // Double Fortune
   'b7db4fbe-0c1e-4f8c-a241-dd33a1593896', // Wild Bandito
+  'e25481c3-b2e6-40b5-a7f8-0c39a41aeb53', // Candy Bonanza
 ];
 
 const HACKSAW_POPULAR_IDS = [
