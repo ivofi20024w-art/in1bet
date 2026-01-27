@@ -220,17 +220,31 @@ export function Plinko2D() {
     const spacingY = (endY - startY) / Math.max(safeRows - 1, 1);
     const spacingX = CANVAS_WIDTH / (safeRows + 2);
     
-    let x = CANVAS_WIDTH / 2;
-    positions.push({ x, y: 20 });
+    positions.push({ x: CANVAS_WIDTH / 2, y: 20 });
     
     const safePath = Array.isArray(path) ? path : [];
-    for (let i = 0; i < safePath.length && i < safeRows; i++) {
+    let leftCount = 0;
+    let rightCount = 0;
+    
+    for (let i = 0; i < safeRows; i++) {
       const direction = safePath[i] || 0;
-      const offset = direction === 0 ? -spacingX / 2 : spacingX / 2;
-      x += offset;
-      if (!isFinite(x)) x = CANVAS_WIDTH / 2;
-      const y = startY + i * spacingY;
-      positions.push({ x, y });
+      if (direction === 0) {
+        leftCount++;
+      } else {
+        rightCount++;
+      }
+      
+      const pinsInRow = i + 3;
+      const rowWidth = (pinsInRow - 1) * spacingX;
+      const rowStartX = (CANVAS_WIDTH - rowWidth) / 2;
+      
+      const ballColumn = rightCount;
+      const ballX = rowStartX + ballColumn * spacingX;
+      const ballY = startY + i * spacingY + spacingY * 0.5;
+      
+      if (isFinite(ballX) && isFinite(ballY)) {
+        positions.push({ x: ballX, y: ballY });
+      }
     }
     
     const safeBucket = isFinite(targetBucket) ? targetBucket : Math.floor(numSlots / 2);
@@ -607,11 +621,11 @@ export function Plinko2D() {
             }}>
               <div style={{ color: IN1BET_COLORS.textMuted, fontSize: isMobile ? "10px" : "11px", marginBottom: "4px" }}>ÚLTIMO GANHO</div>
               <div style={{ 
-                color: lastWin > 0 ? IN1BET_COLORS.accent : IN1BET_COLORS.textMuted, 
+                color: (lastWin || 0) > 0 ? IN1BET_COLORS.accent : IN1BET_COLORS.textMuted, 
                 fontSize: isMobile ? "16px" : "18px", 
                 fontWeight: "bold" 
               }}>
-                R$ {lastWin.toFixed(2)}
+                R$ {(lastWin || 0).toFixed(2)}
               </div>
             </div>
           </div>
