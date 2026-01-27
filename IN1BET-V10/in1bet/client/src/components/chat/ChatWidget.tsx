@@ -397,14 +397,14 @@ function DraggableMessageItem({
           "relative z-10 pl-2 pr-2 py-1.5 rounded-md hover:bg-[#1A1D29] transition-colors border border-transparent hover:border-white/5",
           msg.type === 'win' && "my-2 bg-[#1A1D29]/50 border-white/5 shadow-sm",
           msg.type === 'casino_bet' && "my-2 bg-blue-500/5 border-blue-500/10",
-          currentUser.id === msg.user.id && "flex flex-row-reverse",
+          currentUser?.id === msg.user.id && "flex flex-row-reverse",
           compactMode && "py-0.5"
         )}
       >
         {/* Context Actions (Hover) */}
         <div className={cn(
           "absolute top-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-[#2D3142] rounded-md shadow-lg border border-white/10 p-1 z-10",
-          currentUser.id === msg.user.id ? "left-2" : "right-2"
+          currentUser?.id === msg.user.id ? "left-2" : "right-2"
         )}>
           <button 
              onClick={() => onReply(msg)}
@@ -429,7 +429,7 @@ function DraggableMessageItem({
           <div className="w-px h-3 bg-white/10 mx-0.5" />
           
           {/* Admin Actions */}
-          {isAdmin && currentUser.id !== msg.user.id && (
+          {isAdmin && currentUser?.id !== msg.user.id && (
             <div className="relative">
               <button 
                 onClick={() => setShowAdminMenu(!showAdminMenu)}
@@ -583,7 +583,7 @@ function DraggableMessageItem({
           <div className={cn(
             "flex items-start gap-3 p-1.5 -mx-1.5 rounded-lg transition-all",
             msg.content.includes(`@${currentUser.username}`) && "bg-amber-500/10 border border-amber-500/20 shadow-[inset_4px_0_0_0_#f59e0b]",
-            currentUser.id === msg.user.id && "flex-row-reverse bg-[#252836]/50"
+            currentUser?.id === msg.user.id && "flex-row-reverse bg-[#252836]/50"
           )}>
             {!compactMode && (
               <div className="mt-0.5 flex flex-col items-center gap-1 shrink-0">
@@ -613,7 +613,7 @@ function DraggableMessageItem({
             <div className="flex-1 min-w-0">
               <div className={cn(
                 "flex items-center gap-2 mb-0.5 flex-wrap",
-                currentUser.id === msg.user.id && "flex-row-reverse"
+                currentUser?.id === msg.user.id && "flex-row-reverse"
               )}>
                 {(() => {
                   const isOwnMessage = currentUser?.id === msg.user.id;
@@ -673,7 +673,7 @@ function DraggableMessageItem({
               {msg.replyTo && (
                 <div className={cn(
                   "mb-1 flex items-center gap-2 border-l-2 border-white/10",
-                  currentUser.id === msg.user.id ? "pr-2 border-l-0 border-r-2 justify-end text-right" : "pl-2"
+                  currentUser?.id === msg.user.id ? "pr-2 border-l-0 border-r-2 justify-end text-right" : "pl-2"
                 )}>
                   <div className="text-[10px] text-muted-foreground/50 truncate max-w-[200px]">
                     <span className="font-bold text-muted-foreground/70 mr-1">{msg.replyTo.username}:</span>
@@ -689,7 +689,7 @@ function DraggableMessageItem({
                     <div className="space-y-2">
                       <div className={cn(
                         "text-[13px] text-gray-300 font-medium leading-normal break-words",
-                        currentUser.id === msg.user.id && "text-right"
+                        currentUser?.id === msg.user.id && "text-right"
                       )}>
                         Ganhou <span className="text-[#00E701] font-bold">R$ {formatCurrency(winInfo.amount)}</span> no <span className="text-white font-medium">{winInfo.gameName}</span>
                         {winInfo.multiplier && (
@@ -711,7 +711,7 @@ function DraggableMessageItem({
                 return (
                   <div className={cn(
                     "text-[13px] text-gray-300 font-medium leading-normal break-words shadow-sm",
-                    currentUser.id === msg.user.id && "text-right"
+                    currentUser?.id === msg.user.id && "text-right"
                   )}>
                     {msg.content}
                   </div>
@@ -721,7 +721,7 @@ function DraggableMessageItem({
               {msg.reactions && Object.keys(msg.reactions).length > 0 && (
                 <div className={cn(
                   "flex flex-wrap gap-1 mt-1.5",
-                  currentUser.id === msg.user.id && "justify-end"
+                  currentUser?.id === msg.user.id && "justify-end"
                 )}>
                   {Object.entries(msg.reactions).map(([emoji, count]) => (
                     <button
