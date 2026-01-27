@@ -13,10 +13,10 @@ import { Button } from "@/components/ui/button";
 import { getStoredAuth } from "@/lib/auth";
 
 const mainBanner = "/banner-hero.png";
-import crashmaniaImg from "@assets/image_1768079128068.png";
-import doubleImg from "@assets/ChatGPT_Image_10_01_2026,_22_27_38_1768108766811.png";
-import minesImg from "@assets/ChatGPT_Image_10_01_2026,_22_30_56_1768108766811.png";
-import plinkoImg from "@assets/ChatGPT_Image_10_01_2026,_22_33_28_1768108766810.png";
+const crashmaniaImg = "/game-aviator.png";
+const doubleImg = "/game-double.png";
+const minesImg = "/game-mines.png";
+const plinkoImg = "/game-plinko.png";
 
 interface SlotsgatewayGame {
   id: string;
@@ -35,10 +35,10 @@ const PROMO_BANNERS = [
 
 
 const ORIGINALS = [
-  { id: "aviator", name: "Aviator Mania", link: "/games/aviatormania", img: crashmaniaImg },
-  { id: "double", name: "Double", link: "/games/double", img: doubleImg },
-  { id: "mines", name: "Mines", link: "/games/mines", img: minesImg },
   { id: "plinko", name: "Plinko", link: "/games/plinko", img: plinkoImg },
+  { id: "mines", name: "Minas", link: "/games/mines", img: minesImg },
+  { id: "double", name: "Roletas", link: "/games/double", img: doubleImg },
+  { id: "aviator", name: "Aviator Mania", link: "/games/aviatormania", img: crashmaniaImg },
 ];
 
 
