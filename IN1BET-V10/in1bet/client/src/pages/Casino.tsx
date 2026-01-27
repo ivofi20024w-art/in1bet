@@ -514,9 +514,9 @@ export default function Casino() {
       </div>
 
       <div className="flex gap-3 mb-10 overflow-x-auto pb-2 scrollbar-none snap-x px-1 md:justify-center">
-          <Link href="/games/mines" className="snap-start flex-shrink-0 group">
+          <Link href="/games/aviatormania" className="snap-start flex-shrink-0 group">
             <div className="relative w-[80px] sm:w-[100px] md:w-[120px] aspect-square rounded-xl overflow-hidden border border-white/10 hover:border-primary/50 shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
-              <img src="/casino-mines.png" alt="Minas" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <img src="/casino-aviator.png" alt="Aviator Mania" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
             </div>
           </Link>
           <Link href="/games/double" className="snap-start flex-shrink-0 group">
@@ -524,9 +524,9 @@ export default function Casino() {
               <img src="/casino-double.png" alt="Roletas" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
             </div>
           </Link>
-          <Link href="/games/aviatormania" className="snap-start flex-shrink-0 group">
+          <Link href="/games/mines" className="snap-start flex-shrink-0 group">
             <div className="relative w-[80px] sm:w-[100px] md:w-[120px] aspect-square rounded-xl overflow-hidden border border-white/10 hover:border-primary/50 shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
-              <img src="/casino-aviator.png" alt="Aviator Mania" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <img src="/casino-mines.png" alt="Minas" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
             </div>
           </Link>
           <Link href="/games/plinko" className="snap-start flex-shrink-0 group">
