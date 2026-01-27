@@ -1288,33 +1288,13 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
             >
               {/* Profile Header with Background */}
               <div 
-                className="relative h-28 bg-gradient-to-br from-orange-500/20 via-amber-500/10 to-transparent bg-cover bg-center shrink-0"
+                className="relative h-20 bg-gradient-to-br from-orange-500/20 via-amber-500/10 to-transparent bg-cover bg-center shrink-0"
                 style={userStats?.user?.profileBackground ? { 
                   backgroundImage: `url(${userStats.user.profileBackground})`,
                   backgroundSize: 'cover'
                 } : {}}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-[#13151C] to-transparent" />
-                <div className="absolute -bottom-10 left-4 w-20 h-20">
-                  {userStats?.user?.avatarUrl ? (
-                    <img 
-                      src={userStats.user.avatarUrl} 
-                      alt={selectedUser.username}
-                      className="w-full h-full rounded-2xl object-cover shadow-xl border-4 border-[#13151C]"
-                      style={{ maxWidth: '80px', maxHeight: '80px' }}
-                    />
-                  ) : (
-                    <div 
-                      className="w-full h-full rounded-2xl flex items-center justify-center text-3xl font-bold shadow-xl border-4 border-[#13151C]"
-                      style={{ 
-                        background: `linear-gradient(135deg, ${selectedUser.color}40, ${selectedUser.color}10)`,
-                        color: selectedUser.color
-                      }}
-                    >
-                      {selectedUser.username.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
                 <div className="absolute top-2 right-2 flex gap-1">
                   {userStats?.isOwner && (
                     <button
@@ -1334,36 +1314,54 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
               </div>
               
               {/* Profile Info */}
-              <div className="pt-12 px-4 pb-4 overflow-y-auto flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-xl font-bold" style={{ color: selectedUser.color }}>
-                    {userStats?.user?.username || selectedUser.username}
-                  </h3>
-                  {getRankBadge(selectedUser.rank, selectedUser.role)}
-                  {userStats?.user?.hideWins && !userStats.isOwner && (
-                    <span className="text-[10px] bg-zinc-700/50 text-zinc-400 px-1.5 py-0.5 rounded">
-                      Privado
-                    </span>
-                  )}
-                </div>
-                
-                <div className="flex items-center gap-2 mb-1">
-                  <div className={cn(
-                    "px-2 py-0.5 rounded text-[10px] font-bold",
-                    getLevelStyle(userStats?.user?.level || selectedUser.level)
-                  )}>
-                    Nível {userStats?.user?.level || selectedUser.level}
+              <div className="px-4 pb-4 overflow-y-auto flex-1">
+                {/* Avatar and Name Row */}
+                <div className="flex items-end gap-3 -mt-8 mb-3">
+                  <div className="w-16 h-16 shrink-0">
+                    {userStats?.user?.avatarUrl ? (
+                      <img 
+                        src={userStats.user.avatarUrl} 
+                        alt={selectedUser.username}
+                        className="w-16 h-16 rounded-xl object-cover shadow-xl border-2 border-[#13151C]"
+                      />
+                    ) : (
+                      <div 
+                        className="w-16 h-16 rounded-xl flex items-center justify-center text-2xl font-bold shadow-xl border-2 border-[#13151C]"
+                        style={{ 
+                          background: `linear-gradient(135deg, ${selectedUser.color}40, ${selectedUser.color}10)`,
+                          color: selectedUser.color
+                        }}
+                      >
+                        {selectedUser.username.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                   </div>
-                  {userStats?.user && (
-                    <span className="text-[10px] text-muted-foreground">
-                      {userStats.user.xp} XP
-                    </span>
-                  )}
+                  <div className="flex-1 min-w-0 pb-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="text-lg font-bold truncate" style={{ color: selectedUser.color }}>
+                        {userStats?.user?.username || selectedUser.username}
+                      </h3>
+                      {getRankBadge(selectedUser.rank, selectedUser.role)}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className={cn(
+                        "px-2 py-0.5 rounded text-[10px] font-bold",
+                        getLevelStyle(userStats?.user?.level || selectedUser.level)
+                      )}>
+                        Nível {userStats?.user?.level || selectedUser.level}
+                      </div>
+                      {userStats?.user?.hideWins && !userStats.isOwner && (
+                        <span className="text-[10px] bg-zinc-700/50 text-zinc-400 px-1.5 py-0.5 rounded">
+                          Privado
+                        </span>
+                      )}
+                    </div>
+                  </div>
                 </div>
                 
                 {userStats?.user && (
-                  <p className="text-[10px] text-muted-foreground mb-4">
-                    Membro há {userStats.user.daysSinceJoin} dias
+                  <p className="text-[10px] text-muted-foreground mb-3">
+                    Membro há {userStats.user.daysSinceJoin} dias • {userStats.user.xp} XP
                   </p>
                 )}
 
