@@ -60,7 +60,7 @@ function generateMinePositions(
 function calculateMultiplier(
   revealed: number,
   mineCount: number,
-  houseEdge: number = 0.01
+  houseEdge: number = 0.05
 ): number {
   if (revealed === 0) return 1;
   
@@ -363,6 +363,7 @@ export async function revealTile(request: RevealTileRequest): Promise<{
 export async function cashout(request: CashoutRequest): Promise<{
   success: boolean;
   winAmount?: number;
+  multiplier?: number;
   minePositions?: number[];
   error?: string;
 }> {
@@ -407,6 +408,7 @@ export async function cashout(request: CashoutRequest): Promise<{
   return {
     success: true,
     winAmount,
+    multiplier: gameState.multiplier,
     minePositions: gameState.minePositions,
   };
 }

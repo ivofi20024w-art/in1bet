@@ -85,7 +85,7 @@ router.post("/cashout", authMiddleware, async (req: Request, res: Response) => {
       });
     }
 
-    const result = await MinesService.cashoutMines({
+    const result = await MinesService.cashout({
       userId,
       betId: parsed.data.betId,
     });
@@ -97,7 +97,7 @@ router.post("/cashout", authMiddleware, async (req: Request, res: Response) => {
     res.json({
       success: true,
       winAmount: result.winAmount,
-      multiplier: result.multiplier,
+      multiplier: result.multiplier || 1,
       minePositions: result.minePositions,
     });
   } catch (error: any) {
@@ -118,7 +118,7 @@ router.get("/active", authMiddleware, async (req: Request, res: Response) => {
     res.json({ 
       active: true, 
       game: result.game,
-      betAmount: result.bet?.betAmount,
+      betAmount: result.betAmount,
     });
   } catch (error: any) {
     console.error("Get active game error:", error);
