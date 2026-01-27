@@ -114,7 +114,7 @@ const GAME_CATEGORIES = [
     { id: "favorites", label: "Favoritos", icon: Heart },
     { id: "slots", label: "Slots", icon: Flame },
     { id: "live", label: "Ao Vivo", icon: Users },
-    { id: "originals", label: "Originais", icon: Rocket, isLink: true, link: "/originals" },
+    { id: "originals", label: "Originais", icon: Rocket, isLink: true, link: "/originais" },
 ];
 
 function DiscIcon(props: any) {

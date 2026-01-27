@@ -220,7 +220,7 @@ function Router() {
         <Route path="/profile/notifications">{() => <ProtectedRoute><NotificationsPage /></ProtectedRoute>}</Route>
         <Route path="/perfil/notificacoes">{() => <ProtectedRoute><NotificationsPage /></ProtectedRoute>}</Route>
         <Route path="/profile/responsible-gaming">{() => <ProtectedRoute><ResponsibleGamingSettings /></ProtectedRoute>}</Route>
-        <Route path="/originals" component={Originals} />
+        <Route path="/originais" component={Originals} />
         <Route path="/wallet">{() => <ProtectedRoute><WalletPage /></ProtectedRoute>}</Route>
         <Route path="/casino/popular" component={Casino} />
         <Route path="/casino/recent" component={Casino} />

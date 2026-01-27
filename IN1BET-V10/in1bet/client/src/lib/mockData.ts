@@ -19,7 +19,7 @@ export const USER = {
 export const CASINO_MENU = [
   { icon: Flame, label: "Casino", path: "/casino" },
   { icon: CircleDollarSign, label: "Casino Ao Vivo", path: "/live-casino" },
-  { icon: Rocket, label: "Originais", path: "/originals" }, // Crash, Double, etc under a category or page
+  { icon: Rocket, label: "Originais", path: "/originais" },
   { icon: TrendingUp, label: "Populares", path: "/casino/popular" },
   { icon: History, label: "Recentes", path: "/casino/recent" },
 ];
