@@ -215,6 +215,8 @@ function Router() {
         <Route path="/perfil/rakeback">{() => <ProtectedRoute><Rakeback /></ProtectedRoute>}</Route>
         <Route path="/profile/missions">{() => <ProtectedRoute><Missions /></ProtectedRoute>}</Route>
         <Route path="/perfil/missoes">{() => <ProtectedRoute><Missions /></ProtectedRoute>}</Route>
+        <Route path="/missions">{() => <ProtectedRoute><Missions /></ProtectedRoute>}</Route>
+        <Route path="/rakeback">{() => <ProtectedRoute><Rakeback /></ProtectedRoute>}</Route>
         <Route path="/profile/notifications">{() => <ProtectedRoute><NotificationsPage /></ProtectedRoute>}</Route>
         <Route path="/perfil/notificacoes">{() => <ProtectedRoute><NotificationsPage /></ProtectedRoute>}</Route>
         <Route path="/profile/responsible-gaming">{() => <ProtectedRoute><ResponsibleGamingSettings /></ProtectedRoute>}</Route>

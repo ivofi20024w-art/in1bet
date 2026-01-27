@@ -167,7 +167,7 @@ export async function updateStreak(userId: string): Promise<{
       title: "Streak Atualizado!",
       message: `Parabéns! Você está em uma sequência de ${newCurrentStreak} dias!`,
       icon: "flame",
-      actionUrl: "/missions",
+      actionUrl: "/profile/missions",
     });
   }
 
@@ -217,7 +217,7 @@ export async function checkAndResetStreak(userId: string): Promise<{
       title: "Proteção de Streak Usada!",
       message: `Sua proteção foi usada automaticamente para manter seu streak de ${streak.currentStreak} dias!`,
       icon: "shield",
-      actionUrl: "/missions",
+      actionUrl: "/profile/missions",
     });
 
     return { wasReset: false, usedProtection: true };
@@ -236,7 +236,7 @@ export async function checkAndResetStreak(userId: string): Promise<{
     title: "Streak Perdido",
     message: `Você perdeu sua sequência de ${streak.currentStreak} dias. Complete uma missão hoje para começar novamente!`,
     icon: "alert-circle",
-    actionUrl: "/missions",
+    actionUrl: "/profile/missions",
   });
 
   return { wasReset: true, usedProtection: false };
@@ -352,7 +352,7 @@ export async function claimStreakReward(
         ? `Você ganhou ${Math.floor(rewardValue)} XP por ${streakDay} dias de streak!`
         : `Você ganhou ${Math.floor(rewardValue)} proteção(ões) de streak!`,
     icon: "gift",
-    actionUrl: "/missions",
+    actionUrl: "/profile/missions",
   });
 
   return {
@@ -395,7 +395,7 @@ export async function useStreakProtection(userId: string): Promise<{
     title: "Proteção Ativada!",
     message: `Sua proteção de streak foi usada para manter sua sequência de ${streak.currentStreak} dias.`,
     icon: "shield",
-    actionUrl: "/missions",
+    actionUrl: "/profile/missions",
   });
 
   return {

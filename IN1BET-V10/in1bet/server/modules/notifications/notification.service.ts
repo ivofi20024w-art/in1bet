@@ -416,7 +416,7 @@ export async function notifyRakebackAvailable(userId: string, amount: number) {
     title: "Rakeback Disponível",
     message: `Você tem R$ ${amount.toFixed(2)} de rakeback para resgatar!`,
     icon: "dollar-sign",
-    actionUrl: "/rakeback",
+    actionUrl: "/profile/rakeback",
     priority: NotificationPriority.HIGH,
   });
 }
@@ -427,7 +427,7 @@ export async function notifyMissionCompleted(userId: string, missionName: string
     title: "Missão Completada!",
     message: `Você completou "${missionName}" e ganhou ${rewardType === "XP" ? `${rewardValue} XP` : `R$ ${rewardValue.toFixed(2)}`}!`,
     icon: "target",
-    actionUrl: "/missions",
+    actionUrl: "/profile/missions",
     priority: NotificationPriority.HIGH,
   });
 }
