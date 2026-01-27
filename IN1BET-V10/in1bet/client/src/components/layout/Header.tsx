@@ -130,6 +130,7 @@ export function Header() {
   }, []);
 
   const getDisplayName = () => {
+    if (user?.username) return user.username;
     if (!user?.name) return "Usuário";
     const parts = user.name.trim().split(" ");
     if (parts.length >= 2) {
@@ -139,6 +140,7 @@ export function Header() {
   };
 
   const getInitials = () => {
+    if (user?.username) return user.username.charAt(0).toUpperCase();
     if (!user?.name) return "U";
     const parts = user.name.trim().split(" ");
     if (parts.length >= 2) {

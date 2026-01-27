@@ -32,6 +32,7 @@ export function isValidCPF(cpf: string): boolean {
 // Users table - Brazilian betting platform
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  username: varchar("username", { length: 30 }).notNull().unique(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   cpf: varchar("cpf", { length: 14 }).notNull().unique(),
@@ -327,6 +328,7 @@ export const insertUserSchema = createInsertSchema(users).omit({
 });
 
 export const registerUserSchema = z.object({
+  username: z.string().min(3, "Username deve ter pelo menos 3 caracteres").max(30, "Username deve ter no máximo 30 caracteres").regex(/^[a-zA-Z0-9_]+$/, "Username deve conter apenas letras, números e underscore"),
   name: z.string().min(3, "Nome deve ter pelo menos 3 caracteres"),
   email: z.string().email("Email inválido"),
   cpf: z.string().refine(isValidCPF, "CPF inválido"),

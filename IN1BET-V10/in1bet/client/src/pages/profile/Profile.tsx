@@ -108,11 +108,12 @@ export default function Profile() {
         <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary shadow-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-              <span className="text-3xl font-bold text-primary">{user.name.charAt(0).toUpperCase()}</span>
+              <span className="text-3xl font-bold text-primary">{(user.username || user.name).charAt(0).toUpperCase()}</span>
             </div>
             <div>
-              <h1 className="text-3xl font-bold font-heading text-white" data-testid="text-user-name">{user.name}</h1>
-              <p className="text-gray-400" data-testid="text-user-email">{user.email}</p>
+              <h1 className="text-3xl font-bold font-heading text-white" data-testid="text-user-name">{user.username || user.name}</h1>
+              <p className="text-gray-400 text-sm" data-testid="text-user-email">{user.email}</p>
+              <p className="text-gray-500 text-xs mt-0.5">Nome: {user.name}</p>
               <div className="flex gap-2 mt-2">
                 <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20" data-testid="badge-vip-level">
                   {getVipLevelLabel(user.vipLevel)}

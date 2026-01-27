@@ -30,6 +30,7 @@ interface ChatUserCustomization {
 
 interface ChatUser {
   id: string;
+  username?: string;
   name: string;
   vipLevel: string;
   level: number;
@@ -242,7 +243,7 @@ export default function CommunityChat({ isVisible, onToggle }: CommunityChatProp
   const handleReply = (msg: ChatMessage) => {
     setReplyTo({
       id: msg.id,
-      username: msg.user.name,
+      username: msg.user.username || msg.user.name,
       content: msg.message,
     });
   };
@@ -298,7 +299,7 @@ export default function CommunityChat({ isVisible, onToggle }: CommunityChatProp
     
     return (
       <span className={`font-semibold text-sm ${customColor || defaultColor} ${effectClass}`}>
-        {user.name}
+        {user.username || user.name}
       </span>
     );
   };
@@ -385,8 +386,8 @@ export default function CommunityChat({ isVisible, onToggle }: CommunityChatProp
               data-testid={`chat-message-${msg.id}`}
             >
               <img 
-                src={getAvatarUrl(msg.user.id, msg.user.name)}
-                alt={msg.user.name}
+                src={getAvatarUrl(msg.user.id, msg.user.username || msg.user.name)}
+                alt={msg.user.username || msg.user.name}
                 className="w-10 h-10 rounded-full flex-shrink-0"
               />
               <div className="flex-1 min-w-0">

@@ -11,6 +11,7 @@ import {
 
 export interface User {
   id: string;
+  username: string;
   name: string;
   email: string;
   cpf: string;
@@ -41,6 +42,7 @@ export const refreshToken = refreshAccessToken;
 
 // Register new user
 export async function register(data: {
+  username: string;
   name: string;
   email: string;
   cpf: string;

@@ -16,6 +16,7 @@ import { eq, or, and } from "drizzle-orm";
 export interface IStorage {
   // User operations
   getUser(id: string): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserByCPF(cpf: string): Promise<User | undefined>;
   getUserByEmailOrCPF(identifier: string): Promise<User | undefined>;
@@ -41,6 +42,11 @@ export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username.toLowerCase()));
     return user || undefined;
   }
 
@@ -76,6 +82,7 @@ export class DatabaseStorage implements IStorage {
       .insert(users)
       .values({
         ...insertUser,
+        username: insertUser.username.toLowerCase(),
         email: insertUser.email.toLowerCase(),
         cpf: formattedCPF,
       })

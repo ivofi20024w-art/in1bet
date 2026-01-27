@@ -18,6 +18,7 @@ export interface ChatUserCustomization {
 
 export interface ChatUser {
   id: string;
+  username?: string;
   name: string;
   vipLevel: string;
   level: number;

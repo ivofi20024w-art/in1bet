@@ -38,6 +38,7 @@ export default function AuthModal() {
     password: "",
     confirmPassword: "",
     terms: false,
+    username: "",
     name: "",
     cpf: "",
     birthDate: "",
@@ -62,6 +63,7 @@ export default function AuthModal() {
       password: "",
       confirmPassword: "",
       terms: false,
+      username: "",
       name: "",
       cpf: "",
       birthDate: "",
@@ -139,6 +141,10 @@ export default function AuthModal() {
     }
 
     if (registerStep === 2) {
+      if (!registerFormData.username) newErrors.username = "Nome de utilizador é obrigatório";
+      else if (registerFormData.username.length < 3) newErrors.username = "Deve ter pelo menos 3 caracteres";
+      else if (!/^[a-zA-Z0-9_]+$/.test(registerFormData.username)) newErrors.username = "Apenas letras, números e underscore";
+      
       if (!registerFormData.name) newErrors.name = "Nome completo é obrigatório";
       if (registerFormData.name.length < 3) newErrors.name = "Nome deve ter pelo menos 3 caracteres";
       if (!registerFormData.cpf) newErrors.cpf = "CPF é obrigatório";
@@ -167,6 +173,7 @@ export default function AuthModal() {
 
     try {
       await register({
+        username: registerFormData.username,
         name: registerFormData.name,
         email: registerFormData.email,
         cpf: registerFormData.cpf,
@@ -443,13 +450,27 @@ export default function AuthModal() {
 
                 {registerStep === 2 && (
                   <div className="space-y-2.5 animate-in slide-in-from-right duration-300">
+                    <div className="space-y-1">
+                      <Label className="text-xs">Nome de Utilizador</Label>
+                      <Input 
+                        placeholder="Como você quer ser chamado (ex: jogador123)" 
+                        value={registerFormData.username}
+                        onChange={e => setRegisterFormData({...registerFormData, username: e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, '')})}
+                        className={`h-9 bg-background/50 border-white/10 text-sm ${registerErrors.username ? "border-red-500" : ""}`}
+                        maxLength={30}
+                        data-testid="modal-input-username"
+                      />
+                      <p className="text-[9px] text-muted-foreground">Este nome será visível no chat e rankings</p>
+                      {registerErrors.username && <span className="text-[10px] text-red-500">{registerErrors.username}</span>}
+                    </div>
+
                     <div className="bg-yellow-500/10 border border-yellow-500/20 p-2 rounded-lg flex gap-2 items-start">
                       <AlertTriangle className="w-3 h-3 text-yellow-500 shrink-0 mt-0.5" />
-                      <p className="text-[10px] text-yellow-200/80">O CPF deve ser do titular da conta para garantir saques rápidos via PIX.</p>
+                      <p className="text-[10px] text-yellow-200/80">O CPF e nome real são privados e usados apenas para verificação e saques.</p>
                     </div>
 
                     <div className="space-y-1">
-                      <Label className="text-xs">Nome Completo</Label>
+                      <Label className="text-xs">Nome Completo (Privado)</Label>
                       <Input 
                         placeholder="Como no documento" 
                         value={registerFormData.name}

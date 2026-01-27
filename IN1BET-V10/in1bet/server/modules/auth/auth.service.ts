@@ -80,11 +80,17 @@ export async function registerUser(
       };
     }
 
-    const { name, email, cpf, password, phone, birthDate } = validationResult.data;
+    const { username, name, email, cpf, password, phone, birthDate } = validationResult.data;
 
     // Validate CPF
     if (!isValidCPF(cpf)) {
       return { success: false, error: "CPF inválido" };
+    }
+
+    // Check if username already exists (with retry for DNS issues)
+    const existingUsername = await withRetry(() => storage.getUserByUsername(username));
+    if (existingUsername) {
+      return { success: false, error: "Este nome de utilizador já está em uso" };
     }
 
     // Check if email already exists (with retry for DNS issues)
@@ -104,6 +110,7 @@ export async function registerUser(
 
     // Create user (with retry for DNS issues)
     const user = await withRetry(() => storage.createUser({
+      username,
       name,
       email,
       cpf,

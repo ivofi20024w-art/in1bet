@@ -202,11 +202,11 @@ function ConversionRow({ conversion }: { conversion: AffiliateData['recentConver
     <div className="flex items-center gap-4 p-4 bg-[#151518] rounded-xl border border-white/5">
       <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#FF7A1A]/20 to-[#FF7A1A]/5 flex items-center justify-center shrink-0">
         <span className="text-xs font-bold text-[#FF7A1A]">
-          {conversion.user?.name?.substring(0, 2).toUpperCase() || "??"}
+          {((conversion.user as any)?.username || conversion.user?.name || "??").substring(0, 2).toUpperCase()}
         </span>
       </div>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-white truncate">{conversion.user?.name || "Usuário"}</p>
+        <p className="font-medium text-white truncate">{(conversion.user as any)?.username || "Usuário"}</p>
         <p className="text-xs text-zinc-500">{formatDate(conversion.createdAt)}</p>
       </div>
       <div className="text-right hidden sm:block">

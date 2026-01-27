@@ -723,7 +723,7 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
       id: m.id,
       user: {
         id: m.user.id,
-        username: m.user.name,
+        username: m.user.username || m.user.name,
         rank: mapVipToRank(m.user.vipLevel, m.user.role === 'ADMIN', m.user.role),
         level: m.user.level || 1,
         color: getUserColor(m.user.id),
