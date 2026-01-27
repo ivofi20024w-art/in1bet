@@ -23,6 +23,7 @@ interface SlotsgatewayGame {
   idHash: string;
   name: string;
   imageUrl: string | null;
+  imageSquare: string | null;
   providerSlug: string;
   gameType: string | null;
   isNew: boolean;
@@ -103,9 +104,9 @@ function GameCard({ game, onPlay }: { game: SlotsgatewayGame; onPlay: () => void
       className="group relative rounded-xl overflow-hidden bg-card border border-white/5 hover:border-primary/50 transition-all cursor-pointer shadow-lg hover:shadow-primary/20 hover:-translate-y-1 duration-300"
       data-testid={`game-card-${game.idHash}`}
     >
-      <div className="aspect-[4/3] relative">
+      <div className="aspect-square relative">
         <img 
-          src={game.imageUrl || 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=400'} 
+          src={game.imageSquare || game.imageUrl || 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=400'} 
           alt={game.name}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />

@@ -35,6 +35,7 @@ interface SlotsgatewayGame {
   idHash: string;
   name: string;
   imageUrl: string | null;
+  imageSquare: string | null;
   providerId: string | null;
   providerSlug: string;
   gameType: string | null;
@@ -409,7 +410,7 @@ export default function Casino() {
     id: index,
     title: game.name,
     provider: game.providerSlug,
-    image: game.imageUrl || 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=400',
+    image: game.imageSquare || game.imageUrl || 'https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=400',
     idHash: game.idHash,
   });
 

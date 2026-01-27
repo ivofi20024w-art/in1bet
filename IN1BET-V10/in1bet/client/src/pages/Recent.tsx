@@ -23,6 +23,7 @@ interface SlotsgatewayGame {
   idHash: string;
   name: string;
   imageUrl: string | null;
+  imageSquare: string | null;
   providerId: string | null;
   providerSlug: string;
   gameType: string | null;
@@ -281,7 +282,7 @@ export default function Recent() {
                             idHash={game.idHash}
                             title={game.name}
                             provider={game.providerSlug}
-                            image={game.imageUrl || ""}
+                            image={game.imageSquare || game.imageUrl || ""}
                             onClick={() => handleSlotsGameClick(game)}
                           />
                         ))}
