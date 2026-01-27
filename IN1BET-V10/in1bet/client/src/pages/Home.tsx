@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { getStoredAuth } from "@/lib/auth";
 
-import mainBanner from "@assets/ChatGPT_Image_11_01_2026,_05_27_36_1768109552475.png";
+const mainBanner = "/banner-hero.png";
 import crashmaniaImg from "@assets/image_1768079128068.png";
 import doubleImg from "@assets/ChatGPT_Image_10_01_2026,_22_27_38_1768108766811.png";
 import minesImg from "@assets/ChatGPT_Image_10_01_2026,_22_30_56_1768108766811.png";
