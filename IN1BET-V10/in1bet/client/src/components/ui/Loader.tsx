@@ -34,7 +34,7 @@ export function Loader({ isLoading, type }: LoaderProps) {
         
         {/* Central Typographic Logo - refined styles */}
         <div className="relative z-10 flex items-center justify-center w-36 h-36 rounded-full bg-background/80 backdrop-blur-md border border-white/5 shadow-[0_0_50px_rgba(249,115,22,0.15)]">
-            <span className="text-5xl font-heading font-black italic text-white tracking-tighter transform -rotate-2 drop-shadow-lg">
+            <span className="text-5xl font-heading font-black italic text-white tracking-tighter drop-shadow-lg">
                 IN1<span className="text-primary">BET</span>
             </span>
         </div>
