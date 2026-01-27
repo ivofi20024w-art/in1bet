@@ -40,11 +40,22 @@ router.patch("/profile", async (req: Request, res: Response) => {
       return;
     }
 
-    const { name, phone } = req.body;
+    const { name, phone, avatarUrl } = req.body;
     
     const updateData: Record<string, any> = {};
     if (name) updateData.name = name;
     if (phone) updateData.phone = phone;
+    
+    if (avatarUrl !== undefined) {
+      if (avatarUrl === null || avatarUrl === "") {
+        updateData.avatarUrl = null;
+      } else if (avatarUrl.startsWith("/avatars/")) {
+        updateData.avatarUrl = avatarUrl;
+      } else {
+        res.status(400).json({ error: "Avatar inválido. Selecione um dos avatares disponíveis." });
+        return;
+      }
+    }
 
     if (Object.keys(updateData).length === 0) {
       res.status(400).json({ error: "Nenhum dado para atualizar" });

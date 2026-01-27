@@ -1,12 +1,20 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
-import { User, Wallet, CheckCircle2, AlertTriangle, Shield, Settings, ChevronRight, ArrowDownLeft, History, Loader2 } from "lucide-react";
+import { User, Wallet, CheckCircle2, AlertTriangle, Shield, Settings, ChevronRight, ArrowDownLeft, History, Loader2, Camera, X, Check } from "lucide-react";
 import { Link } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, useCallback } from "react";
-import { getStoredAuth, getWallet, getCurrentUser, type User as UserType } from "@/lib/auth";
+import { getStoredAuth, getWallet, getCurrentUser, type User as UserType, storeAuth, type AuthState } from "@/lib/auth";
 import { WalletModal } from "@/components/wallet/WalletModal";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 interface WalletData {
   balance: number;
@@ -14,10 +22,28 @@ interface WalletData {
   currency: string;
 }
 
+const MALE_AVATARS = Array.from({ length: 35 }, (_, i) => ({
+  id: `male_${i + 1}`,
+  url: `/avatars/male/avatar_m_${String(i + 1).padStart(2, '0')}.png`,
+  gender: 'male' as const,
+}));
+
+const FEMALE_AVATARS = Array.from({ length: 15 }, (_, i) => ({
+  id: `female_${i + 1}`,
+  url: `/avatars/female/avatar_f_${String(i + 1).padStart(2, '0')}.png`,
+  gender: 'female' as const,
+}));
+
+const ALL_AVATARS = [...MALE_AVATARS, ...FEMALE_AVATARS];
+
 export default function Profile() {
   const [user, setUser] = useState<UserType | null>(null);
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
+  const [savingAvatar, setSavingAvatar] = useState(false);
+  const [avatarFilter, setAvatarFilter] = useState<'all' | 'male' | 'female'>('all');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -25,6 +51,7 @@ export default function Profile() {
     
     if (auth.isAuthenticated && auth.user) {
       setUser(auth.user);
+      setSelectedAvatar(auth.user.avatarUrl || null);
       const walletData = await getWallet();
       setWallet(walletData);
     }
@@ -34,6 +61,44 @@ export default function Profile() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const handleSaveAvatar = async () => {
+    if (!user) return;
+    
+    setSavingAvatar(true);
+    try {
+      const auth = getStoredAuth();
+      const response = await fetch('/api/users/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${auth.accessToken}`,
+        },
+        body: JSON.stringify({ avatarUrl: selectedAvatar }),
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Erro ao salvar avatar');
+      }
+      
+      const data = await response.json();
+      
+      const updatedAuth: AuthState = {
+        ...auth,
+        user: data.user,
+      };
+      storeAuth(updatedAuth);
+      setUser(data.user);
+      
+      toast.success('Avatar atualizado com sucesso!');
+      setShowAvatarModal(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Erro ao salvar avatar');
+    } finally {
+      setSavingAvatar(false);
+    }
+  };
 
   const formatCurrency = (value: number) => {
     return value.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
@@ -72,6 +137,10 @@ export default function Profile() {
     }
   };
 
+  const filteredAvatars = avatarFilter === 'all' 
+    ? ALL_AVATARS 
+    : ALL_AVATARS.filter(a => a.gender === avatarFilter);
+
   if (loading) {
     return (
       <MainLayout>
@@ -107,8 +176,22 @@ export default function Profile() {
         
         <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
           <div className="flex items-center gap-4">
-            <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-primary shadow-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center">
-              <span className="text-3xl font-bold text-primary">{(user.username || user.name).charAt(0).toUpperCase()}</span>
+            <div 
+              className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-primary shadow-lg bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center cursor-pointer group"
+              onClick={() => setShowAvatarModal(true)}
+            >
+              {user.avatarUrl ? (
+                <img 
+                  src={user.avatarUrl} 
+                  alt="Avatar" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-3xl font-bold text-primary">{(user.username || user.name).charAt(0).toUpperCase()}</span>
+              )}
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                <Camera className="w-6 h-6 text-white" />
+              </div>
             </div>
             <div>
               <h1 className="text-3xl font-bold font-heading text-white" data-testid="text-user-name">{user.username || user.name}</h1>
@@ -244,6 +327,101 @@ export default function Profile() {
         </div>
 
       </div>
+
+      <Dialog open={showAvatarModal} onOpenChange={setShowAvatarModal}>
+        <DialogContent className="bg-[#111111] border-gray-800 max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Camera className="w-5 h-5 text-primary" />
+              Escolher Avatar
+            </DialogTitle>
+            <DialogDescription className="text-gray-400">
+              Selecione um avatar para seu perfil
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex gap-2 mb-4">
+            <Button 
+              variant={avatarFilter === 'all' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setAvatarFilter('all')}
+              className={avatarFilter === 'all' ? 'bg-primary' : ''}
+            >
+              Todos ({ALL_AVATARS.length})
+            </Button>
+            <Button 
+              variant={avatarFilter === 'male' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setAvatarFilter('male')}
+              className={avatarFilter === 'male' ? 'bg-blue-600' : ''}
+            >
+              Masculino ({MALE_AVATARS.length})
+            </Button>
+            <Button 
+              variant={avatarFilter === 'female' ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setAvatarFilter('female')}
+              className={avatarFilter === 'female' ? 'bg-pink-600' : ''}
+            >
+              Feminino ({FEMALE_AVATARS.length})
+            </Button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto pr-2">
+            <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-7 gap-3">
+              {filteredAvatars.map((avatar) => (
+                <div
+                  key={avatar.id}
+                  onClick={() => setSelectedAvatar(avatar.url)}
+                  className={`relative w-14 h-14 rounded-full overflow-hidden cursor-pointer border-2 transition-all hover:scale-110 ${
+                    selectedAvatar === avatar.url 
+                      ? 'border-primary ring-2 ring-primary/50' 
+                      : 'border-transparent hover:border-white/30'
+                  }`}
+                >
+                  <img 
+                    src={avatar.url} 
+                    alt={avatar.id} 
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  {selectedAvatar === avatar.url && (
+                    <div className="absolute inset-0 bg-primary/30 flex items-center justify-center">
+                      <Check className="w-5 h-5 text-white" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-3 pt-4 border-t border-gray-800 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSelectedAvatar(user?.avatarUrl || null);
+                setShowAvatarModal(false);
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleSaveAvatar}
+              disabled={savingAvatar}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {savingAvatar ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                'Salvar Avatar'
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 }

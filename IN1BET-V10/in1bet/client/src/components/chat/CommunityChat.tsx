@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { 
   Send, Users, Crown, Shield, ShieldCheck, Headphones, HelpCircle,
   Flag, Smile, MoreHorizontal, Mic, Paperclip, ArrowLeft, ChevronUp, ChevronDown,
-  Reply, X
+  Reply, X, ImageIcon, Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -492,31 +492,10 @@ export default function CommunityChat({ isVisible, onToggle }: CommunityChatProp
             disabled={!isConnected}
             data-testid="input-chat-message"
           />
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-10 w-10 text-gray-400 hover:text-white"
-          >
-            <Paperclip className="h-4 w-4" />
-          </Button>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-10 w-10 text-gray-400 hover:text-white"
-          >
-            <Mic className="h-4 w-4" />
-          </Button>
         </div>
         
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-gray-400 hover:text-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
             <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
               <PopoverTrigger asChild>
                 <Button 
@@ -566,13 +545,104 @@ export default function CommunityChat({ isVisible, onToggle }: CommunityChatProp
                 </div>
               </PopoverContent>
             </Popover>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="h-8 w-8 text-gray-400 hover:text-white"
-            >
-              <Paperclip className="h-4 w-4" />
-            </Button>
+            
+            {myLevel >= 50 ? (
+              <>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-gray-400 hover:text-white"
+                      title="Enviar GIF (Nível 50+)"
+                    >
+                      <ImageIcon className="h-4 w-4" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    className="w-64 p-3 bg-[#1a1a1f] border-white/10" 
+                    side="top" 
+                    align="start"
+                  >
+                    <p className="text-sm text-gray-300 mb-2">Enviar GIF</p>
+                    <p className="text-xs text-gray-500">Funcionalidade em breve!</p>
+                  </PopoverContent>
+                </Popover>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 text-gray-400 hover:text-white"
+                  title="Upload de foto (Nível 50+)"
+                >
+                  <Paperclip className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-gray-600 cursor-not-allowed"
+                      title="GIFs - Desbloqueado no nível 50"
+                    >
+                      <div className="relative">
+                        <ImageIcon className="h-4 w-4" />
+                        <Lock className="h-2.5 w-2.5 absolute -bottom-0.5 -right-0.5 text-yellow-500" />
+                      </div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    className="w-64 p-3 bg-[#1a1a1f] border-white/10" 
+                    side="top" 
+                    align="start"
+                  >
+                    <div className="flex items-center gap-2 text-yellow-500 mb-2">
+                      <Lock className="h-4 w-4" />
+                      <span className="font-bold text-sm">Recurso Bloqueado</span>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Envio de GIFs é desbloqueado a partir do <span className="text-primary font-bold">Nível 50</span>.
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Seu nível atual: <span className="text-white">{myLevel}</span>
+                    </p>
+                  </PopoverContent>
+                </Popover>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-gray-600 cursor-not-allowed"
+                      title="Upload de foto - Desbloqueado no nível 50"
+                    >
+                      <div className="relative">
+                        <Paperclip className="h-4 w-4" />
+                        <Lock className="h-2.5 w-2.5 absolute -bottom-0.5 -right-0.5 text-yellow-500" />
+                      </div>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent 
+                    className="w-64 p-3 bg-[#1a1a1f] border-white/10" 
+                    side="top" 
+                    align="start"
+                  >
+                    <div className="flex items-center gap-2 text-yellow-500 mb-2">
+                      <Lock className="h-4 w-4" />
+                      <span className="font-bold text-sm">Recurso Bloqueado</span>
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      Upload de fotos é desbloqueado a partir do <span className="text-primary font-bold">Nível 50</span>.
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Seu nível atual: <span className="text-white">{myLevel}</span>
+                    </p>
+                  </PopoverContent>
+                </Popover>
+              </>
+            )}
           </div>
           
           <Button
