@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Link } from "wouter";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -193,6 +194,35 @@ function getLevelStyle(level: number) {
 
 function formatCurrency(value: number): string {
   return value.toLocaleString('pt-BR');
+}
+
+const GAME_URL_MAP: Record<string, string> = {
+  'Aviator Mania': '/games/aviatormania',
+  'Aviator': '/games/aviatormania',
+  'Double': '/games/double',
+  'Mines': '/games/mines',
+  'Plinko': '/games/plinko',
+  'Crash': '/games/crash',
+};
+
+interface CasinoWinInfo {
+  amount: number;
+  gameName: string;
+  multiplier?: number;
+  gameUrl: string | null;
+}
+
+function parseCasinoWinMessage(content: string): CasinoWinInfo | null {
+  const match = content.match(/Ganhou R\$ ([\d.,]+) no ([^\s(]+(?:\s+\w+)?)(?: \(([\d.]+)x\))?/);
+  if (!match) return null;
+  
+  const amountStr = match[1].replace(/\./g, '').replace(',', '.');
+  const amount = parseFloat(amountStr);
+  const gameName = match[2].trim();
+  const multiplier = match[3] ? parseFloat(match[3]) : undefined;
+  const gameUrl = GAME_URL_MAP[gameName] || null;
+  
+  return { amount, gameName, multiplier, gameUrl };
 }
 
 function formatTimeAgo(date: Date | string): string {
@@ -546,12 +576,41 @@ function DraggableMessageItem({
                 </div>
               )}
 
-              <div className={cn(
-                "text-[13px] text-gray-300 font-medium leading-normal break-words shadow-sm",
-                currentUser.id === msg.user.id && "text-right"
-              )}>
-                {msg.content}
-              </div>
+              {(() => {
+                const winInfo = parseCasinoWinMessage(msg.content);
+                if (winInfo) {
+                  return (
+                    <div className="space-y-2">
+                      <div className={cn(
+                        "text-[13px] text-gray-300 font-medium leading-normal break-words",
+                        currentUser.id === msg.user.id && "text-right"
+                      )}>
+                        Ganhou <span className="text-[#00E701] font-bold">R$ {formatCurrency(winInfo.amount)}</span> no <span className="text-white font-medium">{winInfo.gameName}</span>
+                        {winInfo.multiplier && (
+                          <span className="ml-1.5 text-[10px] px-1.5 py-0.5 rounded bg-[#00E701]/10 text-[#00E701] border border-[#00E701]/20 font-bold font-mono">
+                            {winInfo.multiplier.toFixed(2)}x
+                          </span>
+                        )}
+                      </div>
+                      {winInfo.gameUrl && (
+                        <Link href={winInfo.gameUrl}>
+                          <Button size="sm" variant="ghost" className="h-6 px-3 text-[11px] text-orange-500 hover:text-orange-400 hover:bg-orange-500/10 gap-1.5 border border-orange-500/20">
+                            <Play className="w-3 h-3 fill-current" /> Jogar
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  );
+                }
+                return (
+                  <div className={cn(
+                    "text-[13px] text-gray-300 font-medium leading-normal break-words shadow-sm",
+                    currentUser.id === msg.user.id && "text-right"
+                  )}>
+                    {msg.content}
+                  </div>
+                );
+              })()}
 
               {msg.reactions && Object.keys(msg.reactions).length > 0 && (
                 <div className={cn(
