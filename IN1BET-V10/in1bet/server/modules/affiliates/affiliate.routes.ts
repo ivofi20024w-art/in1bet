@@ -32,17 +32,22 @@ const adminCheck = async (req: Request, res: Response, next: Function) => {
     return res.status(401).json({ error: "Não autenticado" });
   }
 
-  const [user] = await db.select().from(users).where(eq(users.id, userId));
-  if (!user) {
-    return res.status(401).json({ error: "Usuário não encontrado" });
-  }
+  try {
+    const [user] = await db.select().from(users).where(eq(users.id, userId));
+    if (!user) {
+      return res.status(401).json({ error: "Usuário não encontrado" });
+    }
 
-  if (!user.isAdmin && user.adminRole !== AdminRole.ADMIN) {
-    return res.status(403).json({ error: "Acesso negado" });
-  }
+    if (!user.isAdmin) {
+      return res.status(403).json({ error: "Acesso negado" });
+    }
 
-  (req as any).adminUser = user;
-  next();
+    (req as any).adminUser = user;
+    next();
+  } catch (error) {
+    console.error("Admin check error in affiliates:", error);
+    return res.status(500).json({ error: "Erro ao verificar permissões" });
+  }
 };
 
 router.get("/track/:code", async (req: Request, res: Response) => {
