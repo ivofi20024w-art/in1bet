@@ -290,7 +290,7 @@ export default function Home() {
 
   return (
     <>
-      <div className={`transition-all duration-300 ${chatVisible ? 'lg:pr-80' : ''}`}>
+      <div className={`transition-all duration-300 ${chatVisible && isDesktop ? 'lg:pr-[340px]' : ''}`}>
         <MainLayout>
       <section className="mb-4">
         <Link href={PROMO_BANNERS[0].link}>
@@ -468,25 +468,28 @@ export default function Home() {
         </MainLayout>
       </div>
 
-      {/* Chat Overlay - Desktop (Floating over content) */}
+      {/* Chat Sidebar - Desktop (Fixed Right Side) */}
       {chatVisible && (
-        <div className="hidden lg:block fixed bottom-4 right-4 w-[380px] h-[600px] z-50 rounded-xl overflow-hidden shadow-2xl border border-white/10">
-          <ChatWidget className="h-full" onClose={() => setChatVisible(false)} />
+        <div className="hidden lg:flex fixed top-0 right-0 w-[340px] h-screen z-30 border-l border-white/5 bg-[#0D0F14]">
+          <ChatWidget className="h-full w-full" onClose={() => setChatVisible(false)} />
         </div>
       )}
 
-      {/* Chat Toggle Button - Desktop (Right Side) */}
+      {/* Chat Toggle Button - Desktop (Right Edge) */}
       {!chatVisible && (
-        <Button 
+        <button 
           onClick={() => setChatVisible(true)}
-          className="hidden lg:flex fixed bottom-4 right-4 h-14 w-14 rounded-full bg-orange-500 hover:bg-orange-600 shadow-lg z-40 items-center justify-center"
+          className="hidden lg:flex fixed top-1/2 -translate-y-1/2 right-0 h-32 w-8 bg-gradient-to-l from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg z-40 items-center justify-center rounded-l-lg transition-all group"
           data-testid="button-open-chat"
         >
-          <MessageCircle className="h-6 w-6" />
-        </Button>
+          <div className="flex flex-col items-center gap-1">
+            <MessageCircle className="h-5 w-5 text-white" />
+            <span className="text-[10px] font-bold text-white tracking-wider" style={{ writingMode: 'vertical-rl', textOrientation: 'mixed' }}>CHAT</span>
+          </div>
+        </button>
       )}
 
-      {/* Chat Toggle Button - Mobile (Right Side) - Positioned above support chat */}
+      {/* Chat Toggle Button - Mobile */}
       <Button
         onClick={() => setChatVisible(!chatVisible)}
         className="lg:hidden fixed bottom-36 right-4 h-14 w-14 rounded-full bg-orange-500 hover:bg-orange-600 shadow-lg z-40"
