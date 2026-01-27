@@ -286,6 +286,10 @@ export function setupChatWebSocket(server: Server) {
               content: message.replyTo.content?.substring(0, 100)
             } : undefined;
 
+            // Fetch fresh customization data (in case user updated settings)
+            const freshCustomization = await getUserCustomization(client.userId);
+            client.customization = freshCustomization;
+
             console.log(`[CHAT WS][${connectionId}] Calling sendMessage service...`);
             const result = await sendMessage(
               client.userId,
@@ -295,7 +299,7 @@ export function setupChatWebSocket(server: Server) {
               client.userVipLevel,
               client.userLevel,
               client.userRole,
-              client.customization,
+              freshCustomization,
               replyTo,
               client.userUsername,
               client.userAvatarUrl
