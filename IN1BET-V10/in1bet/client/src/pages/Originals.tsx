@@ -9,10 +9,10 @@ const minesImg = "/game-mines.png";
 const plinkoImg = "/game-plinko.png";
 
 const ORIGINALS = [
-  { id: "plinko", name: "Plinko", link: "/games/plinko", img: plinkoImg },
-  { id: "mines", name: "Minas", link: "/games/mines", img: minesImg },
-  { id: "double", name: "Roletas", link: "/games/double", img: doubleImg },
   { id: "aviator", name: "Aviator Mania", link: "/games/aviatormania", img: crashmaniaImg },
+  { id: "double", name: "Roletas", link: "/games/double", img: doubleImg },
+  { id: "mines", name: "Minas", link: "/games/mines", img: minesImg },
+  { id: "plinko", name: "Plinko", link: "/games/plinko", img: plinkoImg },
 ];
 
 export default function Originals() {
