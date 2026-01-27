@@ -292,9 +292,9 @@ export default function Home() {
     <>
       <div className={`transition-all duration-300 ${chatVisible ? 'lg:pr-80' : ''}`}>
         <MainLayout>
-      <section className="mb-4 rounded-xl overflow-hidden" style={{ backgroundImage: 'url(/banner-bg.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <section className="mb-4">
         <Link href={PROMO_BANNERS[0].link}>
-          <div className="relative w-full lg:max-w-2xl mx-auto overflow-hidden group cursor-pointer">
+          <div className="relative w-full lg:max-w-2xl mx-auto overflow-hidden group cursor-pointer rounded-xl bg-gradient-to-r from-[#1a0a00] via-[#2d1200] to-[#1a0a00]">
             <img 
               src={PROMO_BANNERS[0].img} 
               alt={PROMO_BANNERS[0].title}
