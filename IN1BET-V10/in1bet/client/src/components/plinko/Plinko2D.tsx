@@ -191,8 +191,8 @@ export function Plinko2D() {
   
   const multipliers = ROWS_MULTIPLIERS[rows]?.[risk] || ROWS_MULTIPLIERS[12].medium;
   const slotColors = getSlotColors(multipliers);
-  const numSlots = multipliers.length;
-  const slotWidth = CANVAS_WIDTH / numSlots;
+  const numSlots = multipliers.length || 13;
+  const slotWidth = numSlots > 0 ? CANVAS_WIDTH / numSlots : CANVAS_WIDTH / 13;
   
   const { 
     money, 
@@ -216,25 +216,30 @@ export function Plinko2D() {
     const positions: {x: number, y: number}[] = [];
     const startY = 50;
     const endY = CANVAS_HEIGHT - 70;
-    const spacingY = (endY - startY) / (rows - 1);
-    const spacingX = CANVAS_WIDTH / (rows + 2);
+    const safeRows = rows || 12;
+    const spacingY = (endY - startY) / Math.max(safeRows - 1, 1);
+    const spacingX = CANVAS_WIDTH / (safeRows + 2);
     
     let x = CANVAS_WIDTH / 2;
     positions.push({ x, y: 20 });
     
-    for (let i = 0; i < path.length && i < rows; i++) {
-      const direction = path[i];
+    const safePath = Array.isArray(path) ? path : [];
+    for (let i = 0; i < safePath.length && i < safeRows; i++) {
+      const direction = safePath[i] || 0;
       const offset = direction === 0 ? -spacingX / 2 : spacingX / 2;
       x += offset;
+      if (!isFinite(x)) x = CANVAS_WIDTH / 2;
       const y = startY + i * spacingY;
       positions.push({ x, y });
     }
     
-    const finalX = (targetBucket + 0.5) * slotWidth;
-    positions.push({ x: finalX, y: CANVAS_HEIGHT - 40 });
+    const safeBucket = isFinite(targetBucket) ? targetBucket : Math.floor(numSlots / 2);
+    const safeSlotWidth = isFinite(slotWidth) && slotWidth > 0 ? slotWidth : CANVAS_WIDTH / 13;
+    const finalX = (safeBucket + 0.5) * safeSlotWidth;
+    positions.push({ x: isFinite(finalX) ? finalX : CANVAS_WIDTH / 2, y: CANVAS_HEIGHT - 40 });
     
     return { positions };
-  }, [rows, slotWidth]);
+  }, [rows, slotWidth, numSlots]);
   
   const handleDropBall = useCallback(async () => {
     if (money < betAmount || activeBalls >= 15 || pendingBets > 0) {
@@ -437,14 +442,30 @@ export function Plinko2D() {
         const ball = animatedBallsRef.current[i];
         const positions = (ball as any).positions as {x: number, y: number}[];
         
-        if (positions && ball.pathIndex < positions.length) {
+        if (!positions || positions.length === 0) {
+          animatedBallsRef.current.splice(i, 1);
+          decrementActiveBalls();
+          continue;
+        }
+        
+        if (!isFinite(ball.x) || !isFinite(ball.y)) {
+          ball.x = CANVAS_WIDTH / 2;
+          ball.y = 20;
+          ball.pathIndex = 0;
+        }
+        
+        if (ball.pathIndex < positions.length) {
           const target = positions[ball.pathIndex];
+          if (!target || !isFinite(target.x) || !isFinite(target.y)) {
+            ball.pathIndex++;
+            continue;
+          }
           const dx = target.x - ball.x;
           const dy = target.y - ball.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
           
           const speed = 4;
-          if (dist > speed) {
+          if (isFinite(dist) && dist > speed) {
             ball.x += (dx / dist) * speed;
             ball.y += (dy / dist) * speed;
           } else {
@@ -454,18 +475,21 @@ export function Plinko2D() {
           }
         }
         
+        const safeX = isFinite(ball.x) ? ball.x : CANVAS_WIDTH / 2;
+        const safeY = isFinite(ball.y) ? ball.y : 20;
+        
         const nearHighValue = ball.multiplier >= 5;
-        const highValueIntensity = Math.min(1, ball.multiplier / 25);
+        const highValueIntensity = Math.min(1, (ball.multiplier || 1) / 25);
         
         ctx.shadowColor = nearHighValue ? "#ffd700" : "#ffcc00";
         ctx.shadowBlur = nearHighValue ? 20 + highValueIntensity * 15 : 14;
-        const ballGrad = ctx.createRadialGradient(ball.x - 2, ball.y - 2, 0, ball.x, ball.y, BALL_RADIUS);
+        const ballGrad = ctx.createRadialGradient(safeX - 2, safeY - 2, 0, safeX, safeY, BALL_RADIUS);
         ballGrad.addColorStop(0, nearHighValue ? "#ffffee" : "#fffacd");
         ballGrad.addColorStop(0.5, nearHighValue ? "#ffe44d" : "#ffd700");
         ballGrad.addColorStop(1, nearHighValue ? "#daa520" : "#b8860b");
         ctx.fillStyle = ballGrad;
         ctx.beginPath();
-        ctx.arc(ball.x, ball.y, BALL_RADIUS + (nearHighValue ? highValueIntensity * 2 : 0), 0, Math.PI * 2);
+        ctx.arc(safeX, safeY, BALL_RADIUS + (nearHighValue ? highValueIntensity * 2 : 0), 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
         
