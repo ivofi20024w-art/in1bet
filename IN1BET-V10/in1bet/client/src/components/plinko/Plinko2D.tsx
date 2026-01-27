@@ -457,10 +457,14 @@ export function Plinko2D() {
             continue;
           }
           
-          // Velocidade aumenta conforme a bola cai (simula gravidade)
-          const rowProgress = ball.pathIndex / positions.length;
-          const gravityMultiplier = 1 + rowProgress * 1.5; // Acelera de 1x a 2.5x
-          const baseSpeed = 0.12; // Velocidade base mais rápida
+          // Velocidade ajustada pelo número de linhas (menos linhas = mais lento)
+          const totalRows = positions.length;
+          const rowSpeedFactor = totalRows <= 8 ? 0.6 : totalRows <= 12 ? 0.8 : 1.0;
+          
+          // Velocidade aumenta suavemente conforme a bola cai (simula gravidade)
+          const rowProgress = ball.pathIndex / totalRows;
+          const gravityMultiplier = 1 + rowProgress * 0.8; // Acelera de 1x a 1.8x
+          const baseSpeed = 0.07 * rowSpeedFactor; // Velocidade base ajustável
           ball.progress += baseSpeed * gravityMultiplier;
           
           if (ball.progress >= 1) {
@@ -471,10 +475,10 @@ export function Plinko2D() {
           } else {
             const prevPos = ball.pathIndex > 0 ? positions[ball.pathIndex - 1] : { x: CANVAS_WIDTH / 2, y: 25 };
             const t = ball.progress;
-            // Easing com aceleração gravitacional (ease-in para simular queda)
-            const easeT = t * t * (3 - 2 * t); // Smooth step com mais peso no início
+            // Easing suave com leve aceleração
+            const easeT = t * (2 - t); // Ease-out quadrático
             ball.x = prevPos.x + (target.x - prevPos.x) * easeT;
-            ball.y = prevPos.y + (target.y - prevPos.y) * (t * t); // Y usa quadrático para gravidade
+            ball.y = prevPos.y + (target.y - prevPos.y) * easeT;
           }
         }
 
