@@ -35,15 +35,17 @@ export function MainLayout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground flex overflow-hidden font-sans">
       <AgeVerificationModal />
-      {/* Desktop Sidebar - Fixed position */}
+      {/* Desktop Sidebar - Fixed position (only on lg screens) */}
       <div className="hidden lg:block fixed left-0 top-0 h-screen z-40">
         <Sidebar />
       </div>
 
-      {/* Main content with left margin for sidebar (uses CSS variable for dynamic width) */}
+      {/* Main content - no margin on mobile, dynamic margin on desktop */}
       <div 
-        className="flex-1 flex flex-col min-h-screen min-w-0 overflow-hidden transition-all duration-300"
-        style={{ marginLeft: isMobile ? '0' : sidebarWidth }}
+        className={cn(
+          "flex-1 flex flex-col min-h-screen min-w-0 overflow-hidden transition-all duration-300",
+          "lg:ml-[var(--sidebar-width,260px)]"
+        )}
       >
         <Header />
 
