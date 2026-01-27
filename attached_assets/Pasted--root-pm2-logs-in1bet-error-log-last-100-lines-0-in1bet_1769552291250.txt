@@ -1,0 +1,102 @@
+
+/root/.pm2/logs/in1bet-error.log last 100 lines:
+0|in1bet   |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+0|in1bet   | Error: DATABASE_URL or NEON_DATABASE_URL must be set. Did you forget to provision a database?
+0|in1bet   |     at /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:77:33061
+0|in1bet   |     at /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:1:225
+0|in1bet   |     at Object.<anonymous> (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:14595)
+0|in1bet   |     at Module._compile (node:internal/modules/cjs/loader:1521:14)
+0|in1bet   |     at Module._extensions..js (node:internal/modules/cjs/loader:1623:10)
+0|in1bet   |     at Module.load (node:internal/modules/cjs/loader:1266:32)
+0|in1bet   |     at Module._load (node:internal/modules/cjs/loader:1091:12)
+0|in1bet   |     at cjsLoader (node:internal/modules/esm/translators:298:15)
+0|in1bet   |     at ModuleWrap.<anonymous> (node:internal/modules/esm/translators:240:7)
+0|in1bet   |     at ModuleJob.run (node:internal/modules/esm/module_job:325:25)
+0|in1bet   | (node:256605) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+0|in1bet   | In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+0|in1bet   |
+0|in1bet   | To prepare for this change:
+0|in1bet   | - If you want the current behavior, explicitly use 'sslmode=verify-full'
+0|in1bet   | - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+0|in1bet   |
+0|in1bet   | See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+0|in1bet   | (Use `node --trace-warnings ...` to show where the warning was created)
+0|in1bet   | (node:256735) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+0|in1bet   | In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+0|in1bet   |
+0|in1bet   | To prepare for this change:
+0|in1bet   | - If you want the current behavior, explicitly use 'sslmode=verify-full'
+0|in1bet   | - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+0|in1bet   |
+0|in1bet   | See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+0|in1bet   | (Use `node --trace-warnings ...` to show where the warning was created)
+0|in1bet   | (node:275284) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+0|in1bet   | In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+0|in1bet   |
+0|in1bet   | To prepare for this change:
+0|in1bet   | - If you want the current behavior, explicitly use 'sslmode=verify-full'
+0|in1bet   | - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+0|in1bet   |
+0|in1bet   | See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+0|in1bet   | (Use `node --trace-warnings ...` to show where the warning was created)
+0|in1bet   | (node:275319) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+0|in1bet   | In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+0|in1bet   |
+0|in1bet   | To prepare for this change:
+0|in1bet   | - If you want the current behavior, explicitly use 'sslmode=verify-full'
+0|in1bet   | - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+0|in1bet   |
+0|in1bet   | See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+0|in1bet   | (Use `node --trace-warnings ...` to show where the warning was created)
+0|in1bet   | (node:275383) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+0|in1bet   | In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+0|in1bet   |
+0|in1bet   | To prepare for this change:
+0|in1bet   | - If you want the current behavior, explicitly use 'sslmode=verify-full'
+0|in1bet   | - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+0|in1bet   |
+0|in1bet   | See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+0|in1bet   | (Use `node --trace-warnings ...` to show where the warning was created)
+0|in1bet   | (node:275407) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+0|in1bet   | In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+0|in1bet   |
+0|in1bet   | To prepare for this change:
+0|in1bet   | - If you want the current behavior, explicitly use 'sslmode=verify-full'
+0|in1bet   | - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+0|in1bet   |
+0|in1bet   | See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+0|in1bet   | (Use `node --trace-warnings ...` to show where the warning was created)
+0|in1bet   | (node:275818) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+0|in1bet   | In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+0|in1bet   |
+0|in1bet   | To prepare for this change:
+0|in1bet   | - If you want the current behavior, explicitly use 'sslmode=verify-full'
+0|in1bet   | - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+0|in1bet   |
+0|in1bet   | See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+0|in1bet   | (Use `node --trace-warnings ...` to show where the warning was created)
+0|in1bet   | OndaPay PIX creation failed: {"status":0,"msg":{"payer.document":"Informe um CPF ou CNPJ v\u00e1lido."}}
+0|in1bet   | Error creating PIX deposit: Error: Falha ao criar cobrança PIX
+0|in1bet   |     at UF (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:52174)
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:54800
+0|in1bet   | OndaPay PIX creation failed: {"status":0,"msg":{"payer.document":"Informe um CPF ou CNPJ v\u00e1lido."}}
+0|in1bet   | Error creating PIX deposit: Error: Falha ao criar cobrança PIX
+0|in1bet   |     at UF (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:52174)
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:54800
+0|in1bet   | OndaPay PIX creation failed: {"status":0,"msg":{"payer.document":"Informe um CPF ou CNPJ v\u00e1lido."}}
+0|in1bet   | Error creating PIX deposit: Error: Falha ao criar cobrança PIX
+0|in1bet   |     at UF (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:52174)
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:54800
+0|in1bet   | OndaPay PIX creation failed: {"status":0,"msg":{"payer.document":"Informe um CPF ou CNPJ v\u00e1lido."}}
+0|in1bet   | Error creating PIX deposit: Error: Falha ao criar cobrança PIX
+0|in1bet   |     at UF (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:52174)
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:54800
+0|in1bet   | OndaPay PIX creation failed: {"status":0,"msg":{"payer.document":"Informe um CPF ou CNPJ v\u00e1lido."}}
+0|in1bet   | Error creating PIX deposit: Error: Falha ao criar cobrança PIX
+0|in1bet   |     at UF (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:52174)
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:200:54800
