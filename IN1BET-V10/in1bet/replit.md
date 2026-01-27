@@ -2,6 +2,22 @@
 
 ## Recent Changes (2026-01-27)
 
+### User Avatar System & Chat Restrictions
+- **Profile Avatar Selection**
+  - 50 pre-generated gaming/casino-themed avatars (35 male, 15 female)
+  - Avatar selection modal with gender filters (All/Male/Female)
+  - Visual feedback on selected avatar with checkmark overlay
+  - Avatars stored in `/client/public/avatars/male/` and `/client/public/avatars/female/`
+  - Backend validates only `/avatars/*` URLs are accepted (no custom uploads)
+  - Location: `client/src/pages/profile/Profile.tsx`, `server/modules/users/users.routes.ts`
+
+- **Chat Level Restrictions**
+  - GIF and photo upload buttons in community chat are locked for users below level 50
+  - Locked buttons show padlock icon with yellow indicator
+  - Popover explains the level requirement when clicked
+  - Users level 50+ see unlocked buttons with full functionality
+  - Location: `client/src/components/chat/CommunityChat.tsx`
+
 ### Security Audit & Fixes
 - **CRITICAL FIX: OndaPay Webhook Signature Verification**
   - Fixed bypass vulnerability where `verifyWebhookSignature()` always returned `{valid: true}`
