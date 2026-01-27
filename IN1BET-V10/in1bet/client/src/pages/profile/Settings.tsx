@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Bell, Globe, Loader2, User, Save, Mail, Smartphone, Ticket, CheckCircle, XCircle, Gift } from "lucide-react";
+import { ArrowLeft, Bell, Globe, Loader2, User, Save, Mail, Smartphone, Ticket, CheckCircle, XCircle, Gift, Palette, Sparkles, Lock } from "lucide-react";
 import { Link } from "wouter";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +15,40 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { TwoFactorSettings } from "@/components/TwoFactorSettings";
 import { getStoredAuth } from "@/lib/auth";
+
+const NAME_COLORS = [
+  { id: "", label: "Padrão", class: "text-gray-400" },
+  { id: "red", label: "Vermelho", class: "text-red-400" },
+  { id: "orange", label: "Laranja", class: "text-orange-400" },
+  { id: "yellow", label: "Amarelo", class: "text-yellow-400" },
+  { id: "green", label: "Verde", class: "text-green-400" },
+  { id: "cyan", label: "Ciano", class: "text-cyan-400" },
+  { id: "blue", label: "Azul", class: "text-blue-400" },
+  { id: "purple", label: "Roxo", class: "text-purple-400" },
+  { id: "pink", label: "Rosa", class: "text-pink-400" },
+  { id: "white", label: "Branco", class: "text-white" },
+];
+
+const NAME_EFFECTS = [
+  { id: "", label: "Nenhum", icon: "—" },
+  { id: "glow", label: "Brilho", icon: "✨" },
+  { id: "stars", label: "Estrelas", icon: "⭐" },
+  { id: "sparkles", label: "Faíscas", icon: "💫" },
+  { id: "fire", label: "Fogo", icon: "🔥" },
+  { id: "thunder", label: "Trovão", icon: "⚡" },
+  { id: "ice", label: "Gelo", icon: "❄️" },
+  { id: "neon", label: "Neon", icon: "💡" },
+  { id: "gold", label: "Dourado", icon: "🏆" },
+  { id: "rainbow", label: "Arco-íris", icon: "🌈" },
+  { id: "matrix", label: "Matrix", icon: "💻" },
+  { id: "pulse", label: "Pulso", icon: "💓" },
+  { id: "glitch", label: "Glitch", icon: "📺" },
+  { id: "cosmic", label: "Cósmico", icon: "🌌" },
+  { id: "toxic", label: "Tóxico", icon: "☢️" },
+  { id: "blood", label: "Sangue", icon: "🩸" },
+  { id: "diamond", label: "Diamante", icon: "💎" },
+  { id: "shadow", label: "Sombra", icon: "🌑" },
+];
 
 interface UserSettings {
   language: string;
@@ -46,6 +80,52 @@ export default function Settings() {
   const { data: settingsData, isLoading } = useQuery<{ settings: UserSettings }>({
     queryKey: ["/api/users/settings"],
   });
+
+  const [selectedNameColor, setSelectedNameColor] = useState("");
+  const [selectedNameEffect, setSelectedNameEffect] = useState("");
+  const [savingCustomization, setSavingCustomization] = useState(false);
+
+  const { data: customizationData } = useQuery<{ customization: { nameColor?: string; nameEffect?: string; messageColor?: string } }>({
+    queryKey: ["/api/chat/customization"],
+  });
+
+  useEffect(() => {
+    if (customizationData?.customization) {
+      setSelectedNameColor(customizationData.customization.nameColor || "");
+      setSelectedNameEffect(customizationData.customization.nameEffect || "");
+    }
+  }, [customizationData]);
+
+  const handleSaveCustomization = async () => {
+    if (!user || (user.level || 0) < 50) return;
+    
+    setSavingCustomization(true);
+    try {
+      const response = await fetch("/api/chat/customization", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${auth.accessToken}`,
+        },
+        body: JSON.stringify({
+          nameColor: selectedNameColor || null,
+          nameEffect: selectedNameEffect || null,
+        }),
+      });
+      
+      if (response.ok) {
+        toast({ title: "Personalização salva!", description: "Seu estilo de nome foi atualizado." });
+        queryClient.invalidateQueries({ queryKey: ["/api/chat/customization"] });
+      } else {
+        const data = await response.json();
+        toast({ variant: "destructive", title: "Erro", description: data.error || "Falha ao salvar" });
+      }
+    } catch (error) {
+      toast({ variant: "destructive", title: "Erro", description: "Falha ao salvar personalização" });
+    } finally {
+      setSavingCustomization(false);
+    }
+  };
 
   useEffect(() => {
     if (settingsData) {
@@ -284,6 +364,114 @@ export default function Settings() {
               </Card>
 
               <TwoFactorSettings />
+
+              <Card className="bg-card border-white/5 shadow-lg">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2 text-primary">
+                    <Palette className="w-5 h-5" />
+                    Personalização do Chat
+                  </CardTitle>
+                  <CardDescription>
+                    {(user?.level || 0) >= 50 
+                      ? "Personalize a cor e efeito do seu nome no chat da comunidade"
+                      : "Desbloqueie no nível 50 para personalizar seu nome no chat"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {(user?.level || 0) < 50 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center mb-4">
+                        <Lock className="w-8 h-8 text-amber-500" />
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Você está no nível <span className="font-bold text-white">{user?.level || 1}</span>
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Faltam <span className="font-bold text-amber-400">{50 - (user?.level || 1)}</span> níveis para desbloquear
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-3">
+                        <Label className="flex items-center gap-2">
+                          <Palette className="w-4 h-4" />
+                          Cor do Nome
+                        </Label>
+                        <div className="grid grid-cols-5 gap-2">
+                          {NAME_COLORS.map((color) => (
+                            <button
+                              key={color.id}
+                              onClick={() => setSelectedNameColor(color.id)}
+                              className={`p-2 rounded-lg border-2 transition-all hover:scale-105 ${
+                                selectedNameColor === color.id
+                                  ? "border-primary bg-primary/10"
+                                  : "border-white/10 bg-secondary/20 hover:border-white/20"
+                              }`}
+                              title={color.label}
+                            >
+                              <span className={`text-sm font-bold ${color.class}`}>Aa</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <Label className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4" />
+                          Efeito do Nome
+                        </Label>
+                        <div className="grid grid-cols-3 gap-2">
+                          {NAME_EFFECTS.map((effect) => (
+                            <button
+                              key={effect.id}
+                              onClick={() => setSelectedNameEffect(effect.id)}
+                              className={`p-3 rounded-lg border-2 transition-all hover:scale-105 flex flex-col items-center gap-1 ${
+                                selectedNameEffect === effect.id
+                                  ? "border-primary bg-primary/10"
+                                  : "border-white/10 bg-secondary/20 hover:border-white/20"
+                              }`}
+                            >
+                              <span className="text-lg">{effect.icon}</span>
+                              <span className="text-[10px] text-muted-foreground">{effect.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-lg bg-secondary/30 border border-white/5">
+                        <Label className="text-xs text-muted-foreground mb-2 block">Pré-visualização</Label>
+                        <div className="flex items-center gap-2">
+                          <div className="px-2 py-1 rounded bg-primary/20 text-primary text-xs font-bold">
+                            {user?.level || 50}
+                          </div>
+                          <span 
+                            className={`font-bold ${
+                              selectedNameColor ? NAME_COLORS.find(c => c.id === selectedNameColor)?.class || "" : "text-white"
+                            } ${
+                              selectedNameEffect ? `effect-${selectedNameEffect}` : ""
+                            }`}
+                          >
+                            {user?.username || user?.name || "SeuNome"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <Button
+                        onClick={handleSaveCustomization}
+                        disabled={savingCustomization}
+                        className="w-full bg-primary hover:bg-primary/90"
+                      >
+                        {savingCustomization ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : (
+                          <Save className="w-4 h-4 mr-2" />
+                        )}
+                        Salvar Personalização
+                      </Button>
+                    </>
+                  )}
+                </CardContent>
+              </Card>
 
               <Card className="bg-card border-white/5 shadow-lg">
                 <CardHeader>

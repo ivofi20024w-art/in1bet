@@ -63,6 +63,16 @@ router.get("/online-users/:roomId", authMiddleware, async (req: Request, res: Re
   }
 });
 
+router.get("/customization", authMiddleware, async (req: Request, res: Response) => {
+  try {
+    const [customization] = await db.select().from(chatUserCustomization).where(eq(chatUserCustomization.userId, req.user!.id));
+    res.json({ customization: customization || null });
+  } catch (error) {
+    console.error("[CHAT] Error fetching customization:", error);
+    res.status(500).json({ error: "Erro ao buscar personalização" });
+  }
+});
+
 router.post("/customization", authMiddleware, async (req: Request, res: Response) => {
   try {
     const [user] = await db.select().from(users).where(eq(users.id, req.user!.id));
@@ -74,7 +84,12 @@ router.post("/customization", authMiddleware, async (req: Request, res: Response
     const { nameColor, nameEffect, messageColor } = req.body;
     
     const validColors = ["red", "orange", "yellow", "green", "cyan", "blue", "purple", "pink", "white", ""];
-    const validEffects = ["glow", "rainbow", "bold", "italic", ""];
+    const validEffects = [
+      "glow", "rainbow", "bold", "italic",
+      "stars", "sparkles", "fire", "thunder", "neon", "ice", "gold",
+      "matrix", "pulse", "glitch", "shadow", "cosmic", "toxic", "blood", "diamond",
+      ""
+    ];
     
     if (nameColor && !validColors.includes(nameColor)) {
       res.status(400).json({ error: "Cor de nome inválida" });

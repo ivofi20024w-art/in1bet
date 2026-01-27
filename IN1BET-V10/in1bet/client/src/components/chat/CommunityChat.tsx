@@ -82,9 +82,24 @@ const ROLE_BADGES: Record<string, { icon: React.ReactNode; label: string; color:
 
 const NAME_EFFECTS: Record<string, string> = {
   glow: "animate-pulse drop-shadow-[0_0_8px_currentColor]",
-  rainbow: "bg-gradient-to-r from-red-400 via-yellow-400 to-blue-400 bg-clip-text text-transparent",
+  rainbow: "effect-rainbow",
   italic: "italic",
   bold: "font-black",
+  stars: "effect-stars",
+  sparkles: "effect-sparkles",
+  fire: "effect-fire",
+  thunder: "effect-thunder",
+  neon: "effect-neon",
+  ice: "effect-ice",
+  gold: "effect-gold",
+  matrix: "effect-matrix",
+  pulse: "effect-pulse",
+  glitch: "effect-glitch",
+  shadow: "effect-shadow",
+  cosmic: "effect-cosmic",
+  toxic: "effect-toxic",
+  blood: "effect-blood",
+  diamond: "effect-diamond",
 };
 
 const EMOJI_CATEGORIES = [

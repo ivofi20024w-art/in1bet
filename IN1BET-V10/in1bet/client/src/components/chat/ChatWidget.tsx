@@ -44,6 +44,12 @@ import { useAuthModal } from "@/stores/authModalStore";
 import { useChatStore, type ChatMessage as StoreChatMessage } from "@/stores/chatStore";
 
 // --- Types ---
+interface UserCustomization {
+  nameColor?: string;
+  nameEffect?: string;
+  messageColor?: string;
+}
+
 interface User {
   id: string;
   username: string;
@@ -52,7 +58,42 @@ interface User {
   level: number;
   color: string;
   role?: string;
+  customization?: UserCustomization | null;
 }
+
+const NAME_EFFECTS: Record<string, string> = {
+  glow: "animate-pulse drop-shadow-[0_0_8px_currentColor]",
+  rainbow: "effect-rainbow",
+  italic: "italic",
+  bold: "font-black",
+  stars: "effect-stars",
+  sparkles: "effect-sparkles",
+  fire: "effect-fire",
+  thunder: "effect-thunder",
+  neon: "effect-neon",
+  ice: "effect-ice",
+  gold: "effect-gold",
+  matrix: "effect-matrix",
+  pulse: "effect-pulse",
+  glitch: "effect-glitch",
+  shadow: "effect-shadow",
+  cosmic: "effect-cosmic",
+  toxic: "effect-toxic",
+  blood: "effect-blood",
+  diamond: "effect-diamond",
+};
+
+const NAME_COLORS: Record<string, string> = {
+  red: "text-red-400",
+  orange: "text-orange-400",
+  yellow: "text-yellow-400",
+  green: "text-green-400",
+  cyan: "text-cyan-400",
+  blue: "text-blue-400",
+  purple: "text-purple-400",
+  pink: "text-pink-400",
+  white: "text-white",
+};
 
 interface Message {
   id: string;
@@ -575,8 +616,12 @@ function DraggableMessageItem({
                 currentUser.id === msg.user.id && "flex-row-reverse"
               )}>
                 <span 
-                  className="text-[13px] font-bold hover:underline cursor-pointer transition-colors"
-                  style={{ color: msg.user.color }}
+                  className={cn(
+                    "text-[13px] font-bold hover:underline cursor-pointer transition-colors",
+                    msg.user.customization?.nameColor ? NAME_COLORS[msg.user.customization.nameColor] : "",
+                    msg.user.customization?.nameEffect ? NAME_EFFECTS[msg.user.customization.nameEffect] : ""
+                  )}
+                  style={msg.user.customization?.nameColor ? undefined : { color: msg.user.color }}
                   onClick={() => setSelectedUser(msg.user)}
                 >
                   {msg.user.username}
@@ -765,7 +810,8 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
         rank: mapVipToRank(m.user.vipLevel, m.user.role === 'ADMIN', m.user.role),
         level: m.user.level || 1,
         color: getUserColor(m.user.id),
-        role: m.user.role
+        role: m.user.role,
+        customization: m.user.customization || null
       },
       content: m.message,
       timestamp: new Date(m.createdAt),
