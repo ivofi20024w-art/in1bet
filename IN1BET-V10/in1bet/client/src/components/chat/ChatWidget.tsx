@@ -1283,18 +1283,18 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative bg-[#13151C] border border-white/10 rounded-xl shadow-2xl w-full max-w-sm overflow-hidden max-h-[85vh] flex flex-col"
+              className="relative bg-[#13151C] border border-white/10 rounded-xl shadow-2xl w-full max-w-sm max-h-[85vh] flex flex-col"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Profile Header with Background */}
               <div 
-                className="relative h-28 bg-gradient-to-br from-orange-500/20 via-amber-500/10 to-transparent bg-cover bg-center shrink-0"
+                className="relative h-32 bg-gradient-to-br from-orange-500/20 via-amber-500/10 to-transparent bg-cover bg-center shrink-0 rounded-t-xl overflow-hidden"
                 style={userStats?.user?.profileBackground ? { 
                   backgroundImage: `url(${userStats.user.profileBackground})`,
                   backgroundSize: 'cover'
                 } : {}}
               >
-                <div className="absolute inset-0 bg-gradient-to-t from-[#13151C]/80 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#13151C] to-transparent" />
                 <div className="absolute top-2 right-2 flex gap-1 z-20">
                   {userStats?.isOwner && (
                     <button
@@ -1311,31 +1311,31 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
                     <X className="w-4 h-4" />
                   </button>
                 </div>
-                
-                {/* Avatar inside header, positioned at bottom-left overlapping */}
-                <div className="absolute -bottom-8 left-4 z-10 w-16 h-16">
-                  {userStats?.user?.avatarUrl ? (
-                    <img 
-                      src={userStats.user.avatarUrl} 
-                      alt={selectedUser.username}
-                      className="w-16 h-16 rounded-xl object-cover shadow-xl border-2 border-[#13151C]"
-                    />
-                  ) : (
-                    <div 
-                      className="w-16 h-16 rounded-xl flex items-center justify-center text-2xl font-bold shadow-xl border-2 border-[#13151C]"
-                      style={{ 
-                        background: `linear-gradient(135deg, ${selectedUser.color}40, ${selectedUser.color}10)`,
-                        color: selectedUser.color
-                      }}
-                    >
-                      {selectedUser.username.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
+              </div>
+              
+              {/* Avatar positioned overlapping header and content */}
+              <div className="absolute left-1/2 -translate-x-1/2 top-[88px] z-20 w-20 h-20">
+                {userStats?.user?.avatarUrl ? (
+                  <img 
+                    src={userStats.user.avatarUrl} 
+                    alt={selectedUser.username}
+                    className="w-20 h-20 rounded-2xl object-cover shadow-xl border-4 border-[#13151C]"
+                  />
+                ) : (
+                  <div 
+                    className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold shadow-xl border-4 border-[#13151C]"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${selectedUser.color}40, ${selectedUser.color}10)`,
+                      color: selectedUser.color
+                    }}
+                  >
+                    {selectedUser.username.charAt(0).toUpperCase()}
+                  </div>
+                )}
               </div>
 
               {/* Profile Info */}
-              <div className="px-4 pb-4 pt-10 overflow-y-auto flex-1">
+              <div className="px-4 pb-4 pt-14 overflow-y-auto flex-1">
                 {/* Name and level centered */}
                 <div className="text-center mb-3">
                   <div className="flex items-center justify-center gap-2 mb-1">
