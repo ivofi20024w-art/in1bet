@@ -31,11 +31,6 @@ export interface User {
   updatedAt: string;
 }
 
-export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
-}
-
 export { type AuthState } from "./authTokens";
 
 export const getStoredAuth = getStoredAuthState;
@@ -43,7 +38,6 @@ export const storeAuth = storeAuthState;
 export const clearAuth = clearAuthState;
 export const refreshToken = refreshAccessToken;
 
-// Register new user
 export async function register(data: {
   username: string;
   name: string;
@@ -53,7 +47,7 @@ export async function register(data: {
   phone?: string;
   birthDate?: string;
   referralCode?: string;
-}): Promise<{ user: User; accessToken: string; refreshToken: string }> {
+}): Promise<{ user: User }> {
   const response = await apiRequest("POST", "/api/auth/register", data);
   const result = await response.json();
   
@@ -61,20 +55,13 @@ export async function register(data: {
     throw new Error(result.error || "Erro ao criar conta");
   }
   
-  const authState: AuthState = {
-    user: result.user,
-    isAuthenticated: true,
-    accessToken: result.accessToken,
-    refreshToken: result.refreshToken,
-  };
-  storeAuth(authState);
+  storeAuth({ user: result.user });
   dispatchAuthChange();
   
   return result;
 }
 
-// Login with email or CPF
-export async function login(identifier: string, password: string): Promise<{ user: User; accessToken: string; refreshToken: string }> {
+export async function login(identifier: string, password: string): Promise<{ user: User }> {
   const response = await apiRequest("POST", "/api/auth/login", { identifier, password });
   const result = await response.json();
   
@@ -82,26 +69,15 @@ export async function login(identifier: string, password: string): Promise<{ use
     throw new Error(result.error || "Erro ao fazer login");
   }
   
-  const authState: AuthState = {
-    user: result.user,
-    isAuthenticated: true,
-    accessToken: result.accessToken,
-    refreshToken: result.refreshToken,
-  };
-  storeAuth(authState);
+  storeAuth({ user: result.user });
   dispatchAuthChange();
   
   return result;
 }
 
-// Logout
 export async function logout(): Promise<void> {
-  const auth = getStoredAuth();
-  
   try {
-    if (auth.refreshToken) {
-      await apiRequest("POST", "/api/auth/logout", { refreshToken: auth.refreshToken });
-    }
+    await apiRequest("POST", "/api/auth/logout", {});
   } catch (e) {
     console.error("Error during logout:", e);
   }
@@ -110,11 +86,10 @@ export async function logout(): Promise<void> {
   dispatchAuthChange();
 }
 
-// Get current user
 export async function getCurrentUser(): Promise<User | null> {
   const auth = getStoredAuth();
   
-  if (!auth.accessToken) {
+  if (!auth.isAuthenticated) {
     return null;
   }
   
@@ -132,18 +107,10 @@ export async function getCurrentUser(): Promise<User | null> {
   }
 }
 
-// Get auth header for API requests
 export function getAuthHeader(): Record<string, string> {
-  const auth = getStoredAuth();
-  
-  if (auth.accessToken) {
-    return { "Authorization": `Bearer ${auth.accessToken}` };
-  }
-  
   return {};
 }
 
-// Get wallet balance
 export async function getWallet(): Promise<{ 
   balance: number; 
   lockedBalance: number; 
@@ -155,7 +122,7 @@ export async function getWallet(): Promise<{
 } | null> {
   const auth = getStoredAuth();
   
-  if (!auth.accessToken) {
+  if (!auth.isAuthenticated) {
     return null;
   }
   

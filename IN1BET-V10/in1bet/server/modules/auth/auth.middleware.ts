@@ -14,6 +14,31 @@ function getJwtSecret(): string {
 
 const JWT_SECRET: string = getJwtSecret();
 
+const isProduction = process.env.NODE_ENV === "production";
+
+export const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? "strict" as const : "lax" as const,
+  path: "/",
+};
+
+export function setAuthCookies(res: Response, accessToken: string, refreshToken: string): void {
+  res.cookie("access_token", accessToken, {
+    ...COOKIE_OPTIONS,
+    maxAge: 15 * 60 * 1000,
+  });
+  res.cookie("refresh_token", refreshToken, {
+    ...COOKIE_OPTIONS,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+}
+
+export function clearAuthCookies(res: Response): void {
+  res.clearCookie("access_token", { path: "/" });
+  res.clearCookie("refresh_token", { path: "/" });
+}
+
 // Extend Express Request to include user
 declare global {
   namespace Express {
@@ -30,6 +55,26 @@ export interface JWTPayload {
   exp: number;
 }
 
+// Get access token from cookie or header (cookies preferred)
+function getAccessToken(req: Request): string | null {
+  if (req.cookies?.access_token) {
+    return req.cookies.access_token;
+  }
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.split(" ")[1];
+  }
+  return null;
+}
+
+// Get refresh token from cookie or body
+export function getRefreshToken(req: Request): string | null {
+  if (req.cookies?.refresh_token) {
+    return req.cookies.refresh_token;
+  }
+  return req.body?.refreshToken || null;
+}
+
 // Authentication middleware - protects routes
 export async function authMiddleware(
   req: Request,
@@ -37,21 +82,14 @@ export async function authMiddleware(
   next: NextFunction
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization;
+    const token = getAccessToken(req);
     
-    console.log(`[AUTH] ${req.method} ${req.path} - Authorization header: ${authHeader ? 'present' : 'missing'}`);
-    
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      console.log(`[AUTH] No Bearer token provided for ${req.path}`);
+    if (!token) {
       res.status(401).json({ error: "Token de acesso não fornecido" });
       return;
     }
-
-    const token = authHeader.split(" ")[1];
-    console.log(`[AUTH] Token first 20 chars: ${token.substring(0, 20)}...`);
     
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
-    console.log(`[AUTH] Token verified for user: ${decoded.userId}`);
     
     const user = await storage.getUser(decoded.userId);
     
@@ -84,14 +122,13 @@ export async function optionalAuthMiddleware(
   next: NextFunction
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization;
+    const token = getAccessToken(req);
     
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!token) {
       next();
       return;
     }
 
-    const token = authHeader.split(" ")[1];
     const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
     const user = await storage.getUser(decoded.userId);
     

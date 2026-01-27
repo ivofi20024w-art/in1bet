@@ -23,10 +23,10 @@ interface Session {
 
 async function fetchSessions(): Promise<Session[]> {
   const auth = getStoredAuth();
-  if (!auth.accessToken) return [];
+  if (!auth.isAuthenticated) return [];
   
   const res = await fetch("/api/auth/sessions", {
-    headers: { Authorization: `Bearer ${auth.accessToken}` },
+    credentials: "include",
   });
   const data = await res.json();
   return data.success ? data.sessions : [];
@@ -73,10 +73,9 @@ export default function Security() {
 
   const revokeSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
-      const auth = getStoredAuth();
       const res = await fetch(`/api/auth/sessions/${sessionId}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Falha ao encerrar sessão");
       return res.json();
@@ -92,19 +91,16 @@ export default function Security() {
 
   const revokeAllSessionsMutation = useMutation({
     mutationFn: async () => {
-      const auth = getStoredAuth();
       const res = await fetch("/api/auth/sessions", {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: "include",
       });
       if (!res.ok) throw new Error("Falha ao encerrar sessões");
       return res.json();
     },
     onSuccess: () => {
       toast({ title: "Todas as sessões encerradas", description: "Você será redirecionado para o login." });
-      localStorage.removeItem("in1bet_token");
-      localStorage.removeItem("in1bet_refresh_token");
-      localStorage.removeItem("in1bet_auth");
+      localStorage.removeItem("in1bet_user");
       setTimeout(() => setLocation("/"), 1500);
     },
     onError: () => {
@@ -130,19 +126,10 @@ export default function Security() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("in1bet_token");
-      if (!token) {
-        setError("Você precisa estar logado para alterar a senha");
-        setLoading(false);
-        return;
-      }
-
       const response = await fetch("/api/users/change-password", {
         method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}` 
-        },
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ currentPassword, newPassword }),
       });
 
@@ -164,9 +151,7 @@ export default function Security() {
         description: "Você será redirecionado para fazer login novamente.",
       });
 
-      localStorage.removeItem("in1bet_token");
-      localStorage.removeItem("in1bet_refresh_token");
-      localStorage.removeItem("in1bet_auth");
+      localStorage.removeItem("in1bet_user");
       
       setTimeout(() => {
         setLocation("/");

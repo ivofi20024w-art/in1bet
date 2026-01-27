@@ -13,7 +13,8 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  // Keep this hook to maintain consistent hook order (was accessToken before cookie migration)
+  const [_deprecated] = useState<string | null>(null);
   
   const chatConnect = useChatStore((s) => s.connect);
   const chatLogout = useChatStore((s) => s.logout);
@@ -23,8 +24,7 @@ export function useAuth() {
     setIsLoading(true);
     const auth = getStoredAuth();
     
-    if (auth.isAuthenticated && auth.accessToken) {
-      setAccessToken(auth.accessToken);
+    if (auth.isAuthenticated) {
       const currentUser = await getCurrentUser();
       if (currentUser) {
         setUser(currentUser);
@@ -35,13 +35,11 @@ export function useAuth() {
       } else {
         setUser(null);
         setIsAuthenticated(false);
-        setAccessToken(null);
         chatLogout();
       }
     } else {
       setUser(null);
       setIsAuthenticated(false);
-      setAccessToken(null);
       chatLogout();
     }
     
@@ -56,7 +54,7 @@ export function useAuth() {
     };
 
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'in1bet_auth') {
+      if (e.key === 'in1bet_user') {
         checkAuth();
       }
     };
@@ -75,7 +73,6 @@ export function useAuth() {
     await authLogout();
     setUser(null);
     setIsAuthenticated(false);
-    setAccessToken(null);
   }, [chatLogout]);
 
   const refreshAuth = useCallback(() => {
@@ -86,7 +83,6 @@ export function useAuth() {
     user,
     isAuthenticated,
     isLoading,
-    accessToken,
     logout,
     refreshAuth,
   };

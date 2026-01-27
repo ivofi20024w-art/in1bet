@@ -48,7 +48,6 @@ function showSessionExpiredOnce() {
 function performLogout(hadSession: boolean = false) {
   clearAuthState();
   
-  // Only show "session expired" toast and redirect if user actually had a session
   if (hadSession) {
     showSessionExpiredOnce();
     
@@ -64,15 +63,9 @@ export async function httpClient<T = any>(
 ): Promise<{ data: T | null; response: Response; error?: string }> {
   const { skipAuth = false, skipRefresh = false, ...fetchOptions } = options;
 
-  const auth = getStoredAuthState();
-  
   const headers: Record<string, string> = {
     ...(fetchOptions.headers as Record<string, string> || {}),
   };
-
-  if (!skipAuth && auth.accessToken) {
-    headers["Authorization"] = `Bearer ${auth.accessToken}`;
-  }
 
   if (fetchOptions.body && typeof fetchOptions.body === "string") {
     headers["Content-Type"] = headers["Content-Type"] || "application/json";
@@ -85,27 +78,24 @@ export async function httpClient<T = any>(
       credentials: "include",
     });
 
-    if (response.status === 401 && !skipAuth && !skipRefresh && auth.refreshToken) {
+    const auth = getStoredAuthState();
+
+    if (response.status === 401 && !skipAuth && !skipRefresh && auth.isAuthenticated) {
       console.log("[httpClient] Got 401, attempting token refresh...");
       
       const refreshed = await attemptRefresh();
       
       if (refreshed) {
         console.log("[httpClient] Token refreshed successfully, retrying request...");
-        const newAuth = getStoredAuthState();
         
-        if (newAuth.accessToken) {
-          headers["Authorization"] = `Bearer ${newAuth.accessToken}`;
-          
-          response = await fetch(url, {
-            ...fetchOptions,
-            headers,
-            credentials: "include",
-          });
-        }
+        response = await fetch(url, {
+          ...fetchOptions,
+          headers,
+          credentials: "include",
+        });
       } else {
         console.log("[httpClient] Token refresh failed, logging out...");
-        performLogout(true); // Had session - refresh failed
+        performLogout(true);
         return {
           data: null,
           response,
@@ -115,11 +105,9 @@ export async function httpClient<T = any>(
     }
 
     if (response.status === 401) {
-      // Check current auth state at time of 401 (not stale initial auth)
       const currentAuth = getStoredAuthState();
-      const hadSession = !!(currentAuth.accessToken || currentAuth.refreshToken);
+      const hadSession = currentAuth.isAuthenticated;
       
-      // Only perform logout actions if user actually had a session
       if (hadSession) {
         performLogout(true);
         return {
@@ -129,7 +117,6 @@ export async function httpClient<T = any>(
         };
       }
       
-      // For guests hitting auth-required endpoints, just return silently
       return {
         data: null,
         response,
@@ -212,9 +199,5 @@ export async function httpDelete<T = any>(
 }
 
 export function getAuthHeaders(): Record<string, string> {
-  const auth = getStoredAuthState();
-  if (auth.accessToken) {
-    return { Authorization: `Bearer ${auth.accessToken}` };
-  }
   return {};
 }

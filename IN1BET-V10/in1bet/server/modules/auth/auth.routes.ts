@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import { registerUser, loginUser, refreshAccessToken, logoutUser, requestPasswordReset, resetPasswordWithToken } from "./auth.service";
-import { authMiddleware } from "./auth.middleware";
+import { authMiddleware, setAuthCookies, clearAuthCookies, getRefreshToken } from "./auth.middleware";
 import { authLimiter, registrationLimiter } from "../../middleware/rateLimit";
 import { storage } from "../../storage";
 
@@ -25,11 +25,11 @@ router.post("/register", registrationLimiter, async (req: Request, res: Response
       return;
     }
 
+    setAuthCookies(res, result.accessToken!, result.refreshToken!);
+
     res.status(201).json({
       message: "Conta criada com sucesso",
       user: result.user,
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
     });
   } catch (error) {
     console.error("Register route error:", error);
@@ -50,11 +50,11 @@ router.post("/login", authLimiter, async (req: Request, res: Response) => {
       return;
     }
 
+    setAuthCookies(res, result.accessToken!, result.refreshToken!);
+
     res.json({
       message: "Login realizado com sucesso",
       user: result.user,
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
     });
   } catch (error) {
     console.error("Login route error:", error);
@@ -65,7 +65,7 @@ router.post("/login", authLimiter, async (req: Request, res: Response) => {
 // POST /api/auth/refresh - Refresh access token
 router.post("/refresh", async (req: Request, res: Response) => {
   try {
-    const { refreshToken } = req.body;
+    const refreshToken = getRefreshToken(req);
     
     if (!refreshToken) {
       res.status(400).json({ error: "Refresh token não fornecido" });
@@ -75,12 +75,14 @@ router.post("/refresh", async (req: Request, res: Response) => {
     const result = await refreshAccessToken(refreshToken);
     
     if (!result.success) {
+      clearAuthCookies(res);
       res.status(401).json({ error: result.error });
       return;
     }
 
+    setAuthCookies(res, result.accessToken!, refreshToken);
+
     res.json({
-      accessToken: result.accessToken,
       user: result.user,
     });
   } catch (error) {
@@ -92,11 +94,13 @@ router.post("/refresh", async (req: Request, res: Response) => {
 // POST /api/auth/logout - Logout and invalidate refresh token
 router.post("/logout", async (req: Request, res: Response) => {
   try {
-    const { refreshToken } = req.body;
+    const refreshToken = getRefreshToken(req);
     
     if (refreshToken) {
       await logoutUser(refreshToken);
     }
+
+    clearAuthCookies(res);
 
     res.json({ message: "Logout realizado com sucesso" });
   } catch (error) {

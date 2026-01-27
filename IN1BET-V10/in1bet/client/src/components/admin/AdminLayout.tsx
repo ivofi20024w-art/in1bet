@@ -59,7 +59,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
   useEffect(() => {
     const checkAdmin = async () => {
-      if (!auth.accessToken || !auth.user) {
+      if (!auth.isAuthenticated || !auth.user) {
         setLoading(false);
         setLocation("/");
         return;
@@ -67,7 +67,7 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
       try {
         const response = await fetch("/api/admin/stats", {
-          headers: { Authorization: `Bearer ${auth.accessToken}` },
+          credentials: "include",
         });
 
         if (response.status === 403 || !response.ok) {
@@ -88,10 +88,10 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
     };
 
     checkAdmin();
-  }, [auth.accessToken, auth.user, setLocation]);
+  }, [auth.isAuthenticated, auth.user, setLocation]);
 
   const handleLogout = () => {
-    localStorage.removeItem("auth");
+    localStorage.removeItem("in1bet_user");
     setLocation("/");
   };
 

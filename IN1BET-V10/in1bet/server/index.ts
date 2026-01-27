@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
@@ -12,6 +13,9 @@ declare module "http" {
     rawBody: unknown;
   }
 }
+
+// @ts-ignore - cookie-parser type mismatch with express types
+app.use(cookieParser());
 
 app.use(
   express.json({
