@@ -18,7 +18,6 @@ import {
   Star,
   Headphones,
   Gift,
-  HelpCircle,
   ShieldCheck,
   Volleyball,
   Timer,
@@ -72,9 +71,8 @@ const MENU_SECTIONS: MenuSection[] = [
 ];
 
 const FOOTER_MENU: MenuItem[] = [
-  { id: "support", label: "Suporte Ao Vivo", path: "/support", icon: Headphones },
+  { id: "support", label: "Suporte", path: "/support", icon: Headphones },
   { id: "promotions", label: "Promoções", path: "/promotions", icon: Gift },
-  { id: "help", label: "Central de Apoio", path: "/help", icon: HelpCircle },
   { id: "responsible", label: "Jogo Responsável", path: "/responsible-gaming", icon: ShieldCheck },
 ];
 
