@@ -1,61 +1,60 @@
 import React, { useEffect, useRef, useCallback, useState } from "react";
-import { usePlinko } from "@/lib/stores/usePlinko";
-import { usePlayPlinko, PlinkoRisk, PlinkoRows } from "@/hooks/usePlinko";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { Wallet, Volume2, VolumeX, Shield, Loader2, Copy, Check, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 
 const CANVAS_WIDTH = 480;
-const CANVAS_HEIGHT = 560;
+const CANVAS_HEIGHT = 520;
 const PIN_RADIUS = 4;
-const BALL_RADIUS = 6;
+const BALL_RADIUS = 7;
 
-type RiskLevel = "low" | "medium" | "high";
+type RiskLevel = "LOW" | "MEDIUM" | "HIGH";
+type RowsOption = 8 | 12 | 16;
 
-const RISK_MAP: Record<RiskLevel, PlinkoRisk> = {
-  low: "LOW",
-  medium: "MEDIUM",
-  high: "HIGH",
-};
-
-const ROWS_MULTIPLIERS: Record<number, Record<RiskLevel, number[]>> = {
-  8: {
-    low: [5.6, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 5.6],
-    medium: [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
-    high: [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
+const MULTIPLIERS: Record<RiskLevel, Record<RowsOption, number[]>> = {
+  LOW: {
+    8: [5.6, 2.1, 1.1, 1, 0.5, 1, 1.1, 2.1, 5.6],
+    12: [8.9, 3, 1.4, 1.1, 1, 0.5, 0.3, 0.5, 1, 1.1, 1.4, 3, 8.9],
+    16: [16, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9, 16],
   },
-  12: {
-    low: [10, 3, 1.6, 1.4, 1.1, 1, 0.5, 1, 1.1, 1.4, 1.6, 3, 10],
-    medium: [33, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 33],
-    high: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170],
+  MEDIUM: {
+    8: [13, 3, 1.3, 0.7, 0.4, 0.7, 1.3, 3, 13],
+    12: [33, 11, 4, 2, 1.1, 0.6, 0.3, 0.6, 1.1, 2, 4, 11, 33],
+    16: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110],
   },
-  16: {
-    low: [16, 9, 2, 1.4, 1.4, 1.2, 1.1, 1, 0.5, 1, 1.1, 1.2, 1.4, 1.4, 2, 9, 16],
-    medium: [110, 41, 10, 5, 3, 1.5, 1, 0.5, 0.3, 0.5, 1, 1.5, 3, 5, 10, 41, 110],
-    high: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000],
+  HIGH: {
+    8: [29, 4, 1.5, 0.3, 0.2, 0.3, 1.5, 4, 29],
+    12: [170, 24, 8.1, 2, 0.7, 0.2, 0.2, 0.2, 0.7, 2, 8.1, 24, 170],
+    16: [1000, 130, 26, 9, 4, 2, 0.2, 0.2, 0.2, 0.2, 0.2, 2, 4, 9, 26, 130, 1000],
   },
 };
 
-const IN1BET_COLORS = {
-  primary: "#ff6600",
-  secondary: "#cc5500", 
-  accent: "#ffaa00",
-  background: "#0a0806",
-  surface: "#1a1410",
-  surfaceLight: "#2a2018",
-  text: "#ffffff",
-  textMuted: "#9a8a7a",
-  danger: "#ff3333",
-  dangerDark: "#cc0000",
+const RISK_LABELS: Record<RiskLevel, string> = {
+  LOW: "Baixo",
+  MEDIUM: "Médio",
+  HIGH: "Alto",
 };
 
-const ROWS_OPTIONS = [8, 12, 16] as const;
+const RISK_COLORS: Record<RiskLevel, string> = {
+  LOW: "text-green-400",
+  MEDIUM: "text-yellow-400",
+  HIGH: "text-red-400",
+};
 
 interface AnimatedBall {
   id: string;
   x: number;
   y: number;
-  targetY: number;
   pathIndex: number;
-  path: number[];
+  positions: { x: number; y: number }[];
   bet: number;
   multiplier: number;
   winAmount: number;
@@ -73,37 +72,28 @@ interface BetHistory {
   bet: number;
   multiplier: number;
   profit: number;
+  timestamp: number;
 }
 
-interface Particle {
-  x: number;
-  y: number;
-  size: number;
-  speed: number;
-  opacity: number;
-}
-
-interface FloatingCoin {
-  x: number;
-  y: number;
-  size: number;
-  speed: number;
-  rotation: number;
-  rotSpeed: number;
+interface ProvablyFairData {
+  serverSeedHash: string;
+  serverSeed?: string;
+  clientSeed?: string;
+  nonce?: number;
 }
 
 function generatePins(rows: number): Pin[] {
   const pins: Pin[] = [];
-  const startY = 50;
-  const endY = CANVAS_HEIGHT - 70;
+  const startY = 60;
+  const endY = CANVAS_HEIGHT - 80;
   const spacingY = (endY - startY) / (rows - 1);
   const spacingX = CANVAS_WIDTH / (rows + 2);
-  
+
   for (let row = 0; row < rows; row++) {
     const pinsInRow = row + 3;
     const rowWidth = (pinsInRow - 1) * spacingX;
     const startX = (CANVAS_WIDTH - rowWidth) / 2;
-    
+
     for (let col = 0; col < pinsInRow; col++) {
       pins.push({
         x: startX + col * spacingX,
@@ -111,202 +101,264 @@ function generatePins(rows: number): Pin[] {
       });
     }
   }
-  
+
   return pins;
 }
 
-function generateParticles(): Particle[] {
-  const particles: Particle[] = [];
-  for (let i = 0; i < 30; i++) {
-    particles.push({
-      x: Math.random() * CANVAS_WIDTH,
-      y: Math.random() * CANVAS_HEIGHT,
-      size: Math.random() * 2 + 0.5,
-      speed: Math.random() * 0.3 + 0.1,
-      opacity: Math.random() * 0.4 + 0.1,
-    });
-  }
-  return particles;
+function getSlotColor(multiplier: number): string {
+  if (multiplier >= 100) return "#ffd700";
+  if (multiplier >= 10) return "#ffaa00";
+  if (multiplier >= 2) return "#ff6600";
+  if (multiplier >= 1) return "#22c55e";
+  return "#ef4444";
 }
 
-function generateCoins(): FloatingCoin[] {
-  const coins: FloatingCoin[] = [];
-  for (let i = 0; i < 6; i++) {
-    coins.push({
-      x: Math.random() * CANVAS_WIDTH,
-      y: Math.random() * CANVAS_HEIGHT,
-      size: Math.random() * 8 + 6,
-      speed: Math.random() * 0.2 + 0.1,
-      rotation: Math.random() * Math.PI * 2,
-      rotSpeed: (Math.random() - 0.5) * 0.02,
-    });
-  }
-  return coins;
-}
+function ProvablyFairModal({ data }: { data: ProvablyFairData | null }) {
+  const [copied, setCopied] = useState<string | null>(null);
 
-function getSlotColors(multipliers: number[]): string[] {
-  return multipliers.map(m => {
-    if (m >= 10) return IN1BET_COLORS.accent;
-    if (m >= 2) return IN1BET_COLORS.primary;
-    if (m >= 1) return IN1BET_COLORS.secondary;
-    return IN1BET_COLORS.danger;
-  });
+  const copyToClipboard = (text: string, field: string) => {
+    navigator.clipboard.writeText(text);
+    setCopied(field);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-white">
+          <Shield className="w-5 h-5" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="bg-card border-white/10 max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-lg">
+            <Shield className="w-5 h-5 text-primary" />
+            Provably Fair - Plinko
+          </DialogTitle>
+          <DialogDescription className="text-muted-foreground text-sm">
+            Verifique a integridade e justiça de cada jogo usando criptografia.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4 mt-4">
+          <div className="space-y-2">
+            <Label className="text-xs text-muted-foreground uppercase tracking-wider">Server Seed Hash (Próxima Rodada)</Label>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 text-[10px] bg-black/40 p-2 rounded border border-white/5 text-green-400 break-all font-mono">
+                {data?.serverSeedHash || "Faça uma aposta para ver"}
+              </code>
+              {data?.serverSeedHash && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0 h-8 w-8"
+                  onClick={() => copyToClipboard(data.serverSeedHash!, "hash")}
+                >
+                  {copied === "hash" ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {data?.serverSeed && (
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Server Seed (Última Rodada)</Label>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 text-[10px] bg-black/40 p-2 rounded border border-white/5 text-yellow-400 break-all font-mono">
+                  {data.serverSeed}
+                </code>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="shrink-0 h-8 w-8"
+                  onClick={() => copyToClipboard(data.serverSeed!, "seed")}
+                >
+                  {copied === "seed" ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {data?.clientSeed && (
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Client Seed</Label>
+              <div className="flex items-center gap-2">
+                <code className="flex-1 text-[10px] bg-black/40 p-2 rounded border border-white/5 text-blue-400 break-all font-mono">
+                  {data.clientSeed}
+                </code>
+              </div>
+            </div>
+          )}
+
+          {data?.nonce !== undefined && (
+            <div className="space-y-2">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wider">Nonce</Label>
+              <code className="block text-[10px] bg-black/40 p-2 rounded border border-white/5 text-purple-400 font-mono">
+                {data.nonce}
+              </code>
+            </div>
+          )}
+
+          <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+            <h4 className="font-bold text-green-400 text-sm mb-2">Como Verificar?</h4>
+            <ol className="list-decimal list-inside space-y-1 text-muted-foreground text-xs">
+              <li>Copie o Server Seed, Client Seed e Nonce</li>
+              <li>Calcule: HMAC-SHA256(serverSeed, clientSeed:nonce:row)</li>
+              <li>Cada direção (0=esquerda, 1=direita) é determinada pelo hash</li>
+              <li>A posição final determina o multiplicador</li>
+            </ol>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
 export function Plinko2D() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animatedBallsRef = useRef<AnimatedBall[]>([]);
   const animationRef = useRef<number>(0);
-  const lastDropRef = useRef<number>(0);
-  const particlesRef = useRef<Particle[]>(generateParticles());
-  const coinsRef = useRef<FloatingCoin[]>(generateCoins());
-  
-  const [risk, setRisk] = useState<RiskLevel>("medium");
-  const [rows, setRows] = useState<8 | 12 | 16>(12);
+  const pinsRef = useRef<Pin[]>(generatePins(12));
+
+  const [risk, setRisk] = useState<RiskLevel>("MEDIUM");
+  const [rows, setRows] = useState<RowsOption>(12);
+  const [betAmount, setBetAmount] = useState("10.00");
   const [betHistory, setBetHistory] = useState<BetHistory[]>([]);
   const [lastHitSlot, setLastHitSlot] = useState<number | null>(null);
-  const [autoBetCount, setAutoBetCount] = useState(10);
-  const [isMobile, setIsMobile] = useState(false);
-  const [autoBetRemaining, setAutoBetRemaining] = useState(0);
-  const [isAutoBetting, setIsAutoBetting] = useState(false);
-  const [pendingBets, setPendingBets] = useState(0);
-  
+  const [isMuted, setIsMuted] = useState(false);
+  const [isDropping, setIsDropping] = useState(false);
+  const [activeBalls, setActiveBalls] = useState(0);
+  const [showBigWin, setShowBigWin] = useState(false);
+  const [bigWinAmount, setBigWinAmount] = useState(0);
+  const [provablyFairData, setProvablyFairData] = useState<ProvablyFairData | null>(null);
+  const [riskOpen, setRiskOpen] = useState(false);
+  const [rowsOpen, setRowsOpen] = useState(false);
+
+  const { user } = useAuth();
+  const { toast } = useToast();
   const queryClient = useQueryClient();
-  const playPlinkoMutation = usePlayPlinko();
-  
+
+  const { data: walletData } = useQuery({
+    queryKey: ["wallet"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/wallet");
+      return res.json();
+    },
+    enabled: !!user,
+    refetchInterval: 3000,
+  });
+
+  const balance = walletData?.wallet?.balance ? parseFloat(walletData.wallet.balance) : 0;
+
+  const playMutation = useMutation({
+    mutationFn: async (data: { betAmount: number; risk: RiskLevel; rows: RowsOption }) => {
+      const res = await apiRequest("POST", "/api/games/plinko/play", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["wallet"] });
+    },
+  });
+
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-  
-  const pins = useRef<Pin[]>(generatePins(rows));
-  
-  useEffect(() => {
-    pins.current = generatePins(rows);
+    pinsRef.current = generatePins(rows);
   }, [rows]);
-  
-  const multipliers = ROWS_MULTIPLIERS[rows]?.[risk] || ROWS_MULTIPLIERS[12].medium;
-  const slotColors = getSlotColors(multipliers);
-  const numSlots = multipliers.length || 13;
-  const slotWidth = numSlots > 0 ? CANVAS_WIDTH / numSlots : CANVAS_WIDTH / 13;
-  
-  const { 
-    money, 
-    activeBalls, 
-    betAmount,
-    showBigWin,
-    lastWin,
-    incrementActiveBalls,
-    decrementActiveBalls,
-    setLastWin,
-    setBetAmount,
-    resetGame,
-    setMoney,
-    isLoading,
-    setLoading,
-    error,
-    setError,
-  } = usePlinko();
-  
-  const calculateBallPath = useCallback((path: number[], targetBucket: number): { positions: {x: number, y: number}[] } => {
-    const positions: {x: number, y: number}[] = [];
-    const startY = 50;
-    const endY = CANVAS_HEIGHT - 70;
-    const safeRows = rows || 12;
-    const spacingY = (endY - startY) / Math.max(safeRows - 1, 1);
-    const spacingX = CANVAS_WIDTH / (safeRows + 2);
-    
-    positions.push({ x: CANVAS_WIDTH / 2, y: 20 });
-    
-    const safePath = Array.isArray(path) ? path : [];
-    let leftCount = 0;
-    let rightCount = 0;
-    
-    for (let i = 0; i < safeRows; i++) {
-      const direction = safePath[i] || 0;
-      if (direction === 0) {
-        leftCount++;
-      } else {
-        rightCount++;
+
+  const multipliers = MULTIPLIERS[risk][rows];
+  const numSlots = multipliers.length;
+  const slotWidth = CANVAS_WIDTH / numSlots;
+
+  const calculateBallPath = useCallback(
+    (path: number[], targetBucket: number): { x: number; y: number }[] => {
+      const positions: { x: number; y: number }[] = [];
+      const startY = 60;
+      const endY = CANVAS_HEIGHT - 80;
+      const spacingY = (endY - startY) / Math.max(rows - 1, 1);
+      const spacingX = CANVAS_WIDTH / (rows + 2);
+
+      positions.push({ x: CANVAS_WIDTH / 2, y: 25 });
+
+      let rightCount = 0;
+      for (let i = 0; i < rows; i++) {
+        const direction = path[i] || 0;
+        if (direction === 1) rightCount++;
+
+        const pinsInRow = i + 3;
+        const rowWidth = (pinsInRow - 1) * spacingX;
+        const rowStartX = (CANVAS_WIDTH - rowWidth) / 2;
+
+        const ballColumn = rightCount;
+        const ballX = rowStartX + ballColumn * spacingX;
+        const ballY = startY + i * spacingY + spacingY * 0.5;
+
+        if (isFinite(ballX) && isFinite(ballY)) {
+          positions.push({ x: ballX, y: ballY });
+        }
       }
-      
-      const pinsInRow = i + 3;
-      const rowWidth = (pinsInRow - 1) * spacingX;
-      const rowStartX = (CANVAS_WIDTH - rowWidth) / 2;
-      
-      const ballColumn = rightCount;
-      const ballX = rowStartX + ballColumn * spacingX;
-      const ballY = startY + i * spacingY + spacingY * 0.5;
-      
-      if (isFinite(ballX) && isFinite(ballY)) {
-        positions.push({ x: ballX, y: ballY });
-      }
-    }
-    
-    const safeBucket = isFinite(targetBucket) ? targetBucket : Math.floor(numSlots / 2);
-    const safeSlotWidth = isFinite(slotWidth) && slotWidth > 0 ? slotWidth : CANVAS_WIDTH / 13;
-    const finalX = (safeBucket + 0.5) * safeSlotWidth;
-    positions.push({ x: isFinite(finalX) ? finalX : CANVAS_WIDTH / 2, y: CANVAS_HEIGHT - 40 });
-    
-    return { positions };
-  }, [rows, slotWidth, numSlots]);
-  
+
+      const finalX = (targetBucket + 0.5) * slotWidth;
+      positions.push({ x: isFinite(finalX) ? finalX : CANVAS_WIDTH / 2, y: CANVAS_HEIGHT - 45 });
+
+      return positions;
+    },
+    [rows, slotWidth]
+  );
+
   const handleDropBall = useCallback(async () => {
-    if (money < betAmount || activeBalls >= 15 || pendingBets > 0) {
+    const amount = parseFloat(betAmount);
+    if (isNaN(amount) || amount < 1) {
+      toast({ title: "Valor inválido", description: "Aposta mínima é R$ 1,00", variant: "destructive" });
       return;
     }
-    
-    setPendingBets(prev => prev + 1);
-    
+    if (amount > balance) {
+      toast({ title: "Saldo insuficiente", description: "Deposite mais para continuar jogando", variant: "destructive" });
+      return;
+    }
+    if (activeBalls >= 10 || isDropping) return;
+
+    setIsDropping(true);
+
     try {
-      const result = await playPlinkoMutation.mutateAsync({
-        betAmount,
-        risk: RISK_MAP[risk],
-        rows: rows as PlinkoRows,
+      const result = await playMutation.mutateAsync({ betAmount: amount, risk, rows });
+
+      if (!result.success || !result.bet) {
+        toast({ title: "Erro", description: result.error || "Erro ao fazer aposta", variant: "destructive" });
+        setIsDropping(false);
+        return;
+      }
+
+      const bet = result.bet;
+      setProvablyFairData({
+        serverSeedHash: bet.serverSeedHash,
+        serverSeed: bet.serverSeed,
+        clientSeed: bet.clientSeed,
+        nonce: bet.nonce,
       });
-      
-      if (result.error) {
-        setError(result.error);
-        return;
-      }
-      
-      const canAdd = incrementActiveBalls();
-      if (!canAdd) {
-        return;
-      }
-      
+
       const id = `ball_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const pathData = calculateBallPath(result.path || [], result.bucket);
-      
+      const positions = calculateBallPath(bet.path || [], bet.bucket);
+
       const ball: AnimatedBall = {
         id,
         x: CANVAS_WIDTH / 2,
-        y: 20,
-        targetY: 0,
+        y: 25,
         pathIndex: 0,
-        path: result.path || [],
-        bet: betAmount,
-        multiplier: result.multiplier,
-        winAmount: result.winAmount,
-        bucket: result.bucket,
+        positions,
+        bet: amount,
+        multiplier: bet.multiplier,
+        winAmount: bet.winAmount,
+        bucket: bet.bucket,
         completed: false,
       };
-      
-      (ball as any).positions = pathData.positions;
+
       animatedBallsRef.current.push(ball);
-      
+      setActiveBalls((prev) => prev + 1);
     } catch (err: any) {
-      setError(err.message || "Erro ao fazer aposta");
+      toast({ title: "Erro", description: err.message || "Erro de conexão", variant: "destructive" });
     } finally {
-      setPendingBets(prev => prev - 1);
-      queryClient.invalidateQueries({ queryKey: ["wallet"] });
+      setIsDropping(false);
     }
-  }, [money, betAmount, activeBalls, pendingBets, risk, rows, playPlinkoMutation, incrementActiveBalls, calculateBallPath, queryClient, setError]);
-  
+  }, [betAmount, balance, activeBalls, isDropping, risk, rows, playMutation, calculateBallPath, toast]);
+
   const recordBet = useCallback((bet: number, multiplier: number, winAmount: number) => {
     const profit = winAmount - bet;
     const record: BetHistory = {
@@ -314,160 +366,84 @@ export function Plinko2D() {
       bet,
       multiplier,
       profit,
+      timestamp: Date.now(),
     };
-    setBetHistory(prev => [record, ...prev].slice(0, 8));
+    setBetHistory((prev) => [record, ...prev].slice(0, 10));
   }, []);
-  
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    
+
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    
+
     const render = () => {
-      const now = Date.now();
-      
-      if (isAutoBetting && autoBetRemaining > 0 && now - lastDropRef.current > 600) {
-        if (money >= betAmount && activeBalls < 15 && pendingBets === 0) {
-          handleDropBall();
-          lastDropRef.current = now;
-          setAutoBetRemaining(prev => {
-            const newVal = prev - 1;
-            if (newVal <= 0) {
-              setIsAutoBetting(false);
-            }
-            return newVal;
-          });
-        }
-      }
-      
       const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
-      gradient.addColorStop(0, IN1BET_COLORS.background);
-      gradient.addColorStop(0.5, "#0f0c08");
-      gradient.addColorStop(1, IN1BET_COLORS.background);
+      gradient.addColorStop(0, "#0c0a09");
+      gradient.addColorStop(0.5, "#0f0d0c");
+      gradient.addColorStop(1, "#0c0a09");
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-      
-      particlesRef.current.forEach(particle => {
-        if (!isFinite(particle.x) || !isFinite(particle.y) || !isFinite(particle.size) || particle.size <= 0) {
-          particle.x = Math.random() * CANVAS_WIDTH;
-          particle.y = Math.random() * CANVAS_HEIGHT;
-          particle.size = Math.random() * 2 + 1;
-          particle.speed = Math.random() * 0.3 + 0.1;
-          particle.opacity = Math.random() * 0.4 + 0.1;
-          return;
-        }
-        particle.y -= particle.speed;
-        if (particle.y < 0) {
-          particle.y = CANVAS_HEIGHT;
-          particle.x = Math.random() * CANVAS_WIDTH;
-        }
-        ctx.fillStyle = `rgba(255, 165, 0, ${particle.opacity})`;
-        ctx.beginPath();
-        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-        ctx.fill();
-      });
-      
-      coinsRef.current.forEach(coin => {
-        if (!isFinite(coin.x) || !isFinite(coin.y) || !isFinite(coin.size) || coin.size <= 0) {
-          coin.x = Math.random() * CANVAS_WIDTH;
-          coin.y = Math.random() * CANVAS_HEIGHT;
-          coin.size = Math.random() * 8 + 6;
-          coin.speed = Math.random() * 0.2 + 0.1;
-          coin.rotation = 0;
-          coin.rotSpeed = (Math.random() - 0.5) * 0.02;
-          return;
-        }
-        
-        coin.y -= coin.speed;
-        coin.rotation += coin.rotSpeed;
-        if (coin.y < -coin.size) {
-          coin.y = CANVAS_HEIGHT + coin.size;
-          coin.x = Math.random() * CANVAS_WIDTH;
-        }
-        
-        ctx.save();
-        ctx.translate(coin.x, coin.y);
-        ctx.rotate(coin.rotation);
-        ctx.globalAlpha = 0.15;
-        
-        const safeSize = Math.max(coin.size, 1);
-        const coinGrad = ctx.createRadialGradient(-2, -2, 0, 0, 0, safeSize);
-        coinGrad.addColorStop(0, "#ffd700");
-        coinGrad.addColorStop(0.7, "#daa520");
-        coinGrad.addColorStop(1, "#b8860b");
-        ctx.fillStyle = coinGrad;
-        ctx.beginPath();
-        ctx.arc(0, 0, safeSize, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = "rgba(255, 255, 200, 0.8)";
-        ctx.font = `bold ${safeSize * 0.8}px Arial`;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("R$", 0, 0);
-        
-        ctx.restore();
-      });
-      
-      pins.current.forEach((pin) => {
+
+      pinsRef.current.forEach((pin) => {
         if (!isFinite(pin.x) || !isFinite(pin.y)) return;
-        ctx.shadowColor = IN1BET_COLORS.primary;
-        ctx.shadowBlur = 8;
+        ctx.shadowColor = "#ff6600";
+        ctx.shadowBlur = 6;
         const pinGrad = ctx.createRadialGradient(pin.x - 1, pin.y - 1, 0, pin.x, pin.y, PIN_RADIUS);
         pinGrad.addColorStop(0, "#ffffff");
-        pinGrad.addColorStop(0.3, IN1BET_COLORS.primary);
-        pinGrad.addColorStop(1, IN1BET_COLORS.secondary);
+        pinGrad.addColorStop(0.4, "#ff8833");
+        pinGrad.addColorStop(1, "#cc5500");
         ctx.fillStyle = pinGrad;
         ctx.beginPath();
         ctx.arc(pin.x, pin.y, PIN_RADIUS, 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
       });
-      
+
       for (let i = 0; i < numSlots; i++) {
         const x = i * slotWidth;
-        const y = CANVAS_HEIGHT - 50;
+        const y = CANVAS_HEIGHT - 55;
         const isHit = lastHitSlot === i;
-        
-        ctx.shadowColor = slotColors[i];
-        ctx.shadowBlur = isHit ? 25 : 12;
-        
-        const slotGrad = ctx.createLinearGradient(x, y, x, y + 45);
-        slotGrad.addColorStop(0, isHit ? "#ffffff" : slotColors[i]);
-        slotGrad.addColorStop(0.5, slotColors[i]);
+        const color = getSlotColor(multipliers[i]);
+
+        ctx.shadowColor = color;
+        ctx.shadowBlur = isHit ? 20 : 8;
+
+        const slotGrad = ctx.createLinearGradient(x, y, x, y + 50);
+        slotGrad.addColorStop(0, isHit ? "#ffffff" : color);
+        slotGrad.addColorStop(0.6, color);
         slotGrad.addColorStop(1, "#000000");
         ctx.fillStyle = slotGrad;
-        
+
         ctx.beginPath();
-        ctx.roundRect(x + 2, y, slotWidth - 4, 45, [0, 0, 8, 8]);
+        ctx.roundRect(x + 1.5, y, slotWidth - 3, 50, [0, 0, 6, 6]);
         ctx.fill();
         ctx.shadowBlur = 0;
-        
+
         ctx.fillStyle = isHit ? "#000000" : "#ffffff";
-        ctx.font = `bold ${isMobile ? "10px" : "11px"} Inter, Arial`;
+        ctx.font = `bold ${numSlots > 13 ? "9px" : "11px"} Inter, system-ui, sans-serif`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(`${multipliers[i]}x`, x + slotWidth / 2, y + 22);
+        ctx.fillText(`${multipliers[i]}x`, x + slotWidth / 2, y + 25);
       }
-      
+
       for (let i = animatedBallsRef.current.length - 1; i >= 0; i--) {
         const ball = animatedBallsRef.current[i];
-        const positions = (ball as any).positions as {x: number, y: number}[];
-        
+        const positions = ball.positions;
+
         if (!positions || positions.length === 0) {
           animatedBallsRef.current.splice(i, 1);
-          decrementActiveBalls();
+          setActiveBalls((prev) => Math.max(0, prev - 1));
           continue;
         }
-        
+
         if (!isFinite(ball.x) || !isFinite(ball.y)) {
           ball.x = CANVAS_WIDTH / 2;
-          ball.y = 20;
+          ball.y = 25;
           ball.pathIndex = 0;
         }
-        
+
         if (ball.pathIndex < positions.length) {
           const target = positions[ball.pathIndex];
           if (!target || !isFinite(target.x) || !isFinite(target.y)) {
@@ -477,8 +453,8 @@ export function Plinko2D() {
           const dx = target.x - ball.x;
           const dy = target.y - ball.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          
-          const speed = 4;
+
+          const speed = 5;
           if (isFinite(dist) && dist > speed) {
             ball.x += (dx / dist) * speed;
             ball.y += (dy / dist) * speed;
@@ -488,51 +464,54 @@ export function Plinko2D() {
             ball.pathIndex++;
           }
         }
-        
+
         const safeX = isFinite(ball.x) ? ball.x : CANVAS_WIDTH / 2;
-        const safeY = isFinite(ball.y) ? ball.y : 20;
-        
-        const nearHighValue = ball.multiplier >= 5;
-        const highValueIntensity = Math.min(1, (ball.multiplier || 1) / 25);
-        
-        ctx.shadowColor = nearHighValue ? "#ffd700" : "#ffcc00";
-        ctx.shadowBlur = nearHighValue ? 20 + highValueIntensity * 15 : 14;
+        const safeY = isFinite(ball.y) ? ball.y : 25;
+
+        const isHighValue = ball.multiplier >= 5;
+
+        ctx.shadowColor = isHighValue ? "#ffd700" : "#ffcc00";
+        ctx.shadowBlur = isHighValue ? 18 : 12;
         const ballGrad = ctx.createRadialGradient(safeX - 2, safeY - 2, 0, safeX, safeY, BALL_RADIUS);
-        ballGrad.addColorStop(0, nearHighValue ? "#ffffee" : "#fffacd");
-        ballGrad.addColorStop(0.5, nearHighValue ? "#ffe44d" : "#ffd700");
-        ballGrad.addColorStop(1, nearHighValue ? "#daa520" : "#b8860b");
+        ballGrad.addColorStop(0, isHighValue ? "#ffffee" : "#fffacd");
+        ballGrad.addColorStop(0.5, isHighValue ? "#ffe44d" : "#ffd700");
+        ballGrad.addColorStop(1, isHighValue ? "#daa520" : "#b8860b");
         ctx.fillStyle = ballGrad;
         ctx.beginPath();
-        ctx.arc(safeX, safeY, BALL_RADIUS + (nearHighValue ? highValueIntensity * 2 : 0), 0, Math.PI * 2);
+        ctx.arc(safeX, safeY, BALL_RADIUS + (isHighValue ? 1 : 0), 0, Math.PI * 2);
         ctx.fill();
         ctx.shadowBlur = 0;
-        
-        if (ball.pathIndex >= positions.length) {
+
+        if (ball.pathIndex >= positions.length && !ball.completed) {
+          ball.completed = true;
           setLastHitSlot(ball.bucket);
-          setTimeout(() => setLastHitSlot(null), 300);
-          
-          const isJackpot = ball.multiplier >= 10;
-          setLastWin(ball.winAmount, isJackpot);
+          setTimeout(() => setLastHitSlot(null), 350);
+
+          if (ball.multiplier >= 10) {
+            setBigWinAmount(ball.winAmount);
+            setShowBigWin(true);
+            setTimeout(() => setShowBigWin(false), 3000);
+          }
+
           recordBet(ball.bet, ball.multiplier, ball.winAmount);
-          decrementActiveBalls();
-          
+          setActiveBalls((prev) => Math.max(0, prev - 1));
           animatedBallsRef.current.splice(i, 1);
         }
       }
-      
+
       animationRef.current = requestAnimationFrame(render);
     };
-    
+
     render();
-    
+
     return () => {
       cancelAnimationFrame(animationRef.current);
     };
-  }, [isAutoBetting, autoBetRemaining, money, betAmount, activeBalls, pendingBets, handleDropBall, setLastWin, decrementActiveBalls, rows, risk, multipliers, slotColors, numSlots, slotWidth, recordBet, isMobile, lastHitSlot]);
-  
+  }, [multipliers, numSlots, slotWidth, recordBet, lastHitSlot]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space") {
+      if (e.code === "Space" && !e.repeat) {
         e.preventDefault();
         handleDropBall();
       }
@@ -540,391 +519,240 @@ export function Plinko2D() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleDropBall]);
-  
-  const canDrop = money >= betAmount && activeBalls < 15 && pendingBets === 0;
 
-  const mobileCanvasScale = isMobile ? Math.min((window.innerWidth - 20) / CANVAS_WIDTH, 0.65) : 1;
-  
+  const adjustBet = (type: "half" | "double" | "max") => {
+    const current = parseFloat(betAmount) || 10;
+    if (type === "half") setBetAmount(Math.max(1, current / 2).toFixed(2));
+    if (type === "double") setBetAmount(Math.min(balance, current * 2).toFixed(2));
+    if (type === "max") setBetAmount(balance.toFixed(2));
+  };
+
+  const canDrop = balance >= parseFloat(betAmount || "0") && activeBalls < 10 && !isDropping;
+
   return (
-    <div style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: isMobile ? "flex-start" : "flex-start",
-      padding: isMobile ? "8px" : "16px",
-      fontFamily: "'Inter', -apple-system, sans-serif",
-    }}>
-      <div style={{
-        display: "flex",
-        flexDirection: isMobile ? "column" : "row",
-        gap: isMobile ? "8px" : "16px",
-        maxWidth: isMobile ? "100%" : "900px",
-        width: "100%",
-      }}>
-        <div style={{
-          background: IN1BET_COLORS.surface,
-          borderRadius: isMobile ? "8px" : "12px",
-          padding: isMobile ? "6px" : "10px",
-          flex: "0 0 auto",
-          border: `1px solid ${IN1BET_COLORS.surfaceLight}`,
-          alignSelf: isMobile ? "center" : "auto",
-        }}>
-          <div style={{
-            background: IN1BET_COLORS.background,
-            borderRadius: isMobile ? "6px" : "10px",
-            padding: isMobile ? "4px" : "8px",
-          }}>
-            <canvas
-              ref={canvasRef}
-              width={CANVAS_WIDTH}
-              height={CANVAS_HEIGHT}
-              style={{
-                width: `${CANVAS_WIDTH * mobileCanvasScale}px`,
-                height: `${CANVAS_HEIGHT * mobileCanvasScale}px`,
-                display: "block",
-                borderRadius: "8px",
-              }}
-            />
+    <div className="w-full max-w-[1400px] mx-auto px-4 py-4 space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-bold text-white tracking-tight">Plinko</h1>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10 bg-white/[0.03]">
+            <Wallet className="w-4 h-4 text-green-500" />
+            <span className="text-green-500 font-bold text-sm">R$</span>
+            <span className="font-bold text-white">
+              {balance.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
           </div>
-        </div>
-
-        <div style={{
-          background: IN1BET_COLORS.surface,
-          borderRadius: isMobile ? "8px" : "12px",
-          padding: isMobile ? "10px" : "16px",
-          flex: "1",
-          minWidth: isMobile ? "auto" : "280px",
-          maxWidth: isMobile ? "100%" : "320px",
-          border: `1px solid ${IN1BET_COLORS.surfaceLight}`,
-        }}>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "10px",
-            marginBottom: isMobile ? "10px" : "16px",
-          }}>
-            <div style={{
-              background: IN1BET_COLORS.surfaceLight,
-              padding: isMobile ? "10px" : "12px",
-              borderRadius: "8px",
-              textAlign: "center",
-            }}>
-              <div style={{ color: IN1BET_COLORS.textMuted, fontSize: isMobile ? "10px" : "11px", marginBottom: "4px" }}>SALDO</div>
-              <div style={{ color: IN1BET_COLORS.primary, fontSize: isMobile ? "16px" : "18px", fontWeight: "bold" }}>
-                R$ {money.toFixed(2)}
-              </div>
-            </div>
-            <div style={{
-              background: IN1BET_COLORS.surfaceLight,
-              padding: isMobile ? "10px" : "12px",
-              borderRadius: "8px",
-              textAlign: "center",
-            }}>
-              <div style={{ color: IN1BET_COLORS.textMuted, fontSize: isMobile ? "10px" : "11px", marginBottom: "4px" }}>ÚLTIMO GANHO</div>
-              <div style={{ 
-                color: (lastWin || 0) > 0 ? IN1BET_COLORS.accent : IN1BET_COLORS.textMuted, 
-                fontSize: isMobile ? "16px" : "18px", 
-                fontWeight: "bold" 
-              }}>
-                R$ {(lastWin || 0).toFixed(2)}
-              </div>
-            </div>
-          </div>
-
-          {error && (
-            <div style={{
-              background: IN1BET_COLORS.danger,
-              color: "#fff",
-              padding: "8px 12px",
-              borderRadius: "6px",
-              marginBottom: "12px",
-              fontSize: "12px",
-              textAlign: "center",
-            }}>
-              {error}
-            </div>
-          )}
-          
-          <div style={{ marginBottom: isMobile ? "10px" : "14px" }}>
-            <div style={{ color: IN1BET_COLORS.textMuted, fontSize: isMobile ? "11px" : "10px", marginBottom: "6px" }}>VALOR DA APOSTA</div>
-            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-              <button
-                onClick={() => setBetAmount(Math.max(0.10, betAmount / 2))}
-                style={{
-                  padding: isMobile ? "10px 14px" : "8px 12px",
-                  background: IN1BET_COLORS.surfaceLight,
-                  border: "none",
-                  borderRadius: "6px",
-                  color: IN1BET_COLORS.text,
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  fontSize: isMobile ? "14px" : "12px",
-                }}
-              >
-                ½
-              </button>
-              <input
-                type="number"
-                value={betAmount}
-                onChange={(e) => setBetAmount(parseFloat(e.target.value) || 0.10)}
-                style={{
-                  flex: 1,
-                  padding: isMobile ? "10px" : "8px",
-                  background: IN1BET_COLORS.background,
-                  border: `1px solid ${IN1BET_COLORS.surfaceLight}`,
-                  borderRadius: "6px",
-                  color: IN1BET_COLORS.text,
-                  textAlign: "center",
-                  fontSize: isMobile ? "16px" : "14px",
-                  fontWeight: "bold",
-                }}
-                min="0.10"
-                step="0.10"
-              />
-              <button
-                onClick={() => setBetAmount(Math.min(1000, betAmount * 2))}
-                style={{
-                  padding: isMobile ? "10px 14px" : "8px 12px",
-                  background: IN1BET_COLORS.surfaceLight,
-                  border: "none",
-                  borderRadius: "6px",
-                  color: IN1BET_COLORS.text,
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                  fontSize: isMobile ? "14px" : "12px",
-                }}
-              >
-                2×
-              </button>
-            </div>
-          </div>
-          
-          <div style={{ marginBottom: isMobile ? "10px" : "14px" }}>
-            <div style={{ color: IN1BET_COLORS.textMuted, fontSize: isMobile ? "11px" : "10px", marginBottom: "6px" }}>RISCO</div>
-            <div style={{ display: "flex", gap: isMobile ? "6px" : "4px" }}>
-              {(["low", "medium", "high"] as RiskLevel[]).map(r => (
-                <button
-                  key={r}
-                  onClick={() => setRisk(r)}
-                  style={{
-                    flex: 1,
-                    padding: isMobile ? "10px 8px" : "6px",
-                    borderRadius: "4px",
-                    border: "none",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                    fontSize: isMobile ? "12px" : "9px",
-                    textTransform: "uppercase",
-                    background: risk === r ? (r === "low" ? IN1BET_COLORS.primary : r === "medium" ? IN1BET_COLORS.accent : IN1BET_COLORS.danger) : IN1BET_COLORS.surface,
-                    color: risk === r ? "#000" : IN1BET_COLORS.textMuted,
-                  }}
-                >
-                  {r === "low" ? "BAIXO" : r === "medium" ? "MÉDIO" : "ALTO"}
-                </button>
-              ))}
-            </div>
-            <div style={{ color: IN1BET_COLORS.textMuted, fontSize: isMobile ? "11px" : "10px", marginBottom: "6px", marginTop: "10px" }}>LINHAS</div>
-            <div style={{ display: "flex", gap: isMobile ? "6px" : "4px" }}>
-              {ROWS_OPTIONS.map(r => (
-                <button
-                  key={r}
-                  onClick={() => setRows(r)}
-                  style={{
-                    flex: 1,
-                    padding: isMobile ? "10px 8px" : "6px",
-                    borderRadius: "4px",
-                    border: "none",
-                    cursor: "pointer",
-                    fontWeight: "bold",
-                    fontSize: isMobile ? "13px" : "11px",
-                    background: rows === r ? IN1BET_COLORS.primary : IN1BET_COLORS.surface,
-                    color: rows === r ? "#000" : IN1BET_COLORS.textMuted,
-                  }}
-                >
-                  {r}
-                </button>
-              ))}
-            </div>
-          </div>
-          
-          <button
-            onClick={handleDropBall}
-            disabled={!canDrop || playPlinkoMutation.isPending}
-            style={{
-              width: "100%",
-              padding: isMobile ? "14px" : "12px",
-              background: canDrop && !playPlinkoMutation.isPending
-                ? `linear-gradient(135deg, ${IN1BET_COLORS.primary}, ${IN1BET_COLORS.secondary})`
-                : IN1BET_COLORS.surfaceLight,
-              border: "none",
-              borderRadius: "8px",
-              color: canDrop && !playPlinkoMutation.isPending ? "#fff" : IN1BET_COLORS.textMuted,
-              fontSize: isMobile ? "16px" : "14px",
-              fontWeight: "bold",
-              cursor: canDrop && !playPlinkoMutation.isPending ? "pointer" : "not-allowed",
-              marginBottom: isMobile ? "10px" : "12px",
-              boxShadow: canDrop && !playPlinkoMutation.isPending ? `0 4px 15px ${IN1BET_COLORS.primary}40` : "none",
-            }}
+          <ProvablyFairModal data={provablyFairData} />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsMuted(!isMuted)}
+            className="text-muted-foreground hover:text-white"
           >
-            {playPlinkoMutation.isPending ? "APOSTANDO..." : "APOSTAR"}
-          </button>
-          
-          <div style={{ 
-            display: "flex", 
-            gap: "8px", 
-            marginBottom: isMobile ? "10px" : "12px",
-            flexDirection: isMobile ? "column" : "row",
-          }}>
-            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: "6px" }}>
-              <span style={{ color: IN1BET_COLORS.textMuted, fontSize: isMobile ? "11px" : "10px" }}>APOSTA AUTO</span>
-              <input
-                type="number"
-                value={autoBetCount}
-                onChange={(e) => setAutoBetCount(Math.max(1, parseInt(e.target.value) || 1))}
-                style={{
-                  width: "50px",
-                  padding: "4px",
-                  background: IN1BET_COLORS.background,
-                  border: `1px solid ${IN1BET_COLORS.surfaceLight}`,
-                  borderRadius: "4px",
-                  color: IN1BET_COLORS.text,
-                  textAlign: "center",
-                  fontSize: isMobile ? "14px" : "12px",
-                }}
-                min="1"
-              />
-            </div>
-            <button
-              onClick={() => {
-                if (isAutoBetting) {
-                  setIsAutoBetting(false);
-                  setAutoBetRemaining(0);
-                } else {
-                  setIsAutoBetting(true);
-                  setAutoBetRemaining(autoBetCount);
-                }
-              }}
-              style={{
-                flex: 1,
-                padding: isMobile ? "10px" : "8px",
-                background: isAutoBetting ? IN1BET_COLORS.danger : IN1BET_COLORS.surfaceLight,
-                border: "none",
-                borderRadius: "6px",
-                color: IN1BET_COLORS.text,
-                cursor: "pointer",
-                fontWeight: "bold",
-                fontSize: isMobile ? "12px" : "11px",
-              }}
-            >
-              {isAutoBetting ? `PARAR (${autoBetRemaining})` : "INICIAR"}
-            </button>
-          </div>
-
-          <div style={{
-            background: IN1BET_COLORS.background,
-            borderRadius: "8px",
-            padding: isMobile ? "8px" : "10px",
-            maxHeight: isMobile ? "120px" : "180px",
-            overflowY: "auto",
-          }}>
-            <div style={{ 
-              color: IN1BET_COLORS.textMuted, 
-              fontSize: isMobile ? "10px" : "9px", 
-              marginBottom: "8px",
-              textTransform: "uppercase",
-              letterSpacing: "1px",
-            }}>
-              HISTÓRICO
-            </div>
-            {betHistory.length === 0 ? (
-              <div style={{ color: IN1BET_COLORS.textMuted, fontSize: isMobile ? "11px" : "10px", textAlign: "center", padding: "10px" }}>
-                Nenhuma aposta ainda
-              </div>
-            ) : (
-              betHistory.map((bet) => (
-                <div
-                  key={bet.id}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "6px 0",
-                    borderBottom: `1px solid ${IN1BET_COLORS.surfaceLight}`,
-                    fontSize: isMobile ? "11px" : "10px",
-                  }}
-                >
-                  <span style={{ color: IN1BET_COLORS.textMuted }}>R$ {bet.bet.toFixed(2)}</span>
-                  <span style={{ 
-                    color: bet.multiplier >= 2 ? IN1BET_COLORS.accent : IN1BET_COLORS.primary,
-                    fontWeight: "bold",
-                  }}>
-                    {bet.multiplier}×
-                  </span>
-                  <span style={{ 
-                    color: bet.profit >= 0 ? IN1BET_COLORS.accent : IN1BET_COLORS.danger,
-                    fontWeight: "bold",
-                  }}>
-                    {bet.profit >= 0 ? "+" : ""}R$ {bet.profit.toFixed(2)}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-          
-          <button
-            onClick={resetGame}
-            style={{
-              width: "100%",
-              padding: isMobile ? "10px" : "8px",
-              background: "transparent",
-              border: `1px solid ${IN1BET_COLORS.surfaceLight}`,
-              borderRadius: "6px",
-              color: IN1BET_COLORS.textMuted,
-              cursor: "pointer",
-              fontSize: isMobile ? "11px" : "10px",
-              marginTop: isMobile ? "8px" : "10px",
-            }}
-          >
-            Resetar
-          </button>
+            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          </Button>
         </div>
       </div>
-      
-      {showBigWin && (
-        <div style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: "rgba(0, 0, 0, 0.8)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 1000,
-          animation: "fadeIn 0.3s ease-out",
-        }}>
-          <div style={{
-            textAlign: "center",
-            animation: "scaleIn 0.5s ease-out",
-          }}>
-            <div style={{
-              fontSize: isMobile ? "36px" : "48px",
-              fontWeight: "bold",
-              color: IN1BET_COLORS.accent,
-              textShadow: `0 0 30px ${IN1BET_COLORS.accent}`,
-              marginBottom: "10px",
-            }}>
-              JACKPOT!
-            </div>
-            <div style={{
-              fontSize: isMobile ? "28px" : "36px",
-              fontWeight: "bold",
-              color: IN1BET_COLORS.text,
-            }}>
-              R$ {lastWin.toFixed(2)}
+
+      <div className="flex flex-col lg:flex-row gap-4">
+        <div className="w-full lg:w-72 bg-card rounded-2xl p-4 flex flex-col gap-4 border border-white/5 shrink-0 order-2 lg:order-1">
+          <div className="space-y-2">
+            <Label className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Valor da Aposta</Label>
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-xs">R$</div>
+              <Input
+                type="number"
+                value={betAmount}
+                onChange={(e) => setBetAmount(e.target.value)}
+                className="pl-8 bg-black/40 border-white/5 text-white font-mono h-10 text-sm focus-visible:ring-primary focus-visible:border-primary"
+                min="1"
+                step="0.01"
+              />
+              <div className="absolute right-1 top-1/2 -translate-y-1/2 flex gap-1">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => adjustBet("half")}
+                  className="h-7 px-2 text-xs text-muted-foreground hover:text-white"
+                >
+                  ½
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => adjustBet("double")}
+                  className="h-7 px-2 text-xs text-muted-foreground hover:text-white"
+                >
+                  2x
+                </Button>
+              </div>
             </div>
           </div>
+
+          <div className="space-y-2">
+            <Label className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Risco</Label>
+            <div className="relative">
+              <Button
+                variant="outline"
+                className="w-full justify-between bg-black/40 border-white/5 text-white h-10"
+                onClick={() => setRiskOpen(!riskOpen)}
+              >
+                <span className={RISK_COLORS[risk]}>{RISK_LABELS[risk]}</span>
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              </Button>
+              {riskOpen && (
+                <div className="absolute z-10 w-full mt-1 bg-card border border-white/10 rounded-lg shadow-xl overflow-hidden">
+                  {(["LOW", "MEDIUM", "HIGH"] as RiskLevel[]).map((r) => (
+                    <button
+                      key={r}
+                      className={cn(
+                        "w-full px-4 py-2.5 text-left text-sm hover:bg-white/5 transition-colors",
+                        risk === r ? "bg-white/10" : ""
+                      )}
+                      onClick={() => {
+                        setRisk(r);
+                        setRiskOpen(false);
+                      }}
+                    >
+                      <span className={RISK_COLORS[r]}>{RISK_LABELS[r]}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Linhas</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {([8, 12, 16] as RowsOption[]).map((r) => (
+                <Button
+                  key={r}
+                  variant={rows === r ? "default" : "outline"}
+                  size="sm"
+                  className={cn(
+                    "h-9 text-sm font-bold",
+                    rows === r
+                      ? "bg-primary text-primary-foreground"
+                      : "border-white/10 bg-black/40 text-white/70 hover:bg-white/10 hover:text-white"
+                  )}
+                  onClick={() => setRows(r)}
+                >
+                  {r}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <Button
+            onClick={handleDropBall}
+            disabled={!canDrop}
+            className={cn(
+              "w-full h-12 text-base font-bold rounded-xl transition-all",
+              canDrop
+                ? "bg-gradient-to-r from-primary to-orange-600 hover:from-primary/90 hover:to-orange-500 text-white shadow-lg shadow-primary/25"
+                : "bg-muted text-muted-foreground cursor-not-allowed"
+            )}
+          >
+            {isDropping ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <>Apostar</>
+            )}
+          </Button>
+
+          <p className="text-center text-[10px] text-muted-foreground">Pressione ESPAÇO para apostar rápido</p>
+
+          {betHistory.length > 0 && (
+            <div className="space-y-2 mt-2">
+              <Label className="text-muted-foreground text-[10px] font-medium uppercase tracking-wider">Histórico</Label>
+              <div className="space-y-1.5 max-h-[180px] overflow-y-auto">
+                {betHistory.map((h) => (
+                  <div
+                    key={h.id}
+                    className={cn(
+                      "flex items-center justify-between px-3 py-2 rounded-lg text-xs",
+                      h.profit >= 0 ? "bg-green-500/10 border border-green-500/20" : "bg-red-500/10 border border-red-500/20"
+                    )}
+                  >
+                    <span className="text-white/70">R$ {h.bet.toFixed(2)}</span>
+                    <span className={cn("font-bold", h.multiplier >= 2 ? "text-yellow-400" : "text-white")}>
+                      {h.multiplier}x
+                    </span>
+                    <span className={cn("font-bold", h.profit >= 0 ? "text-green-400" : "text-red-400")}>
+                      {h.profit >= 0 ? "+" : ""}R$ {h.profit.toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+        <div className="flex-1 order-1 lg:order-2">
+          <div className="bg-card rounded-2xl p-3 border border-white/5">
+            <div className="relative bg-gradient-to-b from-black/60 to-black/40 rounded-xl overflow-hidden">
+              <canvas
+                ref={canvasRef}
+                width={CANVAS_WIDTH}
+                height={CANVAS_HEIGHT}
+                className="w-full max-w-[480px] mx-auto block"
+                style={{ aspectRatio: `${CANVAS_WIDTH}/${CANVAS_HEIGHT}` }}
+              />
+
+              <AnimatePresence>
+                {showBigWin && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                  >
+                    <div className="text-center">
+                      <motion.div
+                        animate={{ scale: [1, 1.1, 1] }}
+                        transition={{ repeat: Infinity, duration: 0.5 }}
+                        className="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-yellow-400 drop-shadow-2xl"
+                      >
+                        BIG WIN!
+                      </motion.div>
+                      <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-3xl md:text-4xl font-bold text-green-400 mt-2"
+                      >
+                        R$ {bigWinAmount.toFixed(2)}
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-2">
+            {multipliers.map((m, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-bold text-center min-w-[40px] border",
+                  lastHitSlot === i ? "scale-110 shadow-lg" : "",
+                  m >= 10
+                    ? "bg-yellow-500/20 border-yellow-500/30 text-yellow-400"
+                    : m >= 2
+                    ? "bg-primary/20 border-primary/30 text-primary"
+                    : m >= 1
+                    ? "bg-green-500/20 border-green-500/30 text-green-400"
+                    : "bg-red-500/20 border-red-500/30 text-red-400"
+                )}
+                style={{ transition: "transform 0.2s, box-shadow 0.2s" }}
+              >
+                {m}x
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

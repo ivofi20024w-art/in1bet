@@ -1,11 +1,7 @@
-import React, { useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { LogIn } from "lucide-react";
 import { Plinko2D } from "@/components/plinko/Plinko2D";
-import { usePlinko } from "@/lib/stores/usePlinko";
 
 function LoginRequiredScreen() {
   return (
@@ -31,30 +27,12 @@ function LoginRequiredScreen() {
 }
 
 export default function Plinko() {
-  const { user, isAuthenticated } = useAuth();
-  const queryClient = useQueryClient();
-  const { setMoney, money } = usePlinko();
-  
-  const { data: walletData, refetch: refetchWallet } = useQuery({
-    queryKey: ["wallet"],
-    queryFn: async () => {
-      const res = await apiRequest("GET", "/api/wallet");
-      return res.json();
-    },
-    enabled: !!user,
-    refetchInterval: 3000,
-  });
-  
-  useEffect(() => {
-    if (walletData?.wallet?.balance) {
-      setMoney(parseFloat(walletData.wallet.balance));
-    }
-  }, [walletData, setMoney]);
-  
+  const { isAuthenticated } = useAuth();
+
   if (!isAuthenticated) {
     return <LoginRequiredScreen />;
   }
-  
+
   return (
     <MainLayout>
       <div className="w-full">
