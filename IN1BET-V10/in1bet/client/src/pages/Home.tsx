@@ -42,11 +42,72 @@ const ORIGINALS = [
 ];
 
 
-async function fetchPopularGames(): Promise<SlotsgatewayGame[]> {
-  const res = await fetch('/api/slotsgateway/games?type=video-slots&limit=12', { credentials: 'include' });
+const POPULAR_GLOBAL_IDS = [
+  '55b148e7-9a9e-4b00-a9dc-5c16e5b940f1', // Starburst
+  'ba3fb0de-75a1-409b-b5b8-5e11d5be5cbf', // Gonzo's Quest
+  '023a272f-d567-41d8-8360-77453eef5ad8', // Sweet Bonanza
+  '4e3c2716-40ed-4dff-8af8-add41c89b9f6', // Gates of Olympus
+  'b0fcd51d-be84-4009-9ab7-244c5a146aee', // Big Bass Bonanza
+  '525f378d-a2fc-4e52-b6e0-a0d71a702ffd', // Big Bass Splash
+  'a787a41a-2c3b-414f-a1ba-9a2622eaade7', // Big Bass Bonanza Megaways
+  '8c3d2320-3700-42ce-98b3-6d6705eef8c3', // Fortune Tiger
+  '5f550215-bf18-4ab6-a97c-f6888cc1d9c6', // Wanted Dead or A Wild
+  '4fc2e0fc-6607-4009-b6e2-71c7a41d57f5', // Sweet Bonanza 1000
+];
+
+const PRAGMATIC_POPULAR_IDS = [
+  '023a272f-d567-41d8-8360-77453eef5ad8', // Sweet Bonanza
+  '4e3c2716-40ed-4dff-8af8-add41c89b9f6', // Gates of Olympus
+  'b0fcd51d-be84-4009-9ab7-244c5a146aee', // Big Bass Bonanza
+  'a4997782-0027-4c4a-9dec-8553d39fd134', // Sugar Rush
+  'cc9d349c-d3fa-496f-b5a1-9ccf66705a24', // Sugar Rush 1000
+  '57d384ea-8e96-4619-89d7-20cdaa8c1876', // Wolf Gold
+  '48e89ac6-9c45-45bd-a493-08927efdba11', // The Dog House Megaways
+  'af024e31-86a2-488a-b03e-f3e5fb2a08c6', // John Hunter and the Tomb of the Scarab Queen
+  '317a8a23-9381-41cd-b27c-a786a4b8826a', // Wild West Gold
+  'c2bfd0b6-4ffd-41f9-abb8-a216a09f616d', // Buffalo King Megaways
+];
+
+const PGSOFT_POPULAR_IDS = [
+  '8c3d2320-3700-42ce-98b3-6d6705eef8c3', // Fortune Tiger
+  '9c0c5194-32b1-4972-b5e9-720eab3f6293', // Fortune Dragon
+  'db69cd76-6482-4089-9425-b9f52dcc6d2c', // Fortune Rabbit
+  '85c2ad4e-5fa2-4b9d-9b25-1a6143767d12', // Fortune Ox
+  'e9b4db5c-323c-4bf2-a34f-6815b2f5399c', // Fortune Snake
+  'a40c9742-43a4-406a-89ab-39973f0a9b44', // Buffalo Win
+  '6b474eec-8a7f-4e11-a6b6-d34831f3bb2f', // The Great Icescape
+  'f7498818-5619-4d26-a801-790003673191', // Double Fortune
+  'b7db4fbe-0c1e-4f8c-a241-dd33a1593896', // Wild Bandito
+];
+
+const HACKSAW_POPULAR_IDS = [
+  'b881f3f6-4a91-4a5e-84db-3bffd3cbb5e4', // Chaos Crew 2
+  '5f550215-bf18-4ab6-a97c-f6888cc1d9c6', // Wanted Dead or A Wild
+  'bfa70dd9-c68f-4407-af49-86c730409967', // RIP City
+  '1cf7f923-62fa-4c66-b7e1-e9264b8c6273', // 2 Wild 2 Die
+  'c12d5d5d-e140-40e5-be72-d38e143973b0', // Fire my Laser
+  '55f5371e-6ed7-4a50-b8df-8d5743475c7a', // Beam Boys
+  '0c2b9bff-cb51-42cd-bcc1-b1a4ff664956', // Evil Eyes
+  '9dfd4240-4bea-42b8-9c8d-c6fadb647e18', // Donut Division
+  '13da909f-f758-4a80-88ad-02d253cad003', // Stormforged
+  '606b7494-942f-4b0d-b291-b7bcc67401af', // Cash Compass
+];
+
+async function fetchGamesByIds(ids: string[]): Promise<SlotsgatewayGame[]> {
+  const res = await fetch('/api/slotsgateway/games?limit=500', { credentials: 'include' });
   const data = await res.json();
-  if (!data.success) return [];
-  return data.data || [];
+  if (!data.success || !data.data) return [];
+  
+  const allGames = data.data as SlotsgatewayGame[];
+  const gameMap = new Map(allGames.map(g => [g.id, g]));
+  
+  return ids
+    .map(id => gameMap.get(id))
+    .filter((g): g is SlotsgatewayGame => g !== undefined);
+}
+
+async function fetchPopularGames(): Promise<SlotsgatewayGame[]> {
+  return fetchGamesByIds(POPULAR_GLOBAL_IDS);
 }
 
 const PROVIDER_IDS: Record<string, string> = {
@@ -55,7 +116,18 @@ const PROVIDER_IDS: Record<string, string> = {
   hacksaw: 'dea8a3ee-942a-4922-a8f6-3cac56cbdea1',
 };
 
+const PROVIDER_POPULAR_IDS: Record<string, string[]> = {
+  pragmaticslots: PRAGMATIC_POPULAR_IDS,
+  pgsoft: PGSOFT_POPULAR_IDS,
+  hacksaw: HACKSAW_POPULAR_IDS,
+};
+
 async function fetchProviderGames(providerSlug: string): Promise<SlotsgatewayGame[]> {
+  const popularIds = PROVIDER_POPULAR_IDS[providerSlug];
+  if (popularIds && popularIds.length > 0) {
+    return fetchGamesByIds(popularIds);
+  }
+  
   const providerId = PROVIDER_IDS[providerSlug];
   if (!providerId) return [];
   const res = await fetch(`/api/slotsgateway/games?providerId=${providerId}&type=video-slots&limit=10`, { credentials: 'include' });
