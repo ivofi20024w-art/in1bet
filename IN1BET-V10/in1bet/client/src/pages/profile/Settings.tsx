@@ -60,7 +60,7 @@ interface UserSettings {
 
 export default function Settings() {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   const queryClient = useQueryClient();
   const [name, setName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
@@ -97,7 +97,16 @@ export default function Settings() {
   }, [customizationData]);
 
   const handleSaveCustomization = async () => {
-    if (!user || (user.level || 0) < 50) return;
+    if (!user || (user.level || 0) < 50) {
+      toast({ variant: "destructive", title: "Erro", description: "Você precisa ser nível 50+ para personalizar" });
+      return;
+    }
+    
+    const token = accessToken || auth.accessToken;
+    if (!token) {
+      toast({ variant: "destructive", title: "Erro", description: "Sessão expirada. Faça login novamente." });
+      return;
+    }
     
     setSavingCustomization(true);
     try {
@@ -105,7 +114,7 @@ export default function Settings() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           nameColor: selectedNameColor || null,
@@ -121,6 +130,7 @@ export default function Settings() {
         toast({ variant: "destructive", title: "Erro", description: data.error || "Falha ao salvar" });
       }
     } catch (error) {
+      console.error("[Settings] Error saving customization:", error);
       toast({ variant: "destructive", title: "Erro", description: "Falha ao salvar personalização" });
     } finally {
       setSavingCustomization(false);
