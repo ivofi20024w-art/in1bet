@@ -436,15 +436,18 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
             <TabsContent value="deposit" className="space-y-4 mt-0 animate-in slide-in-from-left-4 duration-300">
               {depositStep === 'input' && (
                 <>
-                  <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-[#32BCAD] flex items-center justify-center shrink-0">
-                      <svg viewBox="0 0 512 512" className="w-5 h-5" fill="white">
+                  <div className="bg-secondary/50 border border-white/10 rounded-xl p-4 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-black/50 flex items-center justify-center shrink-0 border border-white/5">
+                      <svg viewBox="0 0 512 512" className="w-7 h-7" fill="#32BCAD">
                         <path d="M112.57 391.19c20.056 0 38.928-7.808 53.12-22l76.693-76.692c5.385-5.404 14.765-5.384 20.15 0l76.989 76.989c14.191 14.172 33.045 21.98 53.12 21.98h15.098l-97.138 97.139c-30.326 30.344-79.505 30.344-109.85 0l-97.415-97.416h9.232zm280.068-271.096c-20.056 0-38.929 7.809-53.12 22l-76.97 76.99c-5.551 5.55-14.599 5.55-20.15 0l-76.711-76.693c-14.192-14.191-33.046-21.999-53.12-21.999h-9.234l97.416-97.416c30.344-30.344 79.523-30.344 109.867 0l97.138 97.138-15.116-.02zm-280.068 73.27c-12.287 0-23.861 4.782-32.56 13.463l-50.614 50.632c-17.957 17.957-17.957 47.071 0 65.028l50.614 50.596c8.7 8.7 20.273 13.5 32.56 13.5h9.234l-9.234 9.234c-42.622 42.622-42.622 111.794 0 154.416l9.234 9.234H112.57c-12.287 0-23.861-4.8-32.56-13.5l-50.614-50.596c-17.957-17.957-17.957-47.071 0-65.028l50.614-50.632c8.7-8.681 20.273-13.463 32.56-13.463h9.234l9.234-9.234-9.234-9.234c-42.622-42.622-42.622-111.794 0-154.416l-9.234 9.234v.02zm280.068 199.586c12.287 0 23.861-4.8 32.56-13.5l50.633-50.614c17.956-17.957 17.956-47.071 0-65.028l-50.633-50.632c-8.7-8.681-20.273-13.463-32.56-13.463h-15.098l15.098-15.098c42.622-42.622 42.622-111.794 0-154.416l-15.098-15.098h15.098c12.287 0 23.861 4.818 32.56 13.5l50.633 50.632c17.956 17.957 17.956 47.071 0 65.028l-50.633 50.614c-8.7 8.7-20.273 13.5-32.56 13.5h-15.098l15.098 15.098c42.622 42.622 42.622 111.794 0 154.416l15.098-15.098v.159z"/>
                       </svg>
                     </div>
                     <div>
-                      <p className="font-bold text-green-500 text-sm">PIX Instantâneo</p>
-                      <p className="text-xs text-muted-foreground">Aprovado em segundos, 24/7</p>
+                      <div className="flex items-center gap-2">
+                        <p className="font-bold text-white text-base">PIX</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">Depósitos e saques instantâneos.</p>
+                      <p className="text-xs text-muted-foreground">Disponível 24 horas, 7 dias por semana.</p>
                     </div>
                   </div>
 
