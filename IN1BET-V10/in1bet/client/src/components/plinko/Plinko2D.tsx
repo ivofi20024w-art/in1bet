@@ -331,6 +331,14 @@ export function Plinko2D() {
       ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
       
       particlesRef.current.forEach(particle => {
+        if (!isFinite(particle.x) || !isFinite(particle.y) || !isFinite(particle.size) || particle.size <= 0) {
+          particle.x = Math.random() * CANVAS_WIDTH;
+          particle.y = Math.random() * CANVAS_HEIGHT;
+          particle.size = Math.random() * 2 + 1;
+          particle.speed = Math.random() * 0.3 + 0.1;
+          particle.opacity = Math.random() * 0.4 + 0.1;
+          return;
+        }
         particle.y -= particle.speed;
         if (particle.y < 0) {
           particle.y = CANVAS_HEIGHT;
@@ -343,6 +351,16 @@ export function Plinko2D() {
       });
       
       coinsRef.current.forEach(coin => {
+        if (!isFinite(coin.x) || !isFinite(coin.y) || !isFinite(coin.size) || coin.size <= 0) {
+          coin.x = Math.random() * CANVAS_WIDTH;
+          coin.y = Math.random() * CANVAS_HEIGHT;
+          coin.size = Math.random() * 8 + 6;
+          coin.speed = Math.random() * 0.2 + 0.1;
+          coin.rotation = 0;
+          coin.rotSpeed = (Math.random() - 0.5) * 0.02;
+          return;
+        }
+        
         coin.y -= coin.speed;
         coin.rotation += coin.rotSpeed;
         if (coin.y < -coin.size) {
@@ -355,17 +373,18 @@ export function Plinko2D() {
         ctx.rotate(coin.rotation);
         ctx.globalAlpha = 0.15;
         
-        const coinGrad = ctx.createRadialGradient(-2, -2, 0, 0, 0, coin.size);
+        const safeSize = Math.max(coin.size, 1);
+        const coinGrad = ctx.createRadialGradient(-2, -2, 0, 0, 0, safeSize);
         coinGrad.addColorStop(0, "#ffd700");
         coinGrad.addColorStop(0.7, "#daa520");
         coinGrad.addColorStop(1, "#b8860b");
         ctx.fillStyle = coinGrad;
         ctx.beginPath();
-        ctx.arc(0, 0, coin.size, 0, Math.PI * 2);
+        ctx.arc(0, 0, safeSize, 0, Math.PI * 2);
         ctx.fill();
         
         ctx.fillStyle = "rgba(255, 255, 200, 0.8)";
-        ctx.font = `bold ${coin.size * 0.8}px Arial`;
+        ctx.font = `bold ${safeSize * 0.8}px Arial`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("R$", 0, 0);
