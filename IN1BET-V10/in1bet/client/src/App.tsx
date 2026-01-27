@@ -69,7 +69,6 @@ import AdminChat from "@/pages/admin/Chat";
 import AdminMissions from "@/pages/admin/Missions";
 import AuthModal from "@/components/auth/AuthModal";
 import { useEffect, useState } from "react";
-import { Loader } from "@/components/ui/Loader";
 import { useAuth } from "@/hooks/useAuth";
 import { useAuthModal } from "@/stores/authModalStore";
 import { SessionProvider } from "@/contexts/SessionContext";
@@ -139,34 +138,8 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
 }
 
 function Router() {
-  const [location] = useLocation();
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadType, setLoadType] = useState<"initial" | "page">("initial");
-
-  useEffect(() => {
-    // Initial load: 1-2 seconds, page transitions: 300-500ms
-    let minTime = 300;
-    let maxTime = 500;
-
-    if (loadType === "initial") {
-        minTime = 1000;
-        maxTime = 2000;
-    }
-
-    const duration = Math.floor(Math.random() * (maxTime - minTime + 1)) + minTime;
-
-    setIsLoading(true);
-    const timer = setTimeout(() => {
-        setIsLoading(false);
-        if (loadType === "initial") setLoadType("page");
-    }, duration);
-
-    return () => clearTimeout(timer);
-  }, [location]);
-
   return (
     <>
-      <Loader isLoading={isLoading} type={loadType} />
       <Switch>
         {/* Public Routes */}
         <Route path="/reset-password" component={ResetPassword} />
