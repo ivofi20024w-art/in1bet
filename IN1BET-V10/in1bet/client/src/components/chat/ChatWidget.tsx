@@ -1295,16 +1295,17 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
                 } : {}}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-[#13151C] to-transparent" />
-                <div className="absolute -bottom-10 left-4">
+                <div className="absolute -bottom-10 left-4 w-20 h-20">
                   {userStats?.user?.avatarUrl ? (
                     <img 
                       src={userStats.user.avatarUrl} 
                       alt={selectedUser.username}
-                      className="w-20 h-20 rounded-2xl object-cover shadow-xl border-4 border-[#13151C]"
+                      className="w-full h-full rounded-2xl object-cover shadow-xl border-4 border-[#13151C]"
+                      style={{ maxWidth: '80px', maxHeight: '80px' }}
                     />
                   ) : (
                     <div 
-                      className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold shadow-xl border-4 border-[#13151C]"
+                      className="w-full h-full rounded-2xl flex items-center justify-center text-3xl font-bold shadow-xl border-4 border-[#13151C]"
                       style={{ 
                         background: `linear-gradient(135deg, ${selectedUser.color}40, ${selectedUser.color}10)`,
                         color: selectedUser.color
