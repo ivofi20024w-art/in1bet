@@ -122,13 +122,13 @@ function DepositBannerSlide() {
     return (
         <div 
             onClick={handleClick}
-            className="relative h-[140px] md:h-[160px] cursor-pointer group"
+            className="relative h-auto md:h-[160px] cursor-pointer group"
             data-testid="carousel-deposit-banner"
         >
             <img 
                 src={depositBannerImage} 
                 alt="Deposite e ganhe bônus" 
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                className="w-full h-auto md:h-full object-contain md:object-cover transition-transform duration-300 group-hover:scale-[1.02]"
             />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
         </div>
