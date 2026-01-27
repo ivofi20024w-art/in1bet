@@ -465,3 +465,104 @@
   color: #e0ffff !important;
   animation: diamond 2s linear infinite;
 }
+
+/* ========== STAFF EFFECTS ========== */
+
+/* Admin Effect - Red glowing pulse */
+@keyframes adminGlow {
+  0%, 100% { 
+    text-shadow: 
+      0 0 5px #ff0000,
+      0 0 10px #ff3333,
+      0 0 20px #ff0000,
+      0 0 30px #cc0000;
+    filter: brightness(1);
+  }
+  50% { 
+    text-shadow: 
+      0 0 10px #ff0000,
+      0 0 20px #ff3333,
+      0 0 40px #ff0000,
+      0 0 60px #cc0000,
+      0 0 80px rgba(255, 0, 0, 0.5);
+    filter: brightness(1.2);
+  }
+}
+
+.effect-admin {
+  color: #ff3333 !important;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  animation: adminGlow 1.5s ease-in-out infinite;
+}
+
+/* Support Effect - Baby blue cloud float */
+@keyframes cloudFloat {
+  0%, 100% { 
+    text-shadow: 
+      0 0 8px #87ceeb,
+      0 0 16px #b0e0e6,
+      0 0 24px #add8e6,
+      2px 2px 8px rgba(135, 206, 235, 0.4);
+    transform: translateY(0);
+  }
+  25% { 
+    text-shadow: 
+      0 0 12px #87ceeb,
+      0 0 24px #b0e0e6,
+      0 0 32px #add8e6,
+      -2px -2px 12px rgba(135, 206, 235, 0.5);
+    transform: translateY(-1px);
+  }
+  50% { 
+    text-shadow: 
+      0 0 16px #87ceeb,
+      0 0 32px #b0e0e6,
+      0 0 48px #add8e6,
+      0 4px 16px rgba(135, 206, 235, 0.6);
+    transform: translateY(-2px);
+  }
+  75% { 
+    text-shadow: 
+      0 0 12px #87ceeb,
+      0 0 24px #b0e0e6,
+      0 0 32px #add8e6,
+      2px 2px 12px rgba(135, 206, 235, 0.5);
+    transform: translateY(-1px);
+  }
+}
+
+.effect-support {
+  display: inline-block;
+  color: #87ceeb !important;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: cloudFloat 3s ease-in-out infinite;
+}
+
+/* Staff Badge Container */
+.staff-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.staff-badge-admin {
+  background: linear-gradient(135deg, rgba(255, 0, 0, 0.2), rgba(139, 0, 0, 0.3));
+  border: 1px solid rgba(255, 0, 0, 0.4);
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.3), inset 0 0 10px rgba(255, 0, 0, 0.1);
+}
+
+.staff-badge-support {
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.2), rgba(176, 224, 230, 0.3));
+  border: 1px solid rgba(135, 206, 235, 0.4);
+  box-shadow: 0 0 10px rgba(135, 206, 235, 0.3), inset 0 0 10px rgba(135, 206, 235, 0.1);
+}

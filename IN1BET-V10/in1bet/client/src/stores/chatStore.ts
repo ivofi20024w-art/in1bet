@@ -62,8 +62,10 @@ interface ChatState {
   myVipLevel: string;
   myCustomization: ChatUserCustomization | null;
   isAdmin: boolean;
+  showStaffBadge: boolean;
   lastError: string | null;
   
+  setShowStaffBadge: (show: boolean) => void;
   connect: () => void;
   disconnect: () => void;
   logout: () => void;
@@ -102,6 +104,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   blockedUsers: [],
   myUserId: null,
   myUserName: null,
+  showStaffBadge: false,
   myRole: 'NONE',
   myLevel: 1,
   myVipLevel: 'bronze',
@@ -344,6 +347,10 @@ export const useChatStore = create<ChatState>((set, get) => ({
   
   reportMessage: (messageId: string, reason: string) => {
     console.log('[ChatStore] Report message:', messageId, reason);
+  },
+
+  setShowStaffBadge: (show: boolean) => {
+    set({ showStaffBadge: show });
   },
 }));
 

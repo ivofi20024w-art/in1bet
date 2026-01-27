@@ -615,29 +615,53 @@ function DraggableMessageItem({
                 "flex items-center gap-2 mb-0.5 flex-wrap",
                 currentUser.id === msg.user.id && "flex-row-reverse"
               )}>
-                <span 
-                  className={cn(
-                    "text-[13px] font-bold hover:underline cursor-pointer transition-colors",
-                    msg.user.customization?.nameColor ? NAME_COLORS[msg.user.customization.nameColor] : "",
-                    msg.user.customization?.nameEffect ? NAME_EFFECTS[msg.user.customization.nameEffect] : ""
-                  )}
-                  style={msg.user.customization?.nameColor ? undefined : { color: msg.user.color }}
-                  onClick={() => setSelectedUser(msg.user)}
-                >
-                  {msg.user.username}
-                </span>
+                {(() => {
+                  const isOwnMessage = currentUser?.id === msg.user.id;
+                  const shouldShowAsStaff = isOwnMessage && showStaffBadge && isStaff;
+                  const isAdminStaff = chatIsAdmin || chatMyRole === 'ADMIN';
+                  
+                  if (shouldShowAsStaff) {
+                    return (
+                      <span 
+                        className={cn(
+                          "staff-badge cursor-pointer",
+                          isAdminStaff ? "staff-badge-admin effect-admin" : "staff-badge-support effect-support"
+                        )}
+                        onClick={() => setSelectedUser(msg.user)}
+                      >
+                        {isAdminStaff ? 'ADMIN' : 'SUPORTE'}
+                      </span>
+                    );
+                  }
+                  
+                  return (
+                    <span 
+                      className={cn(
+                        "text-[13px] font-bold hover:underline cursor-pointer transition-colors",
+                        msg.user.customization?.nameColor ? NAME_COLORS[msg.user.customization.nameColor] : "",
+                        msg.user.customization?.nameEffect ? NAME_EFFECTS[msg.user.customization.nameEffect] : ""
+                      )}
+                      style={msg.user.customization?.nameColor ? undefined : { color: msg.user.color }}
+                      onClick={() => setSelectedUser(msg.user)}
+                    >
+                      {msg.user.username}
+                    </span>
+                  );
+                })()}
 
-                <div 
-                  className={cn(
-                    "px-1.5 py-0.5 rounded text-[9px] font-bold border flex items-center justify-center shadow-sm select-none cursor-help",
-                    getLevelStyle(msg.user.level)
-                  )}
-                  title={`Level ${msg.user.level}`}
-                >
-                  {msg.user.level}
-                </div>
+                {!(currentUser?.id === msg.user.id && showStaffBadge && isStaff) && (
+                  <div 
+                    className={cn(
+                      "px-1.5 py-0.5 rounded text-[9px] font-bold border flex items-center justify-center shadow-sm select-none cursor-help",
+                      getLevelStyle(msg.user.level)
+                    )}
+                    title={`Level ${msg.user.level}`}
+                  >
+                    {msg.user.level}
+                  </div>
+                )}
 
-                {getRankBadge(msg.user.rank, msg.user.role)}
+                {!(currentUser?.id === msg.user.id && showStaffBadge && isStaff) && getRankBadge(msg.user.rank, msg.user.role)}
                 
                 {showTimestamps && (
                   <span className="text-[10px] text-muted-foreground/30 font-mono ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
@@ -776,6 +800,9 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
   const chatMyLevel = useChatStore((s) => s.myLevel);
   const chatMyVipLevel = useChatStore((s) => s.myVipLevel);
   const chatIsAdmin = useChatStore((s) => s.isAdmin);
+  const showStaffBadge = useChatStore((s) => s.showStaffBadge);
+  const setShowStaffBadge = useChatStore((s) => s.setShowStaffBadge);
+  const isStaff = chatMyRole === 'ADMIN' || chatMyRole === 'CHAT_MODERATOR' || chatIsAdmin;
   const chatJoinRoom = useChatStore((s) => s.joinRoom);
   const chatSendMessage = useChatStore((s) => s.sendMessage);
   const chatAdminDeleteMessage = useChatStore((s) => s.adminDeleteMessage);
@@ -1622,10 +1649,28 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
         
         <div className="flex items-center justify-between mt-2 px-1">
           <div className="flex items-center gap-3">
-             {isAdmin && (
-               <button className="text-[10px] font-semibold text-muted-foreground hover:text-white transition-colors flex items-center gap-1">
-                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                 Admin
+             {isStaff && (
+               <button 
+                 onClick={() => setShowStaffBadge(!showStaffBadge)}
+                 className={cn(
+                   "text-[10px] font-bold transition-all flex items-center gap-1.5 px-2 py-1 rounded-md border",
+                   showStaffBadge 
+                     ? chatIsAdmin || chatMyRole === 'ADMIN'
+                       ? "bg-red-500/20 border-red-500/40 text-red-400 shadow-[0_0_8px_rgba(255,0,0,0.3)]"
+                       : "bg-sky-500/20 border-sky-500/40 text-sky-400 shadow-[0_0_8px_rgba(135,206,235,0.3)]"
+                     : "bg-white/5 border-white/10 text-muted-foreground hover:text-white hover:bg-white/10"
+                 )}
+               >
+                 <div className={cn(
+                   "w-2 h-2 rounded-full transition-all",
+                   showStaffBadge 
+                     ? chatIsAdmin || chatMyRole === 'ADMIN' ? "bg-red-500 animate-pulse" : "bg-sky-400 animate-pulse"
+                     : "bg-gray-500"
+                 )} />
+                 {chatIsAdmin || chatMyRole === 'ADMIN' ? 'ADMIN' : 'SUPORTE'}
+                 <span className="text-[8px] text-muted-foreground ml-1">
+                   {showStaffBadge ? 'ON' : 'OFF'}
+                 </span>
                </button>
              )}
              <button 
