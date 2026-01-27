@@ -456,32 +456,20 @@ export function Plinko2D() {
             ball.pathIndex++;
             continue;
           }
-          const dx = target.x - ball.x;
-          const dy = target.y - ball.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          const gravity = 0.35;
-          const friction = 0.98;
-          const bounce = 0.6;
           
-          ball.vy += gravity;
-          ball.vx *= friction;
-          ball.vy *= friction;
+          ball.progress += 0.08;
           
-          const baseSpeed = 3 + Math.min(ball.vy, 4);
-          
-          if (isFinite(dist) && dist > baseSpeed) {
-            const dirX = dx / dist;
-            const dirY = dy / dist;
-            ball.vx += dirX * 0.8;
-            ball.vy += dirY * 0.5;
-            ball.x += ball.vx;
-            ball.y += ball.vy;
-          } else {
-            ball.vx *= bounce * (Math.random() * 0.4 + 0.8);
+          if (ball.progress >= 1) {
             ball.x = target.x;
             ball.y = target.y;
             ball.pathIndex++;
+            ball.progress = 0;
+          } else {
+            const prevPos = ball.pathIndex > 0 ? positions[ball.pathIndex - 1] : { x: CANVAS_WIDTH / 2, y: 25 };
+            const t = ball.progress;
+            const easeT = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+            ball.x = prevPos.x + (target.x - prevPos.x) * easeT;
+            ball.y = prevPos.y + (target.y - prevPos.y) * easeT;
           }
         }
 
@@ -531,13 +519,17 @@ export function Plinko2D() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === "Space" && !e.repeat) {
+      if (e.code === "Space") {
         e.preventDefault();
-        handleDropBall();
+        e.stopPropagation();
+        if (!e.repeat) {
+          handleDropBall();
+        }
+        return false;
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown, { passive: false, capture: true });
+    return () => window.removeEventListener("keydown", handleKeyDown, { capture: true });
   }, [handleDropBall]);
 
   const adjustBet = (type: "half" | "double" | "max") => {
