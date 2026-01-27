@@ -92,21 +92,22 @@ export function GameSectionHeader({
           />
         </div>
         <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-heading font-bold leading-none">
-              {titleHighlight ? (
-                <>
-                  <span className={colors.text}>{titleHighlight}</span>
-                  <span className="text-white">{title}</span>
-                </>
-              ) : (
+          <h2 className="text-xl sm:text-2xl font-heading font-bold leading-none">
+            {titleHighlight ? (
+              <>
+                <span className={colors.text}>{titleHighlight}</span>
                 <span className="text-white">{title}</span>
-              )}
-            </h2>
+              </>
+            ) : (
+              <span className="text-white">{title}</span>
+            )}
+          </h2>
+          <div className="flex items-center gap-2 mt-0.5">
+            <p className="text-xs text-muted-foreground">{subtitle}</p>
             {gameCount !== undefined && gameCount > 0 && (
               <span
                 className={cn(
-                  "px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider",
+                  "px-2 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider hidden sm:inline-flex",
                   colors.bg,
                   colors.text,
                   "border",
@@ -117,7 +118,6 @@ export function GameSectionHeader({
               </span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
         </div>
       </div>
 
