@@ -107,19 +107,25 @@ function verifyWebhookSignature(req: Request): WebhookVerificationResult {
     "x-signature", 
     "signature",
     "x-webhook-signature",
+    "x-hmac-signature",
+    "authorization",
   ];
   
   let signature: string | undefined;
+  let foundHeader: string | undefined;
   for (const header of possibleHeaders) {
     const value = req.headers[header] as string;
     if (value) {
-      signature = value.replace(/^(Bearer |sha256=)/, "");
+      foundHeader = header;
+      signature = value.replace(/^(Bearer |sha256=|hmac=)/, "");
+      console.log(`[WEBHOOK] Found signature in header '${header}': ${signature.substring(0, 20)}...`);
       break;
     }
   }
   
   if (!signature) {
     console.error("[SECURITY] Webhook rejected: No signature header found");
+    console.log("[WEBHOOK] Available headers:", Object.keys(req.headers).join(", "));
     return { valid: false, error: "Missing signature header" };
   }
 
@@ -134,8 +140,11 @@ function verifyWebhookSignature(req: Request): WebhookVerificationResult {
     .update(rawBody)
     .digest("hex");
 
+  console.log(`[WEBHOOK] Received signature (${signature.length} chars): ${signature.substring(0, 20)}...`);
+  console.log(`[WEBHOOK] Expected signature (${expectedSignature.length} chars): ${expectedSignature.substring(0, 20)}...`);
+
   if (signature.length !== expectedSignature.length) {
-    console.error("[SECURITY] Webhook rejected: Signature length mismatch");
+    console.error(`[SECURITY] Webhook rejected: Signature length mismatch (received: ${signature.length}, expected: ${expectedSignature.length})`);
     return { valid: false, error: "Invalid signature" };
   }
 
@@ -146,10 +155,11 @@ function verifyWebhookSignature(req: Request): WebhookVerificationResult {
     );
     
     if (!isValid) {
-      console.error("[SECURITY] Webhook rejected: Signature verification failed");
+      console.error("[SECURITY] Webhook rejected: Signature verification failed (signatures don't match)");
       return { valid: false, error: "Invalid signature" };
     }
     
+    console.log("[WEBHOOK] Signature verified successfully!");
     return { valid: true };
   } catch (error) {
     console.error("[SECURITY] Webhook rejected: Signature verification error:", error);
@@ -159,23 +169,35 @@ function verifyWebhookSignature(req: Request): WebhookVerificationResult {
 
 router.post("/webhook/ondapay", webhookLimiter, async (req: Request, res: Response) => {
   try {
-    console.log("OndaPay webhook received:", JSON.stringify(req.body, null, 2));
+    console.log("=== ONDAPAY WEBHOOK START ===");
+    console.log("OndaPay webhook received at:", new Date().toISOString());
+    console.log("Headers:", JSON.stringify(req.headers, null, 2));
+    console.log("Body:", JSON.stringify(req.body, null, 2));
+    console.log("Raw body available:", !!(req as any).rawBody);
+    console.log("ONDAPAY_WEBHOOK_SECRET configured:", !!process.env.ONDAPAY_WEBHOOK_SECRET);
 
     const verificationResult = verifyWebhookSignature(req);
     if (!verificationResult.valid) {
       console.error("Webhook signature verification failed:", verificationResult.error);
+      console.log("=== ONDAPAY WEBHOOK END (REJECTED) ===");
       return res.status(401).json({ error: verificationResult.error || "Invalid signature" });
     }
 
+    console.log("Signature verified, processing payment...");
     const result = await processPixWebhook(req.body);
 
     if (result.success) {
+      console.log("Payment processed successfully:", result.message);
+      console.log("=== ONDAPAY WEBHOOK END (SUCCESS) ===");
       res.status(200).json({ received: true, message: result.message });
     } else {
+      console.error("Payment processing failed:", result.message);
+      console.log("=== ONDAPAY WEBHOOK END (FAILED) ===");
       res.status(400).json({ error: result.message });
     }
   } catch (error: any) {
     console.error("Error processing OndaPay webhook:", error);
+    console.log("=== ONDAPAY WEBHOOK END (ERROR) ===");
     res.status(500).json({ error: "Internal server error" });
   }
 });
