@@ -77,9 +77,8 @@ export function Header() {
     queryKey: ['user-level'],
     queryFn: async () => {
       const auth = getStoredAuth();
-      if (!auth.accessToken) return null;
+      if (!auth.isAuthenticated) return null;
       const res = await fetch('/api/levels/info', {
-        headers: { 'Authorization': `Bearer ${auth.accessToken}` },
         credentials: 'include',
       });
       if (!res.ok) return null;
@@ -106,7 +105,7 @@ export function Header() {
       setIsAuthenticated(auth.isAuthenticated);
       setUser(auth.user);
       
-      if (auth.isAuthenticated && auth.accessToken) {
+      if (auth.isAuthenticated) {
         const wallet = await getWallet();
         if (wallet) {
           setWalletBalance(wallet.balance);
@@ -163,12 +162,10 @@ export function Header() {
     setCurrentGameName(game.name);
     
     try {
-      const auth = getStoredAuth();
       const res = await fetch('/api/slotsgateway/launch', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
-          ...(auth.accessToken ? { 'Authorization': `Bearer ${auth.accessToken}` } : {}),
         },
         credentials: 'include',
         body: JSON.stringify({
