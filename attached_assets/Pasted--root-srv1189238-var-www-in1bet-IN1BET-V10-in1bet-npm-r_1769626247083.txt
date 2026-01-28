@@ -1,0 +1,64 @@
+
+root@srv1189238:/var/www/in1bet/IN1BET-V10/in1bet# npm run build                
+> rest-express@1.0.0 build
+> tsx script/build.ts
+
+building client...
+vite v7.3.1 building client environment for production...
+
+/grid.svg referenced in /grid.svg didn't resolve at build time, it will remain unchanged to be resolved at runtime
+✓ 3867 modules transformed.
+rendering chunks (1)...[meta-images] no Replit deployment domain found, skipping meta tag updates
+../dist/public/index.html                                                                        1.72 kB │ gzip:   0.72 kB
+../dist/public/assets/casino_banner_rodadas_gratis-BYhSEKqO.jpeg                               103.80 kB
+../dist/public/assets/tigre1_1767994256497-BFEWCRBD.jpeg                                       188.52 kB
+../dist/public/assets/vip_program_luxury_gold_and_black_card-DZGYVF9b.png                      978.86 kB
+../dist/public/assets/elegant_background_for_double_casino_game-CnbVPme-.png                   997.51 kB
+../dist/public/assets/gold-v3-6pl6luS9.png                                                   1,202.67 kB
+../dist/public/assets/weekly_cashback_promo_banner-op2QBMmx.png                              1,206.30 kB
+../dist/public/assets/casino_welcome_bonus_banner_with_neon_lights-BjKBecun.png              1,312.11 kB
+../dist/public/assets/mine-v4-D9XSWAvq.png                                                   1,313.97 kB
+../dist/public/assets/neon_plinko_game_background_with_pyramid_structure-Bw9HMUyl.png        1,376.16 kB
+../dist/public/assets/futuristic_neon_cityscape_background_for_crash_game-B3cFTbTU.png       1,380.43 kB
+../dist/public/assets/drops_and_wins_tournament_banner-wbmiW2mQ.png                          1,460.90 kB
+../dist/public/assets/mysterious_background_for_mines_casino_game-BDeluLii.png               1,465.13 kB
+../dist/public/assets/professional_soccer_stadium_night_scene_with_floodlights-BrB7wTwV.png  1,495.62 kB
+../dist/public/assets/ChatGPT_Image_10_01_2026__23_38_48_1769032748300-CAWUc9I5.png          2,340.95 kB
+../dist/public/assets/ChatGPT_Image_10_01_2026__22_30_56_1768108766811-B3F3I8hy.png          2,402.92 kB
+../dist/public/assets/plane-CBNJWTDk.png                                                     2,550.23 kB
+../dist/public/assets/plane-crash-lWlmPh-j.png                                               2,912.02 kB
+../dist/public/assets/index-CJJ2JL9r.css                                                       288.32 kB │ gzip:  36.57 kB
+../dist/public/assets/index-DhRJdYfq.js                                                      1,958.41 kB │ gzip: 515.99 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 12.09s
+building server...
+✘ [ERROR] Could not resolve "cookie-parser"
+
+    server/index.ts:2:25:
+      2 │ import cookieParser from "cookie-parser";
+        ╵                          ~~~~~~~~~~~~~~~
+
+  You can mark the path "cookie-parser" as external to exclude it from the
+  bundle, which will remove this error and leave the unresolved path in the
+  bundle.
+
+1 error
+Error: Build failed with 1 error:
+server/index.ts:2:25: ERROR: Could not resolve "cookie-parser"
+    at failureErrorWithLog (/var/www/in1bet/IN1BET-V10/in1bet/node_modules/esbuild/lib/main.js:1467:15)
+    at /var/www/in1bet/IN1BET-V10/in1bet/node_modules/esbuild/lib/main.js:926:25
+    at /var/www/in1bet/IN1BET-V10/in1bet/node_modules/esbuild/lib/main.js:878:52
+    at buildResponseToResult (/var/www/in1bet/IN1BET-V10/in1bet/node_modules/esbuild/lib/main.js:924:7)
+    at /var/www/in1bet/IN1BET-V10/in1bet/node_modules/esbuild/lib/main.js:951:16
+    at responseCallbacks.<computed> (/var/www/in1bet/IN1BET-V10/in1bet/node_modules/esbuild/lib/main.js:603:9)
+    at handleIncomingPacket (/var/www/in1bet/IN1BET-V10/in1bet/node_modules/esbuild/lib/main.js:658:12)
+    at Socket.readFromStdout (/var/www/in1bet/IN1BET-V10/in1bet/node_modules/esbuild/lib/main.js:581:7)
+    at Socket.emit (node:events:524:28)
+    at addChunk (node:internal/streams/readable:561:12) {
+  errors: [Getter/Setter],
+  warnings: [Getter/Setter]
+}
