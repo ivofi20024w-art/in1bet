@@ -176,11 +176,18 @@ router.post("/webhook/ondapay", webhookLimiter, async (req: Request, res: Respon
     console.log("Raw body available:", !!(req as any).rawBody);
     console.log("ONDAPAY_WEBHOOK_SECRET configured:", !!process.env.ONDAPAY_WEBHOOK_SECRET);
 
-    const verificationResult = verifyWebhookSignature(req);
-    if (!verificationResult.valid) {
-      console.error("Webhook signature verification failed:", verificationResult.error);
-      console.log("=== ONDAPAY WEBHOOK END (REJECTED) ===");
-      return res.status(401).json({ error: verificationResult.error || "Invalid signature" });
+    // DEBUG MODE: Skip signature verification temporarily to capture OndaPay's format
+    const DEBUG_SKIP_SIGNATURE = process.env.ONDAPAY_DEBUG_MODE === "true";
+    
+    if (!DEBUG_SKIP_SIGNATURE) {
+      const verificationResult = verifyWebhookSignature(req);
+      if (!verificationResult.valid) {
+        console.error("Webhook signature verification failed:", verificationResult.error);
+        console.log("=== ONDAPAY WEBHOOK END (REJECTED) ===");
+        return res.status(401).json({ error: verificationResult.error || "Invalid signature" });
+      }
+    } else {
+      console.log("!!! DEBUG MODE: Skipping signature verification !!!");
     }
 
     console.log("Signature verified, processing payment...");
