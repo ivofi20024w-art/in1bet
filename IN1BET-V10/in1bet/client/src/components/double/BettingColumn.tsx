@@ -1,6 +1,6 @@
 import type { DoubleBetType, DoubleBet } from "@shared/schema";
 import { multipliers } from "@/lib/game-data";
-import { Dices, Rotate3D, Crown, User } from "lucide-react";
+import { Dices, Rotate3D, Crown, User, LucideIcon } from "lucide-react";
 
 interface BettingColumnProps {
   type: DoubleBetType;
@@ -9,13 +9,15 @@ interface BettingColumnProps {
   disabled?: boolean;
 }
 
-const columnConfig: Record<DoubleBetType, { 
+interface ColumnConfigItem {
   label: string; 
-  icon: React.ElementType; 
+  icon: LucideIcon; 
   headerBgClass: string;
   textColorClass: string;
   badgeTextColorClass: string;
-}> = {
+}
+
+const columnConfig: { [key in DoubleBetType]: ColumnConfigItem } = {
   red: { 
     label: "Vermelho", 
     icon: Dices, 

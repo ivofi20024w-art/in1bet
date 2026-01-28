@@ -91,10 +91,10 @@ export async function getUserRakebackSummary(userId: string) {
     id: p.id,
     grossAmount: parseFloat(p.rakebackAmount),
     netAmount: parseFloat(p.rakebackAmount),
-    rolloverRequired: parseFloat(p.rolloverRequired || "0"),
-    rolloverProgress: parseFloat(p.rolloverProgress || "0"),
-    canWithdraw: parseFloat(p.rolloverProgress || "0") >= parseFloat(p.rolloverRequired || "0"),
-    createdAt: p.calculatedAt || p.periodEnd,
+    rolloverRequired: 0,
+    rolloverProgress: 0,
+    canWithdraw: true,
+    createdAt: p.createdAt || p.periodEnd,
     expiresAt: null,
   }));
   

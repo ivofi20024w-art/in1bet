@@ -1,7 +1,15 @@
-import { Router, Request, Response } from "express";
+import { Router, Request, Response, NextFunction } from "express";
 import { slotsGatewayService } from "./slotsgateway.service";
 import { authMiddleware } from "../auth/auth.middleware";
 import { z } from "zod";
+
+const adminCheck = async (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user?.isAdmin) {
+    res.status(403).json({ error: "Acesso não autorizado" });
+    return;
+  }
+  next();
+};
 
 const router = Router();
 
@@ -266,7 +274,7 @@ router.post("/callback", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/debug", async (req: Request, res: Response) => {
+router.get("/debug", authMiddleware, adminCheck, async (req: Request, res: Response) => {
   try {
     console.log("[SlotsGateway DEBUG] Starting debug check...");
     

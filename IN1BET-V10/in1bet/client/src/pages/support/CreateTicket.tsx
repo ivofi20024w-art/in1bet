@@ -57,7 +57,7 @@ export default function CreateTicket() {
         departmentId: departmentId || undefined,
       });
 
-      if (result.success && result.ticket) {
+      if (result.ticket) {
         setTicketNumber(result.ticket.ticketNumber);
         setSuccess(true);
         toast.success("Ticket criado com sucesso!");

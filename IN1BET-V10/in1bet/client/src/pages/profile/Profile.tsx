@@ -83,8 +83,9 @@ export default function Profile() {
       
       const data = await response.json();
       
+      const currentAuth = getStoredAuth();
       const updatedAuth: AuthState = {
-        ...auth,
+        ...currentAuth,
         user: data.user,
       };
       storeAuth(updatedAuth);

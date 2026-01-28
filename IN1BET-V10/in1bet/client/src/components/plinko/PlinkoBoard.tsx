@@ -31,7 +31,15 @@ export function PlinkoBoard() {
   const lastDropTimeRef = useRef<number>(0);
   const sceneRef = useRef<THREE.Group>(null);
   
-  const { dropBall, addWin, removeBall, autoDrop, money, betAmount, activeBalls } = usePlinko();
+  const { 
+    incrementActiveBalls: dropBall, 
+    setLastWin: addWin, 
+    decrementActiveBalls: removeBall, 
+    autoDrop, 
+    money, 
+    betAmount, 
+    activeBalls 
+  } = usePlinko();
   
   const pinPositions = useMemo(() => {
     const positions: Array<{ x: number; y: number }> = [];
