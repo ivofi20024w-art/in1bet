@@ -48,6 +48,8 @@ export interface TypingUser {
 interface ChatState {
   isConnected: boolean;
   isConnecting: boolean;
+  isAuthenticated: boolean;
+  pendingRoomId: string | null;
   rooms: ChatRoom[];
   currentRoomId: string | null;
   messages: Map<string, ChatMessage[]>;
@@ -95,6 +97,8 @@ const PING_INTERVAL = 25000;
 export const useChatStore = create<ChatState>((set, get) => ({
   isConnected: false,
   isConnecting: false,
+  isAuthenticated: false,
+  pendingRoomId: null,
   rooms: [],
   currentRoomId: null,
   messages: new Map(),
@@ -158,9 +162,17 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
     ws.onclose = (event) => {
       console.log('[ChatStore] WebSocket CLOSED:', event.code, event.reason);
+      const state = get();
+      const previousRoomId = state.currentRoomId;
       wsInstance = null;
       connectLock = false;
-      set({ isConnected: false, isConnecting: false });
+      set({ 
+        isConnected: false, 
+        isConnecting: false, 
+        isAuthenticated: false,
+        currentRoomId: null,
+        pendingRoomId: previousRoomId
+      });
 
       if (pingInterval) {
         clearInterval(pingInterval);
@@ -204,6 +216,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({
       isConnected: false,
       isConnecting: false,
+      isAuthenticated: false,
+      currentRoomId: null,
+      pendingRoomId: null,
     });
   },
   
@@ -224,7 +239,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     set({
       isConnected: false,
       isConnecting: false,
+      isAuthenticated: false,
       currentRoomId: null,
+      pendingRoomId: null,
       myUserId: null,
       myUserName: null,
       rooms: [],
@@ -242,11 +259,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
       wsExists: !!wsInstance,
       wsReadyState: wsInstance?.readyState,
       isConnected: state.isConnected,
+      isAuthenticated: state.isAuthenticated,
       currentRoomId: state.currentRoomId
     });
     
     if (!wsInstance || wsInstance.readyState !== WebSocket.OPEN) {
       console.log('[ChatStore] joinRoom ABORTED - WebSocket not open');
+      set({ pendingRoomId: roomId });
+      return;
+    }
+    
+    if (!state.isAuthenticated) {
+      console.log('[ChatStore] joinRoom QUEUED - waiting for authentication');
+      set({ pendingRoomId: roomId });
       return;
     }
     
@@ -257,7 +282,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
     
     console.log('[ChatStore] joinRoom - sending request...');
     wsInstance.send(JSON.stringify({ type: 'join_room', roomId }));
-    set({ currentRoomId: roomId });
   },
 
   leaveRoom: () => {
@@ -360,9 +384,14 @@ async function handleMessage(
   switch (data.type) {
     case 'authenticated': {
       console.log('[ChatStore] Authenticated successfully');
+      const state = get();
+      const roomToJoin = state.pendingRoomId || 'global';
+      
       set({
         isConnected: true,
         isConnecting: false,
+        isAuthenticated: true,
+        pendingRoomId: null,
         rooms: data.rooms || [],
         myUserId: data.userId,
         myUserName: data.userName,
@@ -381,15 +410,16 @@ async function handleMessage(
         }
       }, PING_INTERVAL);
 
-      const state = get();
-      if (state.currentRoomId) {
-        wsInstance?.send(JSON.stringify({ type: 'join_room', roomId: state.currentRoomId }));
+      console.log('[ChatStore] Auto-joining room after auth:', roomToJoin);
+      if (wsInstance?.readyState === WebSocket.OPEN) {
+        wsInstance.send(JSON.stringify({ type: 'join_room', roomId: roomToJoin }));
       }
       break;
     }
 
     case 'auth_failed': {
       console.log('[ChatStore] Auth failed, trying token refresh...');
+      isAuthenticated = false;
       set({ isConnecting: false });
       
       try {
@@ -553,7 +583,7 @@ async function handleMessage(
 
 export function initializeChatOnAuth() {
   const auth = getStoredAuthState();
-  if (auth.accessToken && auth.isAuthenticated) {
+  if (auth.isAuthenticated) {
     useChatStore.getState().connect();
   }
 }

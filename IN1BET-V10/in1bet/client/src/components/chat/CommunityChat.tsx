@@ -226,10 +226,10 @@ export default function CommunityChat({ isVisible, onToggle }: CommunityChatProp
   }, [messages, scrollToBottom]);
   
   useEffect(() => {
-    if (isVisible && auth.accessToken && !chatIsConnected) {
+    if (isVisible && auth.isAuthenticated && !chatIsConnected) {
       chatConnect();
     }
-  }, [isVisible, auth.accessToken, chatIsConnected, chatConnect]);
+  }, [isVisible, auth.isAuthenticated, chatIsConnected, chatConnect]);
   
   useEffect(() => {
     if (chatIsConnected && chatRooms.length > 0 && !chatCurrentRoomId) {
@@ -345,7 +345,7 @@ export default function CommunityChat({ isVisible, onToggle }: CommunityChatProp
     );
   };
 
-  if (!auth.accessToken) {
+  if (!auth.isAuthenticated) {
     return (
       <div className="flex flex-col h-full bg-[#0d0d12] border-l border-white/10">
         <div className="flex items-center justify-between p-4 border-b border-white/10">
