@@ -46,12 +46,12 @@ export default function WalletPage() {
 
   const fetchTransactions = useCallback(async () => {
     const auth = getStoredAuth();
-    if (!auth.accessToken) return;
+    if (!auth.isAuthenticated) return;
 
     setLoadingTransactions(true);
     try {
       const response = await fetch("/api/wallet/transactions", {
-        headers: { "Authorization": `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();

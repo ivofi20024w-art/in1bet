@@ -22,10 +22,6 @@ async function attemptRefresh(): Promise<boolean> {
 }
 
 function getAuthHeaders(): Record<string, string> {
-  const auth = getStoredAuthState();
-  if (auth.accessToken) {
-    return { Authorization: `Bearer ${auth.accessToken}` };
-  }
   return {};
 }
 
@@ -64,21 +60,17 @@ export async function apiRequest(
   });
 
   if (res.status === 401 && !skipAuth) {
-    const auth = getStoredAuthState();
-    if (auth.refreshToken) {
-      const refreshed = await attemptRefresh();
-      if (refreshed) {
-        const newHeaders: Record<string, string> = {
-          ...(data ? { "Content-Type": "application/json" } : {}),
-          ...getAuthHeaders(),
-        };
-        res = await fetch(url, {
-          method,
-          headers: newHeaders,
-          body: data ? JSON.stringify(data) : undefined,
-          credentials: "include",
-        });
-      }
+    const refreshed = await attemptRefresh();
+    if (refreshed) {
+      const newHeaders: Record<string, string> = {
+        ...(data ? { "Content-Type": "application/json" } : {}),
+      };
+      res = await fetch(url, {
+        method,
+        headers: newHeaders,
+        body: data ? JSON.stringify(data) : undefined,
+        credentials: "include",
+      });
     }
   }
 
@@ -100,15 +92,11 @@ export const getQueryFn: <T>(options: {
     });
 
     if (res.status === 401) {
-      const auth = getStoredAuthState();
-      if (auth.refreshToken) {
-        const refreshed = await attemptRefresh();
-        if (refreshed) {
-          res = await fetch(queryKey.join("/") as string, {
-            credentials: "include",
-            headers: getAuthHeaders(),
-          });
-        }
+      const refreshed = await attemptRefresh();
+      if (refreshed) {
+        res = await fetch(queryKey.join("/") as string, {
+          credentials: "include",
+        });
       }
     }
 

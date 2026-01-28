@@ -101,7 +101,7 @@ export default function AdminAudit() {
     try {
       setLoading(true);
       const response = await fetch("/api/admin/audit-logs?limit=200", {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -112,7 +112,7 @@ export default function AdminAudit() {
     } finally {
       setLoading(false);
     }
-  }, [auth.accessToken]);
+  }, []);
 
   useEffect(() => {
     fetchLogs();

@@ -152,9 +152,7 @@ export default function AdminAffiliates() {
     try {
       setLoading(true);
       const response = await fetch("/api/affiliate/admin", {
-        headers: {
-          Authorization: `Bearer ${auth?.accessToken}`,
-        },
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -167,7 +165,7 @@ export default function AdminAffiliates() {
     } finally {
       setLoading(false);
     }
-  }, [auth?.accessToken]);
+  }, []);
 
   const fetchConversions = useCallback(async () => {
     try {
@@ -178,9 +176,7 @@ export default function AdminAffiliates() {
       for (const affiliateId of ids.slice(0, 10)) {
         try {
           const response = await fetch(`/api/affiliate/admin/${affiliateId}`, {
-            headers: {
-              Authorization: `Bearer ${auth?.accessToken}`,
-            },
+            credentials: 'include',
           });
           if (response.ok) {
             const data = await response.json();
@@ -196,7 +192,7 @@ export default function AdminAffiliates() {
     } catch (error) {
       console.error("Failed to fetch conversions:", error);
     }
-  }, [auth?.accessToken, affiliates]);
+  }, [affiliates]);
 
   const fetchPayouts = useCallback(async () => {
     try {
@@ -207,9 +203,7 @@ export default function AdminAffiliates() {
       for (const affiliateId of ids.slice(0, 10)) {
         try {
           const response = await fetch(`/api/affiliate/admin/${affiliateId}`, {
-            headers: {
-              Authorization: `Bearer ${auth?.accessToken}`,
-            },
+            credentials: 'include',
           });
           if (response.ok) {
             const data = await response.json();
@@ -228,7 +222,7 @@ export default function AdminAffiliates() {
     } catch (error) {
       console.error("Failed to fetch payouts:", error);
     }
-  }, [auth?.accessToken, affiliates]);
+  }, [affiliates]);
 
   useEffect(() => {
     fetchAffiliates();
@@ -245,7 +239,7 @@ export default function AdminAffiliates() {
       setIsSearching(true);
       try {
         const response = await fetch(`/api/affiliate/admin/search-users?q=${encodeURIComponent(userSearch)}`, {
-          headers: { Authorization: `Bearer ${auth?.accessToken}` },
+          credentials: 'include',
         });
         if (response.ok) {
           const data = await response.json();
@@ -260,7 +254,7 @@ export default function AdminAffiliates() {
 
     const debounce = setTimeout(searchUsers, 300);
     return () => clearTimeout(debounce);
-  }, [userSearch, auth?.accessToken]);
+  }, [userSearch]);
 
   const createAffiliate = async () => {
     if (!newAffiliate.userId) {
@@ -274,8 +268,8 @@ export default function AdminAffiliates() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth?.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           userId: newAffiliate.userId,
           commissionType: newAffiliate.commissionType,
@@ -315,8 +309,8 @@ export default function AdminAffiliates() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth?.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ status: newStatus }),
       });
 
@@ -340,9 +334,7 @@ export default function AdminAffiliates() {
       setActionLoading(true);
       const response = await fetch(`/api/affiliate/admin/payouts/${payoutId}/approve`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${auth?.accessToken}`,
-        },
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -366,9 +358,7 @@ export default function AdminAffiliates() {
       setActionLoading(true);
       const response = await fetch(`/api/affiliate/admin/payouts/${payoutId}/pay`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${auth?.accessToken}`,
-        },
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -394,8 +384,8 @@ export default function AdminAffiliates() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth?.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ reason: "Marcado como fraude pelo admin" }),
       });
 

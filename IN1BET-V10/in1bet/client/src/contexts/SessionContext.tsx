@@ -36,7 +36,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   const isAuthenticated = () => {
     const auth = getStoredAuth();
-    return auth.isAuthenticated && !!auth.accessToken;
+    return auth.isAuthenticated;
   };
 
   const clearAllTimers = useCallback(() => {
@@ -140,7 +140,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const auth = getStoredAuth();
-    if (auth.isAuthenticated && auth.accessToken) {
+    if (auth.isAuthenticated) {
       startSessionTimer();
     }
     
@@ -152,7 +152,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const checkAuthChange = () => {
       const auth = getStoredAuth();
-      if (auth.isAuthenticated && auth.accessToken) {
+      if (auth.isAuthenticated) {
         if (sessionExpiresAtRef.current === 0) {
           startSessionTimer();
         }

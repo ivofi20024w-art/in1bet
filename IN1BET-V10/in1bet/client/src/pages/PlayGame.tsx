@@ -27,10 +27,10 @@ interface WalletData {
 
 async function fetchWallet(): Promise<WalletData> {
   const auth = getStoredAuth();
-  if (!auth.accessToken) throw new Error('Not authenticated');
+  if (!auth.isAuthenticated) throw new Error('Not authenticated');
   
   const res = await fetch('/api/wallet', {
-    headers: { 'Authorization': `Bearer ${auth.accessToken}` }
+    credentials: 'include',
   });
   const data = await res.json();
   if (!data.wallet) throw new Error(data.error || 'Wallet not found');
@@ -42,13 +42,12 @@ async function fetchWallet(): Promise<WalletData> {
 
 async function launchGame(idHash: string): Promise<{ launchUrl: string }> {
   const auth = getStoredAuth();
-  if (!auth.accessToken) throw new Error('Authentication required');
+  if (!auth.isAuthenticated) throw new Error('Authentication required');
   
   const res = await fetch('/api/slotsgateway/launch', {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${auth.accessToken}`,
     },
     credentials: 'include',
     body: JSON.stringify({ idHash }),

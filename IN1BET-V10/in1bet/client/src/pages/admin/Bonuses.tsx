@@ -146,7 +146,7 @@ export default function AdminBonuses() {
     try {
       setLoading(true);
       const response = await fetch("/api/admin/bonuses", {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -157,13 +157,13 @@ export default function AdminBonuses() {
     } finally {
       setLoading(false);
     }
-  }, [auth.accessToken]);
+  }, []);
 
   const fetchUserBonuses = useCallback(async () => {
     try {
       setLoadingUserBonuses(true);
       const response = await fetch("/api/admin/user-bonuses?limit=100", {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -174,7 +174,7 @@ export default function AdminBonuses() {
     } finally {
       setLoadingUserBonuses(false);
     }
-  }, [auth.accessToken]);
+  }, []);
 
   useEffect(() => {
     fetchBonuses();
@@ -186,7 +186,7 @@ export default function AdminBonuses() {
     try {
       const response = await fetch(`/api/admin/bonuses/${bonusId}/toggle`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       const data = await response.json();
       if (response.ok) {
@@ -214,8 +214,8 @@ export default function AdminBonuses() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
       const data = await response.json();
@@ -246,8 +246,8 @@ export default function AdminBonuses() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
       const data = await response.json();
@@ -297,8 +297,8 @@ export default function AdminBonuses() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ reason: cancelReason }),
       });
       const data = await response.json();

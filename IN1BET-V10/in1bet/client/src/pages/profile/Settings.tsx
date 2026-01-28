@@ -60,7 +60,7 @@ interface UserSettings {
 
 export default function Settings() {
   const { toast } = useToast();
-  const { user, accessToken } = useAuth();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [name, setName] = useState(user?.name || "");
   const [phone, setPhone] = useState(user?.phone || "");
@@ -102,8 +102,7 @@ export default function Settings() {
       return;
     }
     
-    const token = accessToken || auth.accessToken;
-    if (!token) {
+    if (!auth.isAuthenticated) {
       toast({ variant: "destructive", title: "Erro", description: "Sessão expirada. Faça login novamente." });
       return;
     }
@@ -114,8 +113,8 @@ export default function Settings() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({
           nameColor: selectedNameColor || null,
           nameEffect: selectedNameEffect || null,
@@ -198,8 +197,8 @@ export default function Settings() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
         },
+        credentials: "include",
         body: JSON.stringify({ code: promoCode.toUpperCase() }),
       });
 

@@ -215,7 +215,7 @@ export default function AdminMissions() {
     try {
       setLoading(true);
       const response = await fetch("/api/missions/admin/templates", {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -226,13 +226,13 @@ export default function AdminMissions() {
     } finally {
       setLoading(false);
     }
-  }, [auth.accessToken]);
+  }, []);
 
   const fetchStats = useCallback(async () => {
     try {
       setLoadingStats(true);
       const response = await fetch("/api/missions/admin/stats", {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -243,7 +243,7 @@ export default function AdminMissions() {
     } finally {
       setLoadingStats(false);
     }
-  }, [auth.accessToken]);
+  }, []);
 
   const handleSearchUserMissions = async () => {
     if (!searchTerm.trim()) {
@@ -254,7 +254,7 @@ export default function AdminMissions() {
     try {
       setLoadingUserMissions(true);
       const response = await fetch(`/api/missions/admin/user-missions?search=${encodeURIComponent(searchTerm)}`, {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -283,8 +283,8 @@ export default function AdminMissions() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ isActive: !currentStatus }),
       });
       if (response.ok) {
@@ -312,8 +312,8 @@ export default function AdminMissions() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify(formData),
       });
       const data = await response.json();
@@ -341,8 +341,8 @@ export default function AdminMissions() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           name: formData.name,
           description: formData.description,
@@ -375,7 +375,7 @@ export default function AdminMissions() {
     try {
       const response = await fetch(`/api/missions/admin/templates/${selectedTemplate.id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         toast.success("Template excluído!");
@@ -397,7 +397,7 @@ export default function AdminMissions() {
     try {
       const response = await fetch(`/api/missions/admin/force-complete/${assignmentId}`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       const data = await response.json();
       if (response.ok) {
@@ -418,7 +418,7 @@ export default function AdminMissions() {
     try {
       const response = await fetch("/api/missions/admin/initialize", {
         method: "POST",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         toast.success("Missões inicializadas!");

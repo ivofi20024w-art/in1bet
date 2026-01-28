@@ -103,7 +103,7 @@ export default function AdminDashboard() {
     if (isRefresh) setRefreshing(true);
     try {
       const response = await fetch("/api/admin/dashboard-stats", {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
       setLoading(false);
       if (isRefresh) setRefreshing(false);
     }
-  }, [auth.accessToken]);
+  }, []);
 
   useEffect(() => {
     fetchStats();

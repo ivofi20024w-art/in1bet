@@ -180,7 +180,7 @@ export default function LiveCasino() {
 
   const handlePlayGame = (game: SlotsgatewayGame) => {
     const auth = getStoredAuth();
-    if (!auth.accessToken) {
+    if (!auth.isAuthenticated) {
       toast({ title: "Login necessário", description: "Faça login para jogar", variant: "destructive" });
       setLocation('/');
       return;

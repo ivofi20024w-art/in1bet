@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getStoredAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,9 +42,8 @@ interface Game {
 }
 
 async function fetchProviders(): Promise<Provider[]> {
-  const auth = getStoredAuth();
   const response = await fetch("/api/slotsgateway/providers", {
-    headers: auth.accessToken ? { Authorization: `Bearer ${auth.accessToken}` } : {},
+    credentials: 'include',
   });
   if (!response.ok) throw new Error("Failed to fetch providers");
   const data = await response.json();
@@ -53,11 +51,10 @@ async function fetchProviders(): Promise<Provider[]> {
 }
 
 async function fetchGames(providerName?: string): Promise<Game[]> {
-  const auth = getStoredAuth();
   const params = new URLSearchParams();
   if (providerName) params.set("providerId", providerName);
   const response = await fetch(`/api/slotsgateway/games?${params}`, {
-    headers: auth.accessToken ? { Authorization: `Bearer ${auth.accessToken}` } : {},
+    credentials: 'include',
   });
   if (!response.ok) throw new Error("Failed to fetch games");
   const data = await response.json();
@@ -65,10 +62,9 @@ async function fetchGames(providerName?: string): Promise<Game[]> {
 }
 
 async function syncAllGames(): Promise<{ count: number }> {
-  const auth = getStoredAuth();
   const response = await fetch("/api/slotsgateway/sync", {
     method: "POST",
-    headers: auth.accessToken ? { Authorization: `Bearer ${auth.accessToken}` } : {},
+    credentials: 'include',
   });
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: "Failed to sync" }));

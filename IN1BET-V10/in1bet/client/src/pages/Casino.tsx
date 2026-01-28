@@ -226,7 +226,7 @@ async function fetchGames(params: {
 async function launchGame(params: { idHash: string }): Promise<{ launchUrl: string }> {
   const auth = getStoredAuth();
   
-  if (!auth.accessToken) {
+  if (!auth.isAuthenticated) {
     throw new Error('Authentication required');
   }
   
@@ -236,7 +236,6 @@ async function launchGame(params: { idHash: string }): Promise<{ launchUrl: stri
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${auth.accessToken}`,
     },
     credentials: 'include',
     body: JSON.stringify({ idHash: params.idHash }),
@@ -440,7 +439,7 @@ export default function Casino() {
 
   const handlePlayGame = (game: SlotsgatewayGame) => {
     const auth = getStoredAuth();
-    if (!auth.accessToken) {
+    if (!auth.isAuthenticated) {
       toast({
         title: "Login necessário",
         description: "Faça login para jogar",

@@ -124,7 +124,7 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
 
   const fetchHistory = useCallback(async () => {
     const auth = getStoredAuth();
-    if (!auth.accessToken) return;
+    if (!auth.isAuthenticated) return;
 
     setLoadingHistory(true);
     try {
@@ -155,7 +155,7 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
 
   const fetchKycStatus = useCallback(async () => {
     const auth = getStoredAuth();
-    if (!auth.accessToken) return;
+    if (!auth.isAuthenticated) return;
 
     try {
       const { data } = await httpGet<KycStatus>("/api/kyc/status");
@@ -170,7 +170,7 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
 
   const checkPixStatus = async (externalId: string): Promise<PixStatusResponse | null> => {
     const auth = getStoredAuth();
-    if (!auth.accessToken) return null;
+    if (!auth.isAuthenticated) return null;
 
     try {
       const { data } = await httpGet<PixStatusResponse>(`/api/payments/pix/status/${externalId}`);
@@ -189,7 +189,7 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
     }
 
     const auth = getStoredAuth();
-    if (!auth.accessToken) {
+    if (!auth.isAuthenticated) {
       toast.error("Você precisa estar logado para fazer um depósito");
       return;
     }
@@ -245,7 +245,7 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
     }
 
     const auth = getStoredAuth();
-    if (!auth.accessToken) {
+    if (!auth.isAuthenticated) {
       toast.error("Você precisa estar logado");
       return;
     }
@@ -293,7 +293,7 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
     }
 
     const auth = getStoredAuth();
-    if (!auth.accessToken) return;
+    if (!auth.isAuthenticated) return;
 
     setKycLoading(true);
 
@@ -302,8 +302,8 @@ export function WalletModal({ children, onBalanceUpdate }: { children: React.Rea
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${auth.accessToken}`,
         },
+        credentials: "include",
         body: JSON.stringify({ 
           fullName: kycName.trim(), 
           cpf: kycCpf.trim() 

@@ -128,7 +128,7 @@ export default function AdminUsers() {
     try {
       setLoading(true);
       const response = await fetch("/api/admin/users?limit=100", {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -139,7 +139,7 @@ export default function AdminUsers() {
     } finally {
       setLoading(false);
     }
-  }, [auth.accessToken]);
+  }, []);
 
   useEffect(() => {
     fetchUsers();
@@ -149,7 +149,7 @@ export default function AdminUsers() {
     setLoadingDetail(true);
     try {
       const response = await fetch(`/api/admin/users/${userId}/wallet`, {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -194,8 +194,8 @@ export default function AdminUsers() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ reason: blockReason }),
       });
       if (response.ok) {
@@ -220,7 +220,7 @@ export default function AdminUsers() {
     try {
       const response = await fetch(`/api/admin/users/${user.id}/unblock`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         toast.success("Usuário desbloqueado com sucesso");

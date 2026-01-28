@@ -36,10 +36,8 @@ export function TwoFactorSettings() {
   const [step, setStep] = useState(1);
 
   const getAuthHeaders = () => {
-    const auth = getStoredAuthState();
     return {
       "Content-Type": "application/json",
-      Authorization: auth.accessToken ? `Bearer ${auth.accessToken}` : "",
     };
   };
 
@@ -47,6 +45,7 @@ export function TwoFactorSettings() {
     try {
       const res = await fetch("/api/2fa/status", {
         headers: getAuthHeaders(),
+        credentials: 'include',
       });
       if (res.ok) {
         const data = await res.json();
@@ -68,6 +67,7 @@ export function TwoFactorSettings() {
       const res = await fetch("/api/2fa/setup", {
         method: "POST",
         headers: getAuthHeaders(),
+        credentials: 'include',
       });
       if (res.ok) {
         const data = await res.json();
@@ -92,6 +92,7 @@ export function TwoFactorSettings() {
       const res = await fetch("/api/2fa/enable", {
         method: "POST",
         headers: getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({
           secret: setupData.secret,
           token: verificationCode,
@@ -123,6 +124,7 @@ export function TwoFactorSettings() {
       const res = await fetch("/api/2fa/disable", {
         method: "POST",
         headers: getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({ token: disableCode }),
       });
 
@@ -149,6 +151,7 @@ export function TwoFactorSettings() {
       const res = await fetch("/api/2fa/regenerate-backup-codes", {
         method: "POST",
         headers: getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({ token: regenerateCode }),
       });
 

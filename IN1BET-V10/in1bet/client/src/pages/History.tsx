@@ -59,10 +59,8 @@ export default function History() {
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   const getAuthHeaders = () => {
-    const auth = getStoredAuthState();
     return {
       'Content-Type': 'application/json',
-      'Authorization': auth.accessToken ? `Bearer ${auth.accessToken}` : '',
     };
   };
 
@@ -97,6 +95,7 @@ export default function History() {
       const endpoint = filter === "bets" ? `/api/history/bets?${params}` : `/api/history?${params}`;
       const res = await fetch(endpoint, {
         headers: getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (res.ok) {
@@ -123,6 +122,7 @@ export default function History() {
     try {
       const res = await fetch('/api/history/stats', {
         headers: getAuthHeaders(),
+        credentials: 'include',
       });
 
       if (res.ok) {

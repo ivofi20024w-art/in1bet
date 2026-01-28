@@ -119,14 +119,13 @@ export default function AdminSecurity() {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const headers = { Authorization: `Bearer ${auth.accessToken}` };
 
       const [statsRes, pendingRes, approvedRes, rejectedRes, logsRes] = await Promise.all([
-        fetch("/api/admin/security/stats", { headers, credentials: "include" }),
-        fetch("/api/admin/security/kyc/pending", { headers, credentials: "include" }),
-        fetch("/api/admin/security/kyc/approved", { headers, credentials: "include" }),
-        fetch("/api/admin/security/kyc/rejected", { headers, credentials: "include" }),
-        fetch("/api/admin/security/logs", { headers, credentials: "include" }),
+        fetch("/api/admin/security/stats", { credentials: "include" }),
+        fetch("/api/admin/security/kyc/pending", { credentials: "include" }),
+        fetch("/api/admin/security/kyc/approved", { credentials: "include" }),
+        fetch("/api/admin/security/kyc/rejected", { credentials: "include" }),
+        fetch("/api/admin/security/logs", { credentials: "include" }),
       ]);
 
       if (statsRes.ok) setStats(await statsRes.json());
@@ -152,7 +151,7 @@ export default function AdminSecurity() {
     } finally {
       setLoading(false);
     }
-  }, [auth.accessToken]);
+  }, []);
 
   useEffect(() => {
     fetchData();
@@ -163,7 +162,6 @@ export default function AdminSecurity() {
       setActionLoading(true);
       const response = await fetch(`/api/admin/security/kyc/${kycId}/approve`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
         credentials: "include",
       });
 
@@ -193,7 +191,6 @@ export default function AdminSecurity() {
       const response = await fetch(`/api/admin/security/kyc/${selectedKyc.id}/reject`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${auth.accessToken}`,
           "Content-Type": "application/json",
         },
         credentials: "include",

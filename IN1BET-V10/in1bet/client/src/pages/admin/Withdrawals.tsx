@@ -98,7 +98,7 @@ export default function AdminWithdrawals() {
         ? `/api/admin/withdrawals?status=${statusFilter}&limit=100`
         : "/api/admin/withdrawals?limit=100";
       const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -109,7 +109,7 @@ export default function AdminWithdrawals() {
     } finally {
       setLoading(false);
     }
-  }, [auth.accessToken, statusFilter]);
+  }, [statusFilter]);
 
   useEffect(() => {
     fetchWithdrawals();
@@ -120,7 +120,7 @@ export default function AdminWithdrawals() {
     try {
       const response = await fetch(`/api/admin/withdrawals/${withdrawal.id}/approve`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       const data = await response.json();
       if (response.ok) {
@@ -148,8 +148,8 @@ export default function AdminWithdrawals() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ reason: rejectReason }),
       });
       const data = await response.json();
@@ -176,7 +176,7 @@ export default function AdminWithdrawals() {
     try {
       const response = await fetch(`/api/admin/withdrawals/${selectedWithdrawal.id}/pay`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       const data = await response.json();
       if (response.ok) {

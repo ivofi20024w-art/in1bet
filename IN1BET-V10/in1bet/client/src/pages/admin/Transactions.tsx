@@ -105,7 +105,7 @@ export default function AdminTransactions() {
         params.append("type", typeFilter);
       }
       const response = await fetch(`/api/admin/transactions?${params}`, {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -116,7 +116,7 @@ export default function AdminTransactions() {
     } finally {
       setLoading(false);
     }
-  }, [auth.accessToken, typeFilter]);
+  }, [typeFilter]);
 
   useEffect(() => {
     fetchTransactions();

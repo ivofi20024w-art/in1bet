@@ -99,9 +99,7 @@ export default function AdminSettings() {
     try {
       setLoading(true);
       const response = await fetch("/api/admin/settings", {
-        headers: {
-          Authorization: `Bearer ${auth?.accessToken}`,
-        },
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -117,15 +115,13 @@ export default function AdminSettings() {
     } finally {
       setLoading(false);
     }
-  }, [auth?.accessToken]);
+  }, []);
 
   const fetchUsers = useCallback(async () => {
     try {
       setLoadingUsers(true);
       const response = await fetch("/api/admin/users", {
-        headers: {
-          Authorization: `Bearer ${auth?.accessToken}`,
-        },
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -144,15 +140,13 @@ export default function AdminSettings() {
     } finally {
       setLoadingUsers(false);
     }
-  }, [auth?.accessToken]);
+  }, []);
 
   const fetchOndapayStatus = useCallback(async () => {
     try {
       setLoadingOndapay(true);
       const response = await fetch("/api/admin/settings/ondapay-status", {
-        headers: {
-          Authorization: `Bearer ${auth?.accessToken}`,
-        },
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -167,7 +161,7 @@ export default function AdminSettings() {
     } finally {
       setLoadingOndapay(false);
     }
-  }, [auth?.accessToken]);
+  }, []);
 
   const saveOndapaySettings = async () => {
     const hasChanges = ondapayForm.clientId || ondapayForm.clientSecret || 
@@ -184,8 +178,8 @@ export default function AdminSettings() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth?.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify(ondapayForm),
       });
 
@@ -216,9 +210,7 @@ export default function AdminSettings() {
       setTestingOndapay(true);
       const response = await fetch("/api/admin/settings/ondapay/test", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${auth?.accessToken}`,
-        },
+        credentials: 'include',
       });
 
       const data = await response.json();
@@ -249,8 +241,8 @@ export default function AdminSettings() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth?.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ enabled: !globalAutoWithdraw }),
       });
 
@@ -279,8 +271,8 @@ export default function AdminSettings() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth?.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ enabled: !currentValue }),
       });
 

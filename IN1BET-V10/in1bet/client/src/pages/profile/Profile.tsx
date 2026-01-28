@@ -67,13 +67,12 @@ export default function Profile() {
     
     setSavingAvatar(true);
     try {
-      const auth = getStoredAuth();
       const response = await fetch('/api/users/profile', {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${auth.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({ avatarUrl: selectedAvatar }),
       });
       

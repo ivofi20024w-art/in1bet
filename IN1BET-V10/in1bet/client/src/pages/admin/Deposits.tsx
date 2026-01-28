@@ -72,7 +72,7 @@ export default function AdminDeposits() {
     try {
       setLoading(true);
       const response = await fetch("/api/admin/deposits?limit=100", {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -83,7 +83,7 @@ export default function AdminDeposits() {
     } finally {
       setLoading(false);
     }
-  }, [auth.accessToken]);
+  }, []);
 
   useEffect(() => {
     fetchDeposits();

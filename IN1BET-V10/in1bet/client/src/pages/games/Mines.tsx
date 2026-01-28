@@ -191,16 +191,14 @@ export default function Mines() {
   }
 
   const getAuthHeaders = () => {
-    const auth = getStoredAuthState();
     return {
       'Content-Type': 'application/json',
-      'Authorization': auth.accessToken ? `Bearer ${auth.accessToken}` : '',
     };
   };
 
   const fetchBalance = async () => {
     try {
-      const res = await fetch('/api/bets/balance', { headers: getAuthHeaders() });
+      const res = await fetch('/api/bets/balance', { headers: getAuthHeaders(), credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         setBalance(data.balance + data.bonusBalance);
@@ -212,7 +210,7 @@ export default function Mines() {
 
   const checkActiveGame = async () => {
     try {
-      const res = await fetch('/api/games/mines/active', { headers: getAuthHeaders() });
+      const res = await fetch('/api/games/mines/active', { headers: getAuthHeaders(), credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         if (data.active && data.game) {
@@ -270,6 +268,7 @@ export default function Mines() {
       const res = await fetch('/api/games/mines/start', {
         method: 'POST',
         headers: getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({
           betAmount: amount,
           mineCount,
@@ -314,6 +313,7 @@ export default function Mines() {
       const res = await fetch('/api/games/mines/reveal', {
         method: 'POST',
         headers: getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({
           betId: gameState.betId,
           tileIndex: index,
@@ -392,6 +392,7 @@ export default function Mines() {
       const res = await fetch('/api/games/mines/cashout', {
         method: 'POST',
         headers: getAuthHeaders(),
+        credentials: 'include',
         body: JSON.stringify({
           betId: gameState.betId,
         }),

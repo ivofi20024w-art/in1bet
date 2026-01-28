@@ -138,7 +138,7 @@ export default function AdminPromoCodes() {
       if (searchTerm) params.append("search", searchTerm);
 
       const response = await fetch(`/api/admin/promo-codes?${params}`, {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -149,7 +149,7 @@ export default function AdminPromoCodes() {
     } finally {
       setLoading(false);
     }
-  }, [auth.accessToken, statusFilter, typeFilter, searchTerm]);
+  }, [statusFilter, typeFilter, searchTerm]);
 
   useEffect(() => {
     fetchPromoCodes();
@@ -160,7 +160,7 @@ export default function AdminPromoCodes() {
     try {
       const response = await fetch(`/api/admin/promo-codes/${id}/toggle`, {
         method: "POST",
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       const data = await response.json();
       if (response.ok) {
@@ -188,8 +188,8 @@ export default function AdminPromoCodes() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           ...formData,
           maxUses: formData.maxUses ? parseInt(formData.maxUses) : null,
@@ -220,8 +220,8 @@ export default function AdminPromoCodes() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${auth.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           description: formData.description,
           value: formData.value,
@@ -254,7 +254,7 @@ export default function AdminPromoCodes() {
     setShowStatsModal(true);
     try {
       const response = await fetch(`/api/admin/promo-codes/${promo.id}/stats`, {
-        headers: { Authorization: `Bearer ${auth.accessToken}` },
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
