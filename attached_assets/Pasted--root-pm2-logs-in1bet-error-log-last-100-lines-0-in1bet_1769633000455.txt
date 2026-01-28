@@ -1,0 +1,101 @@
+/root/.pm2/logs/in1bet-error.log last 100 lines:
+0|in1bet   |       at yS.<anonymous> (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:77:5463)
+0|in1bet   |       at Object.onceWrapper (node:events:638:28)
+0|in1bet   |       at yS.emit (node:events:524:28)
+0|in1bet   |       at Socket.<anonymous> (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:76:21688)
+0|in1bet   |       at Socket.emit (node:events:524:28)
+0|in1bet   |       at TCP.<anonymous> (node:net:343:12)
+0|in1bet   | }
+0|in1bet   | Error: Connection terminated due to connection timeout
+0|in1bet   |     at /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:77:14263
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:77:29664
+0|in1bet   |     at async il.startWaitingPeriod (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:113945)
+0|in1bet   |     at async Timeout._onTimeout (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:113473) {
+0|in1bet   |   [cause]: Error: Connection terminated unexpectedly
+0|in1bet   |       at yS.<anonymous> (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:77:5463)
+0|in1bet   |       at Object.onceWrapper (node:events:638:28)
+0|in1bet   |       at yS.emit (node:events:524:28)
+0|in1bet   |       at Socket.<anonymous> (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:76:21688)
+0|in1bet   |       at Socket.emit (node:events:524:28)
+0|in1bet   |       at TCP.<anonymous> (node:net:343:12)
+0|in1bet   | }
+0|in1bet   | [SlotsGateway] Request failed, retrying in 1000ms... TypeError: fetch failed
+0|in1bet   |     at node:internal/deps/undici/undici:14900:13
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async qp.fetchWithRetry (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:134993)
+0|in1bet   |     at async qp.getGameList (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:137162)
+0|in1bet   |     at async JA.syncGames (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:137893)
+0|in1bet   |     at async YA (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:146031) {
+0|in1bet   |   [cause]: ConnectTimeoutError: Connect Timeout Error (attempted address: api-eu-1.slotsgateway.com:443, timeout: 10000ms)
+0|in1bet   |       at onConnectTimeout (node:internal/deps/undici/undici:2718:28)
+0|in1bet   |       at Immediate._onImmediate (node:internal/deps/undici/undici:2699:11)
+0|in1bet   |       at process.processImmediate (node:internal/timers:483:21) {
+0|in1bet   |     code: 'UND_ERR_CONNECT_TIMEOUT',
+0|in1bet   |     [Symbol(undici.error.UND_ERR)]: true,
+0|in1bet   |     [Symbol(undici.error.UND_ERR_CONNECT_TIMEOUT)]: true
+0|in1bet   |   }
+0|in1bet   | }
+0|in1bet   | [SlotsGateway] Request failed, retrying in 2000ms... TypeError: fetch failed
+0|in1bet   |     at node:internal/deps/undici/undici:14900:13
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async qp.fetchWithRetry (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:134993)
+0|in1bet   |     at async qp.getGameList (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:137162)
+0|in1bet   |     at async JA.syncGames (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:137893)
+0|in1bet   |     at async YA (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:146031) {
+0|in1bet   |   [cause]: ConnectTimeoutError: Connect Timeout Error (attempted address: api-eu-1.slotsgateway.com:443, timeout: 10000ms)
+0|in1bet   |       at onConnectTimeout (node:internal/deps/undici/undici:2718:28)
+0|in1bet   |       at Immediate._onImmediate (node:internal/deps/undici/undici:2699:11)
+0|in1bet   |       at process.processImmediate (node:internal/timers:483:21) {
+0|in1bet   |     code: 'UND_ERR_CONNECT_TIMEOUT',
+0|in1bet   |     [Symbol(undici.error.UND_ERR)]: true,
+0|in1bet   |     [Symbol(undici.error.UND_ERR_CONNECT_TIMEOUT)]: true
+0|in1bet   |   }
+0|in1bet   | }
+0|in1bet   | [SlotsGateway] Failed to sync games: TypeError: fetch failed
+0|in1bet   |     at node:internal/deps/undici/undici:14900:13
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async qp.fetchWithRetry (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:134993)
+0|in1bet   |     at async qp.getGameList (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:137162)
+0|in1bet   |     at async JA.syncGames (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:137893)
+0|in1bet   |     at async YA (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:146031) {
+0|in1bet   |   [cause]: ConnectTimeoutError: Connect Timeout Error (attempted address: api-eu-1.slotsgateway.com:443, timeout: 10000ms)
+0|in1bet   |       at onConnectTimeout (node:internal/deps/undici/undici:2718:28)
+0|in1bet   |       at Immediate._onImmediate (node:internal/deps/undici/undici:2699:11)
+0|in1bet   |       at process.processImmediate (node:internal/timers:483:21) {
+0|in1bet   |     code: 'UND_ERR_CONNECT_TIMEOUT',
+0|in1bet   |     [Symbol(undici.error.UND_ERR)]: true,
+0|in1bet   |     [Symbol(undici.error.UND_ERR_CONNECT_TIMEOUT)]: true
+0|in1bet   |   }
+0|in1bet   | }
+0|in1bet   | [SlotsGateway] Failed to sync games on startup: Error: Connection terminated due to connection timeout
+0|in1bet   |     at /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:77:14263
+0|in1bet   |     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+0|in1bet   |     at async /var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:77:29664
+0|in1bet   |     at async JA.getCachedGames (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:139865)
+0|in1bet   |     at async JA.syncGames (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:139379)
+0|in1bet   |     at async YA (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:202:146031) {
+0|in1bet   |   [cause]: Error: Connection terminated unexpectedly
+0|in1bet   |       at yS.<anonymous> (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:77:5463)
+0|in1bet   |       at Object.onceWrapper (node:events:638:28)
+0|in1bet   |       at yS.emit (node:events:524:28)
+0|in1bet   |       at Socket.<anonymous> (/var/www/in1bet/IN1BET-V10/in1bet/dist/index.cjs:76:21688)
+0|in1bet   |       at Socket.emit (node:events:524:28)
+0|in1bet   |       at TCP.<anonymous> (node:net:343:12)
+0|in1bet   | }
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/IN1BET-V10/in1bet/dist/public/index.html'
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/IN1BET-V10/in1bet/dist/public/index.html'
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/IN1BET-V10/in1bet/dist/public/index.html'
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/IN1BET-V10/in1bet/dist/public/index.html'
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/IN1BET-V10/in1bet/dist/public/index.html'
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/IN1BET-V10/in1bet/dist/public/index.html'
+0|in1bet   | Error: ENOENT: no such file or directory, stat '/var/www/in1bet/IN1BET-V10/in1bet/dist/public/index.html'
+0|in1bet   | (node:9927) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+0|in1bet   | In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+0|in1bet   |
+0|in1bet   | To prepare for this change:
+0|in1bet   | - If you want the current behavior, explicitly use 'sslmode=verify-full'
+0|in1bet   | - If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+0|in1bet   |
+0|in1bet   | See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+0|in1bet   | (Use `node --trace-warnings ...` to show where the warning was created)
