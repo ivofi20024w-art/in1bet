@@ -289,7 +289,7 @@ export default function Home() {
 
   return (
     <>
-      <div className={`transition-all duration-300 ${chatVisible && isDesktop ? 'lg:pr-[340px]' : ''}`}>
+      <div className="transition-all duration-300">
         <MainLayout>
       <section className="mb-4">
         <Link href={PROMO_BANNERS[0].link}>
@@ -467,9 +467,9 @@ export default function Home() {
         </MainLayout>
       </div>
 
-      {/* Chat Sidebar - Desktop (Fixed Right Side) */}
+      {/* Chat Sidebar - Desktop (Fixed Right Side - Overlays content) */}
       {chatVisible && (
-        <div className="hidden lg:flex fixed top-0 right-0 w-[340px] h-screen z-30 border-l border-white/5 bg-[#0D0F14]">
+        <div className="hidden lg:flex fixed top-0 right-0 w-[340px] h-screen z-30 border-l border-white/10 bg-[#0D0F14] shadow-[-8px_0_30px_rgba(0,0,0,0.5)]">
           <ChatWidget className="h-full w-full" onClose={() => setChatVisible(false)} />
         </div>
       )}
