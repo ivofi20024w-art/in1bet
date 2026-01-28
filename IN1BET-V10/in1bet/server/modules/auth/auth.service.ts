@@ -258,10 +258,7 @@ export async function loginUser(data: LoginUser, deviceInfo?: DeviceInfo): Promi
     }
 
     // Verify password
-    console.log("[LOGIN] Comparing password for user:", user.email);
-    console.log("[LOGIN] Stored hash starts with:", user.password?.substring(0, 20));
     const isValidPassword = await bcrypt.compare(password, user.password);
-    console.log("[LOGIN] Password valid:", isValidPassword);
     
     if (!isValidPassword) {
       return { success: false, error: "Email/CPF ou senha incorretos" };
@@ -423,9 +420,6 @@ export async function requestPasswordReset(identifier: string): Promise<{
       const { sendPasswordResetEmail, isEmailConfigured } = await import("../email/email.service");
       if (isEmailConfigured()) {
         await sendPasswordResetEmail(user.email, plainToken, user.name);
-        console.log("[PASSWORD_RESET] Email sent to:", user.email);
-      } else {
-        console.log("[PASSWORD_RESET] Email not configured. Token:", plainToken);
       }
     } catch (emailError) {
       console.error("[PASSWORD_RESET] Failed to send email:", emailError);

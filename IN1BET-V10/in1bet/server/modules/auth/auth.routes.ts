@@ -132,12 +132,6 @@ router.post("/forgot-password", authLimiter, async (req: Request, res: Response)
     const result = await requestPasswordReset(identifier);
     
     // Always return success to prevent enumeration attacks
-    // In production, send email with the token
-    if (result.token) {
-      // For development/testing, we return the token
-      // In production, this would only send an email
-      console.log("[FORGOT_PASSWORD] Token generated:", result.token);
-    }
 
     res.json({ 
       message: "Se o email/CPF estiver cadastrado, você receberá instruções para redefinir sua senha.",
