@@ -419,8 +419,7 @@ async function handleMessage(
 
     case 'auth_failed': {
       console.log('[ChatStore] Auth failed, trying token refresh...');
-      isAuthenticated = false;
-      set({ isConnecting: false });
+      set({ isAuthenticated: false, isConnecting: false });
       
       try {
         const newToken = await refreshAccessToken();

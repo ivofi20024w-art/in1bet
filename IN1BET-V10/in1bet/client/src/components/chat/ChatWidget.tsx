@@ -757,9 +757,7 @@ function DraggableMessageItem({
 // --- User Stats Fetch ---
 async function fetchUserStats(userId: string): Promise<UserStats | null> {
   try {
-    const auth = getStoredAuth();
     const res = await fetch(`/api/user/${userId}/stats`, {
-      headers: auth.accessToken ? { Authorization: `Bearer ${auth.accessToken}` } : {},
       credentials: 'include'
     });
     if (!res.ok) return null;
@@ -817,7 +815,8 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
   const chatConnect = useChatStore((s) => s.connect);
   const chatGetRoomOnlineCount = useChatStore((s) => s.getRoomOnlineCount);
   
-  const accessToken = getStoredAuth().accessToken;
+  const authState = getStoredAuth();
+  const isUserAuthenticated = authState.isAuthenticated;
   const isConnected = chatIsConnected;
   const isAdmin = chatIsAdmin;
   const userLevel = chatMyLevel;
@@ -885,7 +884,7 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
   const [unauthOnlineCount, setUnauthOnlineCount] = useState(0);
 
   useEffect(() => {
-    if (!accessToken) {
+    if (!isUserAuthenticated) {
       const fetchOnlineCount = async () => {
         try {
           const res = await fetch('/api/chat/online-count');
@@ -899,14 +898,14 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
       const interval = setInterval(fetchOnlineCount, 30000);
       return () => clearInterval(interval);
     }
-  }, [accessToken]);
+  }, [isUserAuthenticated]);
   
   const roomOnlineCount = useMemo(() => {
     if (!chatCurrentRoomId) return chatOnlineCount;
     return chatGetRoomOnlineCount(chatCurrentRoomId);
   }, [chatCurrentRoomId, chatOnlineCount, chatGetRoomOnlineCount]);
   
-  const displayOnlineCount = accessToken ? roomOnlineCount : unauthOnlineCount;
+  const displayOnlineCount = isUserAuthenticated ? roomOnlineCount : unauthOnlineCount;
 
   // Save settings to localStorage
   useEffect(() => {
@@ -966,13 +965,12 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
   const updateProfile = async () => {
     setIsUpdatingProfile(true);
     try {
-      const auth = getStoredAuth();
       const res = await fetch('/api/user/profile', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${auth.accessToken}`,
         },
+        credentials: 'include',
         body: JSON.stringify({
           hideWins: editHideWins,
           avatarUrl: editAvatarUrl || null,
@@ -1086,7 +1084,7 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
   }, []);
 
   // If not authenticated, show login prompt
-  if (!accessToken) {
+  if (!isUserAuthenticated) {
     return (
       <div className={cn("flex flex-col h-full bg-gradient-to-b from-[#13151C] to-[#0D0F14] rounded-xl border border-white/5 overflow-hidden", className)}>
         <style>{animationStyles}</style>
@@ -1129,7 +1127,7 @@ export function ChatWidget({ className, onClose }: ChatWidgetProps) {
             <Button 
               variant="outline" 
               className="w-full border-white/10 text-muted-foreground hover:text-white hover:bg-white/5"
-              onClick={openRegister}
+              onClick={() => openRegister()}
             >
               <Star className="w-4 h-4 mr-2" />
               Criar Conta
