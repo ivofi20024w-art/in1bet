@@ -467,9 +467,9 @@ export default function Home() {
         </MainLayout>
       </div>
 
-      {/* Chat Sidebar - Desktop (Fixed Right Side - Overlays content) */}
+      {/* Chat Sidebar - Desktop (Fixed Right Side - Overlays content, below header) */}
       {chatVisible && (
-        <div className="hidden lg:flex fixed top-0 right-0 w-[340px] h-screen z-30 border-l border-white/10 bg-[#0D0F14] shadow-[-8px_0_30px_rgba(0,0,0,0.5)]">
+        <div className="hidden lg:flex fixed top-16 right-0 w-[340px] h-[calc(100vh-64px)] z-30 border-l border-white/10 bg-[#0D0F14] shadow-[-8px_0_30px_rgba(0,0,0,0.5)]">
           <ChatWidget className="h-full w-full" onClose={() => setChatVisible(false)} />
         </div>
       )}
